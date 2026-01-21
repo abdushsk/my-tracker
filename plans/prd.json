@@ -86,7 +86,7 @@
         "Basic structure for onAlarm listener"
       ],
       "priority": 1,
-      "passes": false,
+      "passes": true,
       "dependsOn": ["US-002"]
     },
     {

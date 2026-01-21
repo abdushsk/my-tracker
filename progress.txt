@@ -87,3 +87,40 @@
 - Recommended order: US-004 or US-006 can be done in parallel
 - US-006 should be prioritized as it unblocks US-007 which unblocks US-008
 
+## Iteration 4 - US-006: Service Worker Setup
+**Status:** Completed
+**Date:** 2026-01-22
+
+### What was done:
+- Created src/background/service-worker.js with Chrome extension Manifest V3 service worker
+- Implemented chrome.runtime.onInstalled listener:
+  - Logs installation/update reason
+  - Distinguishes between 'install' and 'update' events
+  - Includes placeholder comments for future initialization
+- Implemented chrome.runtime.onMessage listener:
+  - Handles message types: TIMER_START, TIMER_PAUSE, UPDATE_BADGE, GET_ACTIVE_TIMERS
+  - Uses switch statement for clean message routing
+  - Returns true for async sendResponse support
+  - Logs all messages for debugging
+- Implemented chrome.alarms.onAlarm listener:
+  - Handles scheduled reset alarms: daily-reset, weekly-reset, monthly-reset, yearly-reset
+  - Handles reminder alarms
+  - Supports timer-specific alarms with goalId extraction
+- Added chrome.runtime.onStartup listener for browser startup events
+- Comprehensive logging throughout for debugging
+
+### Technical details:
+- Service worker uses Manifest V3 patterns (no background page)
+- All listeners are properly registered at the top level
+- Placeholder structure ready for future implementation of:
+  - Timer persistence (continue when popup closed)
+  - Goal reset scheduling via chrome.alarms
+  - Badge updates
+  - Notification triggers
+
+### Notes for next iteration:
+- US-007 (Storage Utility Module) is now unblocked (depends on US-006)
+- US-004 (Popup HTML Structure) is still available (depends on US-002)
+- Recommended order: US-004 next (priority 1), then US-005 (CSS), then US-007
+- US-007 should be done early in the chain as it unblocks US-008 (Goal Data Model) and US-009 (Activity Log Model)
+
