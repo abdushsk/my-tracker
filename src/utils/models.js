@@ -288,6 +288,31 @@ function getDateStringDaysAgo(daysAgo) {
 }
 
 /**
+ * Get the start of the current week (Monday) in YYYY-MM-DD format
+ * @returns {string} Monday's date string for the current week
+ */
+function getWeekStartDateString() {
+  const now = new Date();
+  const dayOfWeek = now.getDay();
+  // dayOfWeek: 0 = Sunday, 1 = Monday, ..., 6 = Saturday
+  // We want Monday as the start of the week
+  const daysToSubtract = dayOfWeek === 0 ? 6 : dayOfWeek - 1;
+  const monday = new Date(now);
+  monday.setDate(now.getDate() - daysToSubtract);
+  return monday.toISOString().split('T')[0];
+}
+
+/**
+ * Get the start of the current month in YYYY-MM-DD format
+ * @returns {string} First day of the current month
+ */
+function getMonthStartDateString() {
+  const now = new Date();
+  const firstDay = new Date(now.getFullYear(), now.getMonth(), 1);
+  return firstDay.toISOString().split('T')[0];
+}
+
+/**
  * Filter history entries by date range
  * @param {HistoryEntry[]} history - Array of history entries
  * @param {string} startDate - Start date (inclusive, YYYY-MM-DD format)
@@ -384,6 +409,8 @@ export {
   generateId,
   getTodayDateString,
   getDateStringDaysAgo,
+  getWeekStartDateString,
+  getMonthStartDateString,
   // Goal functions
   createGoal,
   isGoalCompleted,

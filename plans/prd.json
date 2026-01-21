@@ -687,7 +687,7 @@
         "Visual icons for each"
       ],
       "priority": 5,
-      "passes": false,
+      "passes": true,
       "dependsOn": ["US-044"]
     },
     {

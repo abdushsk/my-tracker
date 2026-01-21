@@ -30,6 +30,8 @@ import {
   createGoal,
   getTodayDateString,
   getDateStringDaysAgo,
+  getWeekStartDateString,
+  getMonthStartDateString,
   filterHistoryByDateRange,
   groupHistoryByDate
 } from '../utils/models.js';
@@ -2583,8 +2585,12 @@ function renderReportsScreen() {
 /**
  * Update the reports screen with calculated statistics
  * US-044: Implements discipline score calculation and display
+ * US-046: Implements completion stats cards (Today, This Week, This Month)
  */
 async function updateReportsStats() {
+  // Get history data for week/month calculations
+  const history = await getHistory();
+
   // Get today's completion count from current goals
   const totalGoals = state.goals.length;
   const completedGoals = state.goals.filter(goal => isGoalCompleted(goal)).length;
@@ -2595,15 +2601,18 @@ async function updateReportsStats() {
     todayCompletedEl.textContent = `${completedGoals}/${totalGoals}`;
   }
 
-  // Placeholder values for week and month (will be calculated from history in US-046)
+  // US-046: Calculate week and month completion stats
+  const weekStats = calculateWeekCompletionStats(history, state.goals);
+  const monthStats = calculateMonthCompletionStats(history, state.goals);
+
   const weekCompletedEl = document.getElementById('week-completed');
   if (weekCompletedEl) {
-    weekCompletedEl.textContent = `--/--`;
+    weekCompletedEl.textContent = `${weekStats.completed}/${weekStats.total}`;
   }
 
   const monthCompletedEl = document.getElementById('month-completed');
   if (monthCompletedEl) {
-    monthCompletedEl.textContent = `--/--`;
+    monthCompletedEl.textContent = `${monthStats.completed}/${monthStats.total}`;
   }
 
   // US-044: Calculate and display discipline score
@@ -2707,6 +2716,72 @@ function calculateDisciplineScore(history, currentGoals) {
   const averageScore = dailyRates.reduce((sum, rate) => sum + rate, 0) / dailyRates.length;
 
   return averageScore;
+}
+
+/**
+ * Calculate completion stats for the current week
+ * US-046: Week completion stats calculation
+ *
+ * Counts total goals completed vs total goals from Monday to today
+ * Combines history data (past days this week) with current goals (today)
+ *
+ * @param {Array} history - Array of history entries
+ * @param {Array} currentGoals - Current goals array (for today's data)
+ * @returns {Object} Object with completed and total counts
+ */
+function calculateWeekCompletionStats(history, currentGoals) {
+  const today = getTodayDateString();
+  const weekStart = getWeekStartDateString();
+
+  // Get history for this week (excluding today)
+  const weekHistory = filterHistoryByDateRange(history, weekStart, today);
+
+  // Filter out today's history entries since we use currentGoals for today
+  const pastDaysHistory = weekHistory.filter(entry => entry.date !== today);
+
+  // Count completed and total from past days this week
+  let completed = pastDaysHistory.filter(entry => entry.completed).length;
+  let total = pastDaysHistory.length;
+
+  // Add today's stats from current goals
+  const todayCompleted = currentGoals.filter(goal => isGoalCompleted(goal)).length;
+  completed += todayCompleted;
+  total += currentGoals.length;
+
+  return { completed, total };
+}
+
+/**
+ * Calculate completion stats for the current month
+ * US-046: Month completion stats calculation
+ *
+ * Counts total goals completed vs total goals from 1st of month to today
+ * Combines history data (past days this month) with current goals (today)
+ *
+ * @param {Array} history - Array of history entries
+ * @param {Array} currentGoals - Current goals array (for today's data)
+ * @returns {Object} Object with completed and total counts
+ */
+function calculateMonthCompletionStats(history, currentGoals) {
+  const today = getTodayDateString();
+  const monthStart = getMonthStartDateString();
+
+  // Get history for this month (excluding today)
+  const monthHistory = filterHistoryByDateRange(history, monthStart, today);
+
+  // Filter out today's history entries since we use currentGoals for today
+  const pastDaysHistory = monthHistory.filter(entry => entry.date !== today);
+
+  // Count completed and total from past days this month
+  let completed = pastDaysHistory.filter(entry => entry.completed).length;
+  let total = pastDaysHistory.length;
+
+  // Add today's stats from current goals
+  const todayCompleted = currentGoals.filter(goal => isGoalCompleted(goal)).length;
+  completed += todayCompleted;
+  total += currentGoals.length;
+
+  return { completed, total };
 }
 
 /**

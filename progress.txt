@@ -2327,3 +2327,69 @@ Created the full Reports screen layout with all required UI sections.
 - US-047 (Weekly Chart) depends on US-046
 - The streak display will show 0 for new users with no history
 - Header streak in View Goals screen will update after visiting Reports
+
+## Iteration 46 - US-046: Reports - Completion Stats Cards
+**Status:** Completed
+**Date:** 2026-01-22
+
+### What was done:
+- Implemented completion stats cards for Today, This Week, and This Month in the Reports screen
+- Added two new date helper functions to models.js
+- Added two new calculation functions to popup.js
+- Stats are calculated from a combination of history data and current goals
+
+### Key implementation details:
+
+1. **New date helper functions in models.js**:
+   - `getWeekStartDateString()`: Returns the Monday of the current week in YYYY-MM-DD format
+   - `getMonthStartDateString()`: Returns the first day of the current month in YYYY-MM-DD format
+
+2. **calculateWeekCompletionStats(history, currentGoals)** - New function in popup.js:
+   - Gets history entries from Monday to today using filterHistoryByDateRange()
+   - Filters out today's history (to avoid double-counting)
+   - Counts completed vs total from past days' history
+   - Adds today's stats from currentGoals
+   - Returns { completed, total } object
+
+3. **calculateMonthCompletionStats(history, currentGoals)** - New function in popup.js:
+   - Gets history entries from 1st of month to today using filterHistoryByDateRange()
+   - Filters out today's history (to avoid double-counting)
+   - Counts completed vs total from past days' history
+   - Adds today's stats from currentGoals
+   - Returns { completed, total } object
+
+4. **Updated updateReportsStats()**:
+   - Now fetches history data at the start (reused for week/month calculations)
+   - Calls calculateWeekCompletionStats() and calculateMonthCompletionStats()
+   - Updates week-completed and month-completed elements with X/Y format
+
+### Acceptance criteria verification:
+- [x] Today's completion card - Uses sun icon, shows X/Y from current goals
+- [x] This week's completion card - Uses calendar icon, shows X/Y from history + today
+- [x] This month's completion card - Uses calendar icon, shows X/Y from history + today
+- [x] X/Y format with percentages - Displays as "X/Y" (e.g., "3/5")
+- [x] Visual icons for each - Each card has distinct SVG icon with colored background
+
+### Technical details:
+- Updated src/utils/models.js:
+  - Added getWeekStartDateString() function (~10 lines)
+  - Added getMonthStartDateString() function (~6 lines)
+  - Exported both new functions
+- Updated src/popup/popup.js:
+  - Added getWeekStartDateString, getMonthStartDateString to imports
+  - Modified updateReportsStats() to fetch history and calculate week/month stats
+  - Added calculateWeekCompletionStats() function (~20 lines)
+  - Added calculateMonthCompletionStats() function (~20 lines)
+
+### HTML Structure (from US-043):
+- Stats cards section with 3-column grid layout
+- Each card has: icon container, value element (id for JS updates), label
+- Today: sun icon with primary color background
+- This Week: calendar icon with secondary color background
+- This Month: calendar icon with warning color background
+
+### Notes for next iteration:
+- US-047 (Weekly Chart) is now unblocked (depends on US-046)
+- The stats will show 0/0 for new users with no history and no goals
+- Stats will update in real-time when goals are completed and Reports screen is refreshed
+- Week starts on Monday (ISO week standard)
