@@ -1328,6 +1328,75 @@ select:focus {
   border-bottom: 1px solid var(--border);
 }
 
+/* US-051: Clickable setting item for theme toggle */
+.setting-item-clickable {
+  cursor: pointer;
+  padding: var(--spacing-md) var(--spacing-sm);
+  margin: 0 calc(var(--spacing-sm) * -1);
+  border-radius: var(--radius);
+  border-bottom: none;
+  transition: background-color var(--transition);
+}
+
+.setting-item-clickable:hover {
+  background-color: var(--background-secondary);
+}
+
+.setting-item-clickable:focus {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
+}
+
+.setting-item-clickable:active {
+  background-color: var(--border);
+}
+
+.setting-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.setting-label {
+  font-weight: var(--font-weight-medium);
+  color: var(--text);
+}
+
+.setting-description {
+  font-size: var(--font-size-xs);
+  color: var(--text-muted);
+}
+
+.theme-toggle-control {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+}
+
+.theme-value {
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  color: var(--primary);
+  min-width: 40px;
+  text-align: right;
+}
+
+.theme-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: var(--radius);
+  background-color: var(--primary-light);
+  color: var(--primary);
+}
+
+.theme-icon svg {
+  width: 18px;
+  height: 18px;
+}
+
 .settings-section.about p {
   font-size: var(--font-size-sm);
   color: var(--text-secondary);

@@ -2673,3 +2673,69 @@ Created the full Reports screen layout with all required UI sections.
   3. Set data-theme attribute on html element
   4. Add `.no-transition` class briefly on page load to prevent flash
 - US-053 (Browser Badge - Goal Count) is also ready to work on
+
+## Iteration: US-051 - Dark Mode - Toggle
+
+### Task completed: US-051 - Dark Mode - Toggle
+**Date:** 2026-01-22
+**Status:** PASSED
+
+### What was implemented:
+
+1. **Theme Management Functions (popup.js)**
+   - `getEffectiveTheme(themeSetting)` - Determines the actual theme based on user setting and system preference
+   - `applyTheme(theme)` - Sets or removes `data-theme='dark'` attribute on html element
+   - `initTheme(settings)` - Initializes theme on page load with flash prevention
+   - `toggleTheme()` - Cycles through themes: auto -> light -> dark -> auto
+   - `setupSystemThemeListener()` - Reacts to system theme changes when 'auto' is selected
+   - `getThemeDisplayText(themeSetting)` - Returns human-readable theme name
+
+2. **Theme Initialization**
+   - Theme is applied immediately after settings are loaded in `initApp()`
+   - Uses `no-transition` class to prevent flash during initial load
+   - Removes `no-transition` after two `requestAnimationFrame` calls for smooth transitions
+
+3. **System Preference Support**
+   - Uses `window.matchMedia('(prefers-color-scheme: dark)')` to detect system theme
+   - Sets up event listener for real-time system theme changes
+   - Only reacts to system changes when user has 'auto' selected
+
+4. **Settings Screen Toggle**
+   - Enhanced `renderSettingsScreen()` with clickable theme toggle
+   - Shows current setting (Light, Dark, Auto) with icon
+   - Auto mode displays "(currently light/dark)" to show effective theme
+   - Different icons for each mode (sun, moon, auto-sun)
+   - Keyboard accessible with Enter/Space support
+
+5. **CSS Styles for Toggle (popup.css)**
+   - `.setting-item-clickable` - Interactive styling with hover/focus/active states
+   - `.setting-info` / `.setting-label` / `.setting-description` - Layout for label and description
+   - `.theme-toggle-control` / `.theme-value` / `.theme-icon` - Right-side toggle display
+
+6. **Storage Integration**
+   - Added `saveSettings` import to popup.js
+   - Theme preference persisted via existing settings storage
+   - Uses default `theme: 'auto'` from `getDefaultSettings()`
+
+### Acceptance criteria verification:
+- [x] Toggle button/switch - Clickable setting item cycles through themes
+- [x] Preference stored - Saved via `saveSettings()` to Chrome storage
+- [x] Respects system preference initially - Uses `prefers-color-scheme` media query for 'auto' mode
+- [x] User can override - Toggle cycles through light, dark, and auto
+- [x] Persists across sessions - Settings loaded from storage on popup open
+
+### Technical details:
+- Updated src/popup/popup.js:
+  - Added `saveSettings` to imports
+  - Added 6 theme management functions (~130 lines)
+  - Updated `initApp()` to initialize theme before showing UI
+  - Enhanced `renderSettingsScreen()` with working toggle UI
+  - Added theme functions to exports
+
+- Updated src/popup/popup.css:
+  - Added ~70 lines for clickable setting item styles
+
+### Notes for next iteration:
+- US-052 (Settings Screen) now has US-051 completed as dependency
+- US-052 will add full settings functionality (sound toggle, volume slider)
+- US-053 (Browser Badge) is also ready to work on

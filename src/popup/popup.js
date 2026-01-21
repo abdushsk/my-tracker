@@ -11,6 +11,7 @@ import {
   getGoals,
   saveGoals,
   getSettings,
+  saveSettings,
   getActiveTimers,
   getStreakData,
   saveStreakData,
@@ -3217,7 +3218,11 @@ function renderSettingsScreen() {
   const screen = document.getElementById(SCREEN_IDS[SCREENS.SETTINGS]);
   if (!screen) return;
 
-  // Placeholder content - will be enhanced in US-052
+  const themeSetting = state.settings?.theme || 'auto';
+  const themeDisplayText = getThemeDisplayText(themeSetting);
+  const effectiveTheme = getEffectiveTheme(themeSetting);
+
+  // US-051: Enhanced settings screen with working theme toggle
   screen.innerHTML = `
     <div class="settings-screen">
       <header class="screen-header">
@@ -3236,9 +3241,22 @@ function renderSettingsScreen() {
         </div>
         <div class="settings-section">
           <h2>Appearance</h2>
-          <div class="setting-item">
-            <span>Theme</span>
-            <span>${state.settings?.theme || 'auto'}</span>
+          <div class="setting-item setting-item-clickable" id="theme-toggle" role="button" tabindex="0" aria-label="Toggle theme">
+            <div class="setting-info">
+              <span class="setting-label">Theme</span>
+              <span class="setting-description">${themeSetting === 'auto' ? `Auto (currently ${effectiveTheme})` : ''}</span>
+            </div>
+            <div class="theme-toggle-control">
+              <span class="theme-value">${themeDisplayText}</span>
+              <span class="theme-icon">
+                ${themeSetting === 'dark' ?
+                  '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="18" height="18"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>' :
+                  themeSetting === 'light' ?
+                  '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="18" height="18"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>' :
+                  '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="18" height="18"><circle cx="12" cy="12" r="4"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="m4.93 4.93 1.41 1.41"/><path d="m17.66 17.66 1.41 1.41"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="m6.34 17.66-1.41 1.41"/><path d="m19.07 4.93-1.41 1.41"/></svg>'
+                }
+              </span>
+            </div>
           </div>
         </div>
         <div class="settings-section about">
@@ -3251,6 +3269,25 @@ function renderSettingsScreen() {
 
   // Attach navigation event listeners
   attachNavigationListeners(screen);
+
+  // US-051: Attach theme toggle listener
+  const themeToggle = screen.querySelector('#theme-toggle');
+  if (themeToggle) {
+    themeToggle.addEventListener('click', async () => {
+      await toggleTheme();
+      // Re-render to update the display
+      renderSettingsScreen();
+    });
+
+    // Also handle keyboard interaction (Enter/Space)
+    themeToggle.addEventListener('keydown', async (e) => {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        await toggleTheme();
+        renderSettingsScreen();
+      }
+    });
+  }
 }
 
 /**
@@ -3418,6 +3455,141 @@ async function sendToServiceWorker(message) {
 }
 
 // =============================================================================
+// US-051: Theme Management
+// =============================================================================
+
+/**
+ * Get the effective theme based on system preference and user setting
+ * @param {string} themeSetting - User's theme setting ('light', 'dark', 'auto')
+ * @returns {string} The effective theme ('light' or 'dark')
+ */
+function getEffectiveTheme(themeSetting) {
+  if (themeSetting === 'auto') {
+    // Check system preference
+    const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+    return prefersDark ? 'dark' : 'light';
+  }
+  return themeSetting;
+}
+
+/**
+ * Apply the theme to the document
+ * @param {string} theme - The theme to apply ('light' or 'dark')
+ */
+function applyTheme(theme) {
+  if (theme === 'dark') {
+    document.documentElement.setAttribute('data-theme', 'dark');
+  } else {
+    document.documentElement.removeAttribute('data-theme');
+  }
+  console.log(`[Theme] Applied theme: ${theme}`);
+}
+
+/**
+ * Initialize theme based on user settings and system preference
+ * Should be called early to prevent theme flash
+ * @param {Object} settings - Settings object with theme property
+ */
+function initTheme(settings) {
+  const themeSetting = settings?.theme || 'auto';
+  const effectiveTheme = getEffectiveTheme(themeSetting);
+
+  // Add no-transition class to prevent flash during initial load
+  document.documentElement.classList.add('no-transition');
+
+  applyTheme(effectiveTheme);
+
+  // Remove no-transition class after a brief delay to enable transitions
+  requestAnimationFrame(() => {
+    requestAnimationFrame(() => {
+      document.documentElement.classList.remove('no-transition');
+    });
+  });
+
+  console.log(`[Theme] Initialized: setting=${themeSetting}, effective=${effectiveTheme}`);
+}
+
+/**
+ * Handle theme toggle in settings
+ * Cycles through: auto -> light -> dark -> auto
+ * @returns {Promise<string>} The new theme setting
+ */
+async function toggleTheme() {
+  const currentSetting = state.settings?.theme || 'auto';
+  let newSetting;
+
+  // Cycle through themes
+  switch (currentSetting) {
+    case 'auto':
+      newSetting = 'light';
+      break;
+    case 'light':
+      newSetting = 'dark';
+      break;
+    case 'dark':
+      newSetting = 'auto';
+      break;
+    default:
+      newSetting = 'auto';
+  }
+
+  // Update state
+  state.settings = {
+    ...state.settings,
+    theme: newSetting
+  };
+
+  // Save to storage
+  await saveSettings(state.settings);
+
+  // Apply the new theme
+  const effectiveTheme = getEffectiveTheme(newSetting);
+  applyTheme(effectiveTheme);
+
+  console.log(`[Theme] Toggled: ${currentSetting} -> ${newSetting} (effective: ${effectiveTheme})`);
+
+  return newSetting;
+}
+
+/**
+ * Set up listener for system theme changes (when user has 'auto' selected)
+ */
+function setupSystemThemeListener() {
+  const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
+
+  mediaQuery.addEventListener('change', (e) => {
+    // Only react to system changes if user has 'auto' selected
+    if (state.settings?.theme === 'auto') {
+      const newTheme = e.matches ? 'dark' : 'light';
+      applyTheme(newTheme);
+      console.log(`[Theme] System preference changed: ${newTheme}`);
+
+      // Re-render settings screen if it's currently showing
+      if (state.currentScreen === SCREENS.SETTINGS) {
+        renderSettingsScreen();
+      }
+    }
+  });
+}
+
+/**
+ * Get the display text for the current theme setting
+ * @param {string} themeSetting - The theme setting ('light', 'dark', 'auto')
+ * @returns {string} Human-readable theme name
+ */
+function getThemeDisplayText(themeSetting) {
+  switch (themeSetting) {
+    case 'light':
+      return 'Light';
+    case 'dark':
+      return 'Dark';
+    case 'auto':
+    default:
+      return 'Auto';
+  }
+}
+
+// =============================================================================
 // Initialization
 // =============================================================================
 
@@ -3429,6 +3601,12 @@ async function initApp() {
 
   // Load data from storage
   await loadData();
+
+  // US-051: Initialize theme before showing any UI
+  initTheme(state.settings);
+
+  // Set up listener for system theme changes
+  setupSystemThemeListener();
 
   // Show the default screen (View Goals)
   showScreen(SCREENS.VIEW_GOALS);
@@ -3518,5 +3696,12 @@ export {
   handleConfirmDelete,
   // US-031 Background timer sync functions
   syncActiveTimersWithGoals,
-  sendToServiceWorker
+  sendToServiceWorker,
+  // US-051 Theme management functions
+  getEffectiveTheme,
+  applyTheme,
+  initTheme,
+  toggleTheme,
+  setupSystemThemeListener,
+  getThemeDisplayText
 };
