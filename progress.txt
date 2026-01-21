@@ -430,3 +430,66 @@
 - US-012, US-013, US-014 all depend on US-011
 - Next work should focus on building out the View Goals screen UI components
 
+## Iteration 12 - US-011: View Goals Screen - Header
+**Status:** Completed
+**Date:** 2026-01-22
+
+### What was done:
+- Enhanced the View Goals screen header with a modern, visually prominent design
+- Implemented header with app title "Daily Goals":
+  - Centered title with bold green (primary color) styling
+  - Clean, modern typography with letter-spacing
+- Added completed goals counter (X/Y format):
+  - Shows completed count vs total goals (e.g., "2/5 completed")
+  - Green checkmark icon for visual clarity
+  - Semibold font weight for the value
+- Added streak counter display:
+  - Shows current streak with flame icon (🔥)
+  - "N day streak" format
+  - Active streak state (>0) shows orange/warning color
+  - Subtle pulse animation on flame icon when streak is active
+- Applied clean, modern styling:
+  - Flexbox layout with column direction for header
+  - Stats contained in a secondary background pill
+  - Visual divider between completed and streak stats
+  - CSS animations for engaging feedback
+- Stats load from storage on initialization:
+  - Added streakData to application state
+  - Added getStreakData() and saveStreakData() to storage.js
+  - Loads streak data in parallel with goals, settings, activeTimers
+
+### Technical details:
+- Updated src/utils/storage.js:
+  - Added STREAK_DATA storage key
+  - Added getStreakData() async function
+  - Added saveStreakData() async function
+  - Added getDefaultStreakData() helper (currentStreak: 0, bestStreak: 0, lastCompletionDate: null)
+- Updated src/popup/popup.js:
+  - Added streakData to state object
+  - Added getStreakData import
+  - Updated loadData() to fetch streak data in parallel
+  - Enhanced renderViewGoalsScreen() with new header structure
+- Updated src/popup/popup.css:
+  - Added .view-goals-header styles for column layout
+  - Added .header-main and .app-title for centered title
+  - Added .header-stats container with secondary background
+  - Added .stat-item, .stat-icon, .stat-value, .stat-label
+  - Added .completed-stat and .streak-stat specific styles
+  - Added .active-streak class with orange color
+  - Added flame-pulse animation for active streaks
+  - Added .stat-divider for visual separation
+
+### Acceptance criteria verification:
+- [x] Header with app title - "Daily Goals" centered with primary color
+- [x] Completed goals counter (X/Y format) - Shows "N/M completed" with checkmark
+- [x] Streak counter display - Shows "N day streak" with flame icon
+- [x] Clean, modern styling - Flexbox layout, CSS variables, animations
+- [x] Stats load from storage on init - streakData loaded in parallel with other data
+
+### Notes for next iteration:
+- US-012 (View Goals Screen - Empty State) is now unblocked (depends on US-011)
+- US-013 (View Goals Screen - Navigation Footer) is now unblocked (depends on US-011)
+- US-014 (View Goals Screen - Goals List Container) depends on US-013
+- Both US-012 and US-013 have priority 2
+- Streak calculation logic will be fully implemented in US-045 (Reports - Streak Counter)
+

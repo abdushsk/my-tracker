@@ -10,7 +10,8 @@ const STORAGE_KEYS = {
   ACTIVITY_LOG: 'activityLog',
   SETTINGS: 'settings',
   HISTORY: 'history',
-  ACTIVE_TIMERS: 'activeTimers'
+  ACTIVE_TIMERS: 'activeTimers',
+  STREAK_DATA: 'streakData'
 };
 
 /**
@@ -255,6 +256,47 @@ function getDefaultSettings() {
   };
 }
 
+/**
+ * Get streak data from storage
+ * @returns {Promise<Object>} Streak data object with currentStreak, bestStreak, lastCompletionDate
+ */
+async function getStreakData() {
+  try {
+    const result = await chrome.storage.local.get(STORAGE_KEYS.STREAK_DATA);
+    return result[STORAGE_KEYS.STREAK_DATA] || getDefaultStreakData();
+  } catch (error) {
+    console.error('Error getting streak data:', error);
+    return getDefaultStreakData();
+  }
+}
+
+/**
+ * Save streak data to storage
+ * @param {Object} streakData - Streak data object to save
+ * @returns {Promise<boolean>} Success status
+ */
+async function saveStreakData(streakData) {
+  try {
+    await chrome.storage.local.set({ [STORAGE_KEYS.STREAK_DATA]: streakData });
+    return true;
+  } catch (error) {
+    console.error('Error saving streak data:', error);
+    return false;
+  }
+}
+
+/**
+ * Get default streak data object
+ * @returns {Object} Default streak data
+ */
+function getDefaultStreakData() {
+  return {
+    currentStreak: 0,
+    bestStreak: 0,
+    lastCompletionDate: null
+  };
+}
+
 // Export functions for use in other modules
 export {
   STORAGE_KEYS,
@@ -273,5 +315,8 @@ export {
   updateGoal,
   deleteGoal,
   clearAllData,
-  getDefaultSettings
+  getDefaultSettings,
+  getStreakData,
+  saveStreakData,
+  getDefaultStreakData
 };

@@ -7,7 +7,7 @@
 // Imports
 // =============================================================================
 
-import { getGoals, getSettings, getActiveTimers } from '../utils/storage.js';
+import { getGoals, getSettings, getActiveTimers, getStreakData } from '../utils/storage.js';
 import { GOAL_TYPES, TIMEFRAMES, isGoalCompleted } from '../utils/models.js';
 
 // =============================================================================
@@ -22,6 +22,7 @@ const state = {
   goals: [],
   settings: null,
   activeTimers: {},
+  streakData: null,
   currentScreen: 'viewGoals',
   isLoading: true
 };
@@ -125,13 +126,28 @@ function renderViewGoalsScreen() {
   const screen = document.getElementById(SCREEN_IDS[SCREENS.VIEW_GOALS]);
   if (!screen) return;
 
-  // Placeholder content - will be enhanced in subsequent user stories
+  const completedCount = getCompletedCount();
+  const totalCount = state.goals.length;
+  const currentStreak = state.streakData?.currentStreak || 0;
+
   screen.innerHTML = `
     <div class="view-goals-screen">
-      <header class="screen-header">
-        <h1>Daily Goals</h1>
-        <div class="quick-stats">
-          <span class="completed-count">${getCompletedCount()}/${state.goals.length} completed</span>
+      <header class="screen-header view-goals-header">
+        <div class="header-main">
+          <h1 class="app-title">Daily Goals</h1>
+        </div>
+        <div class="header-stats">
+          <div class="stat-item completed-stat">
+            <span class="stat-icon">&#10003;</span>
+            <span class="stat-value">${completedCount}/${totalCount}</span>
+            <span class="stat-label">completed</span>
+          </div>
+          <div class="stat-divider"></div>
+          <div class="stat-item streak-stat ${currentStreak > 0 ? 'active-streak' : ''}">
+            <span class="stat-icon streak-icon">&#128293;</span>
+            <span class="stat-value">${currentStreak}</span>
+            <span class="stat-label">day streak</span>
+          </div>
         </div>
       </header>
       <main class="goals-list-container">
@@ -334,22 +350,25 @@ async function loadData() {
   try {
     state.isLoading = true;
 
-    // Load goals, settings, and active timers in parallel
-    const [goals, settings, activeTimers] = await Promise.all([
+    // Load goals, settings, active timers, and streak data in parallel
+    const [goals, settings, activeTimers, streakData] = await Promise.all([
       getGoals(),
       getSettings(),
-      getActiveTimers()
+      getActiveTimers(),
+      getStreakData()
     ]);
 
     // Update state
     state.goals = goals;
     state.settings = settings;
     state.activeTimers = activeTimers;
+    state.streakData = streakData;
 
     console.log('Data loaded:', {
       goalsCount: goals.length,
       settings: settings,
-      activeTimersCount: Object.keys(activeTimers).length
+      activeTimersCount: Object.keys(activeTimers).length,
+      streakData: streakData
     });
 
     state.isLoading = false;

@@ -354,7 +354,104 @@ select:focus {
   padding: var(--spacing-md);
 }
 
-/* Quick stats */
+/* ========================================
+   US-011: View Goals Screen - Header
+   ======================================== */
+
+/* View Goals Header - Enhanced styling */
+.view-goals-header {
+  flex-direction: column;
+  align-items: stretch;
+  padding: var(--spacing-md) var(--spacing-md) var(--spacing-sm);
+  gap: var(--spacing-sm);
+}
+
+.header-main {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.app-title {
+  font-size: var(--font-size-xl);
+  font-weight: var(--font-weight-bold);
+  color: var(--primary);
+  margin: 0;
+  letter-spacing: -0.5px;
+}
+
+/* Header stats container */
+.header-stats {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: var(--spacing-md);
+  padding: var(--spacing-sm) var(--spacing-md);
+  background-color: var(--background-secondary);
+  border-radius: var(--radius);
+}
+
+/* Individual stat item */
+.stat-item {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+}
+
+.stat-icon {
+  font-size: var(--font-size-base);
+  color: var(--text-secondary);
+}
+
+.stat-value {
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-semibold);
+  color: var(--text);
+}
+
+.stat-label {
+  font-size: var(--font-size-xs);
+  color: var(--text-muted);
+}
+
+/* Completed stat styling */
+.completed-stat .stat-icon {
+  color: var(--success);
+  font-weight: var(--font-weight-bold);
+}
+
+/* Streak stat styling */
+.streak-stat .streak-icon {
+  font-size: var(--font-size-lg);
+}
+
+.streak-stat.active-streak .stat-value {
+  color: var(--warning);
+}
+
+.streak-stat.active-streak .streak-icon {
+  animation: flame-pulse 1.5s ease-in-out infinite;
+}
+
+@keyframes flame-pulse {
+  0%, 100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.1);
+    opacity: 0.8;
+  }
+}
+
+/* Stat divider */
+.stat-divider {
+  width: 1px;
+  height: 24px;
+  background-color: var(--border);
+}
+
+/* Quick stats - legacy support */
 .quick-stats {
   display: flex;
   gap: var(--spacing-sm);
