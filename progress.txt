@@ -2528,3 +2528,72 @@ Created the full Reports screen layout with all required UI sections.
 - Timer goals track duration via pause action's value field
 - Counter/checkbox goals track activity count
 - getMostProductiveHours can be used to show "Most Productive Hours" insight in reports
+
+## Iteration: US-049 - Activity Timeline - Heatmap
+
+### Task completed: US-049 - Activity Timeline - Heatmap
+**Date:** 2026-01-22
+**Status:** PASSED
+
+### What was implemented:
+
+1. **Activity Heatmap Component in Reports Screen**
+   - Added new HTML section for heatmap visualization in renderReportsScreen()
+   - Grid structure: 7 rows (days) x 24 columns (hours)
+   - Hour labels at top (12a, 3a, 6a, 9a, 12p, 3p, 6p, 9p)
+   - Day labels on left (Sun-Sat for last 7 days)
+   - GitHub-style green color palette for activity intensity
+
+2. **renderActivityHeatmap() Function (~100 lines)**
+   - Fetches activity log data from storage
+   - Uses getActivityByHourForDateRange() from US-048 to group data
+   - Calculates max activity for color normalization
+   - Renders 168 cells (7 days x 24 hours) with intensity levels 0-4
+   - Generates tooltips showing "Day, Time: X actions, Y min"
+
+3. **Activity Level Calculation**
+   - Timer goals: Uses duration (converted to minutes) for intensity
+   - Counter/Checkbox goals: Uses action count for intensity
+   - Normalization: Divides by max activity, maps to 0-4 scale
+
+4. **CSS Styles (~155 lines)**
+   - .activity-heatmap: Container with card styling
+   - .heatmap-container: Flex layout for labels and grid
+   - .heatmap-hour-labels: Grid for hour markers
+   - .heatmap-day-labels: Flex column for day names
+   - .heatmap-grid: CSS Grid 24x7 layout
+   - .heatmap-cell: Individual cell with hover effects
+   - .level-0 through .level-4: GitHub-style green intensity colors
+   - .heatmap-legend: "Less" to "More" scale at bottom
+
+### Acceptance criteria verification:
+- [x] Grid of day x hour - 7 rows (days) x 24 columns (hours)
+- [x] Color intensity for activity - 5 levels (0-4) with green palette
+- [x] Last 7 days shown - Uses getDateStringDaysAgo() for date range
+- [x] Hover shows details - Native title tooltip with day, time, actions, duration
+- [x] Legend for colors - "Less [ ] [ ] [ ] [ ] [ ] More" scale
+
+### Technical details:
+- Updated src/popup/popup.js:
+  - Added getActivityLog import from storage.js
+  - Added getActivityByHourForDateRange import from models.js
+  - Added heatmap HTML section in renderReportsScreen()
+  - Added renderActivityHeatmap() call in updateReportsStats()
+  - Added renderActivityHeatmap() function (~100 lines)
+- Updated src/popup/popup.css:
+  - Added ~155 lines of heatmap styles
+
+### Features:
+- GitHub contribution graph inspired design
+- Hover effect scales cells with subtle shadow
+- Today's row label is highlighted with primary color
+- Responsive grid that fits within popup width
+- Empty cells (no activity) shown in neutral border color
+- Supports both timer duration and action count visualization
+
+### Notes for next iteration:
+- US-050 (Dark Mode - CSS Variables) is ready (depends on US-005 which passed)
+- US-053 (Browser Badge - Goal Count) is also ready (depends on US-006, US-019 which passed)
+- Heatmap green colors may need adjustment for dark mode (US-050)
+- Could add click-to-filter functionality in future enhancement
+- Activity log grows over time - may need cleanup strategy for old data

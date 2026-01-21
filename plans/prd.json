@@ -732,7 +732,7 @@
         "Legend for colors"
       ],
       "priority": 6,
-      "passes": false,
+      "passes": true,
       "dependsOn": ["US-048"]
     },
     {

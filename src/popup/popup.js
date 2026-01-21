@@ -18,7 +18,8 @@ import {
   updateGoal,
   deleteGoal,
   addActivityLogEntry,
-  getHistory
+  getHistory,
+  getActivityLog
 } from '../utils/storage.js';
 import {
   GOAL_TYPES,
@@ -33,7 +34,8 @@ import {
   getWeekStartDateString,
   getMonthStartDateString,
   filterHistoryByDateRange,
-  groupHistoryByDate
+  groupHistoryByDate,
+  getActivityByHourForDateRange
 } from '../utils/models.js';
 import {
   initSounds,
@@ -2569,6 +2571,37 @@ function renderReportsScreen() {
             </div>
           </div>
         </section>
+
+        <!-- US-049: Activity Timeline Heatmap Section -->
+        <section class="reports-section heatmap-section">
+          <h2 class="section-title">Activity Timeline</h2>
+          <div class="activity-heatmap" id="activity-heatmap">
+            <div class="heatmap-container">
+              <div class="heatmap-hour-labels" id="heatmap-hour-labels">
+                <!-- Hour labels will be rendered dynamically -->
+              </div>
+              <div class="heatmap-grid-wrapper">
+                <div class="heatmap-day-labels" id="heatmap-day-labels">
+                  <!-- Day labels will be rendered dynamically -->
+                </div>
+                <div class="heatmap-grid" id="heatmap-grid">
+                  <!-- Heatmap cells will be rendered dynamically -->
+                </div>
+              </div>
+            </div>
+            <div class="heatmap-legend" id="heatmap-legend">
+              <span class="legend-label">Less</span>
+              <div class="legend-scale">
+                <div class="legend-cell level-0"></div>
+                <div class="legend-cell level-1"></div>
+                <div class="legend-cell level-2"></div>
+                <div class="legend-cell level-3"></div>
+                <div class="legend-cell level-4"></div>
+              </div>
+              <span class="legend-label">More</span>
+            </div>
+          </div>
+        </section>
       </main>
     </div>
   `;
@@ -2621,6 +2654,9 @@ async function updateReportsStats() {
 
   // US-047: Render weekly chart
   renderWeeklyChart(history, state.goals);
+
+  // US-049: Render activity heatmap
+  await renderActivityHeatmap();
 }
 
 /**
@@ -2903,6 +2939,109 @@ function calculateWeeklyChartData(history, currentGoals) {
   }
 
   return chartData;
+}
+
+/**
+ * Render the activity heatmap showing when user worked on goals
+ * US-049: Activity Timeline - Heatmap
+ *
+ * Display grid: rows = days (last 7), columns = hours (0-23)
+ * Cell color intensity = activity level
+ * Focus on timer goals showing when user worked
+ */
+async function renderActivityHeatmap() {
+  const gridContainer = document.getElementById('heatmap-grid');
+  const hourLabelsContainer = document.getElementById('heatmap-hour-labels');
+  const dayLabelsContainer = document.getElementById('heatmap-day-labels');
+
+  if (!gridContainer || !hourLabelsContainer || !dayLabelsContainer) return;
+
+  // Get activity log data
+  const activityLog = await getActivityLog();
+
+  // Calculate date range (last 7 days)
+  const today = getTodayDateString();
+  const startDate = getDateStringDaysAgo(6);
+
+  // Get activity data grouped by date and hour
+  const activityByDateAndHour = getActivityByHourForDateRange(activityLog, null, startDate, today);
+
+  // Find max activity for normalization (for color intensity)
+  let maxActivity = 0;
+  Object.values(activityByDateAndHour).forEach(dayData => {
+    dayData.forEach(hourData => {
+      // For timer goals, use duration; for others, use count
+      const activityLevel = hourData.duration > 0 ? hourData.duration / 60 : hourData.count;
+      if (activityLevel > maxActivity) {
+        maxActivity = activityLevel;
+      }
+    });
+  });
+
+  // Render hour labels (showing every 3rd hour for compact display)
+  const hourLabels = [0, 3, 6, 9, 12, 15, 18, 21];
+  hourLabelsContainer.innerHTML = hourLabels.map(hour => {
+    const displayHour = hour === 0 ? '12a' : hour < 12 ? `${hour}a` : hour === 12 ? '12p' : `${hour - 12}p`;
+    return `<span class="heatmap-hour-label" style="grid-column: ${hour + 1}">${displayHour}</span>`;
+  }).join('');
+
+  // Generate list of dates for last 7 days (oldest to newest)
+  const dates = [];
+  for (let i = 6; i >= 0; i--) {
+    dates.push(getDateStringDaysAgo(i));
+  }
+
+  // Render day labels
+  const dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+  dayLabelsContainer.innerHTML = dates.map(dateStr => {
+    const date = new Date(dateStr + 'T00:00:00');
+    const dayName = dayNames[date.getDay()];
+    const isToday = dateStr === today;
+    return `<span class="heatmap-day-label${isToday ? ' heatmap-day-today' : ''}">${dayName}</span>`;
+  }).join('');
+
+  // Render heatmap grid (7 rows x 24 columns)
+  let gridHTML = '';
+  dates.forEach((dateStr, rowIndex) => {
+    const dayData = activityByDateAndHour[dateStr] || [];
+
+    for (let hour = 0; hour < 24; hour++) {
+      const hourData = dayData[hour] || { count: 0, duration: 0 };
+
+      // Calculate activity level (use duration for timers, count for others)
+      const activityLevel = hourData.duration > 0 ? hourData.duration / 60 : hourData.count;
+
+      // Normalize to 0-4 scale for color intensity
+      const intensityLevel = maxActivity > 0
+        ? Math.min(4, Math.ceil((activityLevel / maxActivity) * 4))
+        : 0;
+
+      // Format tooltip text
+      const tooltipParts = [];
+      if (hourData.count > 0) {
+        tooltipParts.push(`${hourData.count} action${hourData.count !== 1 ? 's' : ''}`);
+      }
+      if (hourData.duration > 0) {
+        const minutes = Math.round(hourData.duration / 60);
+        tooltipParts.push(`${minutes} min`);
+      }
+      const tooltipText = tooltipParts.length > 0
+        ? tooltipParts.join(', ')
+        : 'No activity';
+
+      const hourDisplay = hour === 0 ? '12 AM' : hour < 12 ? `${hour} AM` : hour === 12 ? '12 PM' : `${hour - 12} PM`;
+      const date = new Date(dateStr + 'T00:00:00');
+      const dayDisplay = date.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
+
+      gridHTML += `<div class="heatmap-cell level-${intensityLevel}"
+        data-date="${dateStr}"
+        data-hour="${hour}"
+        data-tooltip="${dayDisplay}, ${hourDisplay}: ${tooltipText}"
+        title="${dayDisplay}, ${hourDisplay}: ${tooltipText}"></div>`;
+    }
+  });
+
+  gridContainer.innerHTML = gridHTML;
 }
 
 /**
