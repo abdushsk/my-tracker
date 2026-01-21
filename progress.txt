@@ -2056,3 +2056,71 @@ Created src/utils/sounds.js with comprehensive audio functionality:
   - Alarms set up (US-040)
   - Reset logic implemented (US-041)
   - Goals will automatically reset at the appropriate times
+---
+
+## Iteration: US-042 - History Storage Model
+
+### Task completed: US-042 - History Storage Model
+Created the HistoryEntry data model and supporting functions in models.js.
+
+### Key implementation details:
+
+1. **Added HistoryEntry typedef to models.js**:
+   - id: Unique identifier (UUID)
+   - goalId: The ID of the goal this history relates to
+   - date: Date string in YYYY-MM-DD format (the period this entry covers)
+   - progress: The progress value at the time of archiving
+   - target: The target value at the time of archiving
+   - completed: Whether the goal was completed (progress >= target)
+   - timeframe: The goal's timeframe (daily/weekly/monthly/yearly)
+   - title: The goal title at the time of archiving
+   - type: The goal type (timer/counter/checkbox)
+   - archivedAt: Timestamp when this entry was archived
+
+2. **Created createHistoryEntry(data) factory function**:
+   - Validates all required fields (goalId, date, progress, target, timeframe, title, type)
+   - Auto-generates id using generateId() if not provided
+   - Auto-calculates completed flag if not provided (progress >= target)
+   - Sets archivedAt to current timestamp if not provided
+
+3. **Created createHistoryEntryFromGoal(goal, date) convenience function**:
+   - Extracts relevant fields from a Goal object
+   - Creates history entry with single function call
+   - Validates goal object and date parameters
+
+4. **Added date utility functions**:
+   - getTodayDateString(): Returns today's date in YYYY-MM-DD format
+   - getDateStringDaysAgo(daysAgo): Returns date N days ago in YYYY-MM-DD format
+
+5. **Added history query/filter functions**:
+   - filterHistoryByDateRange(history, startDate, endDate): Filter entries within date range
+   - filterHistoryByGoalId(history, goalId): Filter entries for specific goal
+   - groupHistoryByDate(history): Group entries by date (returns object with date keys)
+
+6. **Storage functions already existed**:
+   - getHistory() in storage.js (added in previous iteration)
+   - saveHistory() in storage.js (added in previous iteration)
+   - HISTORY key in STORAGE_KEYS constant
+
+### Technical details:
+- Updated src/utils/models.js:
+  - Added HistoryEntry section (~150 lines) between Goal and ActivityLog models
+  - Added 7 new functions to exports
+- All functions syntax-validated with node --check
+- Model structure matches what service-worker.js createHistoryEntry() produces
+- History entries organized by date via groupHistoryByDate() function
+
+### Acceptance criteria verification:
+- [x] HistoryEntry model defined - typedef with all properties documented
+- [x] getHistory() function - exists in storage.js (line 108-116)
+- [x] saveHistory() function - exists in storage.js (line 123-131)
+- [x] History organized by date - groupHistoryByDate() function for grouping, date field in each entry
+- [x] Accessible for reports - exported filter/query functions make history accessible
+
+### Notes for next iteration:
+- US-043 (Reports Screen - Layout) is now available (priority 5, depends on US-013 done)
+- US-044-US-046 depend on US-043
+- US-047-US-049 depend on US-046/US-042 (higher priority 6)
+- The history model is now complete and ready for reports to use
+- Service worker already creates history entries on reset (US-041)
+- Reports screen can use filterHistoryByDateRange, groupHistoryByDate to get data

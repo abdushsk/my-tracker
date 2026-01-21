@@ -626,7 +626,7 @@
         "Accessible for reports"
       ],
       "priority": 5,
-      "passes": false,
+      "passes": true,
       "dependsOn": ["US-009"]
     },
     {

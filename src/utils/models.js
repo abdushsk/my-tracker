@@ -172,6 +172,159 @@ function resetGoalProgress(goal) {
 }
 
 // =============================================================================
+// History Entry Model
+// =============================================================================
+
+/**
+ * @typedef {Object} HistoryEntry
+ * @property {string} id - Unique identifier (UUID)
+ * @property {string} goalId - The ID of the goal this history relates to
+ * @property {string} date - Date string in YYYY-MM-DD format (the period this entry covers)
+ * @property {number} progress - The progress value at the time of archiving
+ * @property {number} target - The target value at the time of archiving
+ * @property {boolean} completed - Whether the goal was completed (progress >= target)
+ * @property {'daily'|'weekly'|'monthly'|'yearly'} timeframe - The goal's timeframe
+ * @property {string} title - The goal title at the time of archiving
+ * @property {'timer'|'counter'|'checkbox'} type - The goal type
+ * @property {number} archivedAt - Timestamp when this entry was archived
+ */
+
+/**
+ * Create a new HistoryEntry for archiving goal progress
+ * @param {Object} data - History entry data
+ * @param {string} data.goalId - The goal ID (required)
+ * @param {string} data.date - The date string for this history entry (required, YYYY-MM-DD format)
+ * @param {number} data.progress - The progress value (required)
+ * @param {number} data.target - The target value (required)
+ * @param {'daily'|'weekly'|'monthly'|'yearly'} data.timeframe - The goal's timeframe (required)
+ * @param {string} data.title - The goal title (required)
+ * @param {'timer'|'counter'|'checkbox'} data.type - The goal type (required)
+ * @param {string} [data.id] - Optional ID (auto-generated if not provided)
+ * @param {boolean} [data.completed] - Optional completed flag (auto-calculated if not provided)
+ * @param {number} [data.archivedAt] - Optional archive timestamp (defaults to current time)
+ * @returns {HistoryEntry} A new history entry object
+ */
+function createHistoryEntry(data) {
+  if (!data || !data.goalId) {
+    throw new Error('History entry requires a goalId');
+  }
+  if (!data.date) {
+    throw new Error('History entry requires a date');
+  }
+  if (data.progress === undefined) {
+    throw new Error('History entry requires progress');
+  }
+  if (data.target === undefined) {
+    throw new Error('History entry requires target');
+  }
+  if (!data.timeframe) {
+    throw new Error('History entry requires timeframe');
+  }
+  if (!data.title) {
+    throw new Error('History entry requires title');
+  }
+  if (!data.type) {
+    throw new Error('History entry requires type');
+  }
+
+  return {
+    id: data.id || generateId(),
+    goalId: data.goalId,
+    date: data.date,
+    progress: data.progress,
+    target: data.target,
+    completed: data.completed !== undefined ? data.completed : data.progress >= data.target,
+    timeframe: data.timeframe,
+    title: data.title,
+    type: data.type,
+    archivedAt: data.archivedAt || Date.now()
+  };
+}
+
+/**
+ * Create a HistoryEntry from a Goal object
+ * Convenience function that extracts relevant fields from a goal
+ * @param {Goal} goal - The goal to create a history entry from
+ * @param {string} date - The date string for this history entry (YYYY-MM-DD format)
+ * @returns {HistoryEntry} A new history entry object
+ */
+function createHistoryEntryFromGoal(goal, date) {
+  if (!goal || !goal.id) {
+    throw new Error('Valid goal object is required');
+  }
+  if (!date) {
+    throw new Error('Date is required');
+  }
+
+  return createHistoryEntry({
+    goalId: goal.id,
+    date: date,
+    progress: goal.progress,
+    target: goal.target,
+    timeframe: goal.timeframe,
+    title: goal.title,
+    type: goal.type
+  });
+}
+
+/**
+ * Get today's date in YYYY-MM-DD format
+ * @returns {string} Today's date string
+ */
+function getTodayDateString() {
+  const now = new Date();
+  return now.toISOString().split('T')[0];
+}
+
+/**
+ * Get a date string for N days ago in YYYY-MM-DD format
+ * @param {number} daysAgo - Number of days ago (0 = today)
+ * @returns {string} Date string in YYYY-MM-DD format
+ */
+function getDateStringDaysAgo(daysAgo) {
+  const date = new Date();
+  date.setDate(date.getDate() - daysAgo);
+  return date.toISOString().split('T')[0];
+}
+
+/**
+ * Filter history entries by date range
+ * @param {HistoryEntry[]} history - Array of history entries
+ * @param {string} startDate - Start date (inclusive, YYYY-MM-DD format)
+ * @param {string} endDate - End date (inclusive, YYYY-MM-DD format)
+ * @returns {HistoryEntry[]} Filtered history entries
+ */
+function filterHistoryByDateRange(history, startDate, endDate) {
+  return history.filter(entry => entry.date >= startDate && entry.date <= endDate);
+}
+
+/**
+ * Filter history entries by goal ID
+ * @param {HistoryEntry[]} history - Array of history entries
+ * @param {string} goalId - The goal ID to filter by
+ * @returns {HistoryEntry[]} Filtered history entries
+ */
+function filterHistoryByGoalId(history, goalId) {
+  return history.filter(entry => entry.goalId === goalId);
+}
+
+/**
+ * Group history entries by date
+ * @param {HistoryEntry[]} history - Array of history entries
+ * @returns {Object} Object with date strings as keys and arrays of entries as values
+ */
+function groupHistoryByDate(history) {
+  return history.reduce((groups, entry) => {
+    const date = entry.date;
+    if (!groups[date]) {
+      groups[date] = [];
+    }
+    groups[date].push(entry);
+    return groups;
+  }, {});
+}
+
+// =============================================================================
 // Activity Log Model
 // =============================================================================
 
@@ -229,11 +382,19 @@ export {
   ACTIVITY_ACTIONS,
   // Utility functions
   generateId,
+  getTodayDateString,
+  getDateStringDaysAgo,
   // Goal functions
   createGoal,
   isGoalCompleted,
   getGoalCompletionPercentage,
   resetGoalProgress,
+  // History Entry functions
+  createHistoryEntry,
+  createHistoryEntryFromGoal,
+  filterHistoryByDateRange,
+  filterHistoryByGoalId,
+  groupHistoryByDate,
   // Activity Log functions
   createActivityLog
 };
