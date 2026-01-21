@@ -611,7 +611,7 @@
         "Handles all timeframe types"
       ],
       "priority": 5,
-      "passes": false,
+      "passes": true,
       "dependsOn": ["US-040", "US-012"]
     },
     {

@@ -16,7 +16,8 @@
 
 const STORAGE_KEYS = {
   GOALS: 'goals',
-  ACTIVE_TIMERS: 'activeTimers'
+  ACTIVE_TIMERS: 'activeTimers',
+  HISTORY: 'history'
 };
 
 /**
@@ -95,6 +96,35 @@ async function updateGoal(goalId, updates) {
     return await saveGoals(goals);
   } catch (error) {
     console.error('[Service Worker] Error updating goal:', error);
+    return false;
+  }
+}
+
+/**
+ * Get history from storage
+ * @returns {Promise<Array>} Array of history entries
+ */
+async function getHistory() {
+  try {
+    const result = await chrome.storage.local.get(STORAGE_KEYS.HISTORY);
+    return result[STORAGE_KEYS.HISTORY] || [];
+  } catch (error) {
+    console.error('[Service Worker] Error getting history:', error);
+    return [];
+  }
+}
+
+/**
+ * Save history to storage
+ * @param {Array} history - Array of history entries
+ * @returns {Promise<boolean>} Success status
+ */
+async function saveHistory(history) {
+  try {
+    await chrome.storage.local.set({ [STORAGE_KEYS.HISTORY]: history });
+    return true;
+  } catch (error) {
+    console.error('[Service Worker] Error saving history:', error);
     return false;
   }
 }
@@ -351,6 +381,201 @@ async function handleSyncTimerProgress(goalId, progress, isActive) {
 }
 
 // ============================================
+// US-041: Auto Reset - Reset Logic
+// ============================================
+
+/**
+ * Generate a unique identifier using crypto.randomUUID()
+ * Falls back to a custom implementation if crypto.randomUUID is not available
+ * @returns {string} A unique UUID string
+ */
+function generateId() {
+  if (typeof crypto !== 'undefined' && crypto.randomUUID) {
+    return crypto.randomUUID();
+  }
+  // Fallback for environments without crypto.randomUUID
+  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+    const r = Math.random() * 16 | 0;
+    const v = c === 'x' ? r : (r & 0x3 | 0x8);
+    return v.toString(16);
+  });
+}
+
+/**
+ * Create a history entry for archiving goal progress before reset
+ * @param {Object} goal - The goal object
+ * @param {string} date - The date string for this history entry (YYYY-MM-DD format)
+ * @returns {Object} A history entry object
+ */
+function createHistoryEntry(goal, date) {
+  return {
+    id: generateId(),
+    goalId: goal.id,
+    date: date,
+    progress: goal.progress,
+    target: goal.target,
+    completed: goal.progress >= goal.target,
+    timeframe: goal.timeframe,
+    title: goal.title,
+    type: goal.type,
+    archivedAt: Date.now()
+  };
+}
+
+/**
+ * Get the date string (YYYY-MM-DD) for archiving history
+ * For daily: yesterday's date
+ * For weekly: the start of the week that just ended
+ * For monthly: the start of the month that just ended
+ * For yearly: the start of the year that just ended
+ * @param {string} timeframe - The timeframe that triggered the reset
+ * @returns {string} Date string in YYYY-MM-DD format
+ */
+function getArchiveDate(timeframe) {
+  const now = new Date();
+  let archiveDate;
+
+  switch (timeframe) {
+    case 'daily':
+      // Archive as yesterday (the day that just ended)
+      archiveDate = new Date(now);
+      archiveDate.setDate(archiveDate.getDate() - 1);
+      break;
+    case 'weekly':
+      // Archive as the start of the week that just ended (last Monday)
+      archiveDate = new Date(now);
+      archiveDate.setDate(archiveDate.getDate() - 7);
+      break;
+    case 'monthly':
+      // Archive as the first day of the previous month
+      archiveDate = new Date(now);
+      archiveDate.setMonth(archiveDate.getMonth() - 1);
+      archiveDate.setDate(1);
+      break;
+    case 'yearly':
+      // Archive as January 1st of the previous year
+      archiveDate = new Date(now);
+      archiveDate.setFullYear(archiveDate.getFullYear() - 1);
+      archiveDate.setMonth(0);
+      archiveDate.setDate(1);
+      break;
+    default:
+      archiveDate = new Date(now);
+      archiveDate.setDate(archiveDate.getDate() - 1);
+  }
+
+  // Format as YYYY-MM-DD
+  const year = archiveDate.getFullYear();
+  const month = String(archiveDate.getMonth() + 1).padStart(2, '0');
+  const day = String(archiveDate.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+}
+
+/**
+ * Perform goal reset for a specific timeframe.
+ * Archives progress to history and resets goals matching the timeframe.
+ * @param {string} timeframe - The timeframe to reset ('daily', 'weekly', 'monthly', 'yearly')
+ * @returns {Promise<Object>} Result object with counts
+ */
+async function performGoalReset(timeframe) {
+  console.log(`[Service Worker] Performing ${timeframe} goal reset...`);
+
+  try {
+    // Get all goals
+    const goals = await getGoals();
+
+    if (goals.length === 0) {
+      console.log('[Service Worker] No goals to reset');
+      return { success: true, resetCount: 0, archivedCount: 0 };
+    }
+
+    // Get current history
+    const history = await getHistory();
+
+    // Get archive date for this timeframe
+    const archiveDate = getArchiveDate(timeframe);
+
+    // Track counts
+    let resetCount = 0;
+    let archivedCount = 0;
+
+    // Process each goal
+    const updatedGoals = goals.map(goal => {
+      // Check if this goal's timeframe matches the reset being performed
+      if (goal.timeframe !== timeframe) {
+        return goal; // No change for goals with different timeframes
+      }
+
+      // Archive current progress to history (only if there's any progress or activity)
+      if (goal.progress > 0 || goal.isActive) {
+        const historyEntry = createHistoryEntry(goal, archiveDate);
+        history.push(historyEntry);
+        archivedCount++;
+        console.log(`[Service Worker] Archived goal "${goal.title}": ${goal.progress}/${goal.target} (${historyEntry.completed ? 'completed' : 'incomplete'})`);
+      }
+
+      // Reset the goal progress
+      resetCount++;
+      const now = Date.now();
+
+      // If this was an active timer, we need to stop it
+      if (goal.isActive && goal.type === 'timer') {
+        console.log(`[Service Worker] Stopping active timer for goal "${goal.title}" during reset`);
+      }
+
+      return {
+        ...goal,
+        progress: 0,
+        isActive: false,
+        lastResetAt: now
+      };
+    });
+
+    // Save the updated goals
+    await saveGoals(updatedGoals);
+
+    // Save the updated history
+    await saveHistory(history);
+
+    // Clean up any active timers for the reset goals
+    if (resetCount > 0) {
+      const activeTimers = await getActiveTimers();
+      let timersUpdated = false;
+
+      for (const goal of goals) {
+        if (goal.timeframe === timeframe && activeTimers[goal.id]) {
+          delete activeTimers[goal.id];
+          timersUpdated = true;
+          console.log(`[Service Worker] Removed active timer for goal "${goal.title}" during reset`);
+        }
+      }
+
+      if (timersUpdated) {
+        await saveActiveTimers(activeTimers);
+      }
+    }
+
+    console.log(`[Service Worker] ${timeframe} reset complete: ${resetCount} goals reset, ${archivedCount} entries archived`);
+
+    return {
+      success: true,
+      resetCount,
+      archivedCount,
+      timeframe,
+      archiveDate
+    };
+  } catch (error) {
+    console.error(`[Service Worker] Error performing ${timeframe} reset:`, error);
+    return {
+      success: false,
+      error: error.message,
+      resetCount: 0,
+      archivedCount: 0
+    };
+  }
+}
+
+// ============================================
 // Alarm Listener
 // ============================================
 
@@ -368,31 +593,31 @@ chrome.alarms.onAlarm.addListener(async (alarm) => {
 
   switch (alarm.name) {
     case ALARM_NAMES.DAILY_RESET:
-      // US-040: Daily check at midnight - handled by US-041
+      // US-041: Daily check at midnight - reset daily goals
       console.log('[Service Worker] Daily reset triggered');
-      // Reset logic will be implemented in US-041
+      await performGoalReset('daily');
       // Note: This alarm repeats automatically via periodInMinutes
       break;
 
     case ALARM_NAMES.WEEKLY_RESET:
-      // US-040: Weekly check at Monday midnight - handled by US-041
+      // US-041: Weekly check at Monday midnight - reset weekly goals
       console.log('[Service Worker] Weekly reset triggered');
-      // Reset logic will be implemented in US-041
+      await performGoalReset('weekly');
       // Note: This alarm repeats automatically via periodInMinutes
       break;
 
     case ALARM_NAMES.MONTHLY_RESET:
-      // US-040: Monthly check at 1st midnight - handled by US-041
+      // US-041: Monthly check at 1st midnight - reset monthly goals
       console.log('[Service Worker] Monthly reset triggered');
-      // Reset logic will be implemented in US-041
+      await performGoalReset('monthly');
       // Reschedule for next month (since months vary in length)
       await rescheduleMonthlyAlarm();
       break;
 
     case ALARM_NAMES.YEARLY_RESET:
-      // US-040: Yearly check at Jan 1st midnight - handled by US-041
+      // US-041: Yearly check at Jan 1st midnight - reset yearly goals
       console.log('[Service Worker] Yearly reset triggered');
-      // Reset logic will be implemented in US-041
+      await performGoalReset('yearly');
       // Reschedule for next year
       await rescheduleYearlyAlarm();
       break;

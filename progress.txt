@@ -1982,3 +1982,77 @@ Created src/utils/sounds.js with comprehensive audio functionality:
 - US-042 (History Storage Model) is also available (depends on US-009 done)
 - US-043 (Reports Screen - Layout) is also available (depends on US-013 done)
 - The alarm infrastructure is complete - just needs the reset logic in US-041
+
+## Iteration 37 - US-041: Auto Reset - Reset Logic
+**Status:** Completed
+**Date:** 2026-01-22
+
+### What was done:
+- Implemented goal reset logic in the service worker that runs when alarms fire
+- Added HISTORY storage key to service worker storage constants
+- Added history storage helper functions to service worker:
+  - getHistory() - retrieves history array from storage
+  - saveHistory() - saves history array to storage
+- Added generateId() function to service worker for creating unique history entry IDs
+- Created createHistoryEntry(goal, date) function:
+  - Creates a history entry with: id, goalId, date, progress, target, completed, timeframe, title, type, archivedAt
+  - Used to archive goal progress before resetting
+- Created getArchiveDate(timeframe) helper function:
+  - Calculates the appropriate archive date based on timeframe
+  - Daily: yesterday's date
+  - Weekly: start of the week that just ended
+  - Monthly: first day of the previous month
+  - Yearly: January 1st of the previous year
+  - Returns date in YYYY-MM-DD format
+- Implemented performGoalReset(timeframe) function:
+  - Retrieves all goals from storage
+  - Filters goals matching the specified timeframe
+  - Archives progress to history (only if there's progress > 0 or goal is active)
+  - Resets progress to 0 for matching goals
+  - Sets isActive to false
+  - Updates lastResetAt to current timestamp
+  - Saves updated goals and history
+  - Cleans up active timers for reset goals
+  - Returns summary with resetCount and archivedCount
+- Updated alarm listener to call performGoalReset():
+  - DAILY_RESET → performGoalReset('daily')
+  - WEEKLY_RESET → performGoalReset('weekly')
+  - MONTHLY_RESET → performGoalReset('monthly')
+  - YEARLY_RESET → performGoalReset('yearly')
+
+### Technical details:
+- Updated src/background/service-worker.js:
+  - Added HISTORY to STORAGE_KEYS constant
+  - Added getHistory() and saveHistory() functions (~25 lines)
+  - Added generateId() function (~15 lines)
+  - Added createHistoryEntry() function (~15 lines)
+  - Added getArchiveDate() function (~40 lines)
+  - Added performGoalReset() function (~100 lines)
+  - Updated alarm listener to call performGoalReset for each timeframe
+- History entries include rich metadata for reports:
+  - goalId, date, progress, target, completed (boolean)
+  - timeframe, title, type, archivedAt
+- Reset logic handles edge cases:
+  - Empty goals array
+  - Active timers that need to be stopped
+  - Goals with different timeframes (only reset matching ones)
+- All changes syntax-validated with node --check
+
+### Acceptance criteria verification:
+- [x] Checks goal timeframes - performGoalReset() filters by goal.timeframe === timeframe
+- [x] Archives progress before reset - createHistoryEntry() called before resetting, stored via saveHistory()
+- [x] Resets progress to 0 - goal.progress set to 0 in updatedGoals
+- [x] Updates lastResetAt timestamp - goal.lastResetAt set to Date.now()
+- [x] Handles all timeframe types - Switch cases for daily, weekly, monthly, yearly in alarm listener
+
+### Notes for next iteration:
+- US-042 (History Storage Model) is now partially complete (storage functions exist in service worker)
+  - models.js still needs HistoryEntry typedef added
+  - storage.js already has getHistory/saveHistory
+  - May need to mark as complete or add minimal additions
+- US-043 (Reports Screen - Layout) is available (depends on US-013 done)
+- Both have priority 5
+- The reset system is now fully operational:
+  - Alarms set up (US-040)
+  - Reset logic implemented (US-041)
+  - Goals will automatically reset at the appropriate times
