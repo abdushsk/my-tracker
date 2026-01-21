@@ -369,7 +369,7 @@
         "Validation for numeric values"
       ],
       "priority": 3,
-      "passes": false,
+      "passes": true,
       "dependsOn": ["US-024"]
     },
     {

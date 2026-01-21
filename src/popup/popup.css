@@ -2539,3 +2539,110 @@ body.modal-open {
 .type-option:active {
   transform: scale(0.97);
 }
+
+/* ========================================
+   US-025: Add Goal Form - Target Input (Timer)
+   ======================================== */
+
+/* Target input group container */
+.target-input-group {
+  transition: opacity var(--transition), max-height var(--transition), margin var(--transition);
+  overflow: hidden;
+}
+
+/* Hidden state for target inputs (shown/hidden based on type) */
+.target-input-group.hidden {
+  opacity: 0;
+  max-height: 0;
+  margin: 0;
+  pointer-events: none;
+}
+
+/* Timer Target Inputs Container */
+.timer-target-inputs {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--spacing-sm);
+}
+
+/* Individual time input field container */
+.time-input-field {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  flex: 1;
+}
+
+/* Time input styling */
+.time-input {
+  width: 100%;
+  text-align: center;
+  font-size: var(--font-size-xl);
+  font-weight: var(--font-weight-semibold);
+  font-family: 'SF Mono', 'Menlo', 'Monaco', 'Courier New', monospace;
+  padding: var(--spacing-md);
+  border-radius: var(--radius-lg);
+  -moz-appearance: textfield; /* Hide spinner in Firefox */
+}
+
+/* Hide spinner buttons in Chrome/Safari/Edge */
+.time-input::-webkit-outer-spin-button,
+.time-input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+/* Time input label (hours/minutes) */
+.time-input-label {
+  font-size: var(--font-size-xs);
+  color: var(--text-muted);
+  font-weight: var(--font-weight-medium);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+/* Separator between hours and minutes */
+.time-separator {
+  font-size: var(--font-size-2xl);
+  font-weight: var(--font-weight-bold);
+  color: var(--text-muted);
+  margin-top: var(--spacing-sm);
+  user-select: none;
+}
+
+/* Form hint text */
+.form-hint {
+  font-size: var(--font-size-xs);
+  color: var(--text-muted);
+  margin: var(--spacing-xs) 0 0;
+  line-height: 1.4;
+}
+
+/* Focus state for time inputs */
+.time-input:focus {
+  border-color: var(--secondary);
+  box-shadow: 0 0 0 3px var(--secondary-light);
+}
+
+/* Error state for timer target */
+.time-input.has-error {
+  border-color: var(--danger);
+  background-color: var(--danger-light);
+}
+
+.time-input.has-error:focus {
+  border-color: var(--danger);
+  box-shadow: 0 0 0 3px rgba(244, 67, 54, 0.15);
+}
+
+/* Timer target group visible state */
+#timer-target-group {
+  max-height: 200px;
+  opacity: 1;
+}
+
+/* Hover effect for time inputs */
+.time-input:hover:not(:focus) {
+  border-color: var(--text-muted);
+}

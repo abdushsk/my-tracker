@@ -1270,3 +1270,80 @@
 - updateTargetInputVisibility() function is ready to be implemented in US-025/US-026
 - The type selector is fully functional and will show/hide target inputs once those are implemented
 
+## Iteration 26 - US-025: Add Goal Form - Target Input (Timer)
+**Status:** Completed
+**Date:** 2026-01-22
+
+### What was done:
+- Added timer target input to the Add Goal form modal
+- Created a two-field input for hours and minutes:
+  - Hours input (0-23) with label "hours"
+  - Minutes input (0-59) with label "minutes"
+  - Colon separator between fields for visual clarity
+  - Default value: 1 hour, 0 minutes
+- Implemented form validation:
+  - Hours must be 0-23
+  - Minutes must be 0-59
+  - Total time must be greater than 0 (cannot save 0:00)
+- Implemented comprehensive CSS styling (~100 lines):
+  - .target-input-group with transition for show/hide animation
+  - .timer-target-inputs flex container for side-by-side inputs
+  - .time-input with monospace font, centered text, no spinners
+  - .time-input-label for "hours"/"minutes" labels below inputs
+  - .time-separator styled colon between fields
+  - .form-hint for helper text below the input
+  - Focus states with blue (timer) color scheme
+  - Error states with red highlighting
+  - Hidden state class for type-based visibility
+- Implemented JavaScript functions:
+  - getTimerTarget() - returns time in seconds
+  - setTimerTarget(seconds) - sets hours/minutes from seconds (for edit mode)
+  - validateTimerTarget() - validates input values
+  - showTimerTargetError(message) - displays error message
+  - clearTimerTargetError() - clears error state
+  - resetTimerTarget() - resets to default (1h 0m)
+- Updated updateTargetInputVisibility():
+  - Shows timer target when Timer type is selected
+  - Hides timer target when other types are selected
+  - Uses CSS class 'hidden' for smooth transitions
+- Integrated with form lifecycle:
+  - resetGoalForm() now calls resetTimerTarget()
+  - openGoalModal() pre-fills timer target in edit mode
+  - handleGoalFormSubmit() validates timer target when type is timer
+
+### Technical details:
+- Updated src/popup/popup.html:
+  - Added #timer-target-group form group with label, inputs, error, and hint
+  - Hours input: id="timer-target-hours", min=0, max=23
+  - Minutes input: id="timer-target-minutes", min=0, max=59
+  - Error span with role="alert" for accessibility
+- Updated src/popup/popup.js (~130 lines in US-025 section):
+  - Six new functions for timer target management
+  - Conversion between form values (hours, minutes) and seconds
+  - Integrated into form reset, modal open, and submit handlers
+  - All new functions exported for testing
+- Updated src/popup/popup.css (~100 lines):
+  - Timer target input styling with transitions
+  - Hidden state for type-based visibility
+  - Form hint text styling
+  - Error states matching existing form error patterns
+- CSS brace count: 382 (balanced)
+- JavaScript syntax validated with node --check
+- HTML div balance validated (18/18)
+
+### Acceptance criteria verification:
+- [x] Shows only when Timer type selected - updateTargetInputVisibility() adds/removes 'hidden' class
+- [x] Hours input (0-23) - Number input with min=0, max=23, validation in validateTimerTarget()
+- [x] Minutes input (0-59) - Number input with min=0, max=59, validation in validateTimerTarget()
+- [x] Converts to seconds for storage - getTimerTarget() returns (hours*3600)+(minutes*60)
+- [x] Validation for numeric values - Range validation, required check (must be > 0)
+
+### Notes for next iteration:
+- US-026 (Add Goal Form - Target Input Counter) is now the next priority 3 task
+  - Depends on US-024 (done) and has priority 3
+- US-027 (Add Goal Form - Timeframe Selector) is still available (depends on US-023)
+- US-030 (Delete Goal - Confirmation) is still available (depends on US-021)
+- US-028 (Save Logic) depends on US-025 (done), US-026, US-027 - not yet unblocked
+- Timer target input is fully functional with validation and edit mode support
+- The form now properly shows/hides timer target based on type selection
+

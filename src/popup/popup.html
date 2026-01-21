@@ -94,7 +94,45 @@
               <input type="hidden" id="goal-type" name="type" value="timer">
             </div>
 
-            <!-- Target inputs will be added in US-025 (Timer) and US-026 (Counter) -->
+            <!-- US-025: Timer Target Input -->
+            <div class="form-group target-input-group" id="timer-target-group">
+              <label for="timer-target-hours" class="form-label">Target Time <span class="required-indicator">*</span></label>
+              <div class="timer-target-inputs">
+                <div class="time-input-field">
+                  <input
+                    type="number"
+                    id="timer-target-hours"
+                    name="timer-hours"
+                    class="form-input time-input"
+                    placeholder="0"
+                    min="0"
+                    max="23"
+                    value="1"
+                    autocomplete="off"
+                  >
+                  <span class="time-input-label">hours</span>
+                </div>
+                <span class="time-separator">:</span>
+                <div class="time-input-field">
+                  <input
+                    type="number"
+                    id="timer-target-minutes"
+                    name="timer-minutes"
+                    class="form-input time-input"
+                    placeholder="0"
+                    min="0"
+                    max="59"
+                    value="0"
+                    autocomplete="off"
+                  >
+                  <span class="time-input-label">minutes</span>
+                </div>
+              </div>
+              <span class="form-error" id="timer-target-error" role="alert" aria-live="polite"></span>
+              <p class="form-hint">Set the duration you want to track (e.g., 1 hour 30 minutes)</p>
+            </div>
+
+            <!-- Counter target input will be added in US-026 -->
             <!-- Timeframe selector will be added in US-027 -->
           </form>
         </div>

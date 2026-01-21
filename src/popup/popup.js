@@ -1179,6 +1179,11 @@ function openGoalModal(mode = 'add', goal = null) {
     setFormType(goal.type);
   }
 
+  // US-025: Pre-fill timer target for edit mode (if timer type)
+  if (goal && goal.type === GOAL_TYPES.TIMER && goal.target) {
+    setTimerTarget(goal.target);
+  }
+
   // US-023: Focus the title input for better UX
   focusTitleInput();
 
@@ -1278,6 +1283,16 @@ function handleGoalFormSubmit(e) {
   if (!titleValid) {
     console.log('[Form] Validation failed - title is required');
     return;
+  }
+
+  // US-025: Validate timer target if timer type is selected
+  const selectedType = getFormType();
+  if (selectedType === GOAL_TYPES.TIMER) {
+    const timerTargetValid = validateTimerTarget();
+    if (!timerTargetValid) {
+      console.log('[Form] Validation failed - timer target is invalid');
+      return;
+    }
   }
 
   console.log(`[Form] Submit in ${mode} mode - full implementation in US-028`);
@@ -1388,6 +1403,9 @@ function resetGoalForm() {
 
   // US-024: Reset type selector to default (Timer)
   resetTypeSelector();
+
+  // US-025: Reset timer target to default values
+  resetTimerTarget();
 }
 
 /**
@@ -1459,24 +1477,168 @@ function handleTypeSelection(type) {
 
 /**
  * Update target input visibility based on selected type
- * This is a placeholder for US-025 and US-026 implementation
+ * US-025: Shows timer target input when Timer type is selected
+ * US-026: Will show counter target input when Counter type is selected
  * @param {string} type - The selected goal type
  */
 function updateTargetInputVisibility(type) {
-  // Placeholder for US-025 (Timer target) and US-026 (Counter target)
-  // Will show/hide the appropriate target input fields
-  console.log(`[Form] Target input visibility updated for type: ${type}`);
+  const timerTargetGroup = document.getElementById('timer-target-group');
+  // const counterTargetGroup = document.getElementById('counter-target-group'); // US-026
 
-  // US-025/US-026: These will be implemented to show/hide target inputs
-  // const timerTarget = document.getElementById('timer-target-group');
-  // const counterTarget = document.getElementById('counter-target-group');
-  //
-  // if (timerTarget) {
-  //   timerTarget.style.display = type === GOAL_TYPES.TIMER ? 'flex' : 'none';
+  // Show/hide timer target input
+  if (timerTargetGroup) {
+    if (type === GOAL_TYPES.TIMER) {
+      timerTargetGroup.classList.remove('hidden');
+    } else {
+      timerTargetGroup.classList.add('hidden');
+    }
+  }
+
+  // US-026: Show/hide counter target input
+  // if (counterTargetGroup) {
+  //   if (type === GOAL_TYPES.COUNTER) {
+  //     counterTargetGroup.classList.remove('hidden');
+  //   } else {
+  //     counterTargetGroup.classList.add('hidden');
+  //   }
   // }
-  // if (counterTarget) {
-  //   counterTarget.style.display = type === GOAL_TYPES.COUNTER ? 'flex' : 'none';
-  // }
+
+  console.log(`[Form] Target input visibility updated for type: ${type}`);
+}
+
+// =============================================================================
+// US-025: Add Goal Form - Target Input (Timer)
+// =============================================================================
+
+/**
+ * Get the timer target value from the form in seconds
+ * @returns {number} The target time in seconds
+ */
+function getTimerTarget() {
+  const hoursInput = document.getElementById('timer-target-hours');
+  const minutesInput = document.getElementById('timer-target-minutes');
+
+  const hours = parseInt(hoursInput?.value, 10) || 0;
+  const minutes = parseInt(minutesInput?.value, 10) || 0;
+
+  // Convert to seconds
+  return (hours * 3600) + (minutes * 60);
+}
+
+/**
+ * Set the timer target value in the form from seconds
+ * @param {number} seconds - The target time in seconds
+ */
+function setTimerTarget(seconds) {
+  const hoursInput = document.getElementById('timer-target-hours');
+  const minutesInput = document.getElementById('timer-target-minutes');
+
+  const hours = Math.floor(seconds / 3600);
+  const minutes = Math.floor((seconds % 3600) / 60);
+
+  if (hoursInput) {
+    hoursInput.value = hours;
+  }
+  if (minutesInput) {
+    minutesInput.value = minutes;
+  }
+}
+
+/**
+ * Validate the timer target input
+ * @returns {boolean} True if valid, false otherwise
+ */
+function validateTimerTarget() {
+  const hoursInput = document.getElementById('timer-target-hours');
+  const minutesInput = document.getElementById('timer-target-minutes');
+  const errorElement = document.getElementById('timer-target-error');
+
+  if (!hoursInput || !minutesInput || !errorElement) {
+    console.error('Timer target input elements not found');
+    return false;
+  }
+
+  // Clear previous errors
+  clearTimerTargetError();
+
+  const hours = parseInt(hoursInput.value, 10);
+  const minutes = parseInt(minutesInput.value, 10);
+
+  // Validate hours range (0-23)
+  if (isNaN(hours) || hours < 0 || hours > 23) {
+    showTimerTargetError('Hours must be between 0 and 23');
+    hoursInput.classList.add('has-error');
+    hoursInput.focus();
+    return false;
+  }
+
+  // Validate minutes range (0-59)
+  if (isNaN(minutes) || minutes < 0 || minutes > 59) {
+    showTimerTargetError('Minutes must be between 0 and 59');
+    minutesInput.classList.add('has-error');
+    minutesInput.focus();
+    return false;
+  }
+
+  // Validate that at least some time is set (not 0:00)
+  if (hours === 0 && minutes === 0) {
+    showTimerTargetError('Please set a target time greater than 0');
+    hoursInput.classList.add('has-error');
+    minutesInput.classList.add('has-error');
+    hoursInput.focus();
+    return false;
+  }
+
+  return true;
+}
+
+/**
+ * Show error message for timer target
+ * @param {string} message - The error message to display
+ */
+function showTimerTargetError(message) {
+  const errorElement = document.getElementById('timer-target-error');
+  if (errorElement) {
+    errorElement.textContent = message;
+    errorElement.classList.add('visible');
+  }
+}
+
+/**
+ * Clear error state for timer target inputs
+ */
+function clearTimerTargetError() {
+  const hoursInput = document.getElementById('timer-target-hours');
+  const minutesInput = document.getElementById('timer-target-minutes');
+  const errorElement = document.getElementById('timer-target-error');
+
+  if (hoursInput) {
+    hoursInput.classList.remove('has-error');
+  }
+  if (minutesInput) {
+    minutesInput.classList.remove('has-error');
+  }
+  if (errorElement) {
+    errorElement.textContent = '';
+    errorElement.classList.remove('visible');
+  }
+}
+
+/**
+ * Reset the timer target inputs to default values
+ */
+function resetTimerTarget() {
+  const hoursInput = document.getElementById('timer-target-hours');
+  const minutesInput = document.getElementById('timer-target-minutes');
+
+  if (hoursInput) {
+    hoursInput.value = '1'; // Default to 1 hour
+  }
+  if (minutesInput) {
+    minutesInput.value = '0';
+  }
+
+  clearTimerTargetError();
 }
 
 /**
@@ -1758,5 +1920,12 @@ export {
   handleTypeSelection,
   attachTypeSelectorListeners,
   resetTypeSelector,
-  updateTargetInputVisibility
+  updateTargetInputVisibility,
+  // US-025 Timer target input functions
+  getTimerTarget,
+  setTimerTarget,
+  validateTimerTarget,
+  showTimerTargetError,
+  clearTimerTargetError,
+  resetTimerTarget
 };
