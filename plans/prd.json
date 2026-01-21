@@ -354,7 +354,7 @@
         "Updates target input when changed"
       ],
       "priority": 3,
-      "passes": false,
+      "passes": true,
       "dependsOn": ["US-023"]
     },
     {

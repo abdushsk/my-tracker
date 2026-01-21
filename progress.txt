@@ -1204,3 +1204,69 @@
 - US-030 (Delete Goal - Confirmation) is still available (depends on US-021)
 - The validation utility functions (showInputError, clearInputError) are designed to be reusable for other form fields
 
+## Iteration 25 - US-024: Add Goal Form - Type Selector
+**Status:** Completed
+**Date:** 2026-01-22
+
+### What was done:
+- Added goal type selector to the Add Goal form modal
+- Created a button group with three type options:
+  - Timer (clock icon) - blue theme when active
+  - Counter (number/dollar icon) - orange theme when active
+  - Checkbox (checkmark icon) - green theme when active
+- Default selection is Timer, stored in hidden input field
+- Implemented comprehensive CSS styling (~145 lines):
+  - Flex-based button group layout with equal-width buttons
+  - Distinct active states with type-specific colors and shadows
+  - Hover states with icon scaling and color changes
+  - Focus-visible states for keyboard accessibility
+  - Selection animation (subtle scale pulse)
+- Implemented JavaScript functions for type selection:
+  - getFormType() - returns currently selected type
+  - setFormType(type) - sets type and updates UI (for edit mode)
+  - handleTypeSelection(type) - click handler for type buttons
+  - attachTypeSelectorListeners() - sets up event listeners
+  - resetTypeSelector() - resets to default (Timer)
+  - updateTargetInputVisibility(type) - placeholder for US-025/US-026
+- Integrated type selector with modal:
+  - Listeners attached when modal opens
+  - Pre-fills type in edit mode (goal.type)
+  - Resets to Timer on form reset
+- Added keyboard navigation support (Enter/Space to select)
+- Used ARIA attributes for accessibility (role="radiogroup", aria-checked)
+
+### Technical details:
+- Updated src/popup/popup.html:
+  - Added type selector form group after title input
+  - Three button elements with data-type attributes
+  - Hidden input stores selected type value
+  - ARIA attributes for screen reader accessibility
+- Updated src/popup/popup.js (~115 lines in US-024 section):
+  - Six new functions for type selection management
+  - Integrated with openGoalModal() and resetGoalForm()
+  - All new functions exported for testing
+- Updated src/popup/popup.css (~145 lines):
+  - .type-selector container and .type-option buttons
+  - Type-specific active state colors
+  - Animation keyframes for selection feedback
+- CSS brace count: 368 (balanced)
+- JavaScript syntax validated with node --check
+- HTML div balance validated (14/14)
+
+### Acceptance criteria verification:
+- [x] Three type options - Timer, Counter, Checkbox buttons in group
+- [x] Visual icons for each - SVG icons matching goal type iconography
+- [x] Default selection: Timer - Timer is active by default, hidden input value="timer"
+- [x] Clear active state styling - Type-specific colors, box-shadow, border changes
+- [x] Updates target input when changed - updateTargetInputVisibility() placeholder ready for US-025/US-026
+
+### Notes for next iteration:
+- US-025 (Add Goal Form - Target Input Timer) is now unblocked
+  - Depends on US-024 (done) and has priority 3
+- US-026 (Add Goal Form - Target Input Counter) is now unblocked
+  - Depends on US-024 (done) and has priority 3
+- US-027 (Add Goal Form - Timeframe Selector) is still available (depends on US-023)
+- US-030 (Delete Goal - Confirmation) is still available (depends on US-021)
+- updateTargetInputVisibility() function is ready to be implemented in US-025/US-026
+- The type selector is fully functional and will show/hide target inputs once those are implemented
+

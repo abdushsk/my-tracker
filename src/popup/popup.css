@@ -2392,3 +2392,150 @@ body.modal-open {
 .char-counter.danger {
   color: var(--danger);
 }
+
+/* ========================================
+   US-024: Add Goal Form - Type Selector
+   ======================================== */
+
+/* Type Selector Container - Button group */
+.type-selector {
+  display: flex;
+  gap: var(--spacing-sm);
+  width: 100%;
+}
+
+/* Type Option Button */
+.type-option {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--spacing-xs);
+  padding: var(--spacing-md) var(--spacing-sm);
+  background-color: var(--background);
+  border: 2px solid var(--border);
+  border-radius: var(--radius-lg);
+  cursor: pointer;
+  transition: all var(--transition);
+  min-height: 80px;
+}
+
+.type-option:hover {
+  border-color: var(--text-muted);
+  background-color: var(--background-secondary);
+}
+
+.type-option:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
+}
+
+/* Active/Selected state */
+.type-option.active {
+  border-color: var(--primary);
+  background-color: var(--primary-light);
+  box-shadow: 0 0 0 3px rgba(76, 175, 80, 0.15);
+}
+
+.type-option.active:hover {
+  background-color: var(--primary-light);
+  border-color: var(--primary);
+}
+
+/* Type Option Icon */
+.type-option-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  color: var(--text-secondary);
+  transition: all var(--transition-fast);
+}
+
+.type-option-icon svg {
+  width: 28px;
+  height: 28px;
+}
+
+.type-option:hover .type-option-icon {
+  color: var(--text);
+  transform: scale(1.1);
+}
+
+.type-option.active .type-option-icon {
+  color: var(--primary);
+}
+
+/* Type-specific icon colors when active */
+.type-option[data-type="timer"].active .type-option-icon {
+  color: var(--secondary);
+}
+
+.type-option[data-type="counter"].active .type-option-icon {
+  color: #E65100;
+}
+
+.type-option[data-type="checkbox"].active .type-option-icon {
+  color: var(--primary);
+}
+
+/* Type Option Label */
+.type-option-label {
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  color: var(--text-secondary);
+  transition: color var(--transition-fast);
+  text-align: center;
+}
+
+.type-option:hover .type-option-label {
+  color: var(--text);
+}
+
+.type-option.active .type-option-label {
+  color: var(--text);
+  font-weight: var(--font-weight-semibold);
+}
+
+/* Type-specific active border colors */
+.type-option[data-type="timer"].active {
+  border-color: var(--secondary);
+  background-color: var(--secondary-light);
+  box-shadow: 0 0 0 3px rgba(33, 150, 243, 0.15);
+}
+
+.type-option[data-type="counter"].active {
+  border-color: #FB8C00;
+  background-color: var(--warning-light);
+  box-shadow: 0 0 0 3px rgba(251, 140, 0, 0.15);
+}
+
+.type-option[data-type="checkbox"].active {
+  border-color: var(--primary);
+  background-color: var(--primary-light);
+  box-shadow: 0 0 0 3px rgba(76, 175, 80, 0.15);
+}
+
+/* Selection animation */
+.type-option.active {
+  animation: type-select 0.3s ease;
+}
+
+@keyframes type-select {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(0.97);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+/* Active state press effect */
+.type-option:active {
+  transform: scale(0.97);
+}

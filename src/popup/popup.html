@@ -58,7 +58,44 @@
               >
               <span class="form-error" id="goal-title-error" role="alert" aria-live="polite"></span>
             </div>
-            <!-- Additional form fields will be added in subsequent user stories (US-024 to US-027) -->
+
+            <!-- US-024: Type Selector -->
+            <div class="form-group">
+              <label class="form-label">Goal Type <span class="required-indicator">*</span></label>
+              <div class="type-selector" role="radiogroup" aria-label="Select goal type">
+                <button type="button" class="type-option active" data-type="timer" role="radio" aria-checked="true" title="Timer - Track time spent on a goal">
+                  <span class="type-option-icon">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                      <circle cx="12" cy="12" r="10"/>
+                      <polyline points="12 6 12 12 16 14"/>
+                    </svg>
+                  </span>
+                  <span class="type-option-label">Timer</span>
+                </button>
+                <button type="button" class="type-option" data-type="counter" role="radio" aria-checked="false" title="Counter - Track a count towards a target">
+                  <span class="type-option-icon">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                      <line x1="12" y1="1" x2="12" y2="23"/>
+                      <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
+                    </svg>
+                  </span>
+                  <span class="type-option-label">Counter</span>
+                </button>
+                <button type="button" class="type-option" data-type="checkbox" role="radio" aria-checked="false" title="Checkbox - Simple yes/no completion">
+                  <span class="type-option-icon">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                      <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+                      <polyline points="9 11 12 14 22 4"/>
+                    </svg>
+                  </span>
+                  <span class="type-option-label">Checkbox</span>
+                </button>
+              </div>
+              <input type="hidden" id="goal-type" name="type" value="timer">
+            </div>
+
+            <!-- Target inputs will be added in US-025 (Timer) and US-026 (Counter) -->
+            <!-- Timeframe selector will be added in US-027 -->
           </form>
         </div>
         <div class="modal-footer">

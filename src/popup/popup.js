@@ -1171,6 +1171,14 @@ function openGoalModal(mode = 'add', goal = null) {
   // Attach modal event listeners
   attachModalListeners(modal);
 
+  // US-024: Attach type selector listeners
+  attachTypeSelectorListeners();
+
+  // US-024: Pre-fill type for edit mode
+  if (goal && goal.type) {
+    setFormType(goal.type);
+  }
+
   // US-023: Focus the title input for better UX
   focusTitleInput();
 
@@ -1377,6 +1385,9 @@ function resetGoalForm() {
   if (titleInput && titleError) {
     clearInputError(titleInput, titleError);
   }
+
+  // US-024: Reset type selector to default (Timer)
+  resetTypeSelector();
 }
 
 /**
@@ -1390,6 +1401,122 @@ function focusTitleInput() {
       titleInput.focus();
     }, 100);
   }
+}
+
+// =============================================================================
+// US-024: Add Goal Form - Type Selector
+// =============================================================================
+
+/**
+ * Get the currently selected goal type from the form
+ * @returns {string} The selected goal type ('timer', 'counter', or 'checkbox')
+ */
+function getFormType() {
+  const typeInput = document.getElementById('goal-type');
+  return typeInput ? typeInput.value : GOAL_TYPES.TIMER;
+}
+
+/**
+ * Set the goal type in the form (for edit mode)
+ * @param {string} type - The goal type to set
+ */
+function setFormType(type) {
+  const typeInput = document.getElementById('goal-type');
+  const typeSelector = document.querySelector('.type-selector');
+
+  if (typeInput) {
+    typeInput.value = type;
+  }
+
+  if (typeSelector) {
+    // Remove active class from all options
+    const options = typeSelector.querySelectorAll('.type-option');
+    options.forEach(option => {
+      option.classList.remove('active');
+      option.setAttribute('aria-checked', 'false');
+    });
+
+    // Add active class to selected option
+    const selectedOption = typeSelector.querySelector(`[data-type="${type}"]`);
+    if (selectedOption) {
+      selectedOption.classList.add('active');
+      selectedOption.setAttribute('aria-checked', 'true');
+    }
+  }
+
+  // Trigger target input visibility update (for US-025/US-026)
+  updateTargetInputVisibility(type);
+}
+
+/**
+ * Handle type option click in the type selector
+ * @param {string} type - The selected type
+ */
+function handleTypeSelection(type) {
+  console.log(`[Form] Type selected: ${type}`);
+  setFormType(type);
+}
+
+/**
+ * Update target input visibility based on selected type
+ * This is a placeholder for US-025 and US-026 implementation
+ * @param {string} type - The selected goal type
+ */
+function updateTargetInputVisibility(type) {
+  // Placeholder for US-025 (Timer target) and US-026 (Counter target)
+  // Will show/hide the appropriate target input fields
+  console.log(`[Form] Target input visibility updated for type: ${type}`);
+
+  // US-025/US-026: These will be implemented to show/hide target inputs
+  // const timerTarget = document.getElementById('timer-target-group');
+  // const counterTarget = document.getElementById('counter-target-group');
+  //
+  // if (timerTarget) {
+  //   timerTarget.style.display = type === GOAL_TYPES.TIMER ? 'flex' : 'none';
+  // }
+  // if (counterTarget) {
+  //   counterTarget.style.display = type === GOAL_TYPES.COUNTER ? 'flex' : 'none';
+  // }
+}
+
+/**
+ * Attach type selector event listeners
+ */
+function attachTypeSelectorListeners() {
+  const typeSelector = document.querySelector('.type-selector');
+
+  if (!typeSelector) {
+    return;
+  }
+
+  const typeOptions = typeSelector.querySelectorAll('.type-option');
+  typeOptions.forEach(option => {
+    option.addEventListener('click', (e) => {
+      e.preventDefault();
+      const type = option.getAttribute('data-type');
+      if (type) {
+        handleTypeSelection(type);
+      }
+    });
+
+    // Keyboard navigation support
+    option.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        const type = option.getAttribute('data-type');
+        if (type) {
+          handleTypeSelection(type);
+        }
+      }
+    });
+  });
+}
+
+/**
+ * Reset the type selector to default (Timer)
+ */
+function resetTypeSelector() {
+  setFormType(GOAL_TYPES.TIMER);
 }
 
 /**
@@ -1624,5 +1751,12 @@ export {
   getFormTitle,
   setFormTitle,
   resetGoalForm,
-  focusTitleInput
+  focusTitleInput,
+  // US-024 Type selector functions
+  getFormType,
+  setFormType,
+  handleTypeSelection,
+  attachTypeSelectorListeners,
+  resetTypeSelector,
+  updateTargetInputVisibility
 };
