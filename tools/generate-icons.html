@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Icon Generator - Daily Goals Tracker</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            max-width: 800px;
+            margin: 40px auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        h1 { color: #333; }
+        .icon-container {
+            display: flex;
+            gap: 30px;
+            margin: 30px 0;
+            align-items: flex-end;
+        }
+        .icon-box {
+            text-align: center;
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .icon-box canvas {
+            display: block;
+            margin: 0 auto 10px;
+        }
+        .icon-box p {
+            margin: 5px 0;
+            color: #666;
+            font-size: 14px;
+        }
+        button {
+            background: #4CAF50;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            margin: 5px;
+        }
+        button:hover { background: #43A047; }
+        .instructions {
+            background: #fff3cd;
+            border: 1px solid #ffc107;
+            padding: 15px;
+            border-radius: 4px;
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Daily Goals Tracker - Icon Generator</h1>
+
+    <div class="instructions">
+        <strong>Instructions:</strong> Click "Download" under each icon to save it as a PNG file.
+        Save them to <code>src/assets/icons/</code> with the names shown.
+    </div>
+
+    <div class="icon-container">
+        <div class="icon-box">
+            <canvas id="icon16" width="16" height="16"></canvas>
+            <p><strong>icon-16.png</strong></p>
+            <p>16x16 pixels</p>
+            <button onclick="downloadIcon(16)">Download</button>
+        </div>
+        <div class="icon-box">
+            <canvas id="icon48" width="48" height="48"></canvas>
+            <p><strong>icon-48.png</strong></p>
+            <p>48x48 pixels</p>
+            <button onclick="downloadIcon(48)">Download</button>
+        </div>
+        <div class="icon-box">
+            <canvas id="icon128" width="128" height="128"></canvas>
+            <p><strong>icon-128.png</strong></p>
+            <p>128x128 pixels</p>
+            <button onclick="downloadIcon(128)">Download</button>
+        </div>
+    </div>
+
+    <button onclick="downloadAll()">Download All Icons</button>
+
+    <script>
+        function drawIcon(ctx, size) {
+            const scale = size / 128;
+
+            // Clear canvas
+            ctx.clearRect(0, 0, size, size);
+
+            // Draw circle background with gradient
+            const gradient = ctx.createLinearGradient(0, 0, size, size);
+            gradient.addColorStop(0, '#66BB6A');
+            gradient.addColorStop(1, '#43A047');
+
+            ctx.beginPath();
+            ctx.arc(size / 2, size / 2, (size / 2) - (2 * scale), 0, Math.PI * 2);
+            ctx.fillStyle = gradient;
+            ctx.fill();
+
+            // Draw outer ring (for larger sizes)
+            if (size >= 48) {
+                ctx.beginPath();
+                ctx.arc(size / 2, size / 2, 48 * scale, 0, Math.PI * 2);
+                ctx.strokeStyle = 'rgba(255, 255, 255, 0.25)';
+                ctx.lineWidth = 3 * scale;
+                ctx.stroke();
+            }
+
+            // Draw inner ring (for 128px)
+            if (size >= 128) {
+                ctx.beginPath();
+                ctx.arc(size / 2, size / 2, 32 * scale, 0, Math.PI * 2);
+                ctx.strokeStyle = 'rgba(255, 255, 255, 0.2)';
+                ctx.lineWidth = 2 * scale;
+                ctx.stroke();
+            }
+
+            // Draw checkmark
+            ctx.beginPath();
+            ctx.moveTo(38 * scale, 64 * scale);
+            ctx.lineTo(56 * scale, 82 * scale);
+            ctx.lineTo(90 * scale, 46 * scale);
+            ctx.strokeStyle = 'white';
+            ctx.lineWidth = Math.max(2, 10 * scale);
+            ctx.lineCap = 'round';
+            ctx.lineJoin = 'round';
+            ctx.stroke();
+        }
+
+        function initIcons() {
+            [16, 48, 128].forEach(size => {
+                const canvas = document.getElementById('icon' + size);
+                const ctx = canvas.getContext('2d');
+                drawIcon(ctx, size);
+            });
+        }
+
+        function downloadIcon(size) {
+            const canvas = document.getElementById('icon' + size);
+            const link = document.createElement('a');
+            link.download = `icon-${size}.png`;
+            link.href = canvas.toDataURL('image/png');
+            link.click();
+        }
+
+        function downloadAll() {
+            [16, 48, 128].forEach((size, index) => {
+                setTimeout(() => downloadIcon(size), index * 200);
+            });
+        }
+
+        // Initialize icons on page load
+        initIcons();
+    </script>
+</body>
+</html>

@@ -53,3 +53,37 @@
 - US-006 (Service Worker Setup) depends on US-002 and is now unblocked
 - Icon files need to be created at src/assets/icons/ to match manifest paths
 
+## Iteration 3 - US-003: Extension Icons
+**Status:** Completed
+**Date:** 2026-01-22
+
+### What was done:
+- Created extension icons in three sizes as required:
+  - icon-16.png (16x16 pixels) - 207 bytes
+  - icon-48.png (48x48 pixels) - 464 bytes
+  - icon-128.png (128x128 pixels) - 1120 bytes
+- Icon design: Green circle (#4CAF50) with white checkmark
+  - Simple, recognizable design representing goal completion/tracking
+  - Scales well across all three sizes
+  - Matches the goal tracking theme of the extension
+- Also created SVG versions of each icon for reference
+- Created tools/generate-icons.js - a Node.js script to regenerate icons if needed
+  - Uses pure Node.js (zlib for compression) without external dependencies
+  - Can be run with `node tools/generate-icons.js`
+- Created tools/generate-icons.html - browser-based tool for manual icon generation
+  - Can be opened in a browser to visually preview and download icons
+
+### Technical details:
+- PNG icons created programmatically using Node.js
+- Uses custom PNG encoding with CRC32 checksums
+- RGBA color mode (8-bit) with transparency support
+- Anti-aliased edges for smoother appearance
+
+### Notes for next iteration:
+- Three priority 1 tasks are now unblocked:
+  - US-004 (Popup HTML Structure) - depends on US-002 (done)
+  - US-006 (Service Worker Setup) - depends on US-002 (done)
+  - US-007 (Storage Utility Module) - depends on US-006 (not done yet)
+- Recommended order: US-004 or US-006 can be done in parallel
+- US-006 should be prioritized as it unblocks US-007 which unblocks US-008
+

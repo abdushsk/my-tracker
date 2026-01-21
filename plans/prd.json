@@ -43,7 +43,7 @@
         "Icons are visually clear and represent goal tracking"
       ],
       "priority": 1,
-      "passes": false,
+      "passes": true,
       "dependsOn": ["US-001"]
     },
     {
