@@ -24,5 +24,11 @@
   },
   "background": {
     "service_worker": "src/background/service-worker.js"
-  }
+  },
+  "web_accessible_resources": [
+    {
+      "resources": ["src/assets/sounds/*.wav"],
+      "matches": ["<all_urls>"]
+    }
+  ]
 }

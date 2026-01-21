@@ -566,7 +566,7 @@
         "All files under 50KB each"
       ],
       "priority": 4,
-      "passes": false,
+      "passes": true,
       "dependsOn": ["US-037"]
     },
     {

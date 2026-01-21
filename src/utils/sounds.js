@@ -24,13 +24,14 @@ export const SOUNDS = {
 
 /**
  * Sound file paths relative to the extension root
+ * Using WAV format for broad browser compatibility without external encoding
  * @type {Object.<string, string>}
  */
 const SOUND_PATHS = {
-  [SOUNDS.COMPLETE]: 'src/assets/sounds/complete.mp3',
-  [SOUNDS.TICK]: 'src/assets/sounds/tick.mp3',
-  [SOUNDS.START]: 'src/assets/sounds/start.mp3',
-  [SOUNDS.PAUSE]: 'src/assets/sounds/pause.mp3'
+  [SOUNDS.COMPLETE]: 'src/assets/sounds/complete.wav',
+  [SOUNDS.TICK]: 'src/assets/sounds/tick.wav',
+  [SOUNDS.START]: 'src/assets/sounds/start.wav',
+  [SOUNDS.PAUSE]: 'src/assets/sounds/pause.wav'
 };
 
 // =============================================================================
