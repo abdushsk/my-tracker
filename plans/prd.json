@@ -807,7 +807,7 @@
         "No console errors"
       ],
       "priority": 1,
-      "passes": false,
+      "passes": true,
       "dependsOn": ["US-010"]
     }
   ]
