@@ -939,141 +939,7 @@ select:focus {
   gap: var(--spacing-sm);
 }
 
-/* Goal List Item */
-.manage-goal-item {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: var(--spacing-md);
-  background-color: var(--background-card);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-lg);
-  transition: all var(--transition-fast);
-}
-
-.manage-goal-item:hover {
-  border-color: var(--primary-light);
-  box-shadow: var(--shadow-sm);
-}
-
-/* Goal Info Section */
-.manage-goal-info {
-  display: flex;
-  align-items: center;
-  gap: var(--spacing-md);
-  flex: 1;
-  min-width: 0;
-}
-
-/* Goal Type Indicator */
-.manage-goal-type-indicator {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 36px;
-  height: 36px;
-  border-radius: var(--radius);
-  flex-shrink: 0;
-  background-color: var(--background-secondary);
-}
-
-.manage-goal-type-indicator.type-timer {
-  background-color: var(--secondary-light);
-  color: var(--secondary);
-}
-
-.manage-goal-type-indicator.type-counter {
-  background-color: var(--warning-light);
-  color: #E65100;
-}
-
-.manage-goal-type-indicator.type-checkbox {
-  background-color: var(--primary-light);
-  color: var(--primary);
-}
-
-.manage-goal-type-icon {
-  width: 18px;
-  height: 18px;
-}
-
-/* Goal Details */
-.manage-goal-details {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-  min-width: 0;
-  flex: 1;
-}
-
-.manage-goal-title {
-  font-size: var(--font-size-base);
-  font-weight: var(--font-weight-medium);
-  color: var(--text);
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.manage-goal-meta {
-  display: flex;
-  align-items: center;
-  gap: var(--spacing-sm);
-}
-
-.manage-goal-timeframe {
-  font-size: var(--font-size-xs);
-  padding: 2px var(--spacing-sm);
-  border-radius: var(--radius-full);
-  font-weight: var(--font-weight-medium);
-  text-transform: capitalize;
-}
-
-/* Goal Action Buttons */
-.manage-goal-actions {
-  display: flex;
-  align-items: center;
-  gap: var(--spacing-sm);
-  flex-shrink: 0;
-}
-
-.manage-action-btn {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 36px;
-  height: 36px;
-  border-radius: var(--radius);
-  color: var(--text-secondary);
-  background-color: transparent;
-  transition: all var(--transition-fast);
-}
-
-.manage-action-btn svg {
-  width: 18px;
-  height: 18px;
-}
-
-.manage-action-btn:hover {
-  background-color: var(--background-secondary);
-  color: var(--text);
-}
-
-.manage-action-btn:active {
-  transform: scale(0.95);
-}
-
-/* Edit button hover state */
-.edit-btn:hover {
-  background-color: var(--secondary-light);
-  color: var(--secondary);
-}
-
-/* Delete button hover state */
-.delete-btn:hover {
-  background-color: var(--danger-light);
-  color: var(--danger);
-}
+/* Note: Goal List Item styles moved to US-021 section below for enhanced implementation */
 
 /* Empty State */
 .manage-empty-state {
@@ -1109,6 +975,179 @@ select:focus {
 .manage-empty-submessage {
   font-size: var(--font-size-sm);
   color: var(--text-muted);
+}
+
+/* ========================================
+   US-021: Manage Goals - Goal List Item
+   ======================================== */
+
+/* Goal List Item - Enhanced for management context */
+.manage-goal-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--spacing-md);
+  background-color: var(--background-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  transition: all var(--transition-fast);
+  gap: var(--spacing-md);
+}
+
+.manage-goal-item:hover {
+  border-color: var(--primary-light);
+  box-shadow: var(--shadow);
+  transform: translateY(-1px);
+}
+
+/* Goal Info Section - Contains type indicator and details */
+.manage-goal-info {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-md);
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+}
+
+/* Goal Type Indicator - Visual icon badge */
+.manage-goal-type-indicator {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: var(--radius);
+  flex-shrink: 0;
+  background-color: var(--background-secondary);
+  transition: all var(--transition-fast);
+}
+
+/* Type-specific indicator colors */
+.manage-goal-type-indicator.type-timer {
+  background-color: var(--secondary-light);
+  color: var(--secondary);
+}
+
+.manage-goal-type-indicator.type-counter {
+  background-color: var(--warning-light);
+  color: #E65100;
+}
+
+.manage-goal-type-indicator.type-checkbox {
+  background-color: var(--primary-light);
+  color: var(--primary);
+}
+
+/* Hover state for type indicator */
+.manage-goal-item:hover .manage-goal-type-indicator {
+  transform: scale(1.05);
+}
+
+.manage-goal-type-icon {
+  width: 20px;
+  height: 20px;
+}
+
+/* Goal Details - Title and meta info */
+.manage-goal-details {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+  flex: 1;
+}
+
+.manage-goal-title {
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-semibold);
+  color: var(--text);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  line-height: 1.3;
+}
+
+/* Meta information row - timeframe and target */
+.manage-goal-meta {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  flex-wrap: wrap;
+}
+
+.manage-goal-timeframe {
+  font-size: var(--font-size-xs);
+  padding: 2px var(--spacing-sm);
+  border-radius: var(--radius-full);
+  font-weight: var(--font-weight-medium);
+  text-transform: capitalize;
+}
+
+/* Target display - shows goal target info */
+.manage-goal-target {
+  font-size: var(--font-size-xs);
+  color: var(--text-muted);
+  font-weight: var(--font-weight-medium);
+}
+
+/* Goal Action Buttons Container */
+.manage-goal-actions {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  flex-shrink: 0;
+}
+
+/* Action Button Base Styles */
+.manage-action-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: var(--radius);
+  color: var(--text-muted);
+  background-color: transparent;
+  transition: all var(--transition-fast);
+  border: 1px solid transparent;
+}
+
+.manage-action-btn .action-icon {
+  width: 18px;
+  height: 18px;
+}
+
+.manage-action-btn:hover {
+  color: var(--text);
+  background-color: var(--background-secondary);
+  border-color: var(--border);
+}
+
+.manage-action-btn:active {
+  transform: scale(0.92);
+}
+
+/* Edit Button - Pencil icon with blue hover */
+.manage-action-btn.edit-btn:hover {
+  background-color: var(--secondary-light);
+  color: var(--secondary);
+  border-color: var(--secondary-light);
+}
+
+.manage-action-btn.edit-btn:focus-visible {
+  outline-color: var(--secondary);
+}
+
+/* Delete Button - Trash icon with red hover */
+.manage-action-btn.delete-btn:hover {
+  background-color: var(--danger-light);
+  color: var(--danger);
+  border-color: var(--danger-light);
+}
+
+.manage-action-btn.delete-btn:focus-visible {
+  outline-color: var(--danger);
 }
 
 /* Legacy support for old classes */

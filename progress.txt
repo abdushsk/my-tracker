@@ -1011,3 +1011,60 @@
 - The Edit and Delete buttons are rendered but don't have functionality yet (US-029, US-030)
 - The Add Goal button doesn't have functionality yet (US-022+)
 
+## Iteration 22 - US-021: Manage Goals - Goal List Item
+**Status:** Completed
+**Date:** 2026-01-22
+
+### What was done:
+- Enhanced the goal list item component for the Manage Goals screen
+- Created dedicated section (US-021) in both popup.js and popup.css
+- Enhanced goal item structure with:
+  - Goal title display with text truncation for long titles
+  - Type icon indicator (clock for timer, counter symbol, checkbox) with type-specific colors
+  - Timeframe badge with color coding (daily=green, weekly=blue, monthly=orange, yearly=purple)
+  - Target display showing goal target in human-readable format
+  - Edit button with pencil icon and blue hover state
+  - Delete button with trash icon and red hover state
+- Added helper functions for manage screen:
+  - getGoalTypeLabel() - Returns human-readable type label
+  - formatTargetForManage() - Formats target as "1h 30m" for timer, "Target: 10" for counter, etc.
+- Enhanced CSS styling:
+  - Improved hover states with transform and shadow effects
+  - Type indicator scales on hover for visual feedback
+  - Action buttons have distinct hover colors (blue for edit, red for delete)
+  - Added focus-visible states for accessibility
+  - Added border styling on action button hover
+  - Removed duplicate styles from US-020 section (now centralized in US-021)
+- Added ARIA labels for better accessibility
+
+### Technical details:
+- Updated src/popup/popup.js:
+  - Added getGoalTypeLabel() function
+  - Added formatTargetForManage() function
+  - Enhanced renderManageGoalItem() with target display and accessibility attributes
+  - Added section header comment for US-021
+- Updated src/popup/popup.css (~130 lines for US-021):
+  - Enhanced .manage-goal-item with gap and transform on hover
+  - Enhanced .manage-goal-type-indicator with larger size (40x40px) and scale on hover
+  - Added .manage-goal-target for target info display
+  - Added .action-icon class for SVG sizing
+  - Enhanced .manage-action-btn with border and distinct hover states
+  - Added focus-visible states
+- Removed duplicate styles from US-020 section to avoid redundancy
+- CSS brace count: 297 (balanced)
+- JavaScript syntax validated with node --check
+
+### Acceptance criteria verification:
+- [x] Goal title display - Title shown with text truncation and semibold weight
+- [x] Type icon (clock/counter/checkbox) - SVG icons with type-specific background colors
+- [x] Timeframe badge - Colored badge showing Daily/Weekly/Monthly/Yearly
+- [x] Edit button (pencil icon) - Pencil/edit SVG icon with blue hover state
+- [x] Delete button (trash icon, red) - Trash SVG icon with red hover state
+
+### Notes for next iteration:
+- US-022 (Add Goal Form - Modal) is now unblocked
+  - Depends on US-021 (done) and has priority 3
+- US-030 (Delete Goal - Confirmation) depends on US-021
+- The Edit and Delete buttons are rendered but functionality not yet implemented (US-029, US-030)
+- The Add Goal button functionality depends on US-022+
+

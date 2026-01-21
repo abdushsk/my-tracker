@@ -308,7 +308,7 @@
         "Delete button (trash icon, red)"
       ],
       "priority": 3,
-      "passes": false,
+      "passes": true,
       "dependsOn": ["US-020"]
     },
     {
