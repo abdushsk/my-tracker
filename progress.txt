@@ -587,3 +587,60 @@
 - US-014 unlocks US-015 (Goal Card Base Component)
 - US-020 (Manage Goals Screen Layout) depends on US-014
 
+## Iteration 15 - US-014: View Goals Screen - Goals List Container
+**Status:** Completed
+**Date:** 2026-01-22
+
+### What was done:
+- Enhanced the goals list container for the View Goals screen
+- Implemented scrollable container that sits between header and footer:
+  - Uses flex: 1 to fill available space
+  - overflow-y: auto for independent scrolling
+  - overflow-x: hidden to prevent horizontal scroll
+  - scroll-behavior: smooth for better UX
+- Added subtle styling to the container:
+  - Background color: var(--background-secondary)
+  - Inset box shadow for depth effect
+  - Border top/bottom when content is present
+  - Custom thin scrollbar styling (4px width)
+- Enhanced goal card placeholder for rendering:
+  - Added goal-card-header with title and timeframe badge
+  - Added timeframe badges with color variants (daily=green, weekly=blue, monthly=orange, yearly=purple)
+  - Added progress bar with fill animation
+  - Added completed goal styling (green border and background)
+  - Added hover effect on cards (elevated shadow)
+- Improved renderGoalsList() function:
+  - Added goal sorting by order property, then by createdAt
+  - Added progress percentage calculation
+  - Added completion state detection
+  - Added XSS protection with escapeHtml() helper function
+
+### Technical details:
+- Updated src/popup/popup.css:
+  - Added US-014 section header comment
+  - Enhanced .goals-list-container with scroll and styling
+  - Added custom scrollbar styles specific to goals list
+  - Added .goal-card-header for title and badge layout
+  - Added .goal-timeframe-badge with color variants
+  - Added .goal-progress-section, .goal-progress-bar, .goal-progress-fill
+  - Added .goal-card.goal-completed styling
+  - CSS brace count: 122 (balanced)
+- Updated src/popup/popup.js:
+  - Enhanced renderGoalsList() with proper card structure
+  - Added escapeHtml() utility for XSS protection
+  - Added sorting logic for goals display order
+  - Added progress calculation and completion detection
+
+### Acceptance criteria verification:
+- [x] Scrollable container div - .goals-list-container with overflow-y: auto
+- [x] Proper flex layout between header/footer - flex: 1, min-height: 0
+- [x] Overflow-y auto for scrolling - Yes, with smooth scroll behavior
+- [x] Subtle background or border styling - Background secondary color, inset shadow, borders
+- [x] Padding for goal cards - var(--spacing-md) on container, gap on list
+
+### Notes for next iteration:
+- US-015 (Goal Card - Base Component) is now unblocked (depends on US-014)
+- US-015 has priority 2 and will enhance the placeholder cards created here
+- US-020 (Manage Goals Screen Layout) is also unblocked (depends on US-014)
+- Goal card structure is ready for US-015 to add type-specific controls
+

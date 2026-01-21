@@ -203,7 +203,7 @@
         "Padding for goal cards"
       ],
       "priority": 2,
-      "passes": false,
+      "passes": true,
       "dependsOn": ["US-013"]
     },
     {

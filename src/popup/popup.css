@@ -395,11 +395,48 @@ select:focus {
   line-height: 1.2;
 }
 
-/* Goals list container */
+/* ========================================
+   US-014: View Goals Screen - Goals List Container
+   ======================================== */
+
+/* Goals list container - scrollable area between header and footer */
 .goals-list-container {
   flex: 1;
   overflow-y: auto;
+  overflow-x: hidden;
   padding: var(--spacing-md);
+  background-color: var(--background-secondary);
+  /* Subtle inner shadow for depth */
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.03);
+  /* Ensure proper scroll behavior */
+  scroll-behavior: smooth;
+  /* Prevent content from overflowing horizontally */
+  min-height: 0;
+}
+
+/* When goals list has content, add subtle border effect */
+.goals-list-container:not(:empty) {
+  border-top: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
+}
+
+/* Custom scrollbar for goals list */
+.goals-list-container::-webkit-scrollbar {
+  width: 4px;
+}
+
+.goals-list-container::-webkit-scrollbar-track {
+  background: transparent;
+  margin: var(--spacing-sm) 0;
+}
+
+.goals-list-container::-webkit-scrollbar-thumb {
+  background: var(--border);
+  border-radius: var(--radius-full);
+}
+
+.goals-list-container::-webkit-scrollbar-thumb:hover {
+  background: var(--text-muted);
 }
 
 /* ========================================
@@ -631,33 +668,142 @@ select:focus {
 .goals-list {
   display: flex;
   flex-direction: column;
-  gap: var(--spacing-sm);
+  gap: var(--spacing-md);
+  /* Add padding at bottom for better scroll experience */
+  padding-bottom: var(--spacing-xs);
 }
 
-/* Basic goal card (placeholder) */
+/* Scroll indicator - shows when list is scrollable */
+.goals-list-container.has-scroll::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 32px;
+  background: linear-gradient(to top, var(--background-secondary) 0%, transparent 100%);
+  pointer-events: none;
+  opacity: 0.8;
+}
+
+/* Basic goal card (placeholder - will be enhanced in US-015) */
 .goal-card {
   padding: var(--spacing-md);
   background-color: var(--background-card);
   border: 1px solid var(--border);
-  border-radius: var(--radius);
+  border-radius: var(--radius-lg);
   box-shadow: var(--shadow-sm);
+  transition: box-shadow var(--transition-fast), transform var(--transition-fast);
+}
+
+/* Goal card hover effect */
+.goal-card:hover {
+  box-shadow: var(--shadow);
 }
 
 .goal-card .goal-title {
   font-weight: var(--font-weight-medium);
+  font-size: var(--font-size-base);
   margin-bottom: var(--spacing-xs);
+  color: var(--text);
 }
 
 .goal-card .goal-type {
   font-size: var(--font-size-xs);
   color: var(--text-muted);
   text-transform: uppercase;
+  letter-spacing: 0.5px;
   margin-bottom: var(--spacing-xs);
 }
 
 .goal-card .goal-progress {
   font-size: var(--font-size-sm);
   color: var(--text-secondary);
+  font-weight: var(--font-weight-medium);
+}
+
+/* Goal card header with title and timeframe badge */
+.goal-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: var(--spacing-sm);
+  margin-bottom: var(--spacing-xs);
+}
+
+/* Timeframe badge */
+.goal-timeframe-badge {
+  font-size: var(--font-size-xs);
+  padding: 2px var(--spacing-sm);
+  border-radius: var(--radius-full);
+  font-weight: var(--font-weight-medium);
+  text-transform: capitalize;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+/* Timeframe badge color variants */
+.timeframe-daily {
+  background-color: var(--primary-light);
+  color: var(--primary);
+}
+
+.timeframe-weekly {
+  background-color: var(--secondary-light);
+  color: var(--secondary);
+}
+
+.timeframe-monthly {
+  background-color: var(--warning-light);
+  color: #E65100;
+}
+
+.timeframe-yearly {
+  background-color: #F3E5F5;
+  color: #7B1FA2;
+}
+
+/* Goal progress section */
+.goal-progress-section {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xs);
+  margin-top: var(--spacing-sm);
+}
+
+.goal-progress-text {
+  font-size: var(--font-size-sm);
+  color: var(--text-secondary);
+  font-weight: var(--font-weight-medium);
+}
+
+/* Progress bar */
+.goal-progress-bar {
+  height: 6px;
+  background-color: var(--background-secondary);
+  border-radius: var(--radius-full);
+  overflow: hidden;
+}
+
+.goal-progress-fill {
+  height: 100%;
+  background-color: var(--primary);
+  border-radius: var(--radius-full);
+  transition: width var(--transition);
+}
+
+/* Completed goal styling */
+.goal-card.goal-completed {
+  border-color: var(--success);
+  background-color: var(--success-light);
+}
+
+.goal-card.goal-completed .goal-progress-fill {
+  background-color: var(--success);
+}
+
+.goal-card.goal-completed .goal-title {
+  color: var(--success);
 }
 
 /* Manage goals screen */

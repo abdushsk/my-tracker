@@ -230,18 +230,52 @@ function renderEmptyState() {
  * @returns {string} HTML string for goals list
  */
 function renderGoalsList() {
+  // Sort goals by order property, then by createdAt
+  const sortedGoals = [...state.goals].sort((a, b) => {
+    if (a.order !== b.order) {
+      return (a.order || 0) - (b.order || 0);
+    }
+    return (a.createdAt || 0) - (b.createdAt || 0);
+  });
+
   // Placeholder - will be fully implemented in US-015 (Goal Card component)
   return `
     <div class="goals-list">
-      ${state.goals.map(goal => `
-        <div class="goal-card" data-goal-id="${goal.id}">
-          <div class="goal-title">${goal.title}</div>
-          <div class="goal-type">${goal.type}</div>
-          <div class="goal-progress">${goal.progress}/${goal.target}</div>
-        </div>
-      `).join('')}
+      ${sortedGoals.map(goal => {
+        const progressPercent = goal.target > 0
+          ? Math.min(100, Math.round((goal.progress / goal.target) * 100))
+          : 0;
+        const isCompleted = goal.progress >= goal.target;
+
+        return `
+          <div class="goal-card ${isCompleted ? 'goal-completed' : ''}" data-goal-id="${goal.id}">
+            <div class="goal-card-header">
+              <div class="goal-title">${escapeHtml(goal.title)}</div>
+              <span class="goal-timeframe-badge timeframe-${goal.timeframe}">${goal.timeframe}</span>
+            </div>
+            <div class="goal-type">${goal.type}</div>
+            <div class="goal-progress-section">
+              <div class="goal-progress-text">${goal.progress}/${goal.target}</div>
+              <div class="goal-progress-bar">
+                <div class="goal-progress-fill" style="width: ${progressPercent}%"></div>
+              </div>
+            </div>
+          </div>
+        `;
+      }).join('')}
     </div>
   `;
+}
+
+/**
+ * Escape HTML special characters to prevent XSS
+ * @param {string} text - Text to escape
+ * @returns {string} Escaped text
+ */
+function escapeHtml(text) {
+  const div = document.createElement('div');
+  div.textContent = text;
+  return div.innerHTML;
 }
 
 /**
