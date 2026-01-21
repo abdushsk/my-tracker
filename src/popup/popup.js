@@ -1147,6 +1147,9 @@ function openGoalModal(mode = 'add', goal = null) {
     return;
   }
 
+  // Reset the form before opening (clear any previous values/errors)
+  resetGoalForm();
+
   // Set modal title based on mode
   modalTitle.textContent = mode === 'edit' ? 'Edit Goal' : 'Add New Goal';
 
@@ -1154,6 +1157,8 @@ function openGoalModal(mode = 'add', goal = null) {
   modal.setAttribute('data-mode', mode);
   if (goal) {
     modal.setAttribute('data-goal-id', goal.id);
+    // US-023: Pre-fill title for edit mode
+    setFormTitle(goal.title);
   } else {
     modal.removeAttribute('data-goal-id');
   }
@@ -1163,14 +1168,11 @@ function openGoalModal(mode = 'add', goal = null) {
   modal.setAttribute('aria-hidden', 'false');
   document.body.classList.add('modal-open');
 
-  // Focus the modal container for accessibility
-  const modalContainer = modal.querySelector('.modal-container');
-  if (modalContainer) {
-    modalContainer.focus();
-  }
-
   // Attach modal event listeners
   attachModalListeners(modal);
+
+  // US-023: Focus the title input for better UX
+  focusTitleInput();
 
   console.log(`[Modal] Opened in ${mode} mode`);
 }
@@ -1195,11 +1197,8 @@ function closeGoalModal() {
   modal.removeAttribute('data-mode');
   modal.removeAttribute('data-goal-id');
 
-  // Reset the form (will be implemented with form fields in US-023+)
-  const form = document.getElementById('goal-form');
-  if (form) {
-    form.reset();
-  }
+  // US-023: Reset the form and clear any validation errors
+  resetGoalForm();
 
   console.log('[Modal] Closed');
 }
@@ -1265,11 +1264,132 @@ function handleGoalFormSubmit(e) {
   const modal = document.getElementById('goal-form-modal');
   const mode = modal?.getAttribute('data-mode') || 'add';
 
+  // US-023: Validate title input
+  const titleValid = validateTitleInput();
+
+  if (!titleValid) {
+    console.log('[Form] Validation failed - title is required');
+    return;
+  }
+
   console.log(`[Form] Submit in ${mode} mode - full implementation in US-028`);
 
   // For now, just close the modal
   // Full save logic will be implemented in US-028
   closeGoalModal();
+}
+
+// =============================================================================
+// US-023: Add Goal Form - Title Input
+// =============================================================================
+
+/**
+ * Validate the title input field
+ * @returns {boolean} True if valid, false otherwise
+ */
+function validateTitleInput() {
+  const titleInput = document.getElementById('goal-title');
+  const errorElement = document.getElementById('goal-title-error');
+
+  if (!titleInput || !errorElement) {
+    console.error('Title input or error element not found');
+    return false;
+  }
+
+  const title = titleInput.value.trim();
+
+  // Clear previous error state
+  clearInputError(titleInput, errorElement);
+
+  // Validation: Required field check
+  if (!title) {
+    showInputError(titleInput, errorElement, 'Goal title is required');
+    titleInput.focus();
+    return false;
+  }
+
+  // Validation passed
+  return true;
+}
+
+/**
+ * Show error state for an input field
+ * @param {HTMLInputElement} input - The input element
+ * @param {HTMLElement} errorElement - The error message element
+ * @param {string} message - The error message to display
+ */
+function showInputError(input, errorElement, message) {
+  input.classList.add('has-error');
+  input.classList.remove('is-valid');
+  input.setAttribute('aria-invalid', 'true');
+  input.setAttribute('aria-describedby', errorElement.id);
+
+  errorElement.textContent = message;
+  errorElement.classList.add('visible');
+}
+
+/**
+ * Clear error state for an input field
+ * @param {HTMLInputElement} input - The input element
+ * @param {HTMLElement} errorElement - The error message element
+ */
+function clearInputError(input, errorElement) {
+  input.classList.remove('has-error');
+  input.setAttribute('aria-invalid', 'false');
+
+  errorElement.textContent = '';
+  errorElement.classList.remove('visible');
+}
+
+/**
+ * Get the current title value from the form
+ * @returns {string} The trimmed title value
+ */
+function getFormTitle() {
+  const titleInput = document.getElementById('goal-title');
+  return titleInput ? titleInput.value.trim() : '';
+}
+
+/**
+ * Set the title value in the form (for edit mode)
+ * @param {string} title - The title to set
+ */
+function setFormTitle(title) {
+  const titleInput = document.getElementById('goal-title');
+  if (titleInput) {
+    titleInput.value = title || '';
+  }
+}
+
+/**
+ * Reset the form to its initial state
+ */
+function resetGoalForm() {
+  const form = document.getElementById('goal-form');
+  const titleInput = document.getElementById('goal-title');
+  const titleError = document.getElementById('goal-title-error');
+
+  if (form) {
+    form.reset();
+  }
+
+  // Clear any validation errors
+  if (titleInput && titleError) {
+    clearInputError(titleInput, titleError);
+  }
+}
+
+/**
+ * Focus the title input when modal opens
+ */
+function focusTitleInput() {
+  const titleInput = document.getElementById('goal-title');
+  if (titleInput) {
+    // Slight delay to ensure modal animation completes
+    setTimeout(() => {
+      titleInput.focus();
+    }, 100);
+  }
 }
 
 /**
@@ -1496,5 +1616,13 @@ export {
   triggerCompletionCelebration,
   // US-022 Modal functions
   openGoalModal,
-  closeGoalModal
+  closeGoalModal,
+  // US-023 Form title input functions
+  validateTitleInput,
+  showInputError,
+  clearInputError,
+  getFormTitle,
+  setFormTitle,
+  resetGoalForm,
+  focusTitleInput
 };

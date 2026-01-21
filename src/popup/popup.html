@@ -42,11 +42,23 @@
           </button>
         </div>
         <div class="modal-body">
-          <form id="goal-form" class="goal-form">
-            <!-- Form fields will be added in subsequent user stories (US-023 to US-027) -->
-            <div class="form-placeholder">
-              <p>Form fields coming soon...</p>
+          <form id="goal-form" class="goal-form" novalidate>
+            <!-- US-023: Title Input -->
+            <div class="form-group">
+              <label for="goal-title" class="form-label">Goal Title <span class="required-indicator">*</span></label>
+              <input
+                type="text"
+                id="goal-title"
+                name="title"
+                class="form-input"
+                placeholder="e.g., Study for exam"
+                required
+                maxlength="100"
+                autocomplete="off"
+              >
+              <span class="form-error" id="goal-title-error" role="alert" aria-live="polite"></span>
             </div>
+            <!-- Additional form fields will be added in subsequent user stories (US-024 to US-027) -->
           </form>
         </div>
         <div class="modal-footer">

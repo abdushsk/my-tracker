@@ -2258,3 +2258,137 @@ select:focus {
 body.modal-open {
   overflow: hidden;
 }
+
+/* ========================================
+   US-023: Add Goal Form - Title Input
+   ======================================== */
+
+/* Form Group - Container for label, input, and error */
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xs);
+}
+
+/* Form Label */
+.form-label {
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  color: var(--text);
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+}
+
+/* Required field indicator */
+.required-indicator {
+  color: var(--danger);
+  font-weight: var(--font-weight-bold);
+  font-size: var(--font-size-base);
+  line-height: 1;
+}
+
+/* Form Input - Enhanced text input styling */
+.form-input {
+  width: 100%;
+  padding: var(--spacing-sm) var(--spacing-md);
+  font-size: var(--font-size-base);
+  font-family: inherit;
+  color: var(--text);
+  background-color: var(--background);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  transition: all var(--transition-fast);
+  outline: none;
+}
+
+.form-input::placeholder {
+  color: var(--text-muted);
+  font-style: italic;
+}
+
+/* Focus state */
+.form-input:focus {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px var(--primary-light);
+}
+
+/* Hover state (when not focused) */
+.form-input:not(:focus):hover {
+  border-color: var(--text-muted);
+}
+
+/* Error state */
+.form-input.has-error {
+  border-color: var(--danger);
+  background-color: var(--danger-light);
+}
+
+.form-input.has-error:focus {
+  border-color: var(--danger);
+  box-shadow: 0 0 0 3px rgba(244, 67, 54, 0.15);
+}
+
+/* Valid state (optional - for when input is valid) */
+.form-input.is-valid {
+  border-color: var(--success);
+}
+
+.form-input.is-valid:focus {
+  box-shadow: 0 0 0 3px var(--success-light);
+}
+
+/* Form Error Message */
+.form-error {
+  font-size: var(--font-size-xs);
+  color: var(--danger);
+  min-height: 16px;
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+  opacity: 0;
+  transform: translateY(-4px);
+  transition: opacity var(--transition-fast), transform var(--transition-fast);
+}
+
+.form-error.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* Error icon (added via pseudo-element when error is visible) */
+.form-error.visible::before {
+  content: '!';
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 14px;
+  height: 14px;
+  background-color: var(--danger);
+  color: var(--text-inverse);
+  border-radius: var(--radius-full);
+  font-size: 10px;
+  font-weight: var(--font-weight-bold);
+  flex-shrink: 0;
+}
+
+/* Form Input - Character counter (optional for future use) */
+.form-input-wrapper {
+  position: relative;
+}
+
+.char-counter {
+  position: absolute;
+  right: var(--spacing-sm);
+  bottom: -20px;
+  font-size: var(--font-size-xs);
+  color: var(--text-muted);
+}
+
+.char-counter.warning {
+  color: var(--warning);
+}
+
+.char-counter.danger {
+  color: var(--danger);
+}

@@ -1136,3 +1136,71 @@
 - US-030 (Delete Goal - Confirmation) is also unblocked (depends on US-021)
 - Form submit currently just closes modal - full save logic in US-028
 
+## Iteration 24 - US-023: Add Goal Form - Title Input
+**Status:** Completed
+**Date:** 2026-01-22
+
+### What was done:
+- Added title input field to the goal form modal
+- Updated popup.html with title input structure:
+  - Form group container with form-group class
+  - Label 'Goal Title' with required indicator (red asterisk)
+  - Text input with placeholder 'e.g., Study for exam'
+  - Required attribute and maxlength="100"
+  - Error message span with role="alert" for accessibility
+  - Added novalidate to form to use custom validation
+- Implemented comprehensive CSS styling (~130 lines in US-023 section):
+  - .form-group container with flex column layout
+  - .form-label with medium font weight and red required indicator
+  - .form-input with focus state (green border, shadow)
+  - .form-input.has-error state (red border, light red background)
+  - .form-input.is-valid state (green border)
+  - .form-error message with visibility transition
+  - Error icon pseudo-element (red circle with exclamation mark)
+  - Character counter styles (for future use)
+- Implemented JavaScript validation functions:
+  - validateTitleInput() - Validates required field, returns boolean
+  - showInputError() - Shows error state with message
+  - clearInputError() - Clears error state
+  - getFormTitle() - Gets trimmed title value
+  - setFormTitle() - Sets title value (for edit mode)
+  - resetGoalForm() - Resets form and clears errors
+  - focusTitleInput() - Auto-focuses title input when modal opens
+- Enhanced openGoalModal() to reset form, pre-fill title in edit mode, and auto-focus
+- Enhanced closeGoalModal() to reset form and clear validation errors
+- Updated handleGoalFormSubmit() to validate title before submission
+- Added all new functions to module exports
+
+### Technical details:
+- Updated src/popup/popup.html:
+  - Added form-group with accessible label/input/error structure
+  - Input has aria-describedby and aria-invalid attributes
+  - Error element has role="alert" and aria-live="polite"
+- Updated src/popup/popup.js (~110 lines in US-023 section):
+  - Created validation utility functions (reusable for other form fields)
+  - Form validation integrated into submit handler
+  - Focus management for better UX
+- Updated src/popup/popup.css (~130 lines):
+  - Form styling with consistent spacing using CSS variables
+  - Focus, hover, error, and valid states
+  - Smooth transitions for error messages
+- CSS brace count: 343 (balanced)
+- JavaScript syntax validated with node --check
+- HTML div balance validated (12/12)
+
+### Acceptance criteria verification:
+- [x] Text input for title - Input with id="goal-title" and proper attributes
+- [x] Label 'Goal Title' - Label with red asterisk for required indicator
+- [x] Placeholder text - 'e.g., Study for exam' placeholder
+- [x] Required validation - validateTitleInput() checks for empty/whitespace
+- [x] Error message display - 'Goal title is required' shown on empty submit
+
+### Notes for next iteration:
+- US-024 (Add Goal Form - Type Selector) is now unblocked
+  - Depends on US-023 (done) and has priority 3
+- US-027 (Add Goal Form - Timeframe Selector) is also unblocked (depends on US-023)
+- US-025 (Timer Target Input) depends on US-024
+- US-026 (Counter Target Input) depends on US-024
+- US-030 (Delete Goal - Confirmation) is still available (depends on US-021)
+- The validation utility functions (showInputError, clearInputError) are designed to be reusable for other form fields
+

@@ -339,7 +339,7 @@
         "Error message display"
       ],
       "priority": 3,
-      "passes": false,
+      "passes": true,
       "dependsOn": ["US-022"]
     },
     {
