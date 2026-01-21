@@ -699,3 +699,61 @@
 - Base controls are rendered but functionality will be implemented in those stories
 - US-019 (Goal Card - Completion State) depends on US-016, US-017, US-018
 
+## Iteration 17 - US-016: Goal Card - Timer Type Controls
+**Status:** Completed
+**Date:** 2026-01-22
+
+### What was done:
+- Implemented fully functional timer controls for timer-type goals
+- Created renderTimerControls() function with:
+  - Play/Pause toggle button with icon state switching
+  - Time display in HH:MM:SS format showing current progress and target
+  - Button states: blue for paused (play icon), orange for active (pause icon)
+- Implemented handleTimerToggle() function for play/pause logic:
+  - PLAY: Sets isActive=true, stores startTime in activeTimers, logs START activity
+  - PAUSE: Calculates elapsed time, updates progress, logs PAUSE activity with elapsed value
+  - Saves state to Chrome storage via updateGoal() and saveActiveTimers()
+- Added real-time timer display updates:
+  - startTimerUpdateInterval() - starts 1-second interval when timers are active
+  - stopTimerUpdateInterval() - cleans up interval when no active timers
+  - updateTimerDisplays() - updates timer display, progress bar, and percentage in DOM without full re-render
+- Implemented handleTimerCompletion() for auto-completion when progress reaches target:
+  - Stops timer, logs COMPLETE activity, triggers re-render to show completion state
+- Added attachGoalControlListeners() for click event binding
+- Added visual feedback styles:
+  - Pulsing animation on active timer button (timer-pulse)
+  - Active timer card has blue border highlight (goal-timer-active)
+  - Progress bar shimmer animation for active timers
+  - Monospace font for timer display (SF Mono, Menlo, etc.)
+
+### Technical details:
+- Updated src/popup/popup.js:
+  - Added imports: saveActiveTimers, updateGoal, addActivityLogEntry, ACTIVITY_ACTIONS, createActivityLog
+  - Added state.timerIntervalId for interval management
+  - Created renderTimerControls() function
+  - Created handleTimerToggle() async function
+  - Created timer interval management functions
+  - Updated renderViewGoalsScreen() to attach goal control listeners
+  - Updated renderGoalCard() to add goal-timer-active class
+- Updated src/popup/popup.css with ~100 lines of timer-specific styles:
+  - .goal-controls-timer layout styles
+  - .timer-display, .timer-current, .timer-separator, .timer-target
+  - .timer-play-btn with hover/active states
+  - .timer-play-btn.is-active with orange background and pulse animation
+  - .goal-type-timer.goal-timer-active card highlighting
+  - @keyframes timer-pulse and progress-shimmer animations
+
+### Acceptance criteria verification:
+- [x] Play button (when paused) - Shows play icon, blue background
+- [x] Pause button (when active) - Shows pause icon, orange background with pulse
+- [x] Time display HH:MM:SS - Monospace font showing current/target time
+- [x] Progress bar reflects progress/target - Updates in real-time during active timer
+- [x] Click handlers toggle isActive - handleTimerToggle() saves state to storage and logs activity
+
+### Notes for next iteration:
+- US-017 (Goal Card - Counter Type Controls) is now the next priority 2 task
+- US-018 (Goal Card - Checkbox Type Controls) also available (priority 2)
+- US-019 (Goal Card - Completion State) depends on US-016 (done), US-017, US-018
+- Timer functionality is now complete with real-time updates and persistence
+- Background tracking (service worker integration) will be fully implemented in US-031
+

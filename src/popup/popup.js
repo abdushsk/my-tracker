@@ -7,8 +7,23 @@
 // Imports
 // =============================================================================
 
-import { getGoals, getSettings, getActiveTimers, getStreakData } from '../utils/storage.js';
-import { GOAL_TYPES, TIMEFRAMES, isGoalCompleted, getGoalCompletionPercentage } from '../utils/models.js';
+import {
+  getGoals,
+  getSettings,
+  getActiveTimers,
+  getStreakData,
+  saveActiveTimers,
+  updateGoal,
+  addActivityLogEntry
+} from '../utils/storage.js';
+import {
+  GOAL_TYPES,
+  TIMEFRAMES,
+  ACTIVITY_ACTIONS,
+  isGoalCompleted,
+  getGoalCompletionPercentage,
+  createActivityLog
+} from '../utils/models.js';
 
 // =============================================================================
 // Application State
@@ -24,7 +39,8 @@ const state = {
   activeTimers: {},
   streakData: null,
   currentScreen: 'viewGoals',
-  isLoading: true
+  isLoading: true,
+  timerIntervalId: null // Interval ID for updating timer display
 };
 
 // =============================================================================
@@ -179,6 +195,14 @@ function renderViewGoalsScreen() {
 
   // Attach navigation event listeners
   attachNavigationListeners(screen);
+
+  // Attach goal control listeners (timer play/pause, etc.)
+  attachGoalControlListeners(screen);
+
+  // Start timer update interval if there are active timers
+  if (Object.keys(state.activeTimers).length > 0) {
+    startTimerUpdateInterval();
+  }
 }
 
 /**
@@ -321,7 +345,9 @@ function renderGoalCard(goal) {
   const cardClasses = [
     'goal-card',
     `goal-type-${goal.type}`,
-    isCompleted ? 'goal-completed' : ''
+    isCompleted ? 'goal-completed' : '',
+    // Add active class for running timers (US-016)
+    goal.type === GOAL_TYPES.TIMER && goal.isActive ? 'goal-timer-active' : ''
   ].filter(Boolean).join(' ');
 
   return `
@@ -351,24 +377,17 @@ function renderGoalCard(goal) {
 }
 
 /**
- * Render goal-specific controls (placeholder - will be fully implemented in US-016/017/018)
+ * Render goal-specific controls
+ * US-016: Timer Type Controls
+ * US-017: Counter Type Controls (placeholder)
+ * US-018: Checkbox Type Controls (placeholder)
  * @param {Object} goal - The goal object
  * @returns {string} HTML string for goal controls
  */
 function renderGoalControls(goal) {
-  // Base implementation - will be extended in US-016 (Timer), US-017 (Counter), US-018 (Checkbox)
   switch (goal.type) {
     case GOAL_TYPES.TIMER:
-      return `
-        <div class="goal-controls goal-controls-timer">
-          <button class="goal-control-btn timer-play-btn" data-action="timer-toggle" data-goal-id="${goal.id}" title="${goal.isActive ? 'Pause' : 'Play'}">
-            ${goal.isActive
-              ? '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>'
-              : '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"/></svg>'
-            }
-          </button>
-        </div>
-      `;
+      return renderTimerControls(goal);
     case GOAL_TYPES.COUNTER:
       return `
         <div class="goal-controls goal-controls-counter">
@@ -398,6 +417,289 @@ function renderGoalControls(goal) {
     default:
       return '';
   }
+}
+
+// =============================================================================
+// US-016: Timer Type Controls
+// =============================================================================
+
+/**
+ * Render timer-specific controls for a goal
+ * @param {Object} goal - The timer goal object
+ * @returns {string} HTML string for timer controls
+ */
+function renderTimerControls(goal) {
+  const isActive = goal.isActive;
+  const activeTimer = state.activeTimers[goal.id];
+
+  // Calculate current elapsed time for display
+  let displayProgress = goal.progress;
+  if (isActive && activeTimer && activeTimer.startTime) {
+    const elapsedSinceStart = Math.floor((Date.now() - activeTimer.startTime) / 1000);
+    displayProgress = goal.progress + elapsedSinceStart;
+  }
+
+  // Cap display progress at target
+  displayProgress = Math.min(displayProgress, goal.target);
+
+  const playIcon = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"/></svg>';
+  const pauseIcon = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>';
+
+  return `
+    <div class="goal-controls goal-controls-timer">
+      <div class="timer-display" data-goal-id="${goal.id}">
+        <span class="timer-current">${formatTime(displayProgress)}</span>
+        <span class="timer-separator">/</span>
+        <span class="timer-target">${formatTime(goal.target)}</span>
+      </div>
+      <button class="goal-control-btn timer-play-btn ${isActive ? 'is-active' : ''}"
+              data-action="timer-toggle"
+              data-goal-id="${goal.id}"
+              title="${isActive ? 'Pause' : 'Play'}">
+        ${isActive ? pauseIcon : playIcon}
+      </button>
+    </div>
+  `;
+}
+
+/**
+ * Handle timer play/pause toggle
+ * @param {string} goalId - The ID of the timer goal
+ */
+async function handleTimerToggle(goalId) {
+  const goal = state.goals.find(g => g.id === goalId);
+  if (!goal || goal.type !== GOAL_TYPES.TIMER) {
+    console.error('Invalid goal for timer toggle:', goalId);
+    return;
+  }
+
+  const isCurrentlyActive = goal.isActive;
+  const now = Date.now();
+
+  if (isCurrentlyActive) {
+    // PAUSE: Calculate elapsed time and save progress
+    const activeTimer = state.activeTimers[goalId];
+    if (activeTimer && activeTimer.startTime) {
+      const elapsedSinceStart = Math.floor((now - activeTimer.startTime) / 1000);
+      const newProgress = Math.min(goal.progress + elapsedSinceStart, goal.target);
+
+      // Update goal in state
+      goal.progress = newProgress;
+      goal.isActive = false;
+
+      // Save goal to storage
+      await updateGoal(goalId, { progress: newProgress, isActive: false });
+
+      // Log the pause activity
+      const activityLog = createActivityLog({
+        goalId: goalId,
+        action: ACTIVITY_ACTIONS.PAUSE,
+        value: elapsedSinceStart
+      });
+      await addActivityLogEntry(activityLog);
+
+      // Clear active timer
+      delete state.activeTimers[goalId];
+      await saveActiveTimers(state.activeTimers);
+
+      console.log(`[Timer] Paused goal ${goalId}: +${elapsedSinceStart}s, total progress: ${newProgress}s`);
+    }
+  } else {
+    // PLAY: Start the timer
+    goal.isActive = true;
+
+    // Update goal in storage
+    await updateGoal(goalId, { isActive: true });
+
+    // Store the start time
+    state.activeTimers[goalId] = {
+      startTime: now,
+      goalId: goalId
+    };
+    await saveActiveTimers(state.activeTimers);
+
+    // Log the start activity
+    const activityLog = createActivityLog({
+      goalId: goalId,
+      action: ACTIVITY_ACTIONS.START,
+      value: null
+    });
+    await addActivityLogEntry(activityLog);
+
+    // Start the timer update interval if not already running
+    startTimerUpdateInterval();
+
+    // Notify service worker (for background tracking)
+    try {
+      chrome.runtime.sendMessage({
+        type: 'TIMER_START',
+        goalId: goalId,
+        startTime: now
+      });
+    } catch (e) {
+      console.log('[Timer] Could not notify service worker:', e);
+    }
+
+    console.log(`[Timer] Started goal ${goalId} at ${new Date(now).toLocaleTimeString()}`);
+  }
+
+  // Re-render to update UI
+  renderCurrentScreen();
+}
+
+/**
+ * Start the interval that updates timer displays every second
+ */
+function startTimerUpdateInterval() {
+  // Don't start if already running
+  if (state.timerIntervalId) {
+    return;
+  }
+
+  state.timerIntervalId = setInterval(() => {
+    updateTimerDisplays();
+  }, 1000);
+
+  console.log('[Timer] Started update interval');
+}
+
+/**
+ * Stop the timer update interval
+ */
+function stopTimerUpdateInterval() {
+  if (state.timerIntervalId) {
+    clearInterval(state.timerIntervalId);
+    state.timerIntervalId = null;
+    console.log('[Timer] Stopped update interval');
+  }
+}
+
+/**
+ * Update all active timer displays without full re-render
+ */
+function updateTimerDisplays() {
+  const activeTimerIds = Object.keys(state.activeTimers);
+
+  // If no active timers, stop the interval
+  if (activeTimerIds.length === 0) {
+    stopTimerUpdateInterval();
+    return;
+  }
+
+  const now = Date.now();
+
+  activeTimerIds.forEach(goalId => {
+    const goal = state.goals.find(g => g.id === goalId);
+    const activeTimer = state.activeTimers[goalId];
+
+    if (!goal || !activeTimer || goal.type !== GOAL_TYPES.TIMER) {
+      return;
+    }
+
+    // Calculate current elapsed time
+    const elapsedSinceStart = Math.floor((now - activeTimer.startTime) / 1000);
+    const currentProgress = Math.min(goal.progress + elapsedSinceStart, goal.target);
+
+    // Update the timer display in DOM
+    const timerDisplay = document.querySelector(`.timer-display[data-goal-id="${goalId}"]`);
+    if (timerDisplay) {
+      const currentTimeElement = timerDisplay.querySelector('.timer-current');
+      if (currentTimeElement) {
+        currentTimeElement.textContent = formatTime(currentProgress);
+      }
+    }
+
+    // Update progress bar
+    const goalCard = document.querySelector(`.goal-card[data-goal-id="${goalId}"]`);
+    if (goalCard) {
+      const progressFill = goalCard.querySelector('.goal-progress-fill');
+      const progressPercent = goalCard.querySelector('.goal-progress-percent');
+
+      if (progressFill) {
+        const percentage = goal.target > 0 ? Math.min(100, (currentProgress / goal.target) * 100) : 100;
+        progressFill.style.width = `${percentage}%`;
+      }
+
+      if (progressPercent) {
+        const percentage = goal.target > 0 ? Math.min(100, (currentProgress / goal.target) * 100) : 100;
+        progressPercent.textContent = `${Math.round(percentage)}%`;
+      }
+
+      // Update progress text display
+      const progressText = goalCard.querySelector('.goal-progress-text');
+      if (progressText) {
+        progressText.textContent = `${formatTime(currentProgress)} / ${formatTime(goal.target)}`;
+      }
+    }
+
+    // Check if goal just completed
+    if (currentProgress >= goal.target && !isGoalCompleted(goal)) {
+      handleTimerCompletion(goalId);
+    }
+  });
+}
+
+/**
+ * Handle timer completion (when progress reaches target)
+ * @param {string} goalId - The ID of the completed timer goal
+ */
+async function handleTimerCompletion(goalId) {
+  const goal = state.goals.find(g => g.id === goalId);
+  if (!goal) return;
+
+  const activeTimer = state.activeTimers[goalId];
+  const now = Date.now();
+
+  // Calculate final progress
+  let elapsedSinceStart = 0;
+  if (activeTimer && activeTimer.startTime) {
+    elapsedSinceStart = Math.floor((now - activeTimer.startTime) / 1000);
+  }
+
+  const finalProgress = goal.target; // Cap at target
+
+  // Update goal
+  goal.progress = finalProgress;
+  goal.isActive = false;
+
+  // Save to storage
+  await updateGoal(goalId, { progress: finalProgress, isActive: false });
+
+  // Log completion
+  const completeLog = createActivityLog({
+    goalId: goalId,
+    action: ACTIVITY_ACTIONS.COMPLETE,
+    value: finalProgress
+  });
+  await addActivityLogEntry(completeLog);
+
+  // Clear active timer
+  delete state.activeTimers[goalId];
+  await saveActiveTimers(state.activeTimers);
+
+  console.log(`[Timer] Goal ${goalId} completed! Final progress: ${finalProgress}s`);
+
+  // Re-render to show completion state
+  renderCurrentScreen();
+}
+
+/**
+ * Attach goal control event listeners to the current screen
+ * @param {HTMLElement} container - The container element
+ */
+function attachGoalControlListeners(container) {
+  // Timer toggle buttons
+  const timerToggleBtns = container.querySelectorAll('[data-action="timer-toggle"]');
+  timerToggleBtns.forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      const goalId = btn.getAttribute('data-goal-id');
+      if (goalId) {
+        handleTimerToggle(goalId);
+      }
+    });
+  });
 }
 
 /**
@@ -621,5 +923,9 @@ export {
   SCREENS,
   showScreen,
   loadData,
-  initApp
+  initApp,
+  // US-016 Timer functions
+  handleTimerToggle,
+  startTimerUpdateInterval,
+  stopTimerUpdateInterval
 };

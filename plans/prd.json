@@ -233,7 +233,7 @@
         "Click handlers toggle isActive"
       ],
       "priority": 2,
-      "passes": false,
+      "passes": true,
       "dependsOn": ["US-015"]
     },
     {

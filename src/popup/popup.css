@@ -1137,28 +1137,112 @@ select:focus {
   transform: scale(0.95);
 }
 
-/* Timer Controls */
+/* ========================================
+   US-016: Timer Type Controls
+   ======================================== */
+
+/* Timer Controls Container */
 .goal-controls-timer {
-  justify-content: center;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--spacing-md);
 }
 
+/* Timer Display */
+.timer-display {
+  display: flex;
+  align-items: baseline;
+  gap: 4px;
+  font-family: 'SF Mono', 'Menlo', 'Monaco', 'Courier New', monospace;
+}
+
+.timer-current {
+  font-size: var(--font-size-xl);
+  font-weight: var(--font-weight-bold);
+  color: var(--text);
+  letter-spacing: 0.5px;
+}
+
+.timer-separator {
+  font-size: var(--font-size-base);
+  color: var(--text-muted);
+  margin: 0 2px;
+}
+
+.timer-target {
+  font-size: var(--font-size-sm);
+  color: var(--text-muted);
+  font-weight: var(--font-weight-medium);
+}
+
+/* Timer Play/Pause Button */
 .timer-play-btn {
-  width: 44px;
-  height: 44px;
+  width: 48px;
+  height: 48px;
   background-color: var(--secondary);
   color: var(--text-inverse);
   border-radius: var(--radius-full);
   box-shadow: var(--shadow-sm);
+  flex-shrink: 0;
+  transition: all var(--transition-fast);
 }
 
 .timer-play-btn:hover {
   background-color: var(--secondary-hover);
   box-shadow: var(--shadow);
+  transform: scale(1.05);
+}
+
+.timer-play-btn:active {
+  transform: scale(0.95);
 }
 
 .timer-play-btn svg {
-  width: 20px;
-  height: 20px;
+  width: 22px;
+  height: 22px;
+}
+
+/* Active state for timer button */
+.timer-play-btn.is-active {
+  background-color: var(--warning);
+  animation: timer-pulse 2s ease-in-out infinite;
+}
+
+.timer-play-btn.is-active:hover {
+  background-color: #F57C00;
+}
+
+@keyframes timer-pulse {
+  0%, 100% {
+    box-shadow: var(--shadow-sm), 0 0 0 0 rgba(255, 152, 0, 0.4);
+  }
+  50% {
+    box-shadow: var(--shadow-sm), 0 0 0 8px rgba(255, 152, 0, 0);
+  }
+}
+
+/* Timer goal card active state */
+.goal-type-timer.goal-timer-active {
+  border-color: var(--secondary);
+  box-shadow: var(--shadow), 0 0 0 2px var(--secondary-light);
+}
+
+.goal-type-timer.goal-timer-active .goal-progress-fill {
+  background: linear-gradient(90deg, var(--secondary) 0%, #42A5F5 100%);
+  animation: progress-shimmer 2s ease-in-out infinite;
+}
+
+@keyframes progress-shimmer {
+  0% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.8;
+  }
+  100% {
+    opacity: 1;
+  }
 }
 
 /* Counter Controls */
