@@ -100,7 +100,7 @@
         "Functions exported for use in other modules"
       ],
       "priority": 1,
-      "passes": false,
+      "passes": true,
       "dependsOn": ["US-006"]
     },
     {

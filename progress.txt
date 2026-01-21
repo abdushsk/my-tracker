@@ -203,3 +203,37 @@
 - US-010 (Popup JavaScript Entry Point) depends on US-005 (now done), US-007, and US-008
 - Dark mode CSS variables will be added in US-050
 
+## Iteration 7 - US-007: Storage Utility Module
+**Status:** Completed
+**Date:** 2026-01-22
+
+### What was done:
+- Created src/utils/storage.js with comprehensive Chrome storage API helpers
+- Implemented core CRUD functions as specified:
+  - getGoals() / saveGoals(goals) - for goal management
+  - getActivityLog() / saveActivityLog(log) - for activity tracking
+  - getSettings() / saveSettings(settings) - for user preferences
+- Added additional utility functions for common operations:
+  - getHistory() / saveHistory(history) - for historical data
+  - getActiveTimers() / saveActiveTimers(timers) - for timer persistence
+  - addActivityLogEntry(entry) - convenience function to append single entries
+  - getGoalById(goalId) - find a specific goal
+  - updateGoal(goalId, updates) - partial goal updates
+  - deleteGoal(goalId) - remove a goal
+  - clearAllData() - reset all storage
+  - getDefaultSettings() - default settings factory
+
+### Technical details:
+- All functions are async/await using chrome.storage.local
+- Every function has try/catch error handling with console.error logging
+- Functions return sensible defaults on error (empty arrays, default settings, false for write operations)
+- Storage keys defined as constants (STORAGE_KEYS) for consistency
+- ES6 module exports for use in other modules
+- Default settings include: soundEnabled, soundVolume, theme, notificationsEnabled, reminderTime
+
+### Notes for next iteration:
+- US-008 (Goal Data Model) is now unblocked (depends on US-007)
+- US-008 has priority 1 and should be done next
+- US-009 (Activity Log Data Model) depends on US-008
+- US-010 (Popup JS Entry Point) depends on US-005 (done), US-007 (done), and US-008 (next)
+
