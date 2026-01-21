@@ -15,6 +15,7 @@ import {
   getStreakData,
   saveActiveTimers,
   updateGoal,
+  deleteGoal,
   addActivityLogEntry
 } from '../utils/storage.js';
 import {
@@ -1108,7 +1109,7 @@ function attachManageGoalsListeners(container) {
     });
   });
 
-  // Delete button click handlers (placeholder for US-030)
+  // US-030: Delete button click handlers - show confirmation dialog
   const deleteButtons = container.querySelectorAll('[data-action="delete"]');
   deleteButtons.forEach(btn => {
     btn.addEventListener('click', (e) => {
@@ -1116,8 +1117,7 @@ function attachManageGoalsListeners(container) {
       e.stopPropagation();
       const goalId = btn.getAttribute('data-goal-id');
       if (goalId) {
-        console.log(`[ManageGoals] Delete button clicked for goal: ${goalId}`);
-        // TODO: Implement delete confirmation in US-030
+        openDeleteConfirmModal(goalId);
       }
     });
   });
@@ -1144,6 +1144,177 @@ function handleEditGoal(goalId) {
 
   // Open the modal in edit mode with the goal data
   openGoalModal('edit', goal);
+}
+
+// =============================================================================
+// US-030: Delete Goal - Confirmation
+// =============================================================================
+
+/**
+ * Goal ID pending deletion - stored while confirmation dialog is open
+ * @type {string|null}
+ */
+let pendingDeleteGoalId = null;
+
+/**
+ * Open the delete confirmation modal
+ * @param {string} goalId - The ID of the goal to potentially delete
+ */
+function openDeleteConfirmModal(goalId) {
+  const goal = state.goals.find(g => g.id === goalId);
+
+  if (!goal) {
+    console.error(`[Delete] Goal not found: ${goalId}`);
+    showFormError('Goal not found. Please refresh and try again.');
+    return;
+  }
+
+  const modal = document.getElementById('delete-confirm-modal');
+  if (!modal) {
+    console.error('[Delete] Confirmation modal not found');
+    return;
+  }
+
+  // Store the goal ID for deletion
+  pendingDeleteGoalId = goalId;
+
+  // Show the modal
+  modal.classList.add('active');
+  modal.setAttribute('aria-hidden', 'false');
+  document.body.classList.add('modal-open');
+
+  // Attach event listeners
+  attachDeleteConfirmListeners(modal);
+
+  console.log(`[Delete] Opened confirmation dialog for goal: ${goal.title} (${goalId})`);
+}
+
+/**
+ * Close the delete confirmation modal
+ */
+function closeDeleteConfirmModal() {
+  const modal = document.getElementById('delete-confirm-modal');
+
+  if (!modal) {
+    return;
+  }
+
+  // Hide the modal
+  modal.classList.remove('active');
+  modal.setAttribute('aria-hidden', 'true');
+  document.body.classList.remove('modal-open');
+
+  // Clear pending delete
+  pendingDeleteGoalId = null;
+
+  console.log('[Delete] Closed confirmation dialog');
+}
+
+/**
+ * Attach event listeners to the delete confirmation modal
+ * @param {HTMLElement} modal - The modal element
+ */
+function attachDeleteConfirmListeners(modal) {
+  // Close button and overlay clicks
+  const closeElements = modal.querySelectorAll('[data-action="close-delete-modal"]');
+  closeElements.forEach(el => {
+    // Remove existing listener to prevent duplicates
+    el.removeEventListener('click', handleDeleteModalClose);
+    el.addEventListener('click', handleDeleteModalClose);
+  });
+
+  // Confirm delete button
+  const confirmBtn = modal.querySelector('[data-action="confirm-delete"]');
+  if (confirmBtn) {
+    confirmBtn.removeEventListener('click', handleConfirmDelete);
+    confirmBtn.addEventListener('click', handleConfirmDelete);
+  }
+
+  // Handle Escape key to close modal
+  document.removeEventListener('keydown', handleDeleteModalKeydown);
+  document.addEventListener('keydown', handleDeleteModalKeydown);
+}
+
+/**
+ * Handle close action for delete modal
+ * @param {Event} e - Click event
+ */
+function handleDeleteModalClose(e) {
+  e.preventDefault();
+  e.stopPropagation();
+  closeDeleteConfirmModal();
+}
+
+/**
+ * Handle keydown events for delete modal (Escape to close)
+ * @param {KeyboardEvent} e - Keyboard event
+ */
+function handleDeleteModalKeydown(e) {
+  const modal = document.getElementById('delete-confirm-modal');
+  if (!modal || !modal.classList.contains('active')) {
+    return;
+  }
+
+  if (e.key === 'Escape') {
+    e.preventDefault();
+    closeDeleteConfirmModal();
+  }
+}
+
+/**
+ * Handle confirm delete action
+ * @param {Event} e - Click event
+ */
+async function handleConfirmDelete(e) {
+  e.preventDefault();
+  e.stopPropagation();
+
+  if (!pendingDeleteGoalId) {
+    console.error('[Delete] No goal ID pending for deletion');
+    closeDeleteConfirmModal();
+    return;
+  }
+
+  const goalId = pendingDeleteGoalId;
+  const goal = state.goals.find(g => g.id === goalId);
+  const goalTitle = goal ? goal.title : 'Goal';
+
+  console.log(`[Delete] Confirming deletion of goal: ${goalTitle} (${goalId})`);
+
+  try {
+    // Delete goal from storage
+    const success = await deleteGoal(goalId);
+
+    if (success) {
+      // Update local state
+      state.goals = state.goals.filter(g => g.id !== goalId);
+
+      // If this goal had an active timer, clean it up
+      if (state.activeTimers[goalId]) {
+        delete state.activeTimers[goalId];
+        await saveActiveTimers(state.activeTimers);
+      }
+
+      console.log(`[Delete] Goal deleted successfully: ${goalTitle}`);
+
+      // Close the confirmation modal
+      closeDeleteConfirmModal();
+
+      // Show success feedback
+      showSuccessFeedback('Goal deleted successfully');
+
+      // Refresh the current screen to show updated list
+      renderCurrentScreen();
+    } else {
+      console.error('[Delete] Failed to delete goal from storage');
+      closeDeleteConfirmModal();
+      showFormError('Failed to delete goal. Please try again.');
+    }
+  } catch (error) {
+    console.error('[Delete] Error deleting goal:', error);
+    closeDeleteConfirmModal();
+    showFormError('An error occurred while deleting. Please try again.');
+  }
 }
 
 /**
@@ -2444,5 +2615,9 @@ export {
   clearFormError,
   // US-029 Edit goal functions
   handleEditGoal,
-  attachManageGoalsListeners
+  attachManageGoalsListeners,
+  // US-030 Delete goal confirmation functions
+  openDeleteConfirmModal,
+  closeDeleteConfirmModal,
+  handleConfirmDelete
 };

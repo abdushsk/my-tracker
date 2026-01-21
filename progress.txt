@@ -1607,3 +1607,77 @@
 - All goal management CRUD operations will be complete after US-030
 - Priority 4 tasks (US-031 Timer Background Tracking, US-034 Counter Logic, etc.) are now eligible
 
+## Iteration 31 - US-030: Delete Goal - Confirmation
+**Status:** Completed
+**Date:** 2026-01-22
+
+### What was done:
+- Implemented full delete functionality with confirmation dialog
+- Added delete confirmation modal HTML structure to popup.html:
+  - Modal overlay (clickable to close)
+  - Dialog with role="alertdialog" for accessibility
+  - Warning icon (exclamation mark in circle) with pulse animation
+  - Title "Delete this goal?"
+  - Message explaining the action is permanent
+  - Cancel button (secondary) and Delete button (danger/red)
+- Added comprehensive CSS styling (~100 lines):
+  - Confirmation modal positioned above other modals (z-index: 1001)
+  - Centered dialog with scale/translate animation
+  - Warning icon with red background and pulse animation
+  - Danger button styling (red background, hover/active states)
+- Implemented JavaScript functions for delete flow:
+  - openDeleteConfirmModal(goalId) - Opens dialog, stores pending goalId
+  - closeDeleteConfirmModal() - Closes dialog, clears pending goalId
+  - attachDeleteConfirmListeners() - Sets up close/cancel/confirm handlers
+  - handleDeleteModalClose() - Click handler for close elements
+  - handleDeleteModalKeydown() - Escape key handler
+  - handleConfirmDelete() - Executes deletion, updates storage and state
+- Connected Delete button in Manage Goals screen to openDeleteConfirmModal()
+- Delete operation:
+  - Calls deleteGoal() from storage.js
+  - Updates local state (filters out deleted goal)
+  - Cleans up active timers if goal had one running
+  - Shows success feedback toast
+  - Refreshes the Manage Goals screen list
+- Added error handling with user feedback for all failure cases
+- Added new functions to module exports
+
+### Technical details:
+- Updated src/popup/popup.html:
+  - Added #delete-confirm-modal with full accessibility attributes
+  - Uses data-action="close-delete-modal" for close elements
+  - Uses data-action="confirm-delete" for delete button
+- Updated src/popup/popup.js (~170 lines added):
+  - Added deleteGoal import from storage.js
+  - Created US-030 section with all delete confirmation functions
+  - Uses pendingDeleteGoalId variable to track goal during confirmation
+  - Integrated with existing showSuccessFeedback/showFormError functions
+- Updated src/popup/popup.css (~100 lines):
+  - US-030 section header
+  - .confirm-modal, .confirm-dialog, .confirm-icon, .confirm-title, .confirm-message, .confirm-actions
+  - @keyframes icon-pulse animation
+  - .btn-danger with hover/active/focus-visible states
+- CSS brace count: 451 (balanced)
+- JavaScript syntax validated with node --check
+- HTML div balance: 26/26
+
+### Acceptance criteria verification:
+- [x] Confirmation dialog appears - Modal opens when Delete button clicked
+- [x] Warning message displayed - "Delete this goal? This cannot be undone."
+- [x] Cancel button closes dialog - closeDeleteConfirmModal() called
+- [x] Delete button removes goal - handleConfirmDelete() deletes from storage
+- [x] Storage updated - deleteGoal() from storage.js called
+- [x] List refreshed - renderCurrentScreen() called after successful deletion
+
+### Notes for next iteration:
+- All priority 3 tasks are now complete
+- Priority 4 tasks are now eligible:
+  - US-031 (Timer - Background Tracking) - depends on US-016 (done), US-006 (done)
+  - US-032 (Timer - Play/Pause Logic) - depends on US-031
+  - US-034 (Counter - Increment Logic) - depends on US-017 (done), US-009 (done)
+  - US-035 (Counter - Decrement Logic) - depends on US-034
+  - US-036 (Checkbox - Toggle Logic) - depends on US-018 (done), US-009 (done)
+  - US-037 (Sound - Audio Utility) - depends on US-001 (done)
+- Goal management CRUD is now complete (Create, Read, Update, Delete)
+- The Manage Goals screen is fully functional
+
