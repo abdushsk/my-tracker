@@ -717,7 +717,7 @@
         "Returns array of counts/durations"
       ],
       "priority": 6,
-      "passes": false,
+      "passes": true,
       "dependsOn": ["US-042"]
     },
     {

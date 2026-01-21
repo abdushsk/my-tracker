@@ -397,6 +397,179 @@ function createActivityLog(data) {
 }
 
 // =============================================================================
+// Activity Timeline Functions
+// =============================================================================
+
+/**
+ * @typedef {Object} HourlyActivityData
+ * @property {number} hour - The hour (0-23)
+ * @property {number} count - Number of activities in this hour
+ * @property {number} duration - Total duration in seconds (for timer goals)
+ * @property {ActivityLog[]} activities - Array of activity log entries for this hour
+ */
+
+/**
+ * Get a date string (YYYY-MM-DD) from a timestamp
+ * @param {number} timestamp - Unix timestamp in milliseconds
+ * @returns {string} Date string in YYYY-MM-DD format
+ */
+function getDateFromTimestamp(timestamp) {
+  const date = new Date(timestamp);
+  return date.toISOString().split('T')[0];
+}
+
+/**
+ * Get the hour (0-23) from a timestamp
+ * @param {number} timestamp - Unix timestamp in milliseconds
+ * @returns {number} Hour of the day (0-23)
+ */
+function getHourFromTimestamp(timestamp) {
+  const date = new Date(timestamp);
+  return date.getHours();
+}
+
+/**
+ * Filter activity logs by goal ID and date
+ * @param {ActivityLog[]} activityLog - Array of activity log entries
+ * @param {string|null} goalId - Goal ID to filter by (null for all goals)
+ * @param {string} date - Date string in YYYY-MM-DD format
+ * @returns {ActivityLog[]} Filtered activity log entries
+ */
+function filterActivityByGoalAndDate(activityLog, goalId, date) {
+  return activityLog.filter(entry => {
+    const entryDate = getDateFromTimestamp(entry.timestamp);
+    const dateMatches = entryDate === date;
+    const goalMatches = goalId === null || entry.goalId === goalId;
+    return dateMatches && goalMatches;
+  });
+}
+
+/**
+ * Filter activity logs by goal ID and date range
+ * @param {ActivityLog[]} activityLog - Array of activity log entries
+ * @param {string|null} goalId - Goal ID to filter by (null for all goals)
+ * @param {string} startDate - Start date (inclusive, YYYY-MM-DD format)
+ * @param {string} endDate - End date (inclusive, YYYY-MM-DD format)
+ * @returns {ActivityLog[]} Filtered activity log entries
+ */
+function filterActivityByGoalAndDateRange(activityLog, goalId, startDate, endDate) {
+  return activityLog.filter(entry => {
+    const entryDate = getDateFromTimestamp(entry.timestamp);
+    const dateInRange = entryDate >= startDate && entryDate <= endDate;
+    const goalMatches = goalId === null || entry.goalId === goalId;
+    return dateInRange && goalMatches;
+  });
+}
+
+/**
+ * Get activity data grouped by hour for a specific goal and date
+ * Returns an array of 24 values for hours 0-23
+ * @param {ActivityLog[]} activityLog - Array of activity log entries
+ * @param {string|null} goalId - Goal ID to filter by (null for all goals)
+ * @param {string} date - Date string in YYYY-MM-DD format
+ * @returns {HourlyActivityData[]} Array of 24 hourly activity data objects
+ */
+function getActivityByHour(activityLog, goalId, date) {
+  // Initialize array with 24 empty hour entries
+  const hourlyData = Array.from({ length: 24 }, (_, hour) => ({
+    hour,
+    count: 0,
+    duration: 0,
+    activities: []
+  }));
+
+  // Filter activities by goal and date
+  const filteredActivities = filterActivityByGoalAndDate(activityLog, goalId, date);
+
+  // Group activities by hour
+  filteredActivities.forEach(activity => {
+    const hour = getHourFromTimestamp(activity.timestamp);
+    hourlyData[hour].activities.push(activity);
+    hourlyData[hour].count++;
+
+    // Add duration for pause actions (timer goals store elapsed time in value)
+    if (activity.action === ACTIVITY_ACTIONS.PAUSE && activity.value !== null) {
+      hourlyData[hour].duration += activity.value;
+    }
+  });
+
+  return hourlyData;
+}
+
+/**
+ * Get activity data grouped by hour for a specific goal over a date range
+ * Returns an object keyed by date with arrays of 24 hourly values
+ * @param {ActivityLog[]} activityLog - Array of activity log entries
+ * @param {string|null} goalId - Goal ID to filter by (null for all goals)
+ * @param {string} startDate - Start date (inclusive, YYYY-MM-DD format)
+ * @param {string} endDate - End date (inclusive, YYYY-MM-DD format)
+ * @returns {Object<string, HourlyActivityData[]>} Object with date strings as keys and hourly data arrays as values
+ */
+function getActivityByHourForDateRange(activityLog, goalId, startDate, endDate) {
+  const result = {};
+
+  // Generate all dates in the range
+  const start = new Date(startDate);
+  const end = new Date(endDate);
+
+  for (let d = new Date(start); d <= end; d.setDate(d.getDate() + 1)) {
+    const dateStr = d.toISOString().split('T')[0];
+    result[dateStr] = getActivityByHour(activityLog, goalId, dateStr);
+  }
+
+  return result;
+}
+
+/**
+ * Get aggregated activity counts by hour across a date range
+ * Useful for finding "most productive hours"
+ * @param {ActivityLog[]} activityLog - Array of activity log entries
+ * @param {string|null} goalId - Goal ID to filter by (null for all goals)
+ * @param {string} startDate - Start date (inclusive, YYYY-MM-DD format)
+ * @param {string} endDate - End date (inclusive, YYYY-MM-DD format)
+ * @returns {HourlyActivityData[]} Array of 24 hourly activity data objects with aggregated counts
+ */
+function getAggregatedActivityByHour(activityLog, goalId, startDate, endDate) {
+  // Initialize array with 24 empty hour entries
+  const hourlyData = Array.from({ length: 24 }, (_, hour) => ({
+    hour,
+    count: 0,
+    duration: 0,
+    activities: []
+  }));
+
+  // Filter activities by goal and date range
+  const filteredActivities = filterActivityByGoalAndDateRange(activityLog, goalId, startDate, endDate);
+
+  // Aggregate activities by hour across all dates
+  filteredActivities.forEach(activity => {
+    const hour = getHourFromTimestamp(activity.timestamp);
+    hourlyData[hour].activities.push(activity);
+    hourlyData[hour].count++;
+
+    // Add duration for pause actions (timer goals store elapsed time in value)
+    if (activity.action === ACTIVITY_ACTIONS.PAUSE && activity.value !== null) {
+      hourlyData[hour].duration += activity.value;
+    }
+  });
+
+  return hourlyData;
+}
+
+/**
+ * Find the most productive hours based on activity count or duration
+ * @param {HourlyActivityData[]} hourlyData - Array of 24 hourly activity data objects
+ * @param {number} topN - Number of top hours to return (default 3)
+ * @param {'count'|'duration'} sortBy - Sort by count or duration (default 'count')
+ * @returns {HourlyActivityData[]} Top N most productive hours
+ */
+function getMostProductiveHours(hourlyData, topN = 3, sortBy = 'count') {
+  return [...hourlyData]
+    .sort((a, b) => b[sortBy] - a[sortBy])
+    .slice(0, topN);
+}
+
+// =============================================================================
 // Exports
 // =============================================================================
 
@@ -411,6 +584,8 @@ export {
   getDateStringDaysAgo,
   getWeekStartDateString,
   getMonthStartDateString,
+  getDateFromTimestamp,
+  getHourFromTimestamp,
   // Goal functions
   createGoal,
   isGoalCompleted,
@@ -423,5 +598,12 @@ export {
   filterHistoryByGoalId,
   groupHistoryByDate,
   // Activity Log functions
-  createActivityLog
+  createActivityLog,
+  // Activity Timeline functions
+  filterActivityByGoalAndDate,
+  filterActivityByGoalAndDateRange,
+  getActivityByHour,
+  getActivityByHourForDateRange,
+  getAggregatedActivityByHour,
+  getMostProductiveHours
 };

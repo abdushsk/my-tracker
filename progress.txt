@@ -2464,3 +2464,67 @@ Created the full Reports screen layout with all required UI sections.
 - US-053 (Browser Badge - Goal Count) is unblocked (depends on US-006, US-019)
 - Chart will show empty bars for days before the extension was installed
 - Chart updates when Reports screen is opened/refreshed
+
+## Iteration: US-048 - Activity Timeline - Data Structure
+
+### Task completed: US-048 - Activity Timeline Data Structure
+**Date:** 2026-01-22
+**Status:** PASSED
+
+### What was implemented:
+
+1. **Core Function: getActivityByHour(activityLog, goalId, date)**
+   - Groups activity log entries by hour (0-23)
+   - Returns array of 24 HourlyActivityData objects
+   - Each object contains: hour, count, duration, activities[]
+   - Duration field aggregates time from timer pause events (value field)
+   - Supports null goalId to get all goals' activities
+
+2. **Helper Functions:**
+   - `getDateFromTimestamp(timestamp)` - Converts timestamp to YYYY-MM-DD string
+   - `getHourFromTimestamp(timestamp)` - Extracts hour (0-23) from timestamp
+   - `filterActivityByGoalAndDate(activityLog, goalId, date)` - Filters by goal and single date
+   - `filterActivityByGoalAndDateRange(activityLog, goalId, startDate, endDate)` - Filters by date range
+
+3. **Extended Functions for Heatmap:**
+   - `getActivityByHourForDateRange(activityLog, goalId, startDate, endDate)` - Returns object keyed by date with hourly arrays
+   - `getAggregatedActivityByHour(activityLog, goalId, startDate, endDate)` - Aggregates across all dates in range
+   - `getMostProductiveHours(hourlyData, topN, sortBy)` - Finds top N productive hours by count or duration
+
+4. **HourlyActivityData Type Definition:**
+   ```javascript
+   {
+     hour: number,       // 0-23
+     count: number,      // Number of activities
+     duration: number,   // Total duration in seconds (for timers)
+     activities: []      // Array of ActivityLog entries
+   }
+   ```
+
+### Acceptance criteria verification:
+- [x] getActivityByHour function - Implemented with comprehensive parameters
+- [x] Groups by hour (0-23) - Returns 24-element array indexed by hour
+- [x] Works for all goal types - Timer (tracks duration), Counter (tracks increments), Checkbox (tracks toggles)
+- [x] Can filter by date range - Added filterActivityByGoalAndDateRange and getActivityByHourForDateRange
+- [x] Returns array of counts/durations - HourlyActivityData includes both count and duration
+
+### Technical details:
+- Updated src/utils/models.js:
+  - Added ~170 lines of new code
+  - Added 7 new exported functions
+  - Added 2 new utility functions (getDateFromTimestamp, getHourFromTimestamp)
+  - Added JSDoc type definition for HourlyActivityData
+
+### Test Results:
+- Verified with simulated activity log containing timer, counter, and checkbox activities
+- Confirmed hour grouping works correctly (activities at 9, 10, 14, 15 hours grouped properly)
+- Confirmed duration aggregation for pause events (1800s and 2700s durations captured)
+- Confirmed null goalId returns all goals' activities
+- Confirmed getMostProductiveHours returns correct top hours sorted by count
+
+### Notes for next iteration:
+- US-049 (Activity Timeline - Heatmap) is now unblocked and can use these functions
+- The getActivityByHourForDateRange function is designed specifically for the heatmap grid
+- Timer goals track duration via pause action's value field
+- Counter/checkbox goals track activity count
+- getMostProductiveHours can be used to show "Most Productive Hours" insight in reports
