@@ -1487,3 +1487,72 @@
 - The timeframe selector is fully functional with all four options and edit mode support
 - All form fields are now complete: Title, Type, Timer Target, Counter Target, Timeframe
 
+## Iteration 29 - US-028: Add Goal Form - Save Logic
+**Status:** Completed
+**Date:** 2026-01-22
+
+### What was done:
+- Implemented full save logic for the Add Goal form
+- Updated imports in popup.js to include:
+  - saveGoals from storage.js
+  - createGoal from models.js
+- Enhanced handleGoalFormSubmit() function with:
+  - Complete validation flow (title, timer target, counter target based on type)
+  - Form data gathering (title, type, target, timeframe)
+  - Target calculation based on goal type:
+    - Timer: getTimerTarget() returns seconds
+    - Counter: getCounterTarget() returns count
+    - Checkbox: always 1
+  - Create mode: createGoal() factory function with all fields + order
+  - Edit mode: updateGoal() function for updating existing goals
+  - Local state update after successful save
+  - Modal close on success
+  - Screen re-render to show updated goals list
+- Added feedback functions:
+  - showSuccessFeedback(message) - Success toast notification
+    - Fixed position at bottom of screen
+    - Green background with checkmark icon
+    - Auto-hides after 2.5 seconds
+  - showFormError(message) - Error banner at top of modal
+    - Red background with warning icon
+    - Shake animation for attention
+    - Auto-hides after 5 seconds
+  - clearFormError() - Clears any form error banner
+- Added CSS styles (~120 lines) for feedback elements:
+  - .feedback-toast with slide-up animation
+  - .feedback-toast.success and .feedback-toast.error variants
+  - .toast-icon and .toast-message components
+  - .form-error-banner with shake animation
+  - @keyframes shake animation
+
+### Technical details:
+- Updated src/popup/popup.js:
+  - Added saveGoals and createGoal to imports
+  - Converted handleGoalFormSubmit to async function
+  - Added comprehensive error handling with try/catch
+  - Added showSuccessFeedback, showFormError, clearFormError functions
+  - Added all new functions to module exports
+- Updated src/popup/popup.css (~120 lines):
+  - US-028 section header
+  - Toast notification styles with animations
+  - Form error banner styles with shake animation
+- JavaScript syntax validated with node --check
+- CSS brace count: 435 (balanced)
+- HTML div balance: 21/21
+
+### Acceptance criteria verification:
+- [x] Validates required fields - Title validation via validateTitleInput(), type-specific target validation
+- [x] Creates goal with correct data - Uses createGoal() with title, type, target, timeframe, order
+- [x] Saves to Chrome storage - Uses saveGoals() for new goals, updateGoal() for edits
+- [x] Closes modal on success - closeGoalModal() called after successful save
+- [x] Refreshes goals list - renderCurrentScreen() called to update view
+- [x] Shows error if validation fails - showFormError() displays error banner, validation functions show field-level errors
+
+### Notes for next iteration:
+- US-029 (Edit Goal - Pre-fill Form) is now unblocked
+  - Depends on US-028 (done) and has priority 3
+- US-030 (Delete Goal - Confirmation) is also available (depends on US-021)
+- The save logic supports both add and edit modes
+- Edit mode functionality is prepared but edit button click handler not yet connected (US-029)
+- Goals are now fully saveable with all configured properties
+

@@ -2876,3 +2876,124 @@ body.modal-open {
 .timeframe-hint .hint-yearly.visible {
   display: inline;
 }
+
+/* ========================================
+   US-028: Add Goal Form - Save Logic
+   Feedback Toast and Error Banner Styles
+   ======================================== */
+
+/* Feedback Toast - Success/Error notification */
+.feedback-toast {
+  position: fixed;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%) translateY(100px);
+  z-index: 2000;
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  padding: var(--spacing-sm) var(--spacing-md);
+  border-radius: var(--radius-lg);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  box-shadow: var(--shadow-lg);
+  opacity: 0;
+  visibility: hidden;
+  transition:
+    transform var(--transition-normal) ease-out,
+    opacity var(--transition-normal) ease-out,
+    visibility var(--transition-normal);
+}
+
+.feedback-toast.visible {
+  transform: translateX(-50%) translateY(0);
+  opacity: 1;
+  visibility: visible;
+}
+
+/* Success toast styling */
+.feedback-toast.success {
+  background-color: var(--success);
+  color: var(--text-inverse);
+}
+
+/* Error toast styling */
+.feedback-toast.error {
+  background-color: var(--danger);
+  color: var(--text-inverse);
+}
+
+/* Toast icon */
+.feedback-toast .toast-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+}
+
+.feedback-toast .toast-icon svg {
+  width: 100%;
+  height: 100%;
+  stroke: currentColor;
+}
+
+/* Toast message */
+.feedback-toast .toast-message {
+  max-width: 250px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Form Error Banner - shown at top of modal for form-level errors */
+.form-error-banner {
+  display: none;
+  align-items: center;
+  gap: var(--spacing-sm);
+  padding: var(--spacing-sm) var(--spacing-md);
+  margin-bottom: var(--spacing-md);
+  background-color: var(--danger-light);
+  border: 1px solid var(--danger);
+  border-radius: var(--radius-md);
+  color: var(--danger);
+  font-size: var(--font-size-sm);
+  animation: shake 0.4s ease-in-out;
+}
+
+.form-error-banner.visible {
+  display: flex;
+}
+
+.form-error-banner .error-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 18px;
+  height: 18px;
+}
+
+.form-error-banner .error-icon svg {
+  width: 100%;
+  height: 100%;
+  stroke: var(--danger);
+}
+
+.form-error-banner .error-message {
+  flex: 1;
+  line-height: 1.4;
+}
+
+/* Shake animation for error */
+@keyframes shake {
+  0%, 100% {
+    transform: translateX(0);
+  }
+  10%, 30%, 50%, 70%, 90% {
+    transform: translateX(-4px);
+  }
+  20%, 40%, 60%, 80% {
+    transform: translateX(4px);
+  }
+}

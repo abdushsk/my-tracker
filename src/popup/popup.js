@@ -9,6 +9,7 @@
 
 import {
   getGoals,
+  saveGoals,
   getSettings,
   getActiveTimers,
   getStreakData,
@@ -22,7 +23,8 @@ import {
   ACTIVITY_ACTIONS,
   isGoalCompleted,
   getGoalCompletionPercentage,
-  createActivityLog
+  createActivityLog,
+  createGoal
 } from '../utils/models.js';
 
 // =============================================================================
@@ -1281,14 +1283,16 @@ function handleModalKeydown(e) {
 }
 
 /**
- * Handle goal form submission (placeholder - full implementation in US-028)
+ * Handle goal form submission
+ * US-028: Full save logic implementation
  * @param {Event} e - Submit event
  */
-function handleGoalFormSubmit(e) {
+async function handleGoalFormSubmit(e) {
   e.preventDefault();
 
   const modal = document.getElementById('goal-form-modal');
   const mode = modal?.getAttribute('data-mode') || 'add';
+  const goalId = modal?.getAttribute('data-goal-id');
 
   // US-023: Validate title input
   const titleValid = validateTitleInput();
@@ -1317,11 +1321,94 @@ function handleGoalFormSubmit(e) {
     }
   }
 
-  console.log(`[Form] Submit in ${mode} mode - full implementation in US-028`);
+  // Gather form data
+  const title = getFormTitle();
+  const type = getFormType();
+  const timeframe = getFormTimeframe();
 
-  // For now, just close the modal
-  // Full save logic will be implemented in US-028
-  closeGoalModal();
+  // Determine target based on type
+  let target;
+  switch (type) {
+    case GOAL_TYPES.TIMER:
+      target = getTimerTarget();
+      break;
+    case GOAL_TYPES.COUNTER:
+      target = getCounterTarget();
+      break;
+    case GOAL_TYPES.CHECKBOX:
+      target = 1; // Checkbox target is always 1
+      break;
+    default:
+      target = 1;
+  }
+
+  console.log(`[Form] Submitting in ${mode} mode:`, { title, type, target, timeframe });
+
+  try {
+    if (mode === 'edit' && goalId) {
+      // Edit mode: update existing goal
+      const success = await updateGoal(goalId, {
+        title,
+        type,
+        target,
+        timeframe
+      });
+
+      if (success) {
+        // Update the goal in local state
+        const goalIndex = state.goals.findIndex(g => g.id === goalId);
+        if (goalIndex !== -1) {
+          state.goals[goalIndex] = {
+            ...state.goals[goalIndex],
+            title,
+            type,
+            target,
+            timeframe
+          };
+        }
+        console.log(`[Form] Goal ${goalId} updated successfully`);
+        showSuccessFeedback('Goal updated successfully!');
+      } else {
+        console.error('[Form] Failed to update goal');
+        showFormError('Failed to update goal. Please try again.');
+        return;
+      }
+    } else {
+      // Add mode: create new goal
+      const newGoal = createGoal({
+        title,
+        type,
+        target,
+        timeframe,
+        order: state.goals.length // Add at the end
+      });
+
+      // Save to storage
+      const updatedGoals = [...state.goals, newGoal];
+      const success = await saveGoals(updatedGoals);
+
+      if (success) {
+        // Update local state
+        state.goals = updatedGoals;
+        console.log(`[Form] New goal created:`, newGoal);
+        showSuccessFeedback('Goal created successfully!');
+      } else {
+        console.error('[Form] Failed to save new goal');
+        showFormError('Failed to save goal. Please try again.');
+        return;
+      }
+    }
+
+    // Close modal on success
+    closeGoalModal();
+
+    // Refresh the current screen to show updated goals
+    renderCurrentScreen();
+
+  } catch (error) {
+    console.error('[Form] Error saving goal:', error);
+    showFormError('An error occurred while saving. Please try again.');
+  }
 }
 
 // =============================================================================
@@ -1937,6 +2024,99 @@ function resetTimeframeSelector() {
   setFormTimeframe(TIMEFRAMES.DAILY);
 }
 
+// =============================================================================
+// US-028: Add Goal Form - Save Logic (Feedback Functions)
+// =============================================================================
+
+/**
+ * Show success feedback to the user (brief toast notification)
+ * @param {string} message - The success message to display
+ */
+function showSuccessFeedback(message) {
+  // Create toast element if it doesn't exist
+  let toast = document.getElementById('feedback-toast');
+  if (!toast) {
+    toast = document.createElement('div');
+    toast.id = 'feedback-toast';
+    toast.className = 'feedback-toast';
+    document.body.appendChild(toast);
+  }
+
+  // Set success styling and message
+  toast.className = 'feedback-toast success';
+  toast.innerHTML = `
+    <span class="toast-icon">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+        <polyline points="20 6 9 17 4 12"/>
+      </svg>
+    </span>
+    <span class="toast-message">${escapeHtml(message)}</span>
+  `;
+
+  // Show the toast
+  toast.classList.add('visible');
+
+  // Auto-hide after 2.5 seconds
+  setTimeout(() => {
+    toast.classList.remove('visible');
+  }, 2500);
+
+  console.log(`[Feedback] Success: ${message}`);
+}
+
+/**
+ * Show error feedback in the form (general form error)
+ * @param {string} message - The error message to display
+ */
+function showFormError(message) {
+  // Create or update form error element
+  let formError = document.getElementById('goal-form-error');
+  if (!formError) {
+    formError = document.createElement('div');
+    formError.id = 'goal-form-error';
+    formError.className = 'form-error-banner';
+    formError.setAttribute('role', 'alert');
+    formError.setAttribute('aria-live', 'polite');
+
+    // Insert at the top of the modal body
+    const modalBody = document.querySelector('.modal-body');
+    if (modalBody) {
+      modalBody.insertBefore(formError, modalBody.firstChild);
+    }
+  }
+
+  formError.innerHTML = `
+    <span class="error-icon">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="12" cy="12" r="10"/>
+        <line x1="12" y1="8" x2="12" y2="12"/>
+        <line x1="12" y1="16" x2="12.01" y2="16"/>
+      </svg>
+    </span>
+    <span class="error-message">${escapeHtml(message)}</span>
+  `;
+
+  formError.classList.add('visible');
+
+  // Auto-hide after 5 seconds
+  setTimeout(() => {
+    formError.classList.remove('visible');
+  }, 5000);
+
+  console.log(`[Feedback] Error: ${message}`);
+}
+
+/**
+ * Clear any form error banner
+ */
+function clearFormError() {
+  const formError = document.getElementById('goal-form-error');
+  if (formError) {
+    formError.classList.remove('visible');
+    formError.textContent = '';
+  }
+}
+
 /**
  * Render a single goal item for the Manage Goals list
  * US-021: Shows title, type icon, timeframe badge, Edit and Delete buttons
@@ -2197,5 +2377,10 @@ export {
   handleTimeframeSelection,
   updateTimeframeHint,
   attachTimeframeSelectorListeners,
-  resetTimeframeSelector
+  resetTimeframeSelector,
+  // US-028 Save logic functions
+  handleGoalFormSubmit,
+  showSuccessFeedback,
+  showFormError,
+  clearFormError
 };

@@ -415,7 +415,7 @@
         "Shows error if validation fails"
       ],
       "priority": 3,
-      "passes": false,
+      "passes": true,
       "dependsOn": ["US-025", "US-026", "US-027"]
     },
     {
