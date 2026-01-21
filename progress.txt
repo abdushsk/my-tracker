@@ -26,3 +26,30 @@
 - Both have priority 1 and depend only on US-001
 - US-002 should likely be done first as it defines the manifest that references the icons
 
+## Iteration 2 - US-002: Chrome Extension Manifest
+**Status:** Completed
+**Date:** 2026-01-22
+
+### What was done:
+- Created manifest.json in project root with Manifest V3 format
+- Configured extension metadata:
+  - name: "Daily Goals Tracker"
+  - version: "1.0.0"
+  - description: Describes the goal tracking functionality
+- Set required permissions:
+  - storage: For storing goals, activity logs, settings
+  - alarms: For scheduled resets and reminders
+  - notifications: For desktop notifications
+- Configured action (browser toolbar):
+  - default_popup: points to src/popup/popup.html
+  - default_icon: references icons at 16, 48, 128px sizes
+  - default_title: "Daily Goals Tracker"
+- Defined extension icons (16, 48, 128px) - placeholder paths ready for US-003
+- Registered service worker at src/background/service-worker.js
+
+### Notes for next iteration:
+- US-003 (Extension Icons) is now the next priority 1 task
+- US-004 (Popup HTML Structure) depends on US-002 and is now unblocked
+- US-006 (Service Worker Setup) depends on US-002 and is now unblocked
+- Icon files need to be created at src/assets/icons/ to match manifest paths
+
