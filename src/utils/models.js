@@ -30,6 +30,21 @@ const TIMEFRAMES = {
   YEARLY: 'yearly'
 };
 
+/**
+ * Activity action types for logging
+ * @readonly
+ * @enum {string}
+ */
+const ACTIVITY_ACTIONS = {
+  START: 'start',
+  PAUSE: 'pause',
+  INCREMENT: 'increment',
+  DECREMENT: 'decrement',
+  TOGGLE: 'toggle',
+  RESET: 'reset',
+  COMPLETE: 'complete'
+};
+
 // =============================================================================
 // Utility Functions
 // =============================================================================
@@ -157,6 +172,53 @@ function resetGoalProgress(goal) {
 }
 
 // =============================================================================
+// Activity Log Model
+// =============================================================================
+
+/**
+ * @typedef {Object} ActivityLog
+ * @property {string} id - Unique identifier (UUID)
+ * @property {string} goalId - The ID of the goal this activity relates to
+ * @property {number} timestamp - Unix timestamp when the action occurred
+ * @property {'start'|'pause'|'increment'|'decrement'|'toggle'|'reset'|'complete'} action - The type of action performed
+ * @property {number|null} value - Optional value associated with the action (e.g., elapsed time for pause, count for increment)
+ */
+
+/**
+ * Create a new ActivityLog entry
+ * @param {Object} data - Activity log data
+ * @param {string} data.goalId - The ID of the goal (required)
+ * @param {'start'|'pause'|'increment'|'decrement'|'toggle'|'reset'|'complete'} data.action - The action type (required)
+ * @param {number|null} [data.value=null] - Optional value associated with the action
+ * @param {number} [data.timestamp] - Optional timestamp (defaults to current time)
+ * @param {string} [data.id] - Optional ID (auto-generated if not provided)
+ * @returns {ActivityLog} A new activity log entry
+ */
+function createActivityLog(data) {
+  if (!data || !data.goalId) {
+    throw new Error('Activity log requires a goalId');
+  }
+
+  if (!data.action) {
+    throw new Error('Activity log requires an action');
+  }
+
+  // Validate action type
+  const validActions = Object.values(ACTIVITY_ACTIONS);
+  if (!validActions.includes(data.action)) {
+    throw new Error(`Invalid action type: ${data.action}. Must be one of: ${validActions.join(', ')}`);
+  }
+
+  return {
+    id: data.id || generateId(),
+    goalId: data.goalId,
+    timestamp: data.timestamp || Date.now(),
+    action: data.action,
+    value: data.value !== undefined ? data.value : null
+  };
+}
+
+// =============================================================================
 // Exports
 // =============================================================================
 
@@ -164,11 +226,14 @@ export {
   // Constants
   GOAL_TYPES,
   TIMEFRAMES,
+  ACTIVITY_ACTIONS,
   // Utility functions
   generateId,
   // Goal functions
   createGoal,
   isGoalCompleted,
   getGoalCompletionPercentage,
-  resetGoalProgress
+  resetGoalProgress,
+  // Activity Log functions
+  createActivityLog
 };

@@ -128,7 +128,7 @@
         "Action types as constants/enum"
       ],
       "priority": 1,
-      "passes": false,
+      "passes": true,
       "dependsOn": ["US-008"]
     },
     {

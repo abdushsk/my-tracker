@@ -273,3 +273,33 @@
 - US-010 (Popup JS Entry Point) depends on US-005 (done), US-007 (done), US-008 (done)
 - US-010 still needs US-009 to be completed before it can start (not listed in prd.json but logically needed)
 
+## Iteration 9 - US-009: Activity Log Data Model
+**Status:** Completed
+**Date:** 2026-01-22
+
+### What was done:
+- Added ActivityLog data structure to src/utils/models.js
+- Defined ACTIVITY_ACTIONS constant (enum) with all valid action types:
+  - START, PAUSE, INCREMENT, DECREMENT, TOGGLE, RESET, COMPLETE
+- Implemented createActivityLog(data) factory function:
+  - Requires goalId (throws error if missing)
+  - Requires action (throws error if missing)
+  - Validates action against ACTIVITY_ACTIONS enum
+  - Auto-generates id using generateId()
+  - Defaults timestamp to Date.now()
+  - Defaults value to null
+
+### Technical details:
+- ActivityLog structure matches FEATURES.md specification:
+  - id (uuid), goalId (uuid), timestamp (number), action (enum), value (number|null)
+- Full JSDoc documentation with @typedef for ActivityLog structure
+- Strict validation on action types to prevent invalid data
+- ES6 module exports: ACTIVITY_ACTIONS, createActivityLog
+
+### Notes for next iteration:
+- US-010 (Popup JavaScript Entry Point) is now unblocked
+  - Depends on US-005 (done), US-007 (done), US-008 (done)
+  - Has priority 2
+- US-054 (Extension Load Test) depends on US-010 and has priority 1
+- Recommended: Complete US-010 next to unblock further UI development
+
