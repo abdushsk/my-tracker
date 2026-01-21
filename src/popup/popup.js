@@ -8,7 +8,7 @@
 // =============================================================================
 
 import { getGoals, getSettings, getActiveTimers, getStreakData } from '../utils/storage.js';
-import { GOAL_TYPES, TIMEFRAMES, isGoalCompleted } from '../utils/models.js';
+import { GOAL_TYPES, TIMEFRAMES, isGoalCompleted, getGoalCompletionPercentage } from '../utils/models.js';
 
 // =============================================================================
 // Application State
@@ -238,33 +238,176 @@ function renderGoalsList() {
     return (a.createdAt || 0) - (b.createdAt || 0);
   });
 
-  // Placeholder - will be fully implemented in US-015 (Goal Card component)
   return `
     <div class="goals-list">
-      ${sortedGoals.map(goal => {
-        const progressPercent = goal.target > 0
-          ? Math.min(100, Math.round((goal.progress / goal.target) * 100))
-          : 0;
-        const isCompleted = goal.progress >= goal.target;
-
-        return `
-          <div class="goal-card ${isCompleted ? 'goal-completed' : ''}" data-goal-id="${goal.id}">
-            <div class="goal-card-header">
-              <div class="goal-title">${escapeHtml(goal.title)}</div>
-              <span class="goal-timeframe-badge timeframe-${goal.timeframe}">${goal.timeframe}</span>
-            </div>
-            <div class="goal-type">${goal.type}</div>
-            <div class="goal-progress-section">
-              <div class="goal-progress-text">${goal.progress}/${goal.target}</div>
-              <div class="goal-progress-bar">
-                <div class="goal-progress-fill" style="width: ${progressPercent}%"></div>
-              </div>
-            </div>
-          </div>
-        `;
-      }).join('')}
+      ${sortedGoals.map(goal => renderGoalCard(goal)).join('')}
     </div>
   `;
+}
+
+// =============================================================================
+// US-015: Goal Card Base Component
+// =============================================================================
+
+/**
+ * Get the icon SVG for a goal type
+ * @param {string} type - The goal type (timer, counter, checkbox)
+ * @returns {string} SVG HTML string
+ */
+function getGoalTypeIcon(type) {
+  switch (type) {
+    case GOAL_TYPES.TIMER:
+      return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="goal-type-icon">
+        <circle cx="12" cy="12" r="10"/>
+        <polyline points="12 6 12 12 16 14"/>
+      </svg>`;
+    case GOAL_TYPES.COUNTER:
+      return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="goal-type-icon">
+        <line x1="12" y1="1" x2="12" y2="23"/>
+        <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
+      </svg>`;
+    case GOAL_TYPES.CHECKBOX:
+      return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="goal-type-icon">
+        <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+        <polyline points="9 11 12 14 22 4"/>
+      </svg>`;
+    default:
+      return '';
+  }
+}
+
+/**
+ * Format timer progress as HH:MM:SS
+ * @param {number} seconds - Time in seconds
+ * @returns {string} Formatted time string
+ */
+function formatTime(seconds) {
+  const hrs = Math.floor(seconds / 3600);
+  const mins = Math.floor((seconds % 3600) / 60);
+  const secs = seconds % 60;
+  return `${hrs.toString().padStart(2, '0')}:${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+}
+
+/**
+ * Format progress display based on goal type
+ * @param {Object} goal - The goal object
+ * @returns {string} Formatted progress string
+ */
+function formatProgressDisplay(goal) {
+  switch (goal.type) {
+    case GOAL_TYPES.TIMER:
+      return `${formatTime(goal.progress)} / ${formatTime(goal.target)}`;
+    case GOAL_TYPES.COUNTER:
+      return `${goal.progress} / ${goal.target}`;
+    case GOAL_TYPES.CHECKBOX:
+      return goal.progress >= goal.target ? 'Completed' : 'Not completed';
+    default:
+      return `${goal.progress} / ${goal.target}`;
+  }
+}
+
+/**
+ * Render a goal card component
+ * @param {Object} goal - The goal object to render
+ * @returns {string} HTML string for the goal card
+ */
+function renderGoalCard(goal) {
+  const progressPercent = getGoalCompletionPercentage(goal);
+  const isCompleted = isGoalCompleted(goal);
+  const typeIcon = getGoalTypeIcon(goal.type);
+  const progressDisplay = formatProgressDisplay(goal);
+
+  // Build CSS classes for the card
+  const cardClasses = [
+    'goal-card',
+    `goal-type-${goal.type}`,
+    isCompleted ? 'goal-completed' : ''
+  ].filter(Boolean).join(' ');
+
+  return `
+    <div class="${cardClasses}" data-goal-id="${goal.id}">
+      <div class="goal-card-header">
+        <div class="goal-card-title-row">
+          <span class="goal-type-indicator">${typeIcon}</span>
+          <h3 class="goal-title">${escapeHtml(goal.title)}</h3>
+        </div>
+        <span class="goal-timeframe-badge timeframe-${goal.timeframe}">${capitalizeFirst(goal.timeframe)}</span>
+      </div>
+      <div class="goal-card-body">
+        <div class="goal-progress-section">
+          <div class="goal-progress-info">
+            <span class="goal-progress-text">${progressDisplay}</span>
+            <span class="goal-progress-percent">${Math.round(progressPercent)}%</span>
+          </div>
+          <div class="goal-progress-bar">
+            <div class="goal-progress-fill" style="width: ${progressPercent}%"></div>
+          </div>
+        </div>
+        ${renderGoalControls(goal)}
+      </div>
+      ${isCompleted ? '<div class="goal-completed-indicator"><span class="completed-checkmark">&#10003;</span></div>' : ''}
+    </div>
+  `;
+}
+
+/**
+ * Render goal-specific controls (placeholder - will be fully implemented in US-016/017/018)
+ * @param {Object} goal - The goal object
+ * @returns {string} HTML string for goal controls
+ */
+function renderGoalControls(goal) {
+  // Base implementation - will be extended in US-016 (Timer), US-017 (Counter), US-018 (Checkbox)
+  switch (goal.type) {
+    case GOAL_TYPES.TIMER:
+      return `
+        <div class="goal-controls goal-controls-timer">
+          <button class="goal-control-btn timer-play-btn" data-action="timer-toggle" data-goal-id="${goal.id}" title="${goal.isActive ? 'Pause' : 'Play'}">
+            ${goal.isActive
+              ? '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>'
+              : '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"/></svg>'
+            }
+          </button>
+        </div>
+      `;
+    case GOAL_TYPES.COUNTER:
+      return `
+        <div class="goal-controls goal-controls-counter">
+          <button class="goal-control-btn counter-decrement-btn" data-action="decrement" data-goal-id="${goal.id}" title="Decrease">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          </button>
+          <span class="counter-value">${goal.progress}</span>
+          <button class="goal-control-btn counter-increment-btn" data-action="increment" data-goal-id="${goal.id}" title="Increase">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          </button>
+        </div>
+      `;
+    case GOAL_TYPES.CHECKBOX:
+      return `
+        <div class="goal-controls goal-controls-checkbox">
+          <button class="goal-control-btn checkbox-toggle-btn ${isGoalCompleted(goal) ? 'checked' : ''}" data-action="checkbox-toggle" data-goal-id="${goal.id}" title="Toggle completion">
+            <span class="checkbox-box">
+              ${isGoalCompleted(goal)
+                ? '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>'
+                : ''
+              }
+            </span>
+            <span class="checkbox-label">${isGoalCompleted(goal) ? 'Done!' : 'Mark as done'}</span>
+          </button>
+        </div>
+      `;
+    default:
+      return '';
+  }
+}
+
+/**
+ * Capitalize the first letter of a string
+ * @param {string} str - String to capitalize
+ * @returns {string} Capitalized string
+ */
+function capitalizeFirst(str) {
+  if (!str) return '';
+  return str.charAt(0).toUpperCase() + str.slice(1);
 }
 
 /**

@@ -644,3 +644,58 @@
 - US-020 (Manage Goals Screen Layout) is also unblocked (depends on US-014)
 - Goal card structure is ready for US-015 to add type-specific controls
 
+## Iteration 16 - US-015: Goal Card - Base Component
+**Status:** Completed
+**Date:** 2026-01-22
+
+### What was done:
+- Created reusable renderGoalCard(goal) function as a component
+- Implemented comprehensive goal card structure:
+  - Card container with type-specific CSS class (goal-type-timer, etc.)
+  - Title display with type indicator icon
+  - Timeframe badge with color coding per timeframe
+  - Progress bar showing 0-100% completion
+  - Goal-specific controls (placeholder for US-016/017/018)
+  - Completion indicator for finished goals
+- Added helper functions:
+  - getGoalTypeIcon(type) - Returns SVG icons for timer/counter/checkbox
+  - formatTime(seconds) - Formats seconds as HH:MM:SS
+  - formatProgressDisplay(goal) - Type-aware progress formatting
+  - capitalizeFirst(str) - String utility for badge labels
+  - renderGoalControls(goal) - Base controls for each goal type
+- Updated renderGoalsList() to use the new renderGoalCard() function
+- Added import for getGoalCompletionPercentage from models.js
+
+### Technical details:
+- Updated src/popup/popup.js:
+  - Added renderGoalCard() function with JSDoc documentation
+  - Added type-specific SVG icons for visual differentiation
+  - Progress displays formatted appropriately per type:
+    - Timer: HH:MM:SS / HH:MM:SS format
+    - Counter: N / M format
+    - Checkbox: "Completed" / "Not completed"
+  - Base control implementations ready for US-016/017/018 to enhance
+- Updated src/popup/popup.css with ~200 lines of goal card styling:
+  - .goal-card with shadow, rounded corners, hover effects
+  - .goal-type-indicator with type-specific colors
+  - .goal-timeframe-badge with 4 color variants (daily=green, weekly=blue, monthly=orange, yearly=purple)
+  - .goal-progress-bar with gradient fills per goal type
+  - .goal-controls with base button styling
+  - Type-specific control styles (timer play button, counter +/- buttons, checkbox toggle)
+  - .goal-completed state with green border, gradient background, checkmark indicator
+
+### Acceptance criteria verification:
+- [x] renderGoalCard(goal) function - Created with comprehensive structure
+- [x] Card with title display - Title shown with truncation support
+- [x] Timeframe badge with color coding - 4 colors (daily=green, weekly=blue, monthly=orange, yearly=purple)
+- [x] Progress bar (0-100%) - Gradient-filled progress bar with percentage display
+- [x] Card styling (shadow, radius, padding) - var(--shadow-sm), var(--radius-lg), var(--spacing-md)
+
+### Notes for next iteration:
+- US-016 (Goal Card - Timer Type Controls) is now unblocked (depends on US-015)
+- US-017 (Goal Card - Counter Type Controls) is now unblocked (depends on US-015)
+- US-018 (Goal Card - Checkbox Type Controls) is now unblocked (depends on US-015)
+- All three have priority 2
+- Base controls are rendered but functionality will be implemented in those stories
+- US-019 (Goal Card - Completion State) depends on US-016, US-017, US-018
+
