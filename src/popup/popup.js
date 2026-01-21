@@ -40,7 +40,8 @@ const state = {
   streakData: null,
   currentScreen: 'viewGoals',
   isLoading: true,
-  timerIntervalId: null // Interval ID for updating timer display
+  timerIntervalId: null, // Interval ID for updating timer display
+  justCompletedGoals: new Set() // Track goals that just completed for animation (US-019)
 };
 
 // =============================================================================
@@ -342,12 +343,16 @@ function renderGoalCard(goal) {
   const progressDisplay = formatProgressDisplay(goal);
 
   // Build CSS classes for the card
+  // US-019: Check if goal just completed for celebration animation
+  const justCompleted = state.justCompletedGoals.has(goal.id);
   const cardClasses = [
     'goal-card',
     `goal-type-${goal.type}`,
     isCompleted ? 'goal-completed' : '',
     // Add active class for running timers (US-016)
-    goal.type === GOAL_TYPES.TIMER && goal.isActive ? 'goal-timer-active' : ''
+    goal.type === GOAL_TYPES.TIMER && goal.isActive ? 'goal-timer-active' : '',
+    // US-019: Add just-completed class for celebration animation
+    justCompleted ? 'just-completed' : ''
   ].filter(Boolean).join(' ');
 
   return `
@@ -426,6 +431,32 @@ function renderGoalControls(goal) {
     default:
       return '';
   }
+}
+
+// =============================================================================
+// US-019: Goal Completion Celebration
+// =============================================================================
+
+/**
+ * Trigger completion celebration animation for a goal
+ * @param {string} goalId - The ID of the completed goal
+ */
+function triggerCompletionCelebration(goalId) {
+  // Add to just-completed set
+  state.justCompletedGoals.add(goalId);
+
+  // Schedule removal of the just-completed state after animation
+  setTimeout(() => {
+    state.justCompletedGoals.delete(goalId);
+
+    // Remove the class from DOM if the element still exists
+    const goalCard = document.querySelector(`.goal-card[data-goal-id="${goalId}"]`);
+    if (goalCard) {
+      goalCard.classList.remove('just-completed');
+    }
+  }, 1500); // Match the animation duration in CSS
+
+  console.log(`[Celebration] Triggered completion animation for goal ${goalId}`);
 }
 
 // =============================================================================
@@ -688,6 +719,9 @@ async function handleTimerCompletion(goalId) {
 
   console.log(`[Timer] Goal ${goalId} completed! Final progress: ${finalProgress}s`);
 
+  // US-019: Trigger completion celebration animation
+  triggerCompletionCelebration(goalId);
+
   // Re-render to show completion state
   renderCurrentScreen();
 }
@@ -738,6 +772,9 @@ async function handleCounterIncrement(goalId) {
     });
     await addActivityLogEntry(completeLog);
     console.log(`[Counter] Goal ${goalId} completed!`);
+
+    // US-019: Trigger completion celebration animation
+    triggerCompletionCelebration(goalId);
   }
 
   // Re-render to update UI
@@ -830,6 +867,9 @@ async function handleCheckboxToggle(goalId) {
     });
     await addActivityLogEntry(completeLog);
     console.log(`[Checkbox] Goal ${goalId} completed!`);
+
+    // US-019: Trigger completion celebration animation
+    triggerCompletionCelebration(goalId);
   }
 
   // Re-render to update UI
@@ -1124,5 +1164,7 @@ export {
   handleCounterIncrement,
   handleCounterDecrement,
   // US-018 Checkbox functions
-  handleCheckboxToggle
+  handleCheckboxToggle,
+  // US-019 Completion celebration
+  triggerCompletionCelebration
 };

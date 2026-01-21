@@ -875,3 +875,71 @@
 - US-020 (Manage Goals Screen Layout) has priority 3 and depends on US-014 (done)
 - All goal card controls are now complete (timer, counter, checkbox)
 
+## Iteration 20 - US-019: Goal Card - Completion State
+**Status:** Completed
+**Date:** 2026-01-22
+
+### What was done:
+- Enhanced visual completion state for all goal cards with rewarding feedback
+- Added green border/glow effect when goals are completed:
+  - 2px green border (var(--success))
+  - Multi-layered box-shadow creating glow effect
+  - Green gradient background
+  - Transform lift on completed cards
+- Enhanced checkmark overlay/indicator:
+  - Increased size from 24px to 28px
+  - Added badge-appear animation with rotation and bounce
+  - Added checkmark-bounce animation for the checkmark symbol
+  - Added golden sparkle particles around the indicator
+- Added celebration animations for just-completed goals:
+  - completion-glow animation (expanding green glow pulse)
+  - confetti-burst effect using radial gradients
+  - Progress bar shimmer-sweep animation for completed cards
+- Added state tracking for just-completed goals:
+  - justCompletedGoals Set in application state
+  - triggerCompletionCelebration() function
+  - Auto-cleanup after 1.5 seconds
+- Applied completion celebration to all goal types:
+  - Timer goals: Green play button when completed
+  - Counter goals: Green increment button when completed
+  - Checkbox goals: Already had completion styling
+
+### Technical details:
+- Updated src/popup/popup.js:
+  - Added justCompletedGoals: new Set() to state object
+  - Created triggerCompletionCelebration(goalId) function
+  - Updated renderGoalCard() to check and apply just-completed class
+  - Integrated triggerCompletionCelebration() into:
+    - handleTimerCompletion()
+    - handleCounterIncrement() (when goal completes)
+    - handleCheckboxToggle() (when goal completes)
+  - Exported triggerCompletionCelebration for testing
+- Updated src/popup/popup.css (~240 lines added):
+  - US-019 section header
+  - Enhanced .goal-card.goal-completed styling with glow
+  - Enhanced .goal-completed-indicator with animation
+  - @keyframes completion-badge-appear
+  - @keyframes checkmark-bounce
+  - .goal-card.goal-completed.just-completed animation class
+  - @keyframes completion-glow
+  - Confetti burst ::before pseudo-element
+  - @keyframes confetti-burst
+  - Type-specific completion enhancements (timer, counter)
+  - Progress bar shimmer sweep animation
+  - Golden sparkle particles with @keyframes sparkle
+- CSS brace count: 251 (balanced)
+
+### Acceptance criteria verification:
+- [x] Green border when completed - 2px green border with glow effect
+- [x] Checkmark overlay or icon - Enhanced indicator badge with animations
+- [x] Subtle glow or highlight effect - Multi-layer box-shadow glow + completion-glow animation
+- [x] Applies to all goal types - Timer, counter, checkbox all supported
+- [x] Updates immediately when goal completes - triggerCompletionCelebration triggers instantly
+
+### Notes for next iteration:
+- US-020 (Manage Goals Screen - Layout) is now the highest priority task
+  - Depends on US-014 (done) and has priority 3
+- US-021 (Manage Goals - Goal List Item) depends on US-020
+- All priority 2 tasks are now complete
+- View Goals screen is fully functional with all goal types and completion celebration
+

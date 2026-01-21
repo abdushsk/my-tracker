@@ -278,7 +278,7 @@
         "Updates immediately when goal completes"
       ],
       "priority": 2,
-      "passes": false,
+      "passes": true,
       "dependsOn": ["US-016", "US-017", "US-018"]
     },
     {
