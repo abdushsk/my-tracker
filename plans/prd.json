@@ -188,7 +188,7 @@
         "Visual feedback on hover/active"
       ],
       "priority": 2,
-      "passes": false,
+      "passes": true,
       "dependsOn": ["US-011"]
     },
     {

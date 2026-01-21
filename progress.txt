@@ -493,3 +493,47 @@
 - Both US-012 and US-013 have priority 2
 - Streak calculation logic will be fully implemented in US-045 (Reports - Streak Counter)
 
+## Iteration 13 - US-013: View Goals Screen - Navigation Footer
+**Status:** Completed
+**Date:** 2026-01-22
+
+### What was done:
+- Enhanced the bottom navigation footer for the View Goals screen
+- Implemented two navigation buttons with SVG icons:
+  - "Manage Goals" button with edit/pencil icon
+  - "Reports" button with bar chart icon
+- Added comprehensive visual feedback:
+  - Hover state: Primary color background and text
+  - Active state (pressed): Scale down animation
+  - Active tab indicator: Underline bar below active button
+- Fixed footer at bottom with proper flex-shrink: 0
+- Improved button styling:
+  - Consistent padding and minimum width
+  - Separated icon and label with proper spacing
+  - Font weight medium for labels
+
+### Technical details:
+- Updated src/popup/popup.css:
+  - Enhanced .screen-footer with min-height and alignment
+  - Added .nav-btn styles with transitions and active states
+  - Added .nav-btn.active styles with underline indicator using ::after
+  - Added SVG icon styling with stroke-based rendering
+  - Added .nav-label class for button text
+- Updated src/popup/popup.js:
+  - Replaced HTML entity icons with inline SVG icons
+  - Added nav-label span wrapper for button text
+  - Using Feather-style icons (edit for Manage Goals, bar-chart for Reports)
+
+### Acceptance criteria verification:
+- [x] Fixed footer navigation - Footer uses flex-shrink: 0 and stays at bottom
+- [x] Manage Goals button with icon - Edit/pencil SVG icon
+- [x] Reports button with icon - Bar chart SVG icon
+- [x] Click handlers navigate screens - data-screen attributes work with attachNavigationListeners
+- [x] Visual feedback on hover/active - Hover changes colors, active scales down, active tab has underline
+
+### Notes for next iteration:
+- US-014 (View Goals Screen - Goals List Container) is now unblocked (depends on US-013)
+- US-012 (View Goals Screen - Empty State) is still available (depends on US-011, already done)
+- Both have priority 2
+- US-014 should be prioritized as it unlocks US-015 (Goal Card Base Component)
+

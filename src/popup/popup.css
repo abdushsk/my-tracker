@@ -319,10 +319,12 @@ select:focus {
 .screen-footer {
   display: flex;
   justify-content: space-around;
-  padding: var(--spacing-md);
+  align-items: center;
+  padding: var(--spacing-sm) var(--spacing-md);
   border-top: 1px solid var(--border);
   background-color: var(--background);
   flex-shrink: 0;
+  min-height: 60px;
 }
 
 /* Navigation button */
@@ -330,12 +332,16 @@ select:focus {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: var(--spacing-xs);
-  padding: var(--spacing-sm) var(--spacing-md);
+  justify-content: center;
+  gap: 2px;
+  padding: var(--spacing-sm) var(--spacing-lg);
   color: var(--text-secondary);
-  font-size: var(--font-size-sm);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-medium);
   border-radius: var(--radius);
   transition: all var(--transition-fast);
+  min-width: 80px;
+  position: relative;
 }
 
 .nav-btn:hover {
@@ -343,8 +349,50 @@ select:focus {
   background-color: var(--primary-light);
 }
 
+.nav-btn:active {
+  transform: scale(0.95);
+}
+
+.nav-btn.active {
+  color: var(--primary);
+  background-color: var(--primary-light);
+}
+
+.nav-btn.active::after {
+  content: '';
+  position: absolute;
+  bottom: -2px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 24px;
+  height: 3px;
+  background-color: var(--primary);
+  border-radius: var(--radius-full);
+}
+
+/* Navigation icon */
 .nav-icon {
-  font-size: var(--font-size-lg);
+  font-size: 20px;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+}
+
+/* SVG icon styling */
+.nav-icon svg {
+  width: 20px;
+  height: 20px;
+  stroke: currentColor;
+  fill: none;
+}
+
+/* Navigation label */
+.nav-label {
+  font-size: var(--font-size-xs);
+  line-height: 1.2;
 }
 
 /* Goals list container */
