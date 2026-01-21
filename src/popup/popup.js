@@ -1047,6 +1047,9 @@ function renderManageGoalsScreen() {
       openGoalModal('add');
     });
   }
+
+  // US-029: Attach Edit/Delete button listeners
+  attachManageGoalsListeners(screen);
 }
 
 /**
@@ -1086,6 +1089,62 @@ function renderManageGoalsList(goals) {
 // =============================================================================
 // US-021: Manage Goals - Goal List Item
 // =============================================================================
+
+/**
+ * Attach event listeners for Manage Goals screen actions (Edit/Delete)
+ * @param {HTMLElement} container - The container element
+ */
+function attachManageGoalsListeners(container) {
+  // US-029: Edit button click handlers
+  const editButtons = container.querySelectorAll('[data-action="edit"]');
+  editButtons.forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      const goalId = btn.getAttribute('data-goal-id');
+      if (goalId) {
+        handleEditGoal(goalId);
+      }
+    });
+  });
+
+  // Delete button click handlers (placeholder for US-030)
+  const deleteButtons = container.querySelectorAll('[data-action="delete"]');
+  deleteButtons.forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      const goalId = btn.getAttribute('data-goal-id');
+      if (goalId) {
+        console.log(`[ManageGoals] Delete button clicked for goal: ${goalId}`);
+        // TODO: Implement delete confirmation in US-030
+      }
+    });
+  });
+}
+
+// =============================================================================
+// US-029: Edit Goal - Pre-fill Form
+// =============================================================================
+
+/**
+ * Handle Edit button click to open modal with goal data
+ * @param {string} goalId - The ID of the goal to edit
+ */
+function handleEditGoal(goalId) {
+  const goal = state.goals.find(g => g.id === goalId);
+
+  if (!goal) {
+    console.error(`[Edit] Goal not found: ${goalId}`);
+    showFormError('Goal not found. Please refresh and try again.');
+    return;
+  }
+
+  console.log(`[Edit] Opening edit modal for goal: ${goal.title} (${goalId})`);
+
+  // Open the modal in edit mode with the goal data
+  openGoalModal('edit', goal);
+}
 
 /**
  * Get the type label for display
@@ -2382,5 +2441,8 @@ export {
   handleGoalFormSubmit,
   showSuccessFeedback,
   showFormError,
-  clearFormError
+  clearFormError,
+  // US-029 Edit goal functions
+  handleEditGoal,
+  attachManageGoalsListeners
 };

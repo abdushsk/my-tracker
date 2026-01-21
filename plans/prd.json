@@ -430,7 +430,7 @@
         "Goal ID preserved"
       ],
       "priority": 3,
-      "passes": false,
+      "passes": true,
       "dependsOn": ["US-028"]
     },
     {

@@ -1556,3 +1556,54 @@
 - Edit mode functionality is prepared but edit button click handler not yet connected (US-029)
 - Goals are now fully saveable with all configured properties
 
+## Iteration 30 - US-029: Edit Goal - Pre-fill Form
+**Status:** Completed
+**Date:** 2026-01-22
+
+### What was done:
+- Implemented Edit Goal functionality connecting the Edit button to the existing modal
+- Created handleEditGoal(goalId) function:
+  - Finds the goal in state by ID
+  - Opens the modal in 'edit' mode with the goal data
+  - Shows error if goal not found
+- Created attachManageGoalsListeners(container) function:
+  - Attaches click handlers to Edit buttons (data-action="edit")
+  - Attaches click handlers to Delete buttons (placeholder for US-030)
+- Connected event listeners in renderManageGoalsScreen():
+  - Calls attachManageGoalsListeners(screen) after rendering
+- Pre-fill functionality leverages existing openGoalModal() which already supports edit mode:
+  - Modal title changes to 'Edit Goal' (via openGoalModal)
+  - Title field pre-filled via setFormTitle(goal.title)
+  - Type selector pre-filled via setFormType(goal.type)
+  - Timer target pre-filled via setTimerTarget(goal.target) when timer type
+  - Counter target pre-filled via setCounterTarget(goal.target) when counter type
+  - Timeframe selector pre-filled via setFormTimeframe(goal.timeframe)
+- Save updates existing goal using existing handleGoalFormSubmit() edit mode logic:
+  - Checks for data-mode="edit" and data-goal-id on modal
+  - Uses updateGoal() to save changes
+  - Preserves goal ID throughout edit process
+- Added new functions to module exports
+
+### Technical details:
+- Updated src/popup/popup.js:
+  - Added attachManageGoalsListeners() function (~30 lines)
+  - Added handleEditGoal() function (~15 lines)
+  - Added call to attachManageGoalsListeners(screen) in renderManageGoalsScreen()
+  - Added exports for handleEditGoal and attachManageGoalsListeners
+- JavaScript syntax validated with node --check
+- HTML div balance: 21/21 (unchanged)
+
+### Acceptance criteria verification:
+- [x] Edit button opens form modal - Click handler calls openGoalModal('edit', goal)
+- [x] Modal title shows 'Edit Goal' - openGoalModal sets title based on mode
+- [x] All fields pre-filled - Title, type, target (timer/counter), timeframe all pre-filled
+- [x] Save updates existing goal - handleGoalFormSubmit uses updateGoal() in edit mode
+- [x] Goal ID preserved - Stored in data-goal-id attribute, used for updates
+
+### Notes for next iteration:
+- US-030 (Delete Goal - Confirmation) is now the next priority 3 task
+  - Depends on US-021 (done) and has priority 3
+  - Delete button click handler placeholder is already in place
+- All goal management CRUD operations will be complete after US-030
+- Priority 4 tasks (US-031 Timer Background Tracking, US-034 Counter Logic, etc.) are now eligible
+
