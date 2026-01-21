@@ -143,7 +143,7 @@
         "Loads and displays viewGoals by default"
       ],
       "priority": 2,
-      "passes": false,
+      "passes": true,
       "dependsOn": ["US-005", "US-007", "US-008"]
     },
     {

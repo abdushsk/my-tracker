@@ -303,3 +303,72 @@
 - US-054 (Extension Load Test) depends on US-010 and has priority 1
 - Recommended: Complete US-010 next to unblock further UI development
 
+## Iteration 10 - US-010: Popup JavaScript Entry Point
+**Status:** Completed
+**Date:** 2026-01-22
+
+### What was done:
+- Created comprehensive src/popup/popup.js as the main entry point
+- Implemented DOMContentLoaded handler that initializes the app
+- Created global state object to track:
+  - goals: Array of goal objects
+  - settings: User settings object
+  - activeTimers: Object mapping goalId to timer state
+  - currentScreen: Current screen name
+  - isLoading: Loading state flag
+- Created SCREENS enum for screen names (VIEW_GOALS, MANAGE_GOALS, REPORTS, SETTINGS)
+- Created SCREEN_IDS mapping to DOM element IDs
+- Implemented showScreen(screenName) function for navigation:
+  - Validates screen name
+  - Hides all screens by removing 'active' class
+  - Shows target screen by adding 'active' class
+  - Calls renderCurrentScreen() to render content
+- Implemented screen rendering functions:
+  - renderViewGoalsScreen() - main screen with header, goals list/empty state, footer
+  - renderManageGoalsScreen() - goal management with back button, add goal button
+  - renderReportsScreen() - reports placeholder with discipline score
+  - renderSettingsScreen() - settings placeholder with current settings display
+- Implemented helper functions:
+  - getCompletedCount() - count of completed goals
+  - renderEmptyState() - empty state with CTA to add first goal
+  - renderGoalsList() - basic goal cards (placeholder for US-015)
+  - attachNavigationListeners() - attaches click handlers to [data-screen] elements
+- Implemented loadData() async function:
+  - Loads goals, settings, and activeTimers in parallel using Promise.all
+  - Updates state with loaded data
+  - Handles errors gracefully
+- Added type="module" to popup.html script tag for ES6 imports
+- Added CSS styles for all screen layouts to popup.css:
+  - Screen container styles with flex layout
+  - Header and footer styles
+  - Navigation buttons
+  - Empty state styling
+  - Goals list and card placeholders
+  - Manage goals screen styles
+  - Reports screen styles
+  - Settings screen styles
+
+### Technical details:
+- Uses ES6 modules with import/export
+- All screen navigation uses data-screen attributes for flexibility
+- State is centralized in a single object for easy management
+- Screen rendering is dynamic - content generated on navigation
+- Parallel data loading improves initialization performance
+- CSS follows BEM-like naming conventions
+- All styles use CSS variables for consistency
+
+### Acceptance criteria verification:
+- [x] popup.js created
+- [x] DOMContentLoaded handler
+- [x] Basic state object initialized
+- [x] Screen navigation function (showScreen)
+- [x] Loads and displays viewGoals by default
+
+### Notes for next iteration:
+- US-054 (Extension Load Test) depends on US-010 and has priority 1
+  - Should test the extension loads properly in Chrome
+- US-011 (View Goals Screen - Header) depends on US-010 and has priority 2
+- US-012 (View Goals Screen - Empty State) depends on US-011
+- US-013 (View Goals Screen - Navigation Footer) depends on US-011
+- Many UI components are now unblocked for implementation
+
