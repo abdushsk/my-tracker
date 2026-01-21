@@ -777,7 +777,7 @@
         "About section with version"
       ],
       "priority": 6,
-      "passes": false,
+      "passes": true,
       "dependsOn": ["US-051", "US-037"]
     },
     {

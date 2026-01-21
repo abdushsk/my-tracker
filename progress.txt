@@ -2739,3 +2739,72 @@ Created the full Reports screen layout with all required UI sections.
 - US-052 (Settings Screen) now has US-051 completed as dependency
 - US-052 will add full settings functionality (sound toggle, volume slider)
 - US-053 (Browser Badge) is also ready to work on
+
+## Iteration: US-052 - Settings Screen
+
+### Task completed: US-052 - Settings Screen
+**Date:** 2026-01-22
+**Status:** PASSED
+
+### What was implemented:
+
+1. **Full Settings Screen Layout (popup.js)**
+   - Complete rewrite of `renderSettingsScreen()` function with all settings components
+   - Sound Settings section with toggle and volume slider
+   - Appearance section with theme toggle (from US-051)
+   - About section with app version and description
+
+2. **Sound Effects Toggle**
+   - Checkbox toggle with custom slider-style switch
+   - On change: updates `state.settings.soundEnabled`, calls `setMuted()` to update audio system
+   - Saves preference to Chrome storage immediately
+   - Disables/enables volume slider based on toggle state
+
+3. **Volume Slider (0-100)**
+   - Range input slider from 0 to 100%
+   - Real-time volume feedback during dragging (via `input` event)
+   - Saves to storage on release (via `change` event)
+   - Dynamic volume icon that changes based on level (muted, low, high)
+   - `updateVolumeIcon()` helper function for icon updates
+   - Disabled state styling when sound is off
+
+4. **Settings Access via Gear Icon**
+   - Added settings gear button to View Goals header
+   - Positioned absolutely in top-right corner
+   - Hover/active states with color transitions
+   - Uses `data-screen` attribute for navigation
+
+5. **CSS Styles Added (popup.css)**
+   - Toggle switch component (~35 lines)
+   - Volume control with slider styling (~65 lines)
+   - Settings button in header (~25 lines)
+   - About section styling
+   - Cross-browser slider support (webkit and moz)
+
+6. **New Imports**
+   - Added `setVolume` and `setMuted` imports from sounds.js
+
+### Acceptance criteria verification:
+- [x] Settings screen layout - Complete layout with sections for Sound, Appearance, and About
+- [x] Sound on/off toggle - Checkbox toggle with custom slider switch styling
+- [x] Volume slider (0-100) - Range input with percentage display and dynamic icon
+- [x] Dark mode toggle - Already implemented in US-051, preserved in new layout
+- [x] About section with version - Shows "Daily Goals Tracker v1.0.0" with description
+
+### Technical details:
+- Updated src/popup/popup.js:
+  - Added `setVolume` and `setMuted` imports
+  - Rewrote `renderSettingsScreen()` (~170 lines)
+  - Added `updateVolumeIcon()` helper function (~20 lines)
+  - Added settings button to View Goals header
+
+- Updated src/popup/popup.css:
+  - Added toggle switch styles (~35 lines)
+  - Added volume control styles (~65 lines)
+  - Added settings button styles (~25 lines)
+  - Updated header-main to be position: relative
+
+### Notes for next iteration:
+- US-053 (Browser Badge - Goal Count) is now the only remaining task with `passes: false`
+- All settings now persist correctly across sessions
+- Volume slider provides real-time feedback while dragging

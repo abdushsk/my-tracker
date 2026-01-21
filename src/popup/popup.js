@@ -42,6 +42,8 @@ import {
   initSounds,
   playSound,
   loadSoundSettings,
+  setVolume,
+  setMuted,
   SOUNDS
 } from '../utils/sounds.js';
 
@@ -172,6 +174,12 @@ function renderViewGoalsScreen() {
       <header class="screen-header view-goals-header">
         <div class="header-main">
           <h1 class="app-title">Daily Goals</h1>
+          <button class="settings-btn" data-screen="${SCREENS.SETTINGS}" aria-label="Settings">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="20" height="20">
+              <circle cx="12" cy="12" r="3"/>
+              <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+            </svg>
+          </button>
         </div>
         <div class="header-stats">
           <div class="stat-item completed-stat">
@@ -3213,16 +3221,20 @@ function calculateStreakFromHistory(history, currentGoals) {
 
 /**
  * Render the Settings screen
+ * US-052: Full settings screen with sound toggle, volume slider, dark mode toggle, and about section
  */
 function renderSettingsScreen() {
   const screen = document.getElementById(SCREEN_IDS[SCREENS.SETTINGS]);
   if (!screen) return;
 
+  // Get current settings
   const themeSetting = state.settings?.theme || 'auto';
   const themeDisplayText = getThemeDisplayText(themeSetting);
   const effectiveTheme = getEffectiveTheme(themeSetting);
+  const soundEnabled = state.settings?.soundEnabled !== false; // Default to true
+  const soundVolume = state.settings?.soundVolume ?? 50; // Default to 50
 
-  // US-051: Enhanced settings screen with working theme toggle
+  // US-052: Full settings screen layout
   screen.innerHTML = `
     <div class="settings-screen">
       <header class="screen-header">
@@ -3232,13 +3244,52 @@ function renderSettingsScreen() {
         <h1>Settings</h1>
       </header>
       <main class="settings-content">
+        <!-- Sound Settings Section -->
         <div class="settings-section">
           <h2>Sound</h2>
-          <div class="setting-item">
-            <span>Sound Effects</span>
-            <span>${state.settings?.soundEnabled ? 'On' : 'Off'}</span>
+
+          <!-- Sound Effects Toggle -->
+          <div class="setting-item setting-item-row" id="sound-toggle-row">
+            <div class="setting-info">
+              <span class="setting-label">Sound Effects</span>
+              <span class="setting-description">Play sounds on goal interactions</span>
+            </div>
+            <label class="toggle-switch" aria-label="Toggle sound effects">
+              <input type="checkbox" id="sound-toggle" ${soundEnabled ? 'checked' : ''}>
+              <span class="toggle-slider"></span>
+            </label>
+          </div>
+
+          <!-- Volume Slider -->
+          <div class="setting-item setting-item-volume ${!soundEnabled ? 'disabled' : ''}">
+            <div class="setting-info">
+              <span class="setting-label">Volume</span>
+            </div>
+            <div class="volume-control">
+              <svg class="volume-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="16" height="16">
+                ${soundVolume === 0 || !soundEnabled ?
+                  '<polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><line x1="23" y1="9" x2="17" y2="15"/><line x1="17" y1="9" x2="23" y2="15"/>' :
+                  soundVolume < 50 ?
+                  '<polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/>' :
+                  '<polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/>'
+                }
+              </svg>
+              <input
+                type="range"
+                id="volume-slider"
+                min="0"
+                max="100"
+                value="${soundVolume}"
+                class="volume-slider"
+                ${!soundEnabled ? 'disabled' : ''}
+                aria-label="Volume level"
+              >
+              <span class="volume-value" id="volume-value">${soundVolume}%</span>
+            </div>
           </div>
         </div>
+
+        <!-- Appearance Settings Section -->
         <div class="settings-section">
           <h2>Appearance</h2>
           <div class="setting-item setting-item-clickable" id="theme-toggle" role="button" tabindex="0" aria-label="Toggle theme">
@@ -3259,9 +3310,12 @@ function renderSettingsScreen() {
             </div>
           </div>
         </div>
+
+        <!-- About Section -->
         <div class="settings-section about">
           <h2>About</h2>
-          <p>Daily Goals Tracker v1.0.0</p>
+          <p class="app-version">Daily Goals Tracker v1.0.0</p>
+          <p class="app-description">Track your daily goals with timers, counters, and checkboxes. Build discipline through consistent progress.</p>
         </div>
       </main>
     </div>
@@ -3269,6 +3323,63 @@ function renderSettingsScreen() {
 
   // Attach navigation event listeners
   attachNavigationListeners(screen);
+
+  // US-052: Attach sound toggle listener
+  const soundToggleCheckbox = screen.querySelector('#sound-toggle');
+  if (soundToggleCheckbox) {
+    soundToggleCheckbox.addEventListener('change', async (e) => {
+      const enabled = e.target.checked;
+
+      // Update state and audio system
+      state.settings = {
+        ...state.settings,
+        soundEnabled: enabled
+      };
+      setMuted(!enabled);
+
+      // Save to storage
+      await saveSettings(state.settings);
+
+      console.log(`[Settings] Sound effects: ${enabled ? 'enabled' : 'disabled'}`);
+
+      // Re-render to update volume slider state
+      renderSettingsScreen();
+    });
+  }
+
+  // US-052: Attach volume slider listener
+  const volumeSlider = screen.querySelector('#volume-slider');
+  const volumeValue = screen.querySelector('#volume-value');
+  if (volumeSlider) {
+    // Update display and audio on input (while dragging)
+    volumeSlider.addEventListener('input', (e) => {
+      const volume = parseInt(e.target.value, 10);
+      if (volumeValue) {
+        volumeValue.textContent = `${volume}%`;
+      }
+      // Update audio system immediately for feedback
+      setVolume(volume / 100);
+
+      // Update the volume icon based on level
+      updateVolumeIcon(screen, volume, state.settings?.soundEnabled !== false);
+    });
+
+    // Save to storage on change (when dragging stops)
+    volumeSlider.addEventListener('change', async (e) => {
+      const volume = parseInt(e.target.value, 10);
+
+      // Update state
+      state.settings = {
+        ...state.settings,
+        soundVolume: volume
+      };
+
+      // Save to storage
+      await saveSettings(state.settings);
+
+      console.log(`[Settings] Volume set to: ${volume}%`);
+    });
+  }
 
   // US-051: Attach theme toggle listener
   const themeToggle = screen.querySelector('#theme-toggle');
@@ -3288,6 +3399,31 @@ function renderSettingsScreen() {
       }
     });
   }
+}
+
+/**
+ * Update the volume icon based on volume level
+ * @param {HTMLElement} screen - The settings screen element
+ * @param {number} volume - Volume level (0-100)
+ * @param {boolean} enabled - Whether sound is enabled
+ */
+function updateVolumeIcon(screen, volume, enabled) {
+  const volumeIcon = screen.querySelector('.volume-icon');
+  if (!volumeIcon) return;
+
+  let iconSvg;
+  if (volume === 0 || !enabled) {
+    // Muted/off icon
+    iconSvg = '<polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><line x1="23" y1="9" x2="17" y2="15"/><line x1="17" y1="9" x2="23" y2="15"/>';
+  } else if (volume < 50) {
+    // Low volume icon
+    iconSvg = '<polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/>';
+  } else {
+    // High volume icon
+    iconSvg = '<polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/>';
+  }
+
+  volumeIcon.innerHTML = iconSvg;
 }
 
 /**
