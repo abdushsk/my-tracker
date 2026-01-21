@@ -1036,6 +1036,15 @@ function renderManageGoalsScreen() {
 
   // Attach navigation event listeners
   attachNavigationListeners(screen);
+
+  // Attach Add Goal button click listener (US-022)
+  const addGoalBtn = screen.querySelector('#add-goal-btn');
+  if (addGoalBtn) {
+    addGoalBtn.addEventListener('click', (e) => {
+      e.preventDefault();
+      openGoalModal('add');
+    });
+  }
 }
 
 /**
@@ -1118,6 +1127,149 @@ function formatTargetForManage(goal) {
     default:
       return '';
   }
+}
+
+// =============================================================================
+// US-022: Add Goal Form - Modal
+// =============================================================================
+
+/**
+ * Open the goal form modal
+ * @param {string} mode - 'add' for new goal, 'edit' for editing existing
+ * @param {Object|null} goal - The goal to edit (null for add mode)
+ */
+function openGoalModal(mode = 'add', goal = null) {
+  const modal = document.getElementById('goal-form-modal');
+  const modalTitle = document.getElementById('modal-title');
+
+  if (!modal || !modalTitle) {
+    console.error('Modal elements not found');
+    return;
+  }
+
+  // Set modal title based on mode
+  modalTitle.textContent = mode === 'edit' ? 'Edit Goal' : 'Add New Goal';
+
+  // Store the mode and goal ID in the modal for form submission
+  modal.setAttribute('data-mode', mode);
+  if (goal) {
+    modal.setAttribute('data-goal-id', goal.id);
+  } else {
+    modal.removeAttribute('data-goal-id');
+  }
+
+  // Show the modal
+  modal.classList.add('active');
+  modal.setAttribute('aria-hidden', 'false');
+  document.body.classList.add('modal-open');
+
+  // Focus the modal container for accessibility
+  const modalContainer = modal.querySelector('.modal-container');
+  if (modalContainer) {
+    modalContainer.focus();
+  }
+
+  // Attach modal event listeners
+  attachModalListeners(modal);
+
+  console.log(`[Modal] Opened in ${mode} mode`);
+}
+
+/**
+ * Close the goal form modal
+ */
+function closeGoalModal() {
+  const modal = document.getElementById('goal-form-modal');
+
+  if (!modal) {
+    console.error('Modal not found');
+    return;
+  }
+
+  // Hide the modal
+  modal.classList.remove('active');
+  modal.setAttribute('aria-hidden', 'true');
+  document.body.classList.remove('modal-open');
+
+  // Clean up modal data attributes
+  modal.removeAttribute('data-mode');
+  modal.removeAttribute('data-goal-id');
+
+  // Reset the form (will be implemented with form fields in US-023+)
+  const form = document.getElementById('goal-form');
+  if (form) {
+    form.reset();
+  }
+
+  console.log('[Modal] Closed');
+}
+
+/**
+ * Attach event listeners to the modal
+ * @param {HTMLElement} modal - The modal element
+ */
+function attachModalListeners(modal) {
+  // Close button and overlay clicks
+  const closeElements = modal.querySelectorAll('[data-action="close-modal"]');
+  closeElements.forEach(el => {
+    // Remove existing listener to prevent duplicates
+    el.removeEventListener('click', handleModalClose);
+    el.addEventListener('click', handleModalClose);
+  });
+
+  // Handle Escape key to close modal
+  document.removeEventListener('keydown', handleModalKeydown);
+  document.addEventListener('keydown', handleModalKeydown);
+
+  // Form submit handler (placeholder - will be enhanced in US-028)
+  const form = document.getElementById('goal-form');
+  if (form) {
+    form.removeEventListener('submit', handleGoalFormSubmit);
+    form.addEventListener('submit', handleGoalFormSubmit);
+  }
+}
+
+/**
+ * Handle modal close action
+ * @param {Event} e - Click event
+ */
+function handleModalClose(e) {
+  e.preventDefault();
+  e.stopPropagation();
+  closeGoalModal();
+}
+
+/**
+ * Handle keydown events for modal (Escape to close)
+ * @param {KeyboardEvent} e - Keyboard event
+ */
+function handleModalKeydown(e) {
+  const modal = document.getElementById('goal-form-modal');
+  if (!modal || !modal.classList.contains('active')) {
+    return;
+  }
+
+  if (e.key === 'Escape') {
+    e.preventDefault();
+    closeGoalModal();
+  }
+}
+
+/**
+ * Handle goal form submission (placeholder - full implementation in US-028)
+ * @param {Event} e - Submit event
+ */
+function handleGoalFormSubmit(e) {
+  e.preventDefault();
+
+  const modal = document.getElementById('goal-form-modal');
+  const mode = modal?.getAttribute('data-mode') || 'add';
+
+  console.log(`[Form] Submit in ${mode} mode - full implementation in US-028`);
+
+  // For now, just close the modal
+  // Full save logic will be implemented in US-028
+  closeGoalModal();
 }
 
 /**
@@ -1341,5 +1493,8 @@ export {
   // US-018 Checkbox functions
   handleCheckboxToggle,
   // US-019 Completion celebration
-  triggerCompletionCelebration
+  triggerCompletionCelebration,
+  // US-022 Modal functions
+  openGoalModal,
+  closeGoalModal
 };

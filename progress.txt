@@ -1068,3 +1068,71 @@
 - The Edit and Delete buttons are rendered but functionality not yet implemented (US-029, US-030)
 - The Add Goal button functionality depends on US-022+
 
+## Iteration 23 - US-022: Add Goal Form - Modal
+**Status:** Completed
+**Date:** 2026-01-22
+
+### What was done:
+- Created modal/overlay system for the Add Goal form
+- Added modal HTML structure to popup.html:
+  - Modal wrapper with aria-hidden attribute for accessibility
+  - Dark overlay background (clickable to close)
+  - Modal container with role="dialog" and aria-modal="true"
+  - Header with title "Add New Goal" and close button (X)
+  - Body with form placeholder (fields to be added in US-023+)
+  - Footer with Cancel (secondary) and Save Goal (primary) buttons
+- Implemented comprehensive CSS styling (~200 lines):
+  - Modal positioned fixed with z-index 1000
+  - Dark semi-transparent overlay (rgba 0.5 → 0.6 on active)
+  - Modal container with scale/translate animation on open
+  - Close button with red hover state
+  - Footer with secondary background
+  - Secondary button styles (for Cancel)
+  - body.modal-open class to prevent scroll
+- Implemented JavaScript modal functions:
+  - openGoalModal(mode, goal) - Opens modal in 'add' or 'edit' mode
+  - closeGoalModal() - Closes modal and resets form
+  - attachModalListeners() - Handles close button, overlay, and Escape key
+  - handleModalClose() - Click handler for close elements
+  - handleModalKeydown() - Keyboard handler for Escape key
+  - handleGoalFormSubmit() - Placeholder form submit (full implementation in US-028)
+- Connected Add Goal button on Manage Goals screen to openGoalModal()
+- Added modal functions to module exports
+
+### Technical details:
+- Updated src/popup/popup.html:
+  - Added #goal-form-modal with full accessibility attributes
+  - Form uses id="goal-form" for footer Save button's form attribute
+- Updated src/popup/popup.js (~150 lines):
+  - Created US-022 section with modal functions
+  - Modal stores mode ('add'/'edit') and goal-id in data attributes
+  - Event listeners properly removed before re-adding to prevent duplicates
+- Updated src/popup/popup.css (~200 lines):
+  - .modal with opacity/visibility transitions
+  - .modal.active state
+  - .modal-overlay with cursor pointer
+  - .modal-container with shadow and transform transitions
+  - .modal-header, .modal-body, .modal-footer sections
+  - .modal-close-btn with hover states
+  - .btn-secondary styles
+  - Animation keyframes (modal-fade-in, modal-slide-up)
+- CSS brace count: 325 (balanced)
+- JavaScript syntax validated with node --check
+- HTML div balance validated (12/12)
+
+### Acceptance criteria verification:
+- [x] Modal overlay with dark background - Semi-transparent black overlay
+- [x] Close button (X) in corner - SVG X icon with red hover state
+- [x] Form title 'Add New Goal' - Dynamic title (changes to 'Edit Goal' in edit mode)
+- [x] Save button (primary) - Green primary button in footer
+- [x] Cancel button (secondary) - Gray secondary button with border
+- [x] Clicking overlay background closes modal - data-action="close-modal" on overlay
+
+### Notes for next iteration:
+- US-023 (Add Goal Form - Title Input) is now unblocked
+  - Depends on US-022 (done) and has priority 3
+- US-024, US-025, US-026, US-027 all depend on US-023
+- US-028 (Save Logic) depends on all form field stories
+- US-030 (Delete Goal - Confirmation) is also unblocked (depends on US-021)
+- Form submit currently just closes modal - full save logic in US-028
+

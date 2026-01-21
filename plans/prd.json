@@ -324,7 +324,7 @@
         "Clicking overlay background closes modal"
       ],
       "priority": 3,
-      "passes": false,
+      "passes": true,
       "dependsOn": ["US-021"]
     },
     {
