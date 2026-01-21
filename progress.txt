@@ -2597,3 +2597,79 @@ Created the full Reports screen layout with all required UI sections.
 - Heatmap green colors may need adjustment for dark mode (US-050)
 - Could add click-to-filter functionality in future enhancement
 - Activity log grows over time - may need cleanup strategy for old data
+
+## Iteration: US-050 - Dark Mode - CSS Variables
+
+### Task completed: US-050 - Dark Mode - CSS Variables
+**Date:** 2026-01-22
+**Status:** PASSED
+
+### What was implemented:
+
+1. **Light Mode Variables Enhancement (in :root)**
+   - Added missing CSS variables that were being used but not defined:
+     - `--card-bg: #FFFFFF` (alias for background-card)
+     - `--radius-md: 6px` (medium border radius)
+     - `--transition-normal: 200ms ease` (alias for transition)
+   - Added heatmap color variables for theme support:
+     - `--heatmap-level-0` through `--heatmap-level-4` (GitHub-style green palette)
+
+2. **Dark Mode Variables ([data-theme='dark'])**
+   - **Primary colors**: Brighter greens (#66BB6A, #81C784) for dark mode visibility
+   - **Secondary colors**: Adjusted blues (#42A5F5, #64B5F6)
+   - **Background colors**: Dark Material Design surfaces (#121212, #1E1E1E)
+   - **Text colors**: Light text on dark (#E0E0E0, #BDBDBD)
+   - **Status colors**: Slightly brighter for contrast (success, danger, warning)
+   - **Border colors**: Subtle dark borders (#333333)
+   - **Shadows**: More prominent with higher opacity for dark backgrounds
+   - **Heatmap colors**: Darker base with brighter greens matching GitHub dark mode
+
+3. **Smooth Theme Transition**
+   - Added transition rules for all elements including pseudo-elements
+   - Transitions apply to: background-color, border-color, color, box-shadow
+   - Uses `var(--transition)` (200ms ease) for consistent timing
+   - Added `.no-transition` class to prevent flash on initial page load
+
+4. **Updated Heatmap Styles**
+   - Converted hardcoded heatmap colors to CSS variables
+   - Both `.heatmap-cell.level-*` and `.legend-cell.level-*` now use variables
+   - Enables automatic dark mode support for the activity heatmap
+
+### Acceptance criteria verification:
+- [x] Light mode variables in :root - Complete with all color, spacing, and typography variables
+- [x] Dark mode in [data-theme='dark'] - Complete with all theme-aware overrides
+- [x] Background, text, accent colors - Dark surfaces (#121212), light text (#E0E0E0), brighter accents
+- [x] Card and border colors - Cards (#1E1E1E), borders (#333333) defined
+- [x] Smooth transition - Added transition rules with .no-transition class for initial load
+
+### Technical details:
+- Updated src/popup/popup.css:
+  - Added ~80 lines for dark mode CSS variables
+  - Added ~20 lines for smooth transition rules
+  - Added 5 new heatmap color variables to :root
+  - Added 3 missing variables (--card-bg, --radius-md, --transition-normal)
+  - Updated heatmap cell and legend colors to use CSS variables
+
+### Color Palette Reference:
+**Light Mode:**
+- Background: #FFFFFF (pure white)
+- Background Secondary: #F5F5F5 (light gray)
+- Text: #212121 (near black)
+- Primary: #4CAF50 (green)
+- Border: #E0E0E0 (light gray)
+
+**Dark Mode:**
+- Background: #121212 (Material dark)
+- Background Secondary: #1E1E1E (elevated dark)
+- Text: #E0E0E0 (light gray)
+- Primary: #66BB6A (brighter green)
+- Border: #333333 (subtle dark)
+
+### Notes for next iteration:
+- US-051 (Dark Mode - Toggle) is now unblocked
+- The toggle implementation should:
+  1. Check system preference with prefers-color-scheme
+  2. Check stored user preference (override)
+  3. Set data-theme attribute on html element
+  4. Add `.no-transition` class briefly on page load to prevent flash
+- US-053 (Browser Badge - Goal Count) is also ready to work on

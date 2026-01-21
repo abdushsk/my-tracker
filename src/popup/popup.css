@@ -12,7 +12,7 @@
   padding: 0;
 }
 
-/* CSS Variables for theming */
+/* CSS Variables for theming - Light Mode (default) */
 :root {
   /* Primary colors */
   --primary: #4CAF50;
@@ -28,6 +28,7 @@
   --background: #FFFFFF;
   --background-secondary: #F5F5F5;
   --background-card: #FFFFFF;
+  --card-bg: #FFFFFF;
 
   /* Text colors */
   --text: #212121;
@@ -53,6 +54,13 @@
   --shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
   --shadow-lg: 0 4px 8px rgba(0, 0, 0, 0.15);
 
+  /* Heatmap colors (GitHub-style green) */
+  --heatmap-level-0: #E0E0E0;
+  --heatmap-level-1: #9be9a8;
+  --heatmap-level-2: #40c463;
+  --heatmap-level-3: #30a14e;
+  --heatmap-level-4: #216e39;
+
   /* Spacing */
   --spacing-xs: 4px;
   --spacing-sm: 8px;
@@ -62,12 +70,14 @@
 
   /* Border radius */
   --radius-sm: 4px;
+  --radius-md: 6px;
   --radius: 8px;
   --radius-lg: 12px;
   --radius-full: 9999px;
 
   /* Transitions */
   --transition-fast: 150ms ease;
+  --transition-normal: 200ms ease;
   --transition: 200ms ease;
   --transition-slow: 300ms ease;
 
@@ -84,6 +94,79 @@
   --font-weight-semibold: 600;
   --font-weight-bold: 700;
   --line-height: 1.5;
+}
+
+/* ========================================
+   US-050: Dark Mode - CSS Variables
+   ======================================== */
+
+/* Dark Mode CSS Variables */
+[data-theme='dark'] {
+  /* Primary colors - slightly brighter for dark mode visibility */
+  --primary: #66BB6A;
+  --primary-hover: #81C784;
+  --primary-light: #1B3A1E;
+
+  /* Secondary colors - adjusted for dark mode */
+  --secondary: #42A5F5;
+  --secondary-hover: #64B5F6;
+  --secondary-light: #1A2A3A;
+
+  /* Background colors - dark surfaces */
+  --background: #121212;
+  --background-secondary: #1E1E1E;
+  --background-card: #1E1E1E;
+  --card-bg: #1E1E1E;
+
+  /* Text colors - light text on dark */
+  --text: #E0E0E0;
+  --text-secondary: #BDBDBD;
+  --text-muted: #757575;
+  --text-inverse: #121212;
+
+  /* Status colors - slightly adjusted for dark mode */
+  --success: #66BB6A;
+  --success-light: #1B3A1E;
+  --danger: #EF5350;
+  --danger-hover: #E57373;
+  --danger-light: #3A1B1B;
+  --warning: #FFA726;
+  --warning-light: #3A2E1B;
+
+  /* Border colors - subtle on dark */
+  --border: #333333;
+  --border-focus: #66BB6A;
+
+  /* Shadow - more prominent on dark backgrounds */
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.3);
+  --shadow: 0 2px 6px rgba(0, 0, 0, 0.4);
+  --shadow-lg: 0 4px 12px rgba(0, 0, 0, 0.5);
+
+  /* Heatmap colors - adjusted for dark mode (darker base, brighter greens) */
+  --heatmap-level-0: #333333;
+  --heatmap-level-1: #0e4429;
+  --heatmap-level-2: #006d32;
+  --heatmap-level-3: #26a641;
+  --heatmap-level-4: #39d353;
+}
+
+/* Smooth theme transition for all elements */
+html,
+html *,
+html *::before,
+html *::after {
+  transition: background-color var(--transition),
+              border-color var(--transition),
+              color var(--transition),
+              box-shadow var(--transition);
+}
+
+/* Disable transitions during initial page load to prevent flash */
+html.no-transition,
+html.no-transition *,
+html.no-transition *::before,
+html.no-transition *::after {
+  transition: none !important;
 }
 
 /* Base typography */
@@ -3675,25 +3758,25 @@ body.modal-open {
   z-index: 1;
 }
 
-/* Heatmap intensity levels - GitHub-style green palette */
+/* Heatmap intensity levels - uses CSS variables for dark mode support */
 .heatmap-cell.level-0 {
-  background-color: var(--border);
+  background-color: var(--heatmap-level-0);
 }
 
 .heatmap-cell.level-1 {
-  background-color: #9be9a8;
+  background-color: var(--heatmap-level-1);
 }
 
 .heatmap-cell.level-2 {
-  background-color: #40c463;
+  background-color: var(--heatmap-level-2);
 }
 
 .heatmap-cell.level-3 {
-  background-color: #30a14e;
+  background-color: var(--heatmap-level-3);
 }
 
 .heatmap-cell.level-4 {
-  background-color: #216e39;
+  background-color: var(--heatmap-level-4);
 }
 
 /* Heatmap legend at the bottom */
@@ -3724,21 +3807,21 @@ body.modal-open {
 }
 
 .legend-cell.level-0 {
-  background-color: var(--border);
+  background-color: var(--heatmap-level-0);
 }
 
 .legend-cell.level-1 {
-  background-color: #9be9a8;
+  background-color: var(--heatmap-level-1);
 }
 
 .legend-cell.level-2 {
-  background-color: #40c463;
+  background-color: var(--heatmap-level-2);
 }
 
 .legend-cell.level-3 {
-  background-color: #30a14e;
+  background-color: var(--heatmap-level-3);
 }
 
 .legend-cell.level-4 {
-  background-color: #216e39;
+  background-color: var(--heatmap-level-4);
 }
