@@ -1,0 +1,28 @@
+# Progress Log
+# This file tracks learnings and progress across Ralph iterations
+
+## Iteration 1 - US-001: Project Initialization
+**Status:** Completed
+**Date:** 2026-01-22
+
+### What was done:
+- Created project folder structure for Chrome extension:
+  - src/popup/ - for popup HTML, CSS, JS
+  - src/background/ - for service worker
+  - src/styles/ - for shared styles
+  - src/utils/ - for utility modules (storage, models, etc.)
+  - src/assets/icons/ - for extension icons
+  - src/assets/sounds/ - for sound effect files
+- Created .gitignore with entries for:
+  - node_modules/
+  - dist/ and build/
+  - IDE files (.idea/, .vscode/)
+  - OS files (.DS_Store, Thumbs.db)
+  - Environment files (.env)
+  - Logs and temporary files
+
+### Notes for next iteration:
+- US-002 (Chrome Extension Manifest) and US-003 (Extension Icons) are now unblocked
+- Both have priority 1 and depend only on US-001
+- US-002 should likely be done first as it defines the manifest that references the icons
+
