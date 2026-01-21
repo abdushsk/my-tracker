@@ -1918,3 +1918,67 @@ Created src/utils/sounds.js with comprehensive audio functionality:
 - US-044, US-045, US-046 depend on US-042 and/or US-043
 - Sound integration is complete - users will hear audio feedback on all goal interactions
 
+
+## Iteration 36 - US-040: Auto Reset - Alarm Setup
+**Status:** Completed
+**Date:** 2026-01-22
+
+### What was done:
+- Implemented Chrome alarms for automatic goal resets in the service worker
+- Added ALARM_NAMES constants for alarm identification:
+  - DAILY_RESET: 'daily-reset'
+  - WEEKLY_RESET: 'weekly-reset'
+  - MONTHLY_RESET: 'monthly-reset'
+  - YEARLY_RESET: 'yearly-reset'
+- Created date calculation helper functions:
+  - getNextMidnight() - calculates next midnight timestamp
+  - getNextMondayMidnight() - calculates next Monday midnight timestamp
+  - getNextFirstOfMonth() - calculates next 1st of month midnight timestamp
+  - getNextJanuaryFirst() - calculates next January 1st midnight timestamp
+- Implemented setupResetAlarms() function:
+  - Clears existing alarms to avoid duplicates
+  - Creates daily alarm at midnight with 24-hour repeat (periodInMinutes: 1440)
+  - Creates weekly alarm at Monday midnight with 7-day repeat (periodInMinutes: 10080)
+  - Creates monthly alarm at 1st of month (no period - rescheduled on fire)
+  - Creates yearly alarm at January 1st (no period - rescheduled on fire)
+  - Logs all created alarms for debugging
+- Implemented rescheduleMonthlyAlarm() and rescheduleYearlyAlarm():
+  - Called when monthly/yearly alarms fire since these intervals vary
+  - Reschedules for the next occurrence
+- Enhanced onInstalled handler to call setupResetAlarms() on install/update
+- Implemented verifyAlarmsSetup() function:
+  - Called on browser startup via onStartup handler
+  - Checks if all four alarms exist
+  - Recreates any missing alarms
+- Updated alarm listener to use ALARM_NAMES constants and call reschedule functions
+
+### Technical details:
+- Updated src/background/service-worker.js:
+  - Added ALARM_NAMES constants after STORAGE_KEYS
+  - Added date calculation helpers (4 functions)
+  - Added setupResetAlarms() function (~60 lines)
+  - Added rescheduleMonthlyAlarm() and rescheduleYearlyAlarm() (~15 lines each)
+  - Added verifyAlarmsSetup() function (~40 lines)
+  - Updated onInstalled handler to be async and call setupResetAlarms()
+  - Updated onStartup handler to call verifyAlarmsSetup()
+  - Updated alarm listener to use constants and handle rescheduling
+- Chrome alarms persist automatically across browser restarts
+- Daily and weekly alarms use periodInMinutes for automatic repetition
+- Monthly and yearly alarms are one-shot and rescheduled when fired (due to varying intervals)
+- JavaScript syntax validated with node --check
+
+### Acceptance criteria verification:
+- [x] Alarms created on install - setupResetAlarms() called in onInstalled handler
+- [x] Daily alarm at midnight - Created with when: getNextMidnight(), periodInMinutes: 1440
+- [x] Weekly/monthly/yearly alarms - All three created with appropriate scheduling
+- [x] Alarms persist across browser restart - Chrome manages persistence, verifyAlarmsSetup() checks on startup
+- [x] Service worker handles alarms - onAlarm listener handles all reset alarm types
+
+### Notes for next iteration:
+- US-041 (Auto Reset - Reset Logic) is now unblocked
+  - Depends on US-040 (done) and US-012 (done)
+  - Has priority 5
+- US-041 will implement the actual reset logic that runs when alarms fire
+- US-042 (History Storage Model) is also available (depends on US-009 done)
+- US-043 (Reports Screen - Layout) is also available (depends on US-013 done)
+- The alarm infrastructure is complete - just needs the reset logic in US-041

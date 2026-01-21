@@ -596,7 +596,7 @@
         "Service worker handles alarms"
       ],
       "priority": 5,
-      "passes": false,
+      "passes": true,
       "dependsOn": ["US-006"]
     },
     {

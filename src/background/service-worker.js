@@ -100,6 +100,17 @@ async function updateGoal(goalId, updates) {
 }
 
 // ============================================
+// US-040: Alarm Names Constants
+// ============================================
+
+const ALARM_NAMES = {
+  DAILY_RESET: 'daily-reset',
+  WEEKLY_RESET: 'weekly-reset',
+  MONTHLY_RESET: 'monthly-reset',
+  YEARLY_RESET: 'yearly-reset'
+};
+
+// ============================================
 // Installation Handler
 // ============================================
 
@@ -107,7 +118,7 @@ async function updateGoal(goalId, updates) {
  * Fires when the extension is first installed, updated, or
  * when Chrome is updated.
  */
-chrome.runtime.onInstalled.addListener((details) => {
+chrome.runtime.onInstalled.addListener(async (details) => {
   console.log('[Service Worker] Extension installed/updated:', details.reason);
 
   if (details.reason === 'install') {
@@ -118,8 +129,8 @@ chrome.runtime.onInstalled.addListener((details) => {
     // Future: Handle any migration or cleanup needed
   }
 
-  // Future: Set up alarms for scheduled resets
-  // setupResetAlarms();
+  // US-040: Set up alarms for scheduled resets
+  await setupResetAlarms();
 });
 
 // ============================================
@@ -349,33 +360,41 @@ async function handleSyncTimerProgress(goalId, progress, isActive) {
  * - Daily/weekly/monthly/yearly goal resets
  * - Reminder notifications
  * - Break reminders for long timer sessions
+ *
+ * US-040: Alarm handlers set up for automatic goal resets
  */
-chrome.alarms.onAlarm.addListener((alarm) => {
+chrome.alarms.onAlarm.addListener(async (alarm) => {
   console.log('[Service Worker] Alarm fired:', alarm.name);
 
   switch (alarm.name) {
-    case 'daily-reset':
-      // Future: Reset all daily goals at midnight
+    case ALARM_NAMES.DAILY_RESET:
+      // US-040: Daily check at midnight - handled by US-041
       console.log('[Service Worker] Daily reset triggered');
-      // resetGoalsByTimeframe('daily');
+      // Reset logic will be implemented in US-041
+      // Note: This alarm repeats automatically via periodInMinutes
       break;
 
-    case 'weekly-reset':
-      // Future: Reset all weekly goals on Monday midnight
+    case ALARM_NAMES.WEEKLY_RESET:
+      // US-040: Weekly check at Monday midnight - handled by US-041
       console.log('[Service Worker] Weekly reset triggered');
-      // resetGoalsByTimeframe('weekly');
+      // Reset logic will be implemented in US-041
+      // Note: This alarm repeats automatically via periodInMinutes
       break;
 
-    case 'monthly-reset':
-      // Future: Reset all monthly goals on 1st midnight
+    case ALARM_NAMES.MONTHLY_RESET:
+      // US-040: Monthly check at 1st midnight - handled by US-041
       console.log('[Service Worker] Monthly reset triggered');
-      // resetGoalsByTimeframe('monthly');
+      // Reset logic will be implemented in US-041
+      // Reschedule for next month (since months vary in length)
+      await rescheduleMonthlyAlarm();
       break;
 
-    case 'yearly-reset':
-      // Future: Reset all yearly goals on Jan 1st midnight
+    case ALARM_NAMES.YEARLY_RESET:
+      // US-040: Yearly check at Jan 1st midnight - handled by US-041
       console.log('[Service Worker] Yearly reset triggered');
-      // resetGoalsByTimeframe('yearly');
+      // Reset logic will be implemented in US-041
+      // Reschedule for next year
+      await rescheduleYearlyAlarm();
       break;
 
     case 'reminder':
@@ -397,6 +416,169 @@ chrome.alarms.onAlarm.addListener((alarm) => {
 });
 
 // ============================================
+// US-040: Auto Reset - Alarm Setup
+// ============================================
+
+/**
+ * Calculate the next midnight timestamp from now
+ * @returns {number} Timestamp of next midnight in milliseconds
+ */
+function getNextMidnight() {
+  const now = new Date();
+  const midnight = new Date(now);
+  midnight.setDate(midnight.getDate() + 1);
+  midnight.setHours(0, 0, 0, 0);
+  return midnight.getTime();
+}
+
+/**
+ * Calculate the next Monday midnight timestamp
+ * @returns {number} Timestamp of next Monday at midnight in milliseconds
+ */
+function getNextMondayMidnight() {
+  const now = new Date();
+  const monday = new Date(now);
+  // Get days until next Monday (0 = Sunday, 1 = Monday, ..., 6 = Saturday)
+  const daysUntilMonday = (8 - now.getDay()) % 7 || 7;
+  monday.setDate(monday.getDate() + daysUntilMonday);
+  monday.setHours(0, 0, 0, 0);
+  return monday.getTime();
+}
+
+/**
+ * Calculate the next 1st of month midnight timestamp
+ * @returns {number} Timestamp of next 1st at midnight in milliseconds
+ */
+function getNextFirstOfMonth() {
+  const now = new Date();
+  const firstOfMonth = new Date(now);
+  // Move to first of next month
+  firstOfMonth.setMonth(firstOfMonth.getMonth() + 1);
+  firstOfMonth.setDate(1);
+  firstOfMonth.setHours(0, 0, 0, 0);
+  return firstOfMonth.getTime();
+}
+
+/**
+ * Calculate the next January 1st midnight timestamp
+ * @returns {number} Timestamp of next January 1st at midnight in milliseconds
+ */
+function getNextJanuaryFirst() {
+  const now = new Date();
+  const january = new Date(now);
+  // Move to January 1st of next year
+  january.setFullYear(january.getFullYear() + 1);
+  january.setMonth(0);
+  january.setDate(1);
+  january.setHours(0, 0, 0, 0);
+  return january.getTime();
+}
+
+/**
+ * Set up all reset alarms for automatic goal resets.
+ * Creates alarms for:
+ * - Daily reset at midnight every day
+ * - Weekly reset at midnight on Monday
+ * - Monthly reset at midnight on the 1st
+ * - Yearly reset at midnight on January 1st
+ *
+ * Alarms persist across browser restarts (Chrome manages this).
+ * @returns {Promise<void>}
+ */
+async function setupResetAlarms() {
+  console.log('[Service Worker] Setting up reset alarms...');
+
+  try {
+    // Clear any existing reset alarms first to avoid duplicates
+    await chrome.alarms.clear(ALARM_NAMES.DAILY_RESET);
+    await chrome.alarms.clear(ALARM_NAMES.WEEKLY_RESET);
+    await chrome.alarms.clear(ALARM_NAMES.MONTHLY_RESET);
+    await chrome.alarms.clear(ALARM_NAMES.YEARLY_RESET);
+
+    const now = Date.now();
+
+    // Create daily alarm - fires at midnight, repeats every 24 hours (1440 minutes)
+    const nextMidnight = getNextMidnight();
+    await chrome.alarms.create(ALARM_NAMES.DAILY_RESET, {
+      when: nextMidnight,
+      periodInMinutes: 24 * 60 // 1440 minutes = 24 hours
+    });
+    console.log(`[Service Worker] Daily reset alarm set for ${new Date(nextMidnight).toLocaleString()}`);
+
+    // Create weekly alarm - fires at Monday midnight, repeats every 7 days (10080 minutes)
+    const nextMonday = getNextMondayMidnight();
+    await chrome.alarms.create(ALARM_NAMES.WEEKLY_RESET, {
+      when: nextMonday,
+      periodInMinutes: 7 * 24 * 60 // 10080 minutes = 7 days
+    });
+    console.log(`[Service Worker] Weekly reset alarm set for ${new Date(nextMonday).toLocaleString()}`);
+
+    // Create monthly alarm - fires at 1st of month midnight
+    // Note: Month length varies, so we only set the first occurrence here
+    // The alarm handler will reschedule for the next month when it fires
+    const nextFirst = getNextFirstOfMonth();
+    await chrome.alarms.create(ALARM_NAMES.MONTHLY_RESET, {
+      when: nextFirst
+      // No periodInMinutes - we'll reschedule when it fires since months vary
+    });
+    console.log(`[Service Worker] Monthly reset alarm set for ${new Date(nextFirst).toLocaleString()}`);
+
+    // Create yearly alarm - fires at January 1st midnight
+    const nextJanuary = getNextJanuaryFirst();
+    await chrome.alarms.create(ALARM_NAMES.YEARLY_RESET, {
+      when: nextJanuary
+      // No periodInMinutes - we'll reschedule when it fires
+    });
+    console.log(`[Service Worker] Yearly reset alarm set for ${new Date(nextJanuary).toLocaleString()}`);
+
+    // Log all alarms for debugging
+    const allAlarms = await chrome.alarms.getAll();
+    console.log('[Service Worker] All alarms set up:', allAlarms.map(a => ({
+      name: a.name,
+      scheduledTime: new Date(a.scheduledTime).toLocaleString(),
+      periodInMinutes: a.periodInMinutes
+    })));
+
+  } catch (error) {
+    console.error('[Service Worker] Error setting up reset alarms:', error);
+  }
+}
+
+/**
+ * Reschedule the monthly alarm for the next month.
+ * Called after the monthly alarm fires since months have varying lengths.
+ * @returns {Promise<void>}
+ */
+async function rescheduleMonthlyAlarm() {
+  try {
+    const nextFirst = getNextFirstOfMonth();
+    await chrome.alarms.create(ALARM_NAMES.MONTHLY_RESET, {
+      when: nextFirst
+    });
+    console.log(`[Service Worker] Monthly alarm rescheduled for ${new Date(nextFirst).toLocaleString()}`);
+  } catch (error) {
+    console.error('[Service Worker] Error rescheduling monthly alarm:', error);
+  }
+}
+
+/**
+ * Reschedule the yearly alarm for next year.
+ * Called after the yearly alarm fires.
+ * @returns {Promise<void>}
+ */
+async function rescheduleYearlyAlarm() {
+  try {
+    const nextJanuary = getNextJanuaryFirst();
+    await chrome.alarms.create(ALARM_NAMES.YEARLY_RESET, {
+      when: nextJanuary
+    });
+    console.log(`[Service Worker] Yearly alarm rescheduled for ${new Date(nextJanuary).toLocaleString()}`);
+  } catch (error) {
+    console.error('[Service Worker] Error rescheduling yearly alarm:', error);
+  }
+}
+
+// ============================================
 // Extension Startup
 // ============================================
 
@@ -404,6 +586,7 @@ chrome.alarms.onAlarm.addListener((alarm) => {
  * Fires when the extension starts (e.g., browser startup, extension enabled).
  * Note: This event also fires on service worker wake-up.
  * US-031: Check for completed timers on startup
+ * US-040: Verify alarms are still set up
  */
 chrome.runtime.onStartup.addListener(async () => {
   console.log('[Service Worker] Extension started');
@@ -411,9 +594,55 @@ chrome.runtime.onStartup.addListener(async () => {
   // US-031: Check for any timers that may have completed
   await checkForCompletedTimers();
 
-  // Future: Verify alarms are still set up
-  // Future: Update badge with current goal count
+  // US-040: Verify alarms are still set up (they should persist, but verify)
+  await verifyAlarmsSetup();
 });
+
+/**
+ * US-040: Verify that all reset alarms are properly set up.
+ * If any are missing, recreate them. This handles edge cases where
+ * alarms might have been cleared for some reason.
+ * @returns {Promise<void>}
+ */
+async function verifyAlarmsSetup() {
+  console.log('[Service Worker] Verifying alarm setup...');
+
+  try {
+    const alarms = await chrome.alarms.getAll();
+    const alarmNames = alarms.map(a => a.name);
+
+    let needsSetup = false;
+
+    // Check if each required alarm exists
+    if (!alarmNames.includes(ALARM_NAMES.DAILY_RESET)) {
+      console.log('[Service Worker] Daily reset alarm missing');
+      needsSetup = true;
+    }
+    if (!alarmNames.includes(ALARM_NAMES.WEEKLY_RESET)) {
+      console.log('[Service Worker] Weekly reset alarm missing');
+      needsSetup = true;
+    }
+    if (!alarmNames.includes(ALARM_NAMES.MONTHLY_RESET)) {
+      console.log('[Service Worker] Monthly reset alarm missing');
+      needsSetup = true;
+    }
+    if (!alarmNames.includes(ALARM_NAMES.YEARLY_RESET)) {
+      console.log('[Service Worker] Yearly reset alarm missing');
+      needsSetup = true;
+    }
+
+    if (needsSetup) {
+      console.log('[Service Worker] Recreating missing alarms...');
+      await setupResetAlarms();
+    } else {
+      console.log('[Service Worker] All alarms verified');
+    }
+  } catch (error) {
+    console.error('[Service Worker] Error verifying alarms:', error);
+    // Try to set up alarms anyway
+    await setupResetAlarms();
+  }
+}
 
 /**
  * US-031: Check for timers that completed while browser was closed
