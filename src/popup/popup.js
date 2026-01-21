@@ -16,7 +16,8 @@ import {
   saveActiveTimers,
   updateGoal,
   deleteGoal,
-  addActivityLogEntry
+  addActivityLogEntry,
+  getHistory
 } from '../utils/storage.js';
 import {
   GOAL_TYPES,
@@ -25,7 +26,11 @@ import {
   isGoalCompleted,
   getGoalCompletionPercentage,
   createActivityLog,
-  createGoal
+  createGoal,
+  getTodayDateString,
+  getDateStringDaysAgo,
+  filterHistoryByDateRange,
+  groupHistoryByDate
 } from '../utils/models.js';
 import {
   initSounds,
@@ -2576,9 +2581,9 @@ function renderReportsScreen() {
 
 /**
  * Update the reports screen with calculated statistics
- * Placeholder implementation - will be enhanced in US-044, US-045, US-046
+ * US-044: Implements discipline score calculation and display
  */
-function updateReportsStats() {
+async function updateReportsStats() {
   // Get today's completion count from current goals
   const totalGoals = state.goals.length;
   const completedGoals = state.goals.filter(goal => isGoalCompleted(goal)).length;
@@ -2599,6 +2604,105 @@ function updateReportsStats() {
   if (monthCompletedEl) {
     monthCompletedEl.textContent = `--/--`;
   }
+
+  // US-044: Calculate and display discipline score
+  await updateDisciplineScore();
+}
+
+/**
+ * Calculate and display the discipline score
+ * US-044: Discipline Score Implementation
+ *
+ * Formula: (completed goals / total goals) * 100 averaged over last 7 days
+ * Color coding: green (>80), yellow (>50), red (<50)
+ */
+async function updateDisciplineScore() {
+  const disciplineScoreEl = document.getElementById('discipline-score-value');
+  if (!disciplineScoreEl) return;
+
+  // Get history data
+  const history = await getHistory();
+
+  // Calculate score based on last 7 days
+  const score = calculateDisciplineScore(history, state.goals);
+
+  // Update the display
+  disciplineScoreEl.textContent = score === null ? '--' : Math.round(score);
+
+  // Apply color coding
+  // Remove any existing score classes
+  disciplineScoreEl.classList.remove(
+    'score-excellent',
+    'score-good',
+    'score-moderate',
+    'score-needs-improvement'
+  );
+
+  // Apply appropriate color class based on score
+  // Color coding per US-044: green (>80), yellow (>50), red (<50)
+  if (score !== null) {
+    if (score > 80) {
+      disciplineScoreEl.classList.add('score-excellent'); // green
+    } else if (score > 50) {
+      disciplineScoreEl.classList.add('score-moderate'); // yellow/warning
+    } else {
+      disciplineScoreEl.classList.add('score-needs-improvement'); // red
+    }
+  }
+}
+
+/**
+ * Calculate the discipline score from history data
+ * US-044: Score calculation logic
+ *
+ * @param {Array} history - Array of history entries
+ * @param {Array} currentGoals - Current goals array (used for today's data)
+ * @returns {number|null} The discipline score (0-100) or null if insufficient data
+ */
+function calculateDisciplineScore(history, currentGoals) {
+  const today = getTodayDateString();
+  const sevenDaysAgo = getDateStringDaysAgo(6); // 6 days ago + today = 7 days
+
+  // Get history for the last 7 days (excluding today which we'll calculate from current goals)
+  const last7DaysHistory = filterHistoryByDateRange(history, sevenDaysAgo, today);
+
+  // Group history by date
+  const historyByDate = groupHistoryByDate(last7DaysHistory);
+
+  // Calculate daily completion rates
+  const dailyRates = [];
+
+  // Process historical days (past 6 days)
+  for (let i = 6; i >= 1; i--) {
+    const dateStr = getDateStringDaysAgo(i);
+    const dayEntries = historyByDate[dateStr] || [];
+
+    if (dayEntries.length > 0) {
+      const completedCount = dayEntries.filter(entry => entry.completed).length;
+      const totalCount = dayEntries.length;
+      const rate = (completedCount / totalCount) * 100;
+      dailyRates.push(rate);
+    }
+    // If no history for a day, we don't include it in the calculation
+    // This avoids penalizing users for days before they started using the extension
+  }
+
+  // Add today's completion rate from current goals
+  if (currentGoals.length > 0) {
+    const todayCompleted = currentGoals.filter(goal => isGoalCompleted(goal)).length;
+    const todayRate = (todayCompleted / currentGoals.length) * 100;
+    dailyRates.push(todayRate);
+  }
+
+  // If we have no data at all, return null
+  if (dailyRates.length === 0) {
+    return null;
+  }
+
+  // Calculate average
+  const averageScore = dailyRates.reduce((sum, rate) => sum + rate, 0) / dailyRates.length;
+
+  return averageScore;
 }
 
 /**

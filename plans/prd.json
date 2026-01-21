@@ -657,7 +657,7 @@
         "Updates on screen open"
       ],
       "priority": 5,
-      "passes": false,
+      "passes": true,
       "dependsOn": ["US-043", "US-042"]
     },
     {

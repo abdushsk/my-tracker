@@ -2199,3 +2199,63 @@ Created the full Reports screen layout with all required UI sections.
 - US-046 (Completion Stats Cards) depends on US-044
 - The layout is complete and ready for data integration in subsequent stories
 - updateReportsStats() will need to be enhanced to calculate actual values from history
+
+## Iteration 44 - US-044: Reports - Discipline Score
+**Status:** Completed
+**Date:** 2026-01-22
+
+### What was done:
+- Implemented discipline score calculation and display in the Reports screen
+- Added three new functions to popup.js for score management
+
+### Key implementation details:
+
+1. **updateReportsStats() - Made async**:
+   - Now awaits updateDisciplineScore() to calculate and display the score
+   - Still handles Today's completion stats from current goal data
+
+2. **updateDisciplineScore() - New function**:
+   - Gets the discipline-score-value element
+   - Fetches history data using getHistory()
+   - Calls calculateDisciplineScore() to compute the score
+   - Updates the display (shows '--' if no data, otherwise rounded score)
+   - Applies color coding classes based on score range:
+     - score-excellent (green) for >80
+     - score-moderate (yellow/warning) for 50-80
+     - score-needs-improvement (red) for <50
+   - Removes any previous score classes before applying new one
+
+3. **calculateDisciplineScore(history, currentGoals) - New function**:
+   - Calculates discipline score from last 7 days of data
+   - Gets history entries from the past 6 days using filterHistoryByDateRange()
+   - Groups history by date using groupHistoryByDate()
+   - For each historical day with entries, calculates completion rate (completed/total * 100)
+   - Adds today's completion rate from currentGoals
+   - Returns average of all daily rates, or null if no data exists
+   - Does not penalize users for days without history (e.g., before they started using the extension)
+
+4. **Imports added**:
+   - getHistory from storage.js
+   - getTodayDateString, getDateStringDaysAgo, filterHistoryByDateRange, groupHistoryByDate from models.js
+
+### Acceptance criteria verification:
+- [x] Score calculated from history - Uses last 7 days of history + current day's goals
+- [x] Displayed as 0-100 number - Math.round(score) displayed in discipline-score-value element
+- [x] Color coded by range - Green (>80), yellow (50-80), red (<50) via CSS classes
+- [x] Shows 'Discipline Score' label - Already present from US-043 layout
+- [x] Updates on screen open - updateReportsStats() called in renderReportsScreen()
+
+### Technical details:
+- Updated src/popup/popup.js:
+  - Added getHistory to imports from storage.js
+  - Added getTodayDateString, getDateStringDaysAgo, filterHistoryByDateRange, groupHistoryByDate to imports from models.js
+  - Made updateReportsStats() async
+  - Added updateDisciplineScore() function (~35 lines)
+  - Added calculateDisciplineScore() function (~45 lines)
+- CSS classes already existed from US-043 (score-excellent, score-moderate, score-needs-improvement)
+
+### Notes for next iteration:
+- US-045 (Streak Counter) is now unblocked (depends on US-044)
+- US-046 (Completion Stats Cards) is now unblocked (depends on US-044)
+- The discipline score will show '--' for new users with no history
+- Score will automatically include today's progress even without any history
