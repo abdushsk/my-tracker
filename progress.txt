@@ -1736,3 +1736,89 @@
   - US-036 (Checkbox - Toggle Logic) - already implemented in US-018
   - US-037 (Sound - Audio Utility) - depends on US-001 (done)
 
+## Iteration 33 - US-032, US-033, US-034, US-035, US-036 (Retroactive) + US-037
+**Status:** Completed
+**Date:** 2026-01-22
+
+### What was done:
+
+#### Retroactive Completion (US-032, US-033, US-034, US-035, US-036)
+Upon analysis, these five user stories were already fully implemented in earlier iterations:
+- **US-032 (Timer - Play/Pause Logic)**: Implemented in US-016 via handleTimerToggle()
+  - Play sets isActive true ✓
+  - Pause calculates and saves progress ✓
+  - Service worker notified via sendToServiceWorker() ✓
+  - Activity logged via createActivityLog() ✓
+  - UI updates immediately via renderCurrentScreen() ✓
+- **US-033 (Timer - Live Display Update)**: Implemented in US-016 via timer interval system
+  - Display updates every second via setInterval(1000) ✓
+  - HH:MM:SS format maintained via formatTime() ✓
+  - Only active timers update ✓
+  - Interval cleared on popup close via stopTimerUpdateInterval() ✓
+  - Progress bar updates too ✓
+- **US-034 (Counter - Increment Logic)**: Implemented in US-017 via handleCounterIncrement()
+  - Progress increases by 1 ✓
+  - Saved to storage immediately via updateGoal() ✓
+  - Activity logged via createActivityLog() with INCREMENT action ✓
+  - UI updates instantly ✓
+  - Completion check triggered via isGoalCompleted() ✓
+- **US-035 (Counter - Decrement Logic)**: Implemented in US-017 via handleCounterDecrement()
+  - Progress decreases by 1 ✓
+  - Cannot go below 0 ✓
+  - Saved to storage immediately ✓
+  - Activity logged with DECREMENT action ✓
+  - UI updates instantly ✓
+- **US-036 (Checkbox - Toggle Logic)**: Implemented in US-018 via handleCheckboxToggle()
+  - Progress toggles 0/1 ✓
+  - Saved to storage immediately ✓
+  - Activity logged with TOGGLE action ✓
+  - UI updates with visual feedback ✓
+  - Completion check triggered ✓
+
+#### US-037: Sound - Audio Utility
+Created src/utils/sounds.js with comprehensive audio functionality:
+- **SOUNDS enum**: Defines available sounds (COMPLETE, TICK, START, PAUSE)
+- **playSound(soundName)**: Plays a sound effect
+  - Validates sound name
+  - Checks mute state before playing
+  - Uses HTMLAudioElement for cross-browser compatibility
+  - Graceful error handling for autoplay policies
+- **setVolume(level)**: Sets volume between 0-1
+  - Validates and clamps input
+  - Updates cached audio elements
+- **getVolume()**: Returns current volume level
+- **setMuted(muted)**: Sets mute state
+- **isMuted()**: Returns current mute state
+- **toggleMuted()**: Toggles mute state
+- **loadSoundSettings(settings)**: Loads settings from storage
+  - Converts soundVolume (0-100) to internal (0-1) range
+  - Maps soundEnabled to muted state
+- **getSoundSettings()**: Returns settings for storage
+- **initSounds()**: Pre-loads audio elements for faster playback
+- **cleanupSounds()**: Releases audio resources
+- **playSoundForEvent(eventType)**: Convenience function mapping events to sounds
+- **testAllSounds()**: Debug function to test all sounds
+
+### Technical details:
+- Uses HTMLAudioElement for broad browser compatibility
+- Sound files loaded from src/assets/sounds/ via chrome.runtime.getURL()
+- Falls back gracefully if audio playback fails (browser autoplay policies)
+- Caches audio elements for reuse
+- Volume stored as 0-1 internally, converted to/from 0-100 for settings
+- All functions exported as ES6 modules
+
+### Acceptance criteria verification for US-037:
+- [x] sounds.js created - src/utils/sounds.js with full implementation
+- [x] playSound function works - playSound(soundName) with validation and error handling
+- [x] Volume control (0-1) - setVolume(level) with clamping
+- [x] Mute toggle - setMuted(bool), isMuted(), toggleMuted()
+- [x] Graceful fallback if sound fails - try/catch with console.warn on failure
+
+### Notes for next iteration:
+- US-038 (Sound - Effect Files) is now unblocked
+  - Depends on US-037 (done) and has priority 4
+  - Needs to create actual MP3 sound files
+- US-039 (Sound - Integration) depends on US-038, US-032, US-034, US-036 (all now done)
+- US-040 (Auto Reset - Alarm Setup) has priority 5 and depends on US-006 (done)
+- All priority 4 dependencies for US-039 are now satisfied, just needs US-038
+

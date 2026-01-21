@@ -476,7 +476,7 @@
         "UI updates immediately"
       ],
       "priority": 4,
-      "passes": false,
+      "passes": true,
       "dependsOn": ["US-031"]
     },
     {
@@ -491,7 +491,7 @@
         "Progress bar updates too"
       ],
       "priority": 4,
-      "passes": false,
+      "passes": true,
       "dependsOn": ["US-032"]
     },
     {
@@ -506,7 +506,7 @@
         "Completion check triggered"
       ],
       "priority": 4,
-      "passes": false,
+      "passes": true,
       "dependsOn": ["US-017", "US-009"]
     },
     {
@@ -521,7 +521,7 @@
         "UI updates instantly"
       ],
       "priority": 4,
-      "passes": false,
+      "passes": true,
       "dependsOn": ["US-034"]
     },
     {
@@ -536,7 +536,7 @@
         "Completion check triggered"
       ],
       "priority": 4,
-      "passes": false,
+      "passes": true,
       "dependsOn": ["US-018", "US-009"]
     },
     {
@@ -551,7 +551,7 @@
         "Graceful fallback if sound fails"
       ],
       "priority": 4,
-      "passes": false,
+      "passes": true,
       "dependsOn": ["US-001"]
     },
     {
