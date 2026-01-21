@@ -943,3 +943,71 @@
 - All priority 2 tasks are now complete
 - View Goals screen is fully functional with all goal types and completion celebration
 
+## Iteration 21 - US-020: Manage Goals Screen - Layout
+**Status:** Completed
+**Date:** 2026-01-22
+
+### What was done:
+- Created full Manage Goals screen layout with all required components
+- Implemented header with Back button and screen title:
+  - SVG arrow icon for back button (replacing HTML entity)
+  - "Manage Goals" title centered in header
+  - Header spacer for balanced layout
+  - Click handler navigates back to View Goals screen
+- Created prominent "Add Goal" button:
+  - Primary color styling with shadow
+  - Plus icon with text label
+  - Full width in actions section
+  - Hover effects (lift and shadow)
+- Implemented scrollable goals list container:
+  - Separate from View Goals - different item structure
+  - Shows goal title, type icon, timeframe badge
+  - Edit button (pencil icon) per goal
+  - Delete button (trash icon, red hover) per goal
+  - Sorted by order property, then by createdAt
+- Added empty state for when no goals exist:
+  - SVG illustration (document/list icon)
+  - Friendly message: "No goals to manage yet"
+  - Submessage: "Click 'Add Goal' above to create your first goal"
+
+### Technical details:
+- Updated src/popup/popup.js:
+  - Added getGoalTypeIconSmall() function for smaller icons in list items
+  - Rewrote renderManageGoalsScreen() with full layout
+  - Added renderManageGoalsEmptyState() function
+  - Added renderManageGoalsList() function
+  - Added renderManageGoalItem() function with type indicator, title, timeframe badge, and action buttons
+  - Goals sorted before rendering
+  - Uses escapeHtml() for XSS protection
+- Updated src/popup/popup.css (~250 lines added):
+  - US-020 section header
+  - .manage-goals-header with back button and title styling
+  - .manage-goals-content flex layout
+  - .manage-goals-actions with prominent add button
+  - .btn-add-goal with hover/active states
+  - .manage-goals-list-container scrollable area
+  - .manage-goals-list with gap between items
+  - .manage-goal-item with hover state
+  - .manage-goal-info with type indicator and details
+  - .manage-goal-type-indicator with type-specific colors
+  - .manage-goal-actions with edit/delete buttons
+  - .manage-action-btn with color-specific hover states (blue for edit, red for delete)
+  - .manage-empty-state centered layout
+- CSS brace count: 293 (balanced)
+- JavaScript syntax validated with node --check
+
+### Acceptance criteria verification:
+- [x] Back button navigates to View Goals - SVG arrow icon with click handler
+- [x] Screen title 'Manage Goals' - Centered in header
+- [x] Add Goal button (prominent styling) - Primary color, full width, shadow effects
+- [x] Goals list container - Scrollable container with manage-goal-items
+- [x] Screen hidden by default - Uses .screen class which is display:none by default
+
+### Notes for next iteration:
+- US-021 (Manage Goals - Goal List Item) is now unblocked
+  - Depends on US-020 (done) and has priority 3
+  - Note: US-020 already includes basic goal list item structure, but US-021 will enhance it
+- US-022 (Add Goal Form - Modal) depends on US-021
+- The Edit and Delete buttons are rendered but don't have functionality yet (US-029, US-030)
+- The Add Goal button doesn't have functionality yet (US-022+)
+

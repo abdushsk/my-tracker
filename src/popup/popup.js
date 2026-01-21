@@ -955,33 +955,80 @@ function escapeHtml(text) {
   return div.innerHTML;
 }
 
+// =============================================================================
+// US-020: Manage Goals Screen - Layout
+// =============================================================================
+
+/**
+ * Get icon SVG for a goal type (for manage screen list)
+ * @param {string} type - The goal type
+ * @returns {string} SVG HTML string
+ */
+function getGoalTypeIconSmall(type) {
+  switch (type) {
+    case GOAL_TYPES.TIMER:
+      return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="manage-goal-type-icon">
+        <circle cx="12" cy="12" r="10"/>
+        <polyline points="12 6 12 12 16 14"/>
+      </svg>`;
+    case GOAL_TYPES.COUNTER:
+      return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="manage-goal-type-icon">
+        <line x1="12" y1="1" x2="12" y2="23"/>
+        <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
+      </svg>`;
+    case GOAL_TYPES.CHECKBOX:
+      return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="manage-goal-type-icon">
+        <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+        <polyline points="9 11 12 14 22 4"/>
+      </svg>`;
+    default:
+      return '';
+  }
+}
+
 /**
  * Render the Manage Goals screen
+ * US-020: Full layout implementation
  */
 function renderManageGoalsScreen() {
   const screen = document.getElementById(SCREEN_IDS[SCREENS.MANAGE_GOALS]);
   if (!screen) return;
 
-  // Placeholder content - will be enhanced in US-020
+  // Sort goals by order property, then by createdAt
+  const sortedGoals = [...state.goals].sort((a, b) => {
+    if (a.order !== b.order) {
+      return (a.order || 0) - (b.order || 0);
+    }
+    return (a.createdAt || 0) - (b.createdAt || 0);
+  });
+
   screen.innerHTML = `
     <div class="manage-goals-screen">
-      <header class="screen-header">
-        <button class="back-btn" data-screen="${SCREENS.VIEW_GOALS}">
-          <span>&#8592;</span> Back
+      <header class="screen-header manage-goals-header">
+        <button class="back-btn" data-screen="${SCREENS.VIEW_GOALS}" title="Back to Goals">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="back-icon">
+            <line x1="19" y1="12" x2="5" y2="12"/>
+            <polyline points="12 19 5 12 12 5"/>
+          </svg>
+          <span class="back-label">Back</span>
         </button>
-        <h1>Manage Goals</h1>
+        <h1 class="manage-title">Manage Goals</h1>
+        <div class="header-spacer"></div>
       </header>
-      <main class="manage-content">
-        <button class="btn btn-primary add-goal-btn">+ Add Goal</button>
-        <div class="goals-management-list">
-          ${state.goals.length === 0
-            ? '<p class="no-goals-message">No goals to manage. Add your first goal!</p>'
-            : state.goals.map(goal => `
-                <div class="manage-goal-item" data-goal-id="${goal.id}">
-                  <span class="goal-title">${goal.title}</span>
-                  <span class="goal-type-badge">${goal.type}</span>
-                </div>
-              `).join('')}
+      <main class="manage-goals-content">
+        <div class="manage-goals-actions">
+          <button class="btn btn-primary btn-add-goal" id="add-goal-btn">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="btn-icon">
+              <line x1="12" y1="5" x2="12" y2="19"/>
+              <line x1="5" y1="12" x2="19" y2="12"/>
+            </svg>
+            <span>Add Goal</span>
+          </button>
+        </div>
+        <div class="manage-goals-list-container">
+          ${sortedGoals.length === 0
+            ? renderManageGoalsEmptyState()
+            : renderManageGoalsList(sortedGoals)}
         </div>
       </main>
     </div>
@@ -989,6 +1036,82 @@ function renderManageGoalsScreen() {
 
   // Attach navigation event listeners
   attachNavigationListeners(screen);
+}
+
+/**
+ * Render empty state for Manage Goals screen
+ * @returns {string} HTML string for empty state
+ */
+function renderManageGoalsEmptyState() {
+  return `
+    <div class="manage-empty-state">
+      <div class="manage-empty-icon">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" fill="none">
+          <rect x="8" y="8" width="48" height="48" rx="8" fill="var(--background-secondary)" stroke="var(--border)" stroke-width="2"/>
+          <line x1="20" y1="22" x2="44" y2="22" stroke="var(--text-muted)" stroke-width="2" stroke-linecap="round"/>
+          <line x1="20" y1="32" x2="38" y2="32" stroke="var(--text-muted)" stroke-width="2" stroke-linecap="round"/>
+          <line x1="20" y1="42" x2="32" y2="42" stroke="var(--text-muted)" stroke-width="2" stroke-linecap="round"/>
+        </svg>
+      </div>
+      <p class="manage-empty-message">No goals to manage yet</p>
+      <p class="manage-empty-submessage">Click "Add Goal" above to create your first goal</p>
+    </div>
+  `;
+}
+
+/**
+ * Render the goals list for Manage Goals screen
+ * @param {Array} goals - Sorted array of goals
+ * @returns {string} HTML string for goals list
+ */
+function renderManageGoalsList(goals) {
+  return `
+    <div class="manage-goals-list">
+      ${goals.map(goal => renderManageGoalItem(goal)).join('')}
+    </div>
+  `;
+}
+
+/**
+ * Render a single goal item for the Manage Goals list
+ * US-020: Shows title, type icon, timeframe badge, Edit and Delete buttons
+ * @param {Object} goal - The goal object
+ * @returns {string} HTML string for the goal list item
+ */
+function renderManageGoalItem(goal) {
+  const typeIcon = getGoalTypeIconSmall(goal.type);
+
+  return `
+    <div class="manage-goal-item" data-goal-id="${goal.id}">
+      <div class="manage-goal-info">
+        <div class="manage-goal-type-indicator type-${goal.type}">
+          ${typeIcon}
+        </div>
+        <div class="manage-goal-details">
+          <span class="manage-goal-title">${escapeHtml(goal.title)}</span>
+          <span class="manage-goal-meta">
+            <span class="manage-goal-timeframe timeframe-${goal.timeframe}">${capitalizeFirst(goal.timeframe)}</span>
+          </span>
+        </div>
+      </div>
+      <div class="manage-goal-actions">
+        <button class="manage-action-btn edit-btn" data-action="edit" data-goal-id="${goal.id}" title="Edit goal">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+            <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+          </svg>
+        </button>
+        <button class="manage-action-btn delete-btn" data-action="delete" data-goal-id="${goal.id}" title="Delete goal">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="3 6 5 6 21 6"/>
+            <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
+            <line x1="10" y1="11" x2="10" y2="17"/>
+            <line x1="14" y1="11" x2="14" y2="17"/>
+          </svg>
+        </button>
+      </div>
+    </div>
+  `;
 }
 
 /**

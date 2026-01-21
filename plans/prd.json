@@ -293,7 +293,7 @@
         "Screen hidden by default"
       ],
       "priority": 3,
-      "passes": false,
+      "passes": true,
       "dependsOn": ["US-014"]
     },
     {

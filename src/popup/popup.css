@@ -806,7 +806,312 @@ select:focus {
   color: var(--success);
 }
 
-/* Manage goals screen */
+/* ========================================
+   US-020: Manage Goals Screen - Layout
+   ======================================== */
+
+/* Manage Goals Header */
+.manage-goals-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: var(--spacing-md);
+  background-color: var(--background);
+  border-bottom: 1px solid var(--border);
+}
+
+.manage-goals-header .back-btn {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+  padding: var(--spacing-sm) var(--spacing-md);
+  color: var(--text-secondary);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  border-radius: var(--radius);
+  transition: all var(--transition-fast);
+}
+
+.manage-goals-header .back-btn:hover {
+  color: var(--text);
+  background-color: var(--background-secondary);
+}
+
+.manage-goals-header .back-btn:active {
+  transform: scale(0.98);
+}
+
+.manage-goals-header .back-icon {
+  width: 18px;
+  height: 18px;
+}
+
+.manage-goals-header .back-label {
+  line-height: 1;
+}
+
+.manage-title {
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-semibold);
+  color: var(--text);
+  margin: 0;
+}
+
+/* Spacer for flex alignment (keeps title centered) */
+.header-spacer {
+  width: 70px; /* Approximate width of back button to balance the layout */
+}
+
+/* Manage Goals Content */
+.manage-goals-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+/* Actions bar with Add Goal button */
+.manage-goals-actions {
+  padding: var(--spacing-md);
+  background-color: var(--background);
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+}
+
+/* Add Goal Button - Prominent styling */
+.btn-add-goal {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--spacing-sm);
+  width: 100%;
+  padding: var(--spacing-md);
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-semibold);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-sm);
+  transition: all var(--transition);
+}
+
+.btn-add-goal:hover {
+  transform: translateY(-1px);
+  box-shadow: var(--shadow);
+}
+
+.btn-add-goal:active {
+  transform: translateY(0);
+  box-shadow: var(--shadow-sm);
+}
+
+.btn-add-goal .btn-icon {
+  width: 20px;
+  height: 20px;
+}
+
+/* Goals List Container - Scrollable */
+.manage-goals-list-container {
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+  background-color: var(--background-secondary);
+  scroll-behavior: smooth;
+  min-height: 0;
+}
+
+.manage-goals-list-container::-webkit-scrollbar {
+  width: 4px;
+}
+
+.manage-goals-list-container::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.manage-goals-list-container::-webkit-scrollbar-thumb {
+  background: var(--border);
+  border-radius: var(--radius-full);
+}
+
+/* Goals List */
+.manage-goals-list {
+  display: flex;
+  flex-direction: column;
+  padding: var(--spacing-md);
+  gap: var(--spacing-sm);
+}
+
+/* Goal List Item */
+.manage-goal-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--spacing-md);
+  background-color: var(--background-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  transition: all var(--transition-fast);
+}
+
+.manage-goal-item:hover {
+  border-color: var(--primary-light);
+  box-shadow: var(--shadow-sm);
+}
+
+/* Goal Info Section */
+.manage-goal-info {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-md);
+  flex: 1;
+  min-width: 0;
+}
+
+/* Goal Type Indicator */
+.manage-goal-type-indicator {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: var(--radius);
+  flex-shrink: 0;
+  background-color: var(--background-secondary);
+}
+
+.manage-goal-type-indicator.type-timer {
+  background-color: var(--secondary-light);
+  color: var(--secondary);
+}
+
+.manage-goal-type-indicator.type-counter {
+  background-color: var(--warning-light);
+  color: #E65100;
+}
+
+.manage-goal-type-indicator.type-checkbox {
+  background-color: var(--primary-light);
+  color: var(--primary);
+}
+
+.manage-goal-type-icon {
+  width: 18px;
+  height: 18px;
+}
+
+/* Goal Details */
+.manage-goal-details {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+  flex: 1;
+}
+
+.manage-goal-title {
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-medium);
+  color: var(--text);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.manage-goal-meta {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+}
+
+.manage-goal-timeframe {
+  font-size: var(--font-size-xs);
+  padding: 2px var(--spacing-sm);
+  border-radius: var(--radius-full);
+  font-weight: var(--font-weight-medium);
+  text-transform: capitalize;
+}
+
+/* Goal Action Buttons */
+.manage-goal-actions {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  flex-shrink: 0;
+}
+
+.manage-action-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: var(--radius);
+  color: var(--text-secondary);
+  background-color: transparent;
+  transition: all var(--transition-fast);
+}
+
+.manage-action-btn svg {
+  width: 18px;
+  height: 18px;
+}
+
+.manage-action-btn:hover {
+  background-color: var(--background-secondary);
+  color: var(--text);
+}
+
+.manage-action-btn:active {
+  transform: scale(0.95);
+}
+
+/* Edit button hover state */
+.edit-btn:hover {
+  background-color: var(--secondary-light);
+  color: var(--secondary);
+}
+
+/* Delete button hover state */
+.delete-btn:hover {
+  background-color: var(--danger-light);
+  color: var(--danger);
+}
+
+/* Empty State */
+.manage-empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: var(--spacing-xl) var(--spacing-md);
+  text-align: center;
+  height: 100%;
+  min-height: 200px;
+}
+
+.manage-empty-icon {
+  width: 64px;
+  height: 64px;
+  margin-bottom: var(--spacing-md);
+  opacity: 0.8;
+}
+
+.manage-empty-icon svg {
+  width: 100%;
+  height: 100%;
+}
+
+.manage-empty-message {
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-medium);
+  color: var(--text-secondary);
+  margin-bottom: var(--spacing-xs);
+}
+
+.manage-empty-submessage {
+  font-size: var(--font-size-sm);
+  color: var(--text-muted);
+}
+
+/* Legacy support for old classes */
 .manage-content {
   flex: 1;
   overflow-y: auto;
@@ -823,15 +1128,6 @@ select:focus {
   display: flex;
   flex-direction: column;
   gap: var(--spacing-sm);
-}
-
-.manage-goal-item {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: var(--spacing-sm) var(--spacing-md);
-  background-color: var(--background-secondary);
-  border-radius: var(--radius);
 }
 
 .goal-type-badge {
