@@ -2700,3 +2700,179 @@ body.modal-open {
   border-color: var(--danger);
   box-shadow: 0 0 0 3px rgba(244, 67, 54, 0.15);
 }
+
+/* ========================================
+   US-027: Add Goal Form - Timeframe Selector
+   ======================================== */
+
+/* Timeframe Selector Container - Grid of 4 options */
+.timeframe-selector {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: var(--spacing-sm);
+  width: 100%;
+}
+
+/* Timeframe Option Button */
+.timeframe-option {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  padding: var(--spacing-sm) var(--spacing-xs);
+  background-color: var(--background);
+  border: 2px solid var(--border);
+  border-radius: var(--radius);
+  cursor: pointer;
+  transition: all var(--transition);
+  min-height: 68px;
+}
+
+.timeframe-option:hover {
+  border-color: var(--text-muted);
+  background-color: var(--background-secondary);
+}
+
+.timeframe-option:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
+}
+
+/* Active/Selected state - Default (Daily) is green */
+.timeframe-option.active {
+  border-color: var(--primary);
+  background-color: var(--primary-light);
+  box-shadow: 0 0 0 2px rgba(76, 175, 80, 0.12);
+}
+
+.timeframe-option.active:hover {
+  background-color: var(--primary-light);
+  border-color: var(--primary);
+}
+
+/* Timeframe-specific active colors */
+.timeframe-option[data-timeframe="daily"].active {
+  border-color: var(--primary);
+  background-color: var(--primary-light);
+  box-shadow: 0 0 0 2px rgba(76, 175, 80, 0.12);
+}
+
+.timeframe-option[data-timeframe="weekly"].active {
+  border-color: var(--secondary);
+  background-color: var(--secondary-light);
+  box-shadow: 0 0 0 2px rgba(33, 150, 243, 0.12);
+}
+
+.timeframe-option[data-timeframe="monthly"].active {
+  border-color: #FB8C00;
+  background-color: var(--warning-light);
+  box-shadow: 0 0 0 2px rgba(251, 140, 0, 0.12);
+}
+
+.timeframe-option[data-timeframe="yearly"].active {
+  border-color: #7B1FA2;
+  background-color: #F3E5F5;
+  box-shadow: 0 0 0 2px rgba(123, 31, 162, 0.12);
+}
+
+/* Timeframe Option Icon */
+.timeframe-option-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  color: var(--text-secondary);
+  transition: all var(--transition-fast);
+}
+
+.timeframe-option-icon svg {
+  width: 22px;
+  height: 22px;
+}
+
+.timeframe-option:hover .timeframe-option-icon {
+  color: var(--text);
+  transform: scale(1.1);
+}
+
+/* Timeframe-specific icon colors when active */
+.timeframe-option[data-timeframe="daily"].active .timeframe-option-icon {
+  color: var(--primary);
+}
+
+.timeframe-option[data-timeframe="weekly"].active .timeframe-option-icon {
+  color: var(--secondary);
+}
+
+.timeframe-option[data-timeframe="monthly"].active .timeframe-option-icon {
+  color: #E65100;
+}
+
+.timeframe-option[data-timeframe="yearly"].active .timeframe-option-icon {
+  color: #7B1FA2;
+}
+
+/* Timeframe Option Label */
+.timeframe-option-label {
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-medium);
+  color: var(--text-secondary);
+  transition: color var(--transition-fast);
+  text-align: center;
+  white-space: nowrap;
+}
+
+.timeframe-option:hover .timeframe-option-label {
+  color: var(--text);
+}
+
+.timeframe-option.active .timeframe-option-label {
+  color: var(--text);
+  font-weight: var(--font-weight-semibold);
+}
+
+/* Selection animation */
+.timeframe-option.active {
+  animation: timeframe-select 0.25s ease;
+}
+
+@keyframes timeframe-select {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(0.96);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+/* Active state press effect */
+.timeframe-option:active {
+  transform: scale(0.96);
+}
+
+/* Timeframe Hint Text - Dynamic based on selection */
+.timeframe-hint {
+  margin-top: var(--spacing-sm);
+  font-size: var(--font-size-xs);
+  color: var(--text-muted);
+  min-height: 16px;
+  line-height: 1.4;
+  transition: color var(--transition-fast);
+}
+
+/* Hint text variations - shown/hidden via JS */
+.timeframe-hint span {
+  display: none;
+}
+
+.timeframe-hint .hint-daily.visible,
+.timeframe-hint .hint-weekly.visible,
+.timeframe-hint .hint-monthly.visible,
+.timeframe-hint .hint-yearly.visible {
+  display: inline;
+}

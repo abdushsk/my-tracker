@@ -1414,3 +1414,76 @@
 - The form now properly shows/hides both timer and counter targets based on type selection
 - All three target input types are now complete: Timer (US-025), Counter (US-026), Checkbox (no target needed)
 
+## Iteration 28 - US-027: Add Goal Form - Timeframe Selector
+**Status:** Completed
+**Date:** 2026-01-22
+
+### What was done:
+- Added timeframe selector to the Add Goal form modal
+- Created a 4-option button group with timeframe options:
+  - Daily (sun icon) - green when active
+  - Weekly (calendar icon) - blue when active
+  - Monthly (calendar with "1" icon) - orange when active
+  - Yearly (clock/year icon) - purple when active
+- Default selection is Daily, stored in hidden input field
+- Implemented comprehensive CSS styling (~175 lines):
+  - Grid-based layout with 4 equal columns
+  - Distinct active states with timeframe-specific colors and shadows
+  - Hover states with icon scaling and color changes
+  - Focus-visible states for keyboard accessibility
+  - Selection animation (subtle scale pulse)
+- Implemented JavaScript functions for timeframe selection:
+  - getFormTimeframe() - returns currently selected timeframe
+  - setFormTimeframe(timeframe) - sets timeframe and updates UI (for edit mode)
+  - handleTimeframeSelection(timeframe) - click handler for timeframe buttons
+  - attachTimeframeSelectorListeners() - sets up event listeners
+  - resetTimeframeSelector() - resets to default (Daily)
+  - updateTimeframeHint(timeframe) - updates helper text based on selection
+- Added dynamic helper text explaining each timeframe:
+  - Daily: "Resets at midnight every day"
+  - Weekly: "Resets at midnight on Monday"
+  - Monthly: "Resets at midnight on the 1st of each month"
+  - Yearly: "Resets at midnight on January 1st"
+- Integrated timeframe selector with modal:
+  - Listeners attached when modal opens
+  - Pre-fills timeframe in edit mode (goal.timeframe)
+  - Resets to Daily on form reset
+- Added keyboard navigation support (Enter/Space to select)
+- Used ARIA attributes for accessibility (role="radiogroup", aria-checked)
+
+### Technical details:
+- Updated src/popup/popup.html:
+  - Added timeframe selector form group after counter target
+  - Four button elements with data-timeframe attributes
+  - Hidden input stores selected timeframe value
+  - ARIA attributes for screen reader accessibility
+  - Dynamic hint text spans for each timeframe
+- Updated src/popup/popup.js (~115 lines in US-027 section):
+  - Six new functions for timeframe selection management
+  - Integrated with openGoalModal() and resetGoalForm()
+  - All new functions exported for testing
+- Updated src/popup/popup.css (~175 lines):
+  - .timeframe-selector container with grid layout
+  - .timeframe-option buttons with hover/active states
+  - Timeframe-specific active state colors matching timeframe badge colors
+  - Animation keyframes for selection feedback
+  - .timeframe-hint text with dynamic visibility
+- CSS brace count: 419 (balanced)
+- JavaScript syntax validated with node --check
+- HTML div balance validated (21/21)
+
+### Acceptance criteria verification:
+- [x] Four timeframe options - Daily, Weekly, Monthly, Yearly buttons in grid
+- [x] Default: Daily - Daily is active by default, hidden input value="daily"
+- [x] Clear visual selection - Timeframe-specific colors, box-shadow, border changes
+- [x] Label 'Reset Schedule' - Label shown above the selector
+- [x] Tooltip or helper text explaining each - Dynamic hint text and title attributes
+
+### Notes for next iteration:
+- US-028 (Add Goal Form - Save Logic) is now unblocked
+  - Depends on US-025 (done), US-026 (done), US-027 (done) and has priority 3
+- US-030 (Delete Goal - Confirmation) is also available (depends on US-021)
+- US-028 will implement the full save logic to create goals with all form fields
+- The timeframe selector is fully functional with all four options and edit mode support
+- All form fields are now complete: Title, Type, Timer Target, Counter Target, Timeframe
+

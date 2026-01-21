@@ -1174,9 +1174,17 @@ function openGoalModal(mode = 'add', goal = null) {
   // US-024: Attach type selector listeners
   attachTypeSelectorListeners();
 
+  // US-027: Attach timeframe selector listeners
+  attachTimeframeSelectorListeners();
+
   // US-024: Pre-fill type for edit mode
   if (goal && goal.type) {
     setFormType(goal.type);
+  }
+
+  // US-027: Pre-fill timeframe for edit mode
+  if (goal && goal.timeframe) {
+    setFormTimeframe(goal.timeframe);
   }
 
   // US-025: Pre-fill timer target for edit mode (if timer type)
@@ -1423,6 +1431,9 @@ function resetGoalForm() {
 
   // US-026: Reset counter target to default value
   resetCounterTarget();
+
+  // US-027: Reset timeframe selector to default (Daily)
+  resetTimeframeSelector();
 }
 
 /**
@@ -1809,6 +1820,123 @@ function resetTypeSelector() {
   setFormType(GOAL_TYPES.TIMER);
 }
 
+// =============================================================================
+// US-027: Add Goal Form - Timeframe Selector
+// =============================================================================
+
+/**
+ * Get the currently selected timeframe from the form
+ * @returns {string} The selected timeframe ('daily', 'weekly', 'monthly', or 'yearly')
+ */
+function getFormTimeframe() {
+  const timeframeInput = document.getElementById('goal-timeframe');
+  return timeframeInput ? timeframeInput.value : TIMEFRAMES.DAILY;
+}
+
+/**
+ * Set the timeframe in the form (for edit mode)
+ * @param {string} timeframe - The timeframe to set
+ */
+function setFormTimeframe(timeframe) {
+  const timeframeInput = document.getElementById('goal-timeframe');
+  const timeframeSelector = document.querySelector('.timeframe-selector');
+
+  if (timeframeInput) {
+    timeframeInput.value = timeframe;
+  }
+
+  if (timeframeSelector) {
+    // Remove active class from all options
+    const options = timeframeSelector.querySelectorAll('.timeframe-option');
+    options.forEach(option => {
+      option.classList.remove('active');
+      option.setAttribute('aria-checked', 'false');
+    });
+
+    // Add active class to selected option
+    const selectedOption = timeframeSelector.querySelector(`[data-timeframe="${timeframe}"]`);
+    if (selectedOption) {
+      selectedOption.classList.add('active');
+      selectedOption.setAttribute('aria-checked', 'true');
+    }
+  }
+
+  // Update the hint text
+  updateTimeframeHint(timeframe);
+}
+
+/**
+ * Handle timeframe option click in the selector
+ * @param {string} timeframe - The selected timeframe
+ */
+function handleTimeframeSelection(timeframe) {
+  console.log(`[Form] Timeframe selected: ${timeframe}`);
+  setFormTimeframe(timeframe);
+}
+
+/**
+ * Update the timeframe hint text based on selection
+ * @param {string} timeframe - The selected timeframe
+ */
+function updateTimeframeHint(timeframe) {
+  const hintContainer = document.getElementById('timeframe-hint');
+  if (!hintContainer) return;
+
+  // Hide all hints
+  const hints = hintContainer.querySelectorAll('span');
+  hints.forEach(hint => {
+    hint.style.display = 'none';
+    hint.classList.remove('visible');
+  });
+
+  // Show the selected hint
+  const selectedHint = hintContainer.querySelector(`.hint-${timeframe}`);
+  if (selectedHint) {
+    selectedHint.style.display = 'inline';
+    selectedHint.classList.add('visible');
+  }
+}
+
+/**
+ * Attach timeframe selector event listeners
+ */
+function attachTimeframeSelectorListeners() {
+  const timeframeSelector = document.querySelector('.timeframe-selector');
+
+  if (!timeframeSelector) {
+    return;
+  }
+
+  const timeframeOptions = timeframeSelector.querySelectorAll('.timeframe-option');
+  timeframeOptions.forEach(option => {
+    option.addEventListener('click', (e) => {
+      e.preventDefault();
+      const timeframe = option.getAttribute('data-timeframe');
+      if (timeframe) {
+        handleTimeframeSelection(timeframe);
+      }
+    });
+
+    // Keyboard navigation support
+    option.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        const timeframe = option.getAttribute('data-timeframe');
+        if (timeframe) {
+          handleTimeframeSelection(timeframe);
+        }
+      }
+    });
+  });
+}
+
+/**
+ * Reset the timeframe selector to default (Daily)
+ */
+function resetTimeframeSelector() {
+  setFormTimeframe(TIMEFRAMES.DAILY);
+}
+
 /**
  * Render a single goal item for the Manage Goals list
  * US-021: Shows title, type icon, timeframe badge, Edit and Delete buttons
@@ -2062,5 +2190,12 @@ export {
   validateCounterTarget,
   showCounterTargetError,
   clearCounterTargetError,
-  resetCounterTarget
+  resetCounterTarget,
+  // US-027 Timeframe selector functions
+  getFormTimeframe,
+  setFormTimeframe,
+  handleTimeframeSelection,
+  updateTimeframeHint,
+  attachTimeframeSelectorListeners,
+  resetTimeframeSelector
 };

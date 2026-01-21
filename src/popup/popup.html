@@ -149,7 +149,69 @@
               <p class="form-hint">Set the target count you want to reach (minimum 1)</p>
             </div>
 
-            <!-- Timeframe selector will be added in US-027 -->
+            <!-- US-027: Timeframe Selector -->
+            <div class="form-group">
+              <label class="form-label">Reset Schedule <span class="required-indicator">*</span></label>
+              <div class="timeframe-selector" role="radiogroup" aria-label="Select reset schedule">
+                <button type="button" class="timeframe-option active" data-timeframe="daily" role="radio" aria-checked="true" title="Goal resets at midnight every day">
+                  <span class="timeframe-option-icon">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                      <circle cx="12" cy="12" r="5"/>
+                      <line x1="12" y1="1" x2="12" y2="3"/>
+                      <line x1="12" y1="21" x2="12" y2="23"/>
+                      <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/>
+                      <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/>
+                      <line x1="1" y1="12" x2="3" y2="12"/>
+                      <line x1="21" y1="12" x2="23" y2="12"/>
+                      <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/>
+                      <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>
+                    </svg>
+                  </span>
+                  <span class="timeframe-option-label">Daily</span>
+                </button>
+                <button type="button" class="timeframe-option" data-timeframe="weekly" role="radio" aria-checked="false" title="Goal resets at midnight on Monday">
+                  <span class="timeframe-option-icon">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                      <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
+                      <line x1="16" y1="2" x2="16" y2="6"/>
+                      <line x1="8" y1="2" x2="8" y2="6"/>
+                      <line x1="3" y1="10" x2="21" y2="10"/>
+                    </svg>
+                  </span>
+                  <span class="timeframe-option-label">Weekly</span>
+                </button>
+                <button type="button" class="timeframe-option" data-timeframe="monthly" role="radio" aria-checked="false" title="Goal resets at midnight on the 1st of each month">
+                  <span class="timeframe-option-icon">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                      <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
+                      <line x1="16" y1="2" x2="16" y2="6"/>
+                      <line x1="8" y1="2" x2="8" y2="6"/>
+                      <line x1="3" y1="10" x2="21" y2="10"/>
+                      <text x="12" y="18" text-anchor="middle" font-size="8" font-weight="bold" fill="currentColor" stroke="none">1</text>
+                    </svg>
+                  </span>
+                  <span class="timeframe-option-label">Monthly</span>
+                </button>
+                <button type="button" class="timeframe-option" data-timeframe="yearly" role="radio" aria-checked="false" title="Goal resets at midnight on January 1st">
+                  <span class="timeframe-option-icon">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                      <circle cx="12" cy="12" r="10"/>
+                      <polyline points="12 6 12 12 16 10"/>
+                      <path d="M12 2 L12 4"/>
+                      <path d="M12 20 L12 22"/>
+                    </svg>
+                  </span>
+                  <span class="timeframe-option-label">Yearly</span>
+                </button>
+              </div>
+              <input type="hidden" id="goal-timeframe" name="timeframe" value="daily">
+              <p class="form-hint timeframe-hint" id="timeframe-hint">
+                <span class="hint-daily">Resets at midnight every day</span>
+                <span class="hint-weekly" style="display:none;">Resets at midnight on Monday</span>
+                <span class="hint-monthly" style="display:none;">Resets at midnight on the 1st of each month</span>
+                <span class="hint-yearly" style="display:none;">Resets at midnight on January 1st</span>
+              </p>
+            </div>
           </form>
         </div>
         <div class="modal-footer">

@@ -399,7 +399,7 @@
         "Tooltip or helper text explaining each"
       ],
       "priority": 3,
-      "passes": false,
+      "passes": true,
       "dependsOn": ["US-023"]
     },
     {
