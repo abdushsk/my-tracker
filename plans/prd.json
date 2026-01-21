@@ -57,7 +57,7 @@
         "Viewport meta tag for proper scaling"
       ],
       "priority": 1,
-      "passes": false,
+      "passes": true,
       "dependsOn": ["US-002"]
     },
     {

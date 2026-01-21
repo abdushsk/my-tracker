@@ -124,3 +124,35 @@
 - Recommended order: US-004 next (priority 1), then US-005 (CSS), then US-007
 - US-007 should be done early in the chain as it unblocks US-008 (Goal Data Model) and US-009 (Activity Log Model)
 
+## Iteration 5 - US-004: Popup HTML Structure
+**Status:** Completed
+**Date:** 2026-01-22
+
+### What was done:
+- Created src/popup/popup.html with proper HTML5 structure:
+  - DOCTYPE declaration and html lang="en"
+  - Head section with meta charset UTF-8 and viewport meta tag
+  - Title: "Daily Goals Tracker"
+  - Link to popup.css stylesheet
+  - Script tag for popup.js at end of body
+- Created main container div with id="app"
+- Set up semantic structure for single-page app with multiple screens:
+  - screen-view-goals (default, marked as active)
+  - screen-manage-goals
+  - screen-reports
+  - screen-settings
+- Created placeholder popup.css and popup.js files to prevent loading errors
+
+### Technical details:
+- Viewport meta tag enables proper scaling on different displays
+- Screen divs use class="screen" with "active" class for visibility control
+- Script loaded at end of body for proper DOM availability
+- Clean, minimal structure ready for US-005 (CSS) and US-010 (JS) implementation
+
+### Notes for next iteration:
+- US-005 (Base CSS Styles) is now unblocked (depends on US-004)
+- US-007 (Storage Utility Module) is still available (depends on US-006)
+- Both are priority 1 - either can be done next
+- US-005 completes the popup visual foundation
+- US-007 provides data layer needed for goal management
+
