@@ -237,3 +237,39 @@
 - US-009 (Activity Log Data Model) depends on US-008
 - US-010 (Popup JS Entry Point) depends on US-005 (done), US-007 (done), and US-008 (next)
 
+## Iteration 8 - US-008: Goal Data Model
+**Status:** Completed
+**Date:** 2026-01-22
+
+### What was done:
+- Created src/utils/models.js with Goal data structure and factory functions
+- Defined constants for goal types and timeframes:
+  - GOAL_TYPES: { TIMER, COUNTER, CHECKBOX }
+  - TIMEFRAMES: { DAILY, WEEKLY, MONTHLY, YEARLY }
+- Implemented generateId() helper function:
+  - Uses crypto.randomUUID() as primary method
+  - Includes fallback UUID generation for environments without crypto support
+- Implemented createGoal(data) factory function:
+  - Requires title (throws error if missing)
+  - Provides sensible defaults for all optional fields
+  - Default targets based on type: timer=3600s, counter=10, checkbox=1
+  - Sets createdAt and lastResetAt to current timestamp
+- Added utility functions for goal management:
+  - isGoalCompleted(goal) - checks if progress >= target
+  - getGoalCompletionPercentage(goal) - returns 0-100 percentage
+  - resetGoalProgress(goal) - returns new goal with reset progress
+
+### Technical details:
+- Full JSDoc documentation with @typedef for Goal structure
+- Goal properties match FEATURES.md specification exactly:
+  - id, title, type, target, progress, timeframe, category, isActive, createdAt, lastResetAt, order
+- ES6 module exports for use in other modules
+- Immutable reset function (returns new object, doesn't mutate)
+- Handles edge cases: 0 progress, 0 target, missing optional fields
+
+### Notes for next iteration:
+- US-009 (Activity Log Data Model) is now unblocked (depends on US-008)
+- US-009 has priority 1 and should be done next
+- US-010 (Popup JS Entry Point) depends on US-005 (done), US-007 (done), US-008 (done)
+- US-010 still needs US-009 to be completed before it can start (not listed in prd.json but logically needed)
+

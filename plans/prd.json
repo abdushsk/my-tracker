@@ -115,7 +115,7 @@
         "Default values for optional fields"
       ],
       "priority": 1,
-      "passes": false,
+      "passes": true,
       "dependsOn": ["US-007"]
     },
     {
