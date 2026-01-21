@@ -389,14 +389,23 @@ function renderGoalControls(goal) {
     case GOAL_TYPES.TIMER:
       return renderTimerControls(goal);
     case GOAL_TYPES.COUNTER:
+      // Add disabled class when progress is 0
+      const isAtMinimum = goal.progress <= 0;
       return `
         <div class="goal-controls goal-controls-counter">
-          <button class="goal-control-btn counter-decrement-btn" data-action="decrement" data-goal-id="${goal.id}" title="Decrease">
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          <button class="goal-control-btn counter-decrement-btn ${isAtMinimum ? 'disabled' : ''}"
+                  data-action="decrement"
+                  data-goal-id="${goal.id}"
+                  title="Decrease"
+                  ${isAtMinimum ? 'disabled' : ''}>
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="5" y1="12" x2="19" y2="12"/></svg>
           </button>
           <span class="counter-value">${goal.progress}</span>
-          <button class="goal-control-btn counter-increment-btn" data-action="increment" data-goal-id="${goal.id}" title="Increase">
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          <button class="goal-control-btn counter-increment-btn"
+                  data-action="increment"
+                  data-goal-id="${goal.id}"
+                  title="Increase">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
           </button>
         </div>
       `;
@@ -683,6 +692,98 @@ async function handleTimerCompletion(goalId) {
   renderCurrentScreen();
 }
 
+// =============================================================================
+// US-017: Counter Type Controls
+// =============================================================================
+
+/**
+ * Handle counter increment
+ * @param {string} goalId - The ID of the counter goal
+ */
+async function handleCounterIncrement(goalId) {
+  const goal = state.goals.find(g => g.id === goalId);
+  if (!goal || goal.type !== GOAL_TYPES.COUNTER) {
+    console.error('Invalid goal for counter increment:', goalId);
+    return;
+  }
+
+  // Calculate new progress (don't exceed target for visual purposes, but allow tracking beyond)
+  const newProgress = goal.progress + 1;
+  const wasCompleted = isGoalCompleted(goal);
+
+  // Update goal in state
+  goal.progress = newProgress;
+
+  // Save to storage
+  await updateGoal(goalId, { progress: newProgress });
+
+  // Log the increment activity
+  const activityLog = createActivityLog({
+    goalId: goalId,
+    action: ACTIVITY_ACTIONS.INCREMENT,
+    value: newProgress
+  });
+  await addActivityLogEntry(activityLog);
+
+  console.log(`[Counter] Incremented goal ${goalId}: progress now ${newProgress}/${goal.target}`);
+
+  // Check if goal just completed
+  const isNowCompleted = isGoalCompleted(goal);
+  if (!wasCompleted && isNowCompleted) {
+    // Log completion
+    const completeLog = createActivityLog({
+      goalId: goalId,
+      action: ACTIVITY_ACTIONS.COMPLETE,
+      value: newProgress
+    });
+    await addActivityLogEntry(completeLog);
+    console.log(`[Counter] Goal ${goalId} completed!`);
+  }
+
+  // Re-render to update UI
+  renderCurrentScreen();
+}
+
+/**
+ * Handle counter decrement
+ * @param {string} goalId - The ID of the counter goal
+ */
+async function handleCounterDecrement(goalId) {
+  const goal = state.goals.find(g => g.id === goalId);
+  if (!goal || goal.type !== GOAL_TYPES.COUNTER) {
+    console.error('Invalid goal for counter decrement:', goalId);
+    return;
+  }
+
+  // Cannot go below 0
+  if (goal.progress <= 0) {
+    console.log(`[Counter] Goal ${goalId} already at minimum (0)`);
+    return;
+  }
+
+  // Calculate new progress
+  const newProgress = goal.progress - 1;
+
+  // Update goal in state
+  goal.progress = newProgress;
+
+  // Save to storage
+  await updateGoal(goalId, { progress: newProgress });
+
+  // Log the decrement activity
+  const activityLog = createActivityLog({
+    goalId: goalId,
+    action: ACTIVITY_ACTIONS.DECREMENT,
+    value: newProgress
+  });
+  await addActivityLogEntry(activityLog);
+
+  console.log(`[Counter] Decremented goal ${goalId}: progress now ${newProgress}/${goal.target}`);
+
+  // Re-render to update UI
+  renderCurrentScreen();
+}
+
 /**
  * Attach goal control event listeners to the current screen
  * @param {HTMLElement} container - The container element
@@ -697,6 +798,32 @@ function attachGoalControlListeners(container) {
       const goalId = btn.getAttribute('data-goal-id');
       if (goalId) {
         handleTimerToggle(goalId);
+      }
+    });
+  });
+
+  // Counter increment buttons (US-017)
+  const incrementBtns = container.querySelectorAll('[data-action="increment"]');
+  incrementBtns.forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      const goalId = btn.getAttribute('data-goal-id');
+      if (goalId) {
+        handleCounterIncrement(goalId);
+      }
+    });
+  });
+
+  // Counter decrement buttons (US-017)
+  const decrementBtns = container.querySelectorAll('[data-action="decrement"]');
+  decrementBtns.forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      const goalId = btn.getAttribute('data-goal-id');
+      if (goalId) {
+        handleCounterDecrement(goalId);
       }
     });
   });
@@ -927,5 +1054,8 @@ export {
   // US-016 Timer functions
   handleTimerToggle,
   startTimerUpdateInterval,
-  stopTimerUpdateInterval
+  stopTimerUpdateInterval,
+  // US-017 Counter functions
+  handleCounterIncrement,
+  handleCounterDecrement
 };

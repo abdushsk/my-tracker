@@ -248,7 +248,7 @@
         "Min 0 validation on decrement"
       ],
       "priority": 2,
-      "passes": false,
+      "passes": true,
       "dependsOn": ["US-015"]
     },
     {

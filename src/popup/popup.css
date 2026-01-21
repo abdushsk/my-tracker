@@ -1245,6 +1245,10 @@ select:focus {
   }
 }
 
+/* ========================================
+   US-017: Counter Type Controls
+   ======================================== */
+
 /* Counter Controls */
 .goal-controls-counter {
   justify-content: center;
@@ -1253,26 +1257,64 @@ select:focus {
 
 .counter-decrement-btn,
 .counter-increment-btn {
-  width: 36px;
-  height: 36px;
+  width: 40px;
+  height: 40px;
   background-color: var(--background-secondary);
   color: var(--text-secondary);
   border-radius: var(--radius-full);
+  box-shadow: var(--shadow-sm);
+  transition: all var(--transition-fast);
 }
 
-.counter-decrement-btn:hover,
+.counter-decrement-btn svg,
+.counter-increment-btn svg {
+  width: 18px;
+  height: 18px;
+}
+
+.counter-decrement-btn:hover {
+  background-color: var(--danger-light);
+  color: var(--danger);
+  box-shadow: var(--shadow);
+}
+
 .counter-increment-btn:hover {
   background-color: var(--warning-light);
   color: #E65100;
+  box-shadow: var(--shadow);
+}
+
+.counter-decrement-btn:active,
+.counter-increment-btn:active {
+  transform: scale(0.9);
+}
+
+/* Disabled state for decrement at 0 */
+.counter-decrement-btn.disabled,
+.counter-decrement-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+  pointer-events: none;
 }
 
 .counter-value {
-  font-size: var(--font-size-xl);
+  font-size: var(--font-size-2xl);
   font-weight: var(--font-weight-bold);
   color: var(--text);
-  min-width: 48px;
+  min-width: 64px;
   text-align: center;
   font-variant-numeric: tabular-nums;
+  line-height: 1;
+}
+
+/* Counter goal active state - when at max or completed */
+.goal-type-counter.goal-completed .counter-value {
+  color: var(--success);
+}
+
+.goal-type-counter.goal-completed .counter-increment-btn {
+  background-color: var(--success-light);
+  color: var(--success);
 }
 
 /* Checkbox Controls */

@@ -757,3 +757,64 @@
 - Timer functionality is now complete with real-time updates and persistence
 - Background tracking (service worker integration) will be fully implemented in US-031
 
+## Iteration 18 - US-017: Goal Card - Counter Type Controls
+**Status:** Completed
+**Date:** 2026-01-22
+
+### What was done:
+- Implemented fully functional counter controls for counter-type goals
+- Created handleCounterIncrement() function:
+  - Increases progress by 1
+  - Saves to Chrome storage via updateGoal()
+  - Logs INCREMENT activity with createActivityLog()
+  - Checks for goal completion and logs COMPLETE activity if threshold reached
+  - Re-renders UI immediately
+- Created handleCounterDecrement() function:
+  - Decreases progress by 1 (minimum 0)
+  - Validates minimum constraint before decrementing
+  - Saves to Chrome storage via updateGoal()
+  - Logs DECREMENT activity with createActivityLog()
+  - Re-renders UI immediately
+- Updated attachGoalControlListeners() to handle:
+  - data-action="increment" click events
+  - data-action="decrement" click events
+- Enhanced renderGoalControls() for counter type:
+  - Added disabled class and attribute when progress is 0
+  - Improved SVG icons with proper stroke attributes
+- Updated CSS for counter controls:
+  - Enhanced button sizing (40x40px with shadow)
+  - Added hover states (red for decrement, orange for increment)
+  - Added active state with scale animation
+  - Added disabled state styling for decrement at 0
+  - Larger counter value display (24px font)
+  - Special styling for completed counter goals
+
+### Technical details:
+- Updated src/popup/popup.js:
+  - Added handleCounterIncrement() async function
+  - Added handleCounterDecrement() async function
+  - Extended attachGoalControlListeners() with counter button handlers
+  - Enhanced renderGoalControls() with disabled state for decrement
+  - Added exports for new functions
+- Updated src/popup/popup.css (~70 lines added):
+  - Added US-017 section header
+  - Enhanced .counter-decrement-btn and .counter-increment-btn
+  - Added hover states with color differentiation
+  - Added .disabled state styling
+  - Enhanced .counter-value display
+  - Added completed state styling for counter goals
+
+### Acceptance criteria verification:
+- [x] Minus button for decrement - Working with SVG icon
+- [x] Plus button for increment - Working with SVG icon
+- [x] Current/target display - Shows N / M in progress section
+- [x] Progress bar reflects current/target - Updates immediately on change
+- [x] Min 0 validation on decrement - Button disabled at 0, function returns early
+
+### Notes for next iteration:
+- US-018 (Goal Card - Checkbox Type Controls) is now the next priority 2 task
+  - Depends on US-015 (done)
+- US-019 (Goal Card - Completion State) still blocked waiting for US-018
+- After US-018, US-019 will be unblocked (depends on US-016, US-017, US-018)
+- Counter functionality is now complete with immediate persistence and activity logging
+
