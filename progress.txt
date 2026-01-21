@@ -2124,3 +2124,78 @@ Created the HistoryEntry data model and supporting functions in models.js.
 - The history model is now complete and ready for reports to use
 - Service worker already creates history entries on reset (US-041)
 - Reports screen can use filterHistoryByDateRange, groupHistoryByDate to get data
+---
+
+## Iteration: US-043 - Reports Screen Layout
+
+### Task completed: US-043 - Reports Screen - Layout
+Created the full Reports screen layout with all required UI sections.
+
+### Key implementation details:
+
+1. **Updated renderReportsScreen() in popup.js**:
+   - Complete HTML layout for Reports screen with all sections
+   - Back button with arrow icon to navigate to View Goals
+   - 'Reports' title centered in header
+   - Header spacer for flex alignment balance
+
+2. **Discipline Score Section**:
+   - Prominent centered card with gradient background
+   - Large score display (48px font) showing "--/100" format
+   - "Discipline Score" label and "Based on last 7 days" description
+   - CSS classes for color coding (score-excellent, score-good, score-moderate, score-needs-improvement)
+
+3. **Streak Section**:
+   - Two-column grid layout with current streak and best streak cards
+   - Current streak card with fire/flame icon and animation when active
+   - Best streak card with star icon
+   - Values loaded from state.streakData
+
+4. **Stats Cards Section**:
+   - Three-column grid with Today, This Week, This Month cards
+   - Each card has: icon with color-coded background, value (X/Y format), label
+   - Sun icon for Today (green), Calendar icon for Week (blue), Calendar icon for Month (orange)
+   - Values show completed/total goals
+
+5. **Charts Placeholder Section**:
+   - "Weekly Overview" title
+   - Dashed border placeholder container
+   - Bar chart icon and "Weekly chart coming soon" message
+
+6. **Added updateReportsStats() function**:
+   - Updates Today's completion stats from current goal data
+   - Placeholder values for week/month (--/--) to be calculated in US-046
+
+7. **Added comprehensive CSS styles** (~370 lines):
+   - .reports-screen container
+   - .reports-header with back button styling
+   - .discipline-score-card with gradient and score value styling
+   - .streak-cards grid with .current-streak-card and .best-streak-card
+   - Flame animation for active streak
+   - .stats-cards grid with .stat-card styling
+   - Icon color variants (today-icon, week-icon, month-icon)
+   - .charts-placeholder with dashed border
+   - All components use CSS variables for theming
+
+### Acceptance criteria verification:
+- [x] Back button to View Goals - back-btn with data-screen="viewGoals" attribute
+- [x] Screen title 'Reports' - centered h1.reports-title
+- [x] Discipline score area (prominent) - discipline-score-card with large font, gradient background
+- [x] Streak display area - streak-cards section with current and best streak
+- [x] Stats cards container - stats-cards section with Today/Week/Month cards
+- [x] Charts placeholder - charts-section with chart-coming-soon placeholder
+
+### Technical details:
+- Updated src/popup/popup.js:
+  - Replaced placeholder renderReportsScreen() with full implementation (~145 lines)
+  - Added updateReportsStats() helper function (~25 lines)
+- Updated src/popup/popup.css:
+  - Added ~370 lines of Reports screen styles at end of file (lines 3115-3482)
+- Both files syntax-validated successfully
+
+### Notes for next iteration:
+- US-044 (Discipline Score calculation) is now available (depends on US-043 and US-042 done)
+- US-045 (Streak Counter calculation) depends on US-044
+- US-046 (Completion Stats Cards) depends on US-044
+- The layout is complete and ready for data integration in subsequent stories
+- updateReportsStats() will need to be enhanced to calculate actual values from history
