@@ -173,7 +173,7 @@
         "Only shows when goals array is empty"
       ],
       "priority": 2,
-      "passes": false,
+      "passes": true,
       "dependsOn": ["US-011"]
     },
     {

@@ -537,3 +537,53 @@
 - Both have priority 2
 - US-014 should be prioritized as it unlocks US-015 (Goal Card Base Component)
 
+## Iteration 14 - US-012: View Goals Screen - Empty State
+**Status:** Completed
+**Date:** 2026-01-22
+
+### What was done:
+- Enhanced the empty state for the View Goals screen when no goals exist
+- Created a custom SVG illustration (target/bullseye with arrow):
+  - Three concentric circles representing a target
+  - Arrow pointing toward the center
+  - Decorative colored dots for visual interest
+  - Uses CSS variables for consistent theming
+- Updated the empty state message:
+  - Main heading: "No goals yet"
+  - Submessage: "Set your first goal and start building better habits today!"
+- Enhanced the CTA button "Add Your First Goal":
+  - Added plus icon (SVG) before text
+  - Large button variant (.btn-lg) for prominence
+  - Shadow and hover effects for better visual feedback
+  - Hover lifts button with increased shadow
+- Added subtle float animation to the illustration
+- Button navigates to Manage Goals screen using existing data-screen mechanism
+
+### Technical details:
+- Updated src/popup/popup.js:
+  - Enhanced renderEmptyState() function
+  - SVG illustration uses CSS variables (--border, --primary, --primary-light, etc.)
+  - Button includes plus icon SVG with .btn-icon class
+- Updated src/popup/popup.css:
+  - Added section header comment for US-012
+  - Added .empty-illustration with 120x120px dimensions
+  - Added .empty-svg for SVG sizing
+  - Added @keyframes empty-float animation (3s cycle)
+  - Enhanced .empty-message with larger font and semibold weight
+  - Enhanced .empty-submessage with max-width for readability
+  - Added .add-first-goal hover/active states with transform
+  - Added .btn-icon and .btn-lg utility classes
+
+### Acceptance criteria verification:
+- [x] Empty state container - .empty-state with flex centering
+- [x] Friendly message text - "No goals yet" with encouraging submessage
+- [x] Visual icon/illustration - Custom SVG target illustration with animation
+- [x] CTA button to Manage Goals - Prominent button with icon, navigates via data-screen
+- [x] Only shows when goals array is empty - Conditional in renderViewGoalsScreen()
+
+### Notes for next iteration:
+- US-014 (View Goals Screen - Goals List Container) is now the highest priority task
+  - Depends on US-013 (done) and has priority 2
+- US-014 unlocks US-015 (Goal Card Base Component)
+- US-020 (Manage Goals Screen Layout) depends on US-014
+

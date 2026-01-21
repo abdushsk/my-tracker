@@ -196,10 +196,29 @@ function getCompletedCount() {
 function renderEmptyState() {
   return `
     <div class="empty-state">
-      <div class="empty-icon">&#127919;</div>
-      <p class="empty-message">No goals yet</p>
-      <p class="empty-submessage">Start tracking your progress!</p>
-      <button class="btn btn-primary add-first-goal" data-screen="${SCREENS.MANAGE_GOALS}">
+      <div class="empty-illustration">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" class="empty-svg">
+          <!-- Target/bullseye circle -->
+          <circle cx="60" cy="50" r="40" fill="none" stroke="var(--border)" stroke-width="2"/>
+          <circle cx="60" cy="50" r="28" fill="none" stroke="var(--border)" stroke-width="2"/>
+          <circle cx="60" cy="50" r="16" fill="none" stroke="var(--primary-light)" stroke-width="2"/>
+          <circle cx="60" cy="50" r="6" fill="var(--primary)" />
+          <!-- Arrow pointing to target -->
+          <line x1="15" y1="85" x2="48" y2="58" stroke="var(--primary)" stroke-width="2.5" stroke-linecap="round"/>
+          <polygon points="52,54 44,56 48,64" fill="var(--primary)"/>
+          <!-- Decorative elements -->
+          <circle cx="100" cy="25" r="3" fill="var(--warning)" opacity="0.6"/>
+          <circle cx="25" cy="30" r="2" fill="var(--secondary)" opacity="0.6"/>
+          <circle cx="95" cy="70" r="2" fill="var(--success)" opacity="0.6"/>
+        </svg>
+      </div>
+      <h2 class="empty-message">No goals yet</h2>
+      <p class="empty-submessage">Set your first goal and start building better habits today!</p>
+      <button class="btn btn-primary btn-lg add-first-goal" data-screen="${SCREENS.MANAGE_GOALS}">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="btn-icon">
+          <line x1="12" y1="5" x2="12" y2="19"/>
+          <line x1="5" y1="12" x2="19" y2="12"/>
+        </svg>
         Add Your First Goal
       </button>
     </div>
