@@ -2259,3 +2259,71 @@ Created the full Reports screen layout with all required UI sections.
 - US-046 (Completion Stats Cards) is now unblocked (depends on US-044)
 - The discipline score will show '--' for new users with no history
 - Score will automatically include today's progress even without any history
+
+## Iteration 45 - US-045: Reports - Streak Counter
+**Status:** Completed
+**Date:** 2026-01-22
+
+### What was done:
+- Implemented streak calculation and display in the Reports screen
+- Added two new functions to popup.js for streak management
+- Streak is calculated from history data + current day's goals
+
+### Key implementation details:
+
+1. **updateStreakDisplay() - New async function**:
+   - Gets current-streak-value and best-streak-value DOM elements
+   - Fetches history data using getHistory()
+   - Calls calculateStreakFromHistory() to compute streaks
+   - Updates DOM elements with calculated values
+   - Updates the "active" class on current-streak-card based on streak > 0
+   - Compares with stored streak data and saves if changed
+   - Updates state.streakData for use elsewhere in the app
+
+2. **calculateStreakFromHistory(history, currentGoals) - New function**:
+   - Groups history by date using groupHistoryByDate()
+   - Filters for DAILY goals only (streak is based on daily goals)
+   - Calculates today's completion status from currentGoals
+   - Builds completionByDate map (date -> allDailyGoalsCompleted boolean)
+   - Current streak calculation:
+     - Starts from today (if all completed) or yesterday (if not)
+     - Counts consecutive completed days going backwards
+     - Breaks on false (incomplete day) or stops on missing data after 90 days
+   - Best streak calculation:
+     - Iterates through all dates with completion data
+     - Tracks consecutive completed days
+     - Compares with stored bestStreak (preserves historical best)
+   - Returns { currentStreak, bestStreak } object
+
+3. **Integration**:
+   - Added saveStreakData to imports from storage.js
+   - updateReportsStats() now calls updateStreakDisplay() after updateDisciplineScore()
+   - Streak persists to storage and updates state for View Goals header
+
+### Acceptance criteria verification:
+- [x] Current streak calculated - Counts consecutive days of ALL daily goals completed
+- [x] Flame icon displayed - Already present from US-043 layout (SVG fire icon)
+- [x] 'X day streak' format - Shows current streak number with "day streak" label
+- [x] Best streak shown below - Shows best streak ever with star icon
+- [x] Streak breaks if any goal missed - Uses `every()` to check all daily goals completed
+
+### Technical details:
+- Updated src/popup/popup.js:
+  - Added saveStreakData to imports from storage.js
+  - Added updateStreakDisplay() function (~40 lines)
+  - Added calculateStreakFromHistory() function (~110 lines)
+  - Modified updateReportsStats() to call updateStreakDisplay()
+
+### Streak logic notes:
+- Only DAILY goals count toward streak (weekly/monthly/yearly excluded)
+- If today's daily goals aren't all completed yet, streak starts counting from yesterday
+- This allows users to maintain their streak during the day while working on goals
+- Days without any daily goals in history are skipped (not counted as breaks)
+- Best streak is preserved even if history is cleared (stored in streakData)
+- Limits backward search to 90 days to prevent infinite loops
+
+### Notes for next iteration:
+- US-046 (Completion Stats Cards) is now unblocked (depends on US-044, already done)
+- US-047 (Weekly Chart) depends on US-046
+- The streak display will show 0 for new users with no history
+- Header streak in View Goals screen will update after visiting Reports
