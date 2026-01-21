@@ -581,7 +581,7 @@
         "Pause sound on timer pause"
       ],
       "priority": 4,
-      "passes": false,
+      "passes": true,
       "dependsOn": ["US-038", "US-032", "US-034", "US-036"]
     },
     {

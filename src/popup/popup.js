@@ -27,6 +27,12 @@ import {
   createActivityLog,
   createGoal
 } from '../utils/models.js';
+import {
+  initSounds,
+  playSound,
+  loadSoundSettings,
+  SOUNDS
+} from '../utils/sounds.js';
 
 // =============================================================================
 // Application State
@@ -551,11 +557,17 @@ async function handleTimerToggle(goalId) {
         goalId: goalId
       });
 
+      // US-039: Play pause sound
+      playSound(SOUNDS.PAUSE);
+
       console.log(`[Timer] Paused goal ${goalId}: +${elapsedSinceStart}s, total progress: ${newProgress}s`);
     }
   } else {
     // PLAY: Start the timer
     goal.isActive = true;
+
+    // US-039: Play start sound
+    playSound(SOUNDS.START);
 
     // Update goal in storage
     await updateGoal(goalId, { isActive: true });
@@ -728,6 +740,9 @@ async function handleTimerCompletion(goalId) {
 
   console.log(`[Timer] Goal ${goalId} completed! Final progress: ${finalProgress}s`);
 
+  // US-039: Play completion sound
+  playSound(SOUNDS.COMPLETE);
+
   // US-019: Trigger completion celebration animation
   triggerCompletionCelebration(goalId);
 
@@ -782,8 +797,14 @@ async function handleCounterIncrement(goalId) {
     await addActivityLogEntry(completeLog);
     console.log(`[Counter] Goal ${goalId} completed!`);
 
+    // US-039: Play completion sound (instead of tick for completion)
+    playSound(SOUNDS.COMPLETE);
+
     // US-019: Trigger completion celebration animation
     triggerCompletionCelebration(goalId);
+  } else {
+    // US-039: Play tick sound for regular increment
+    playSound(SOUNDS.TICK);
   }
 
   // Re-render to update UI
@@ -825,6 +846,9 @@ async function handleCounterDecrement(goalId) {
   await addActivityLogEntry(activityLog);
 
   console.log(`[Counter] Decremented goal ${goalId}: progress now ${newProgress}/${goal.target}`);
+
+  // US-039: Play tick sound for decrement
+  playSound(SOUNDS.TICK);
 
   // Re-render to update UI
   renderCurrentScreen();
@@ -877,8 +901,14 @@ async function handleCheckboxToggle(goalId) {
     await addActivityLogEntry(completeLog);
     console.log(`[Checkbox] Goal ${goalId} completed!`);
 
+    // US-039: Play completion sound (instead of tick for completion)
+    playSound(SOUNDS.COMPLETE);
+
     // US-019: Trigger completion celebration animation
     triggerCompletionCelebration(goalId);
+  } else {
+    // US-039: Play tick sound for regular toggle
+    playSound(SOUNDS.TICK);
   }
 
   // Re-render to update UI
@@ -2520,6 +2550,10 @@ async function loadData() {
       activeTimersCount: Object.keys(activeTimers).length,
       streakData: streakData
     });
+
+    // US-039: Initialize sound system with user settings
+    await initSounds();
+    loadSoundSettings(settings);
 
     // US-031: Sync active timers with goals - ensure isActive flags are in sync
     await syncActiveTimersWithGoals();

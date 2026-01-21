@@ -1866,3 +1866,55 @@ Created src/utils/sounds.js with comprehensive audio functionality:
 - US-039 will connect the sound system to goal interactions
 - US-040 (Auto Reset - Alarm Setup) has priority 5 and depends on US-006 (done)
 
+## Iteration 35 - US-039: Sound - Integration
+**Status:** Completed
+**Date:** 2026-01-22
+
+### What was done:
+- Integrated the sound system into all goal interactions
+- Added imports from sounds.js to popup.js:
+  - initSounds, playSound, loadSoundSettings, SOUNDS
+- Sound playback integrated into Timer goals:
+  - START sound plays when timer begins (play button clicked)
+  - PAUSE sound plays when timer is paused
+  - COMPLETE sound plays when timer reaches target
+- Sound playback integrated into Counter goals:
+  - TICK sound plays on increment (unless goal completes)
+  - TICK sound plays on decrement
+  - COMPLETE sound plays when counter reaches target
+- Sound playback integrated into Checkbox goals:
+  - TICK sound plays on toggle (unless goal completes)
+  - COMPLETE sound plays when checkbox is checked and goal completes
+- Sound system initialization:
+  - initSounds() called in loadData() to preload audio elements
+  - loadSoundSettings() called with user settings to apply volume/mute preferences
+
+### Technical details:
+- Updated src/popup/popup.js:
+  - Added imports for sound functions at the top
+  - handleTimerToggle(): Added playSound(SOUNDS.START) on play, playSound(SOUNDS.PAUSE) on pause
+  - handleTimerCompletion(): Added playSound(SOUNDS.COMPLETE)
+  - handleCounterIncrement(): Added playSound(SOUNDS.COMPLETE) on completion, playSound(SOUNDS.TICK) otherwise
+  - handleCounterDecrement(): Added playSound(SOUNDS.TICK)
+  - handleCheckboxToggle(): Added playSound(SOUNDS.COMPLETE) on completion, playSound(SOUNDS.TICK) otherwise
+  - loadData(): Added initSounds() and loadSoundSettings(settings) after loading data
+- Sound plays asynchronously (non-blocking) to not delay UI updates
+- Completion sound takes priority over tick sound (plays COMPLETE instead of TICK when goal completes)
+
+### Acceptance criteria verification:
+- [x] Completion sound plays at 100% - playSound(SOUNDS.COMPLETE) in handleTimerCompletion, handleCounterIncrement (when complete), handleCheckboxToggle (when complete)
+- [x] Tick on counter changes - playSound(SOUNDS.TICK) in handleCounterIncrement and handleCounterDecrement
+- [x] Tick on checkbox toggle - playSound(SOUNDS.TICK) in handleCheckboxToggle (when not completing)
+- [x] Start sound on timer play - playSound(SOUNDS.START) in handleTimerToggle when starting
+- [x] Pause sound on timer pause - playSound(SOUNDS.PAUSE) in handleTimerToggle when pausing
+
+### Notes for next iteration:
+- All priority 4 tasks are now complete
+- Priority 5 tasks are now eligible:
+  - US-040 (Auto Reset - Alarm Setup) - depends on US-006 (done)
+  - US-042 (History Storage Model) - depends on US-009 (done)
+  - US-043 (Reports Screen - Layout) - depends on US-013 (done)
+- US-041 depends on US-040 (not done yet)
+- US-044, US-045, US-046 depend on US-042 and/or US-043
+- Sound integration is complete - users will hear audio feedback on all goal interactions
+
