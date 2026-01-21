@@ -2646,3 +2646,57 @@ body.modal-open {
 .time-input:hover:not(:focus) {
   border-color: var(--text-muted);
 }
+
+/* ========================================
+   US-026: Add Goal Form - Target Input (Counter)
+   ======================================== */
+
+/* Counter Target Input - Large prominent number input */
+.counter-target-input {
+  font-size: var(--font-size-xl);
+  font-weight: var(--font-weight-semibold);
+  text-align: center;
+  padding: var(--spacing-md) var(--spacing-lg);
+  border-radius: var(--radius-lg);
+  max-width: 200px;
+  -moz-appearance: textfield; /* Hide spinner in Firefox */
+}
+
+/* Hide spinner buttons in Chrome/Safari/Edge */
+.counter-target-input::-webkit-outer-spin-button,
+.counter-target-input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+/* Counter target group styling */
+#counter-target-group {
+  max-height: 150px;
+  opacity: 1;
+}
+
+#counter-target-group .form-label {
+  margin-bottom: var(--spacing-xs);
+}
+
+/* Focus state with counter/orange theme */
+.counter-target-input:focus {
+  border-color: #FB8C00;
+  box-shadow: 0 0 0 3px var(--warning-light);
+}
+
+/* Hover state */
+.counter-target-input:hover:not(:focus) {
+  border-color: var(--text-muted);
+}
+
+/* Error state */
+.counter-target-input.has-error {
+  border-color: var(--danger);
+  background-color: var(--danger-light);
+}
+
+.counter-target-input.has-error:focus {
+  border-color: var(--danger);
+  box-shadow: 0 0 0 3px rgba(244, 67, 54, 0.15);
+}

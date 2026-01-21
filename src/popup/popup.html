@@ -132,7 +132,23 @@
               <p class="form-hint">Set the duration you want to track (e.g., 1 hour 30 minutes)</p>
             </div>
 
-            <!-- Counter target input will be added in US-026 -->
+            <!-- US-026: Counter Target Input -->
+            <div class="form-group target-input-group hidden" id="counter-target-group">
+              <label for="counter-target" class="form-label">Target Count <span class="required-indicator">*</span></label>
+              <input
+                type="number"
+                id="counter-target"
+                name="counter-target"
+                class="form-input counter-target-input"
+                placeholder="e.g., 10"
+                min="1"
+                value="10"
+                autocomplete="off"
+              >
+              <span class="form-error" id="counter-target-error" role="alert" aria-live="polite"></span>
+              <p class="form-hint">Set the target count you want to reach (minimum 1)</p>
+            </div>
+
             <!-- Timeframe selector will be added in US-027 -->
           </form>
         </div>

@@ -1347,3 +1347,70 @@
 - Timer target input is fully functional with validation and edit mode support
 - The form now properly shows/hides timer target based on type selection
 
+## Iteration 27 - US-026: Add Goal Form - Target Input (Counter)
+**Status:** Completed
+**Date:** 2026-01-22
+
+### What was done:
+- Added counter target input to the Add Goal form modal
+- Created HTML structure for the counter target input:
+  - Form group container with id="counter-target-group"
+  - Label 'Target Count' with required indicator (red asterisk)
+  - Number input with placeholder 'e.g., 10', min=1, default value 10
+  - Error message span with role="alert" for accessibility
+  - Form hint: 'Set the target count you want to reach (minimum 1)'
+  - Input is initially hidden (shown only when Counter type is selected)
+- Implemented comprehensive CSS styling (~50 lines):
+  - Large, centered number input styling
+  - Orange/warning color theme for counter type (consistent with counter goal styling)
+  - Focus state with orange border and warning-light shadow
+  - Error state with red styling
+  - Hidden state for type-based visibility
+  - No spinner buttons (cleaner number input)
+- Implemented JavaScript functions for counter target management:
+  - getCounterTarget() - returns target count (minimum 1)
+  - setCounterTarget(count) - sets counter value (for edit mode)
+  - validateCounterTarget() - validates required, minimum 1, positive integer
+  - showCounterTargetError(message) - displays error message
+  - clearCounterTargetError() - clears error state
+  - resetCounterTarget() - resets to default (10)
+- Integrated with form lifecycle:
+  - updateTargetInputVisibility() now shows counter target when Counter type selected
+  - resetGoalForm() calls resetCounterTarget()
+  - openGoalModal() pre-fills counter target in edit mode (for counter type)
+  - handleGoalFormSubmit() validates counter target when counter type is selected
+- Added all new functions to module exports
+
+### Technical details:
+- Updated src/popup/popup.html:
+  - Added counter-target-group form group with label, input, error, and hint
+  - Input has min=1 attribute and value=10 default
+  - Uses 'hidden' class by default (toggled by type selection)
+- Updated src/popup/popup.js (~100 lines in US-026 section):
+  - Six new functions for counter target management
+  - Integrated into updateTargetInputVisibility(), resetGoalForm(), openGoalModal(), handleGoalFormSubmit()
+  - All new functions exported for testing
+- Updated src/popup/popup.css (~50 lines):
+  - Counter target input styling with centered layout
+  - Orange focus theme matching counter goal type
+  - Error states matching existing form error patterns
+- CSS brace count: 390 (balanced)
+- JavaScript syntax validated with node --check
+- HTML div balance validated (19/19)
+
+### Acceptance criteria verification:
+- [x] Shows only when Counter type selected - updateTargetInputVisibility() toggles 'hidden' class
+- [x] Number input - type="number" input with id="counter-target"
+- [x] Minimum value 1 - min="1" attribute, validateCounterTarget() checks value >= 1
+- [x] Placeholder text - 'e.g., 10' placeholder
+- [x] Validation for positive integer - validateCounterTarget() checks for NaN, < 1, non-integer
+
+### Notes for next iteration:
+- US-027 (Add Goal Form - Timeframe Selector) is now a priority 3 task
+  - Depends on US-023 (done) and has priority 3
+- US-030 (Delete Goal - Confirmation) is still available (depends on US-021)
+- US-028 (Save Logic) depends on US-025 (done), US-026 (done), US-027 - waiting on US-027
+- Counter target input is fully functional with validation and edit mode support
+- The form now properly shows/hides both timer and counter targets based on type selection
+- All three target input types are now complete: Timer (US-025), Counter (US-026), Checkbox (no target needed)
+

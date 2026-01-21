@@ -384,7 +384,7 @@
         "Validation for positive integer"
       ],
       "priority": 3,
-      "passes": false,
+      "passes": true,
       "dependsOn": ["US-024"]
     },
     {

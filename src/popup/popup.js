@@ -1184,6 +1184,11 @@ function openGoalModal(mode = 'add', goal = null) {
     setTimerTarget(goal.target);
   }
 
+  // US-026: Pre-fill counter target for edit mode (if counter type)
+  if (goal && goal.type === GOAL_TYPES.COUNTER && goal.target) {
+    setCounterTarget(goal.target);
+  }
+
   // US-023: Focus the title input for better UX
   focusTitleInput();
 
@@ -1291,6 +1296,15 @@ function handleGoalFormSubmit(e) {
     const timerTargetValid = validateTimerTarget();
     if (!timerTargetValid) {
       console.log('[Form] Validation failed - timer target is invalid');
+      return;
+    }
+  }
+
+  // US-026: Validate counter target if counter type is selected
+  if (selectedType === GOAL_TYPES.COUNTER) {
+    const counterTargetValid = validateCounterTarget();
+    if (!counterTargetValid) {
+      console.log('[Form] Validation failed - counter target is invalid');
       return;
     }
   }
@@ -1406,6 +1420,9 @@ function resetGoalForm() {
 
   // US-025: Reset timer target to default values
   resetTimerTarget();
+
+  // US-026: Reset counter target to default value
+  resetCounterTarget();
 }
 
 /**
@@ -1478,12 +1495,12 @@ function handleTypeSelection(type) {
 /**
  * Update target input visibility based on selected type
  * US-025: Shows timer target input when Timer type is selected
- * US-026: Will show counter target input when Counter type is selected
+ * US-026: Shows counter target input when Counter type is selected
  * @param {string} type - The selected goal type
  */
 function updateTargetInputVisibility(type) {
   const timerTargetGroup = document.getElementById('timer-target-group');
-  // const counterTargetGroup = document.getElementById('counter-target-group'); // US-026
+  const counterTargetGroup = document.getElementById('counter-target-group');
 
   // Show/hide timer target input
   if (timerTargetGroup) {
@@ -1495,13 +1512,13 @@ function updateTargetInputVisibility(type) {
   }
 
   // US-026: Show/hide counter target input
-  // if (counterTargetGroup) {
-  //   if (type === GOAL_TYPES.COUNTER) {
-  //     counterTargetGroup.classList.remove('hidden');
-  //   } else {
-  //     counterTargetGroup.classList.add('hidden');
-  //   }
-  // }
+  if (counterTargetGroup) {
+    if (type === GOAL_TYPES.COUNTER) {
+      counterTargetGroup.classList.remove('hidden');
+    } else {
+      counterTargetGroup.classList.add('hidden');
+    }
+  }
 
   console.log(`[Form] Target input visibility updated for type: ${type}`);
 }
@@ -1639,6 +1656,117 @@ function resetTimerTarget() {
   }
 
   clearTimerTargetError();
+}
+
+// =============================================================================
+// US-026: Add Goal Form - Target Input (Counter)
+// =============================================================================
+
+/**
+ * Get the counter target value from the form
+ * @returns {number} The target count (minimum 1)
+ */
+function getCounterTarget() {
+  const counterInput = document.getElementById('counter-target');
+  const value = parseInt(counterInput?.value, 10);
+  return isNaN(value) || value < 1 ? 1 : value;
+}
+
+/**
+ * Set the counter target value in the form
+ * @param {number} count - The target count to set
+ */
+function setCounterTarget(count) {
+  const counterInput = document.getElementById('counter-target');
+  if (counterInput) {
+    counterInput.value = Math.max(1, count || 10);
+  }
+}
+
+/**
+ * Validate the counter target input
+ * @returns {boolean} True if valid, false otherwise
+ */
+function validateCounterTarget() {
+  const counterInput = document.getElementById('counter-target');
+  const errorElement = document.getElementById('counter-target-error');
+
+  if (!counterInput || !errorElement) {
+    console.error('Counter target input elements not found');
+    return false;
+  }
+
+  // Clear previous errors
+  clearCounterTargetError();
+
+  const value = parseInt(counterInput.value, 10);
+
+  // Validate that a value is provided
+  if (counterInput.value === '' || isNaN(value)) {
+    showCounterTargetError('Please enter a target count');
+    counterInput.classList.add('has-error');
+    counterInput.focus();
+    return false;
+  }
+
+  // Validate minimum value (1)
+  if (value < 1) {
+    showCounterTargetError('Target must be at least 1');
+    counterInput.classList.add('has-error');
+    counterInput.focus();
+    return false;
+  }
+
+  // Validate it's a positive integer
+  if (!Number.isInteger(value) || value <= 0) {
+    showCounterTargetError('Please enter a positive whole number');
+    counterInput.classList.add('has-error');
+    counterInput.focus();
+    return false;
+  }
+
+  return true;
+}
+
+/**
+ * Show error message for counter target
+ * @param {string} message - The error message to display
+ */
+function showCounterTargetError(message) {
+  const errorElement = document.getElementById('counter-target-error');
+  if (errorElement) {
+    errorElement.textContent = message;
+    errorElement.classList.add('visible');
+  }
+}
+
+/**
+ * Clear error state for counter target input
+ */
+function clearCounterTargetError() {
+  const counterInput = document.getElementById('counter-target');
+  const errorElement = document.getElementById('counter-target-error');
+
+  if (counterInput) {
+    counterInput.classList.remove('has-error');
+  }
+  if (errorElement) {
+    errorElement.textContent = '';
+    errorElement.classList.remove('visible');
+  }
+}
+
+/**
+ * Reset the counter target input to default value
+ */
+function resetCounterTarget() {
+  const counterInput = document.getElementById('counter-target');
+
+  if (counterInput) {
+    counterInput.value = '10'; // Default to 10
+  }
+
+  clearCounterTargetError();
 }
 
 /**
@@ -1927,5 +2055,12 @@ export {
   validateTimerTarget,
   showTimerTargetError,
   clearTimerTargetError,
-  resetTimerTarget
+  resetTimerTarget,
+  // US-026 Counter target input functions
+  getCounterTarget,
+  setCounterTarget,
+  validateCounterTarget,
+  showCounterTargetError,
+  clearCounterTargetError,
+  resetCounterTarget
 };
