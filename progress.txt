@@ -156,3 +156,50 @@
 - US-005 completes the popup visual foundation
 - US-007 provides data layer needed for goal management
 
+## Iteration 6 - US-005: Base CSS Styles
+**Status:** Completed
+**Date:** 2026-01-22
+
+### What was done:
+- Created comprehensive base CSS styles in src/popup/popup.css
+- Implemented CSS reset:
+  - Universal box-sizing: border-box
+  - Reset margin and padding on all elements
+  - Reset default styles for buttons, inputs, lists
+- Defined CSS variables for theming:
+  - Primary colors: --primary (#4CAF50 green to match icons), --primary-hover, --primary-light
+  - Secondary colors: --secondary (#2196F3 blue), variants
+  - Background colors: --background, --background-secondary, --background-card
+  - Text colors: --text, --text-secondary, --text-muted, --text-inverse
+  - Status colors: --success, --danger, --warning with light variants
+  - Border and shadow variables
+  - Spacing scale (xs to xl)
+  - Border radius scale
+  - Transition timing variables
+- Set popup dimensions:
+  - Width: 380px (per FEATURES.md spec)
+  - Min height: 500px, Max height: 600px (per FEATURES.md spec)
+- Configured base typography:
+  - System font stack for native look
+  - Font sizes from xs (11px) to 2xl (24px)
+  - Font weights: normal, medium, semibold, bold
+  - Line height: 1.5
+- Added screen management styles (.screen, .screen.active)
+- Added scrollbar styling for WebKit browsers
+- Added accessibility utilities (.sr-only, :focus-visible)
+- Added text utility classes (.text-center, .text-muted, etc.)
+
+### Technical details:
+- Uses CSS custom properties (variables) for easy theming
+- Prepared for dark mode support (variables in :root can be overridden)
+- Font-smoothing enabled for better text rendering
+- Responsive focus states for accessibility
+- Clean scrollbar styling that matches the design
+
+### Notes for next iteration:
+- US-007 (Storage Utility Module) is now the next priority 1 task
+  - Depends on US-006 (done)
+  - Unblocks US-008 (Goal Data Model)
+- US-010 (Popup JavaScript Entry Point) depends on US-005 (now done), US-007, and US-008
+- Dark mode CSS variables will be added in US-050
+
