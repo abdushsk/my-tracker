@@ -2808,3 +2808,67 @@ Created the full Reports screen layout with all required UI sections.
 - US-053 (Browser Badge - Goal Count) is now the only remaining task with `passes: false`
 - All settings now persist correctly across sessions
 - Volume slider provides real-time feedback while dragging
+
+## Iteration: US-053 - Browser Badge - Goal Count
+
+### Task completed: US-053 - Browser Badge - Goal Count
+**Date:** 2026-01-22
+**Status:** PASSED
+
+### What was implemented:
+
+1. **Badge Colors Constants (service-worker.js)**
+   - `BADGE_COLORS.ALL_COMPLETE`: '#22c55e' - Green for when all goals are done
+   - `BADGE_COLORS.INCOMPLETE`: '#f97316' - Orange for incomplete goals
+   - `BADGE_COLORS.NO_GOALS`: '#94a3b8' - Gray (badge cleared when no goals)
+
+2. **updateBadge() Function (service-worker.js)**
+   - Retrieves all goals from storage
+   - Counts incomplete goals where `progress < target`
+   - When all goals complete: shows checkmark '✓' with green background
+   - When incomplete goals exist: shows count with orange background
+   - When no goals exist: clears badge completely
+
+3. **Storage Change Listener (service-worker.js)**
+   - `chrome.storage.onChanged.addListener` watches for goal changes
+   - Automatically updates badge when goals are modified from any source
+   - Only triggers on 'local' storage area and 'goals' key changes
+
+4. **Badge Update Triggers**
+   - On extension install/update (`chrome.runtime.onInstalled`)
+   - On browser startup (`chrome.runtime.onStartup`)
+   - On service worker load (immediate call to `updateBadge()`)
+   - On goal reset (after `performGoalReset()` completes)
+   - On storage changes (via `chrome.storage.onChanged` listener)
+   - On explicit UPDATE_BADGE message (updated message handler)
+
+5. **Message Handler Update**
+   - Updated the 'UPDATE_BADGE' case to actually call `updateBadge()`
+   - Returns success/error response asynchronously
+
+### Acceptance criteria verification:
+- [x] Badge shows incomplete count - Shows count of goals with progress < target
+- [x] Updates on goal changes - Uses chrome.storage.onChanged listener
+- [x] Green background when all done - '#22c55e' with checkmark character
+- [x] Red/orange when incomplete - '#f97316' orange background
+- [x] Clears when no goals - Empty string badge text when goals.length === 0
+
+### Technical details:
+- Updated src/background/service-worker.js:
+  - Added BADGE_COLORS constants (~5 lines)
+  - Added updateBadge() function (~35 lines)
+  - Added chrome.storage.onChanged listener (~10 lines)
+  - Updated UPDATE_BADGE message handler
+  - Added updateBadge() calls to onInstalled, onStartup, and service worker load
+  - Added updateBadge() call after performGoalReset()
+
+### Chrome APIs used:
+- `chrome.action.setBadgeText({ text: string })` - Set badge text
+- `chrome.action.setBadgeBackgroundColor({ color: string })` - Set badge background color
+- `chrome.storage.onChanged.addListener` - Listen for storage changes
+
+### Notes for next iteration:
+- All user stories now have `passes: true`
+- The extension is complete with all features implemented
+- Badge updates in real-time via storage change listener
+- Badge persists across browser restarts via onStartup handler

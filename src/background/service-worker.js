@@ -161,6 +161,9 @@ chrome.runtime.onInstalled.addListener(async (details) => {
 
   // US-040: Set up alarms for scheduled resets
   await setupResetAlarms();
+
+  // US-053: Update badge on install/update
+  await updateBadge();
 });
 
 // ============================================
@@ -192,9 +195,11 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
       break;
 
     case 'UPDATE_BADGE':
-      // Future: Update the extension badge with goal count
-      console.log('[Service Worker] Badge update requested:', message.data);
-      sendResponse({ success: true, message: 'Badge updated' });
+      // US-053: Update the extension badge with goal count
+      console.log('[Service Worker] Badge update requested');
+      updateBadge()
+        .then(() => sendResponse({ success: true, message: 'Badge updated' }))
+        .catch(error => sendResponse({ success: false, error: error.message }));
       break;
 
     case 'GET_ACTIVE_TIMERS':
@@ -557,6 +562,11 @@ async function performGoalReset(timeframe) {
 
     console.log(`[Service Worker] ${timeframe} reset complete: ${resetCount} goals reset, ${archivedCount} entries archived`);
 
+    // US-053: Update badge after goals reset (all will be incomplete now)
+    if (resetCount > 0) {
+      await updateBadge();
+    }
+
     return {
       success: true,
       resetCount,
@@ -821,6 +831,9 @@ chrome.runtime.onStartup.addListener(async () => {
 
   // US-040: Verify alarms are still set up (they should persist, but verify)
   await verifyAlarmsSetup();
+
+  // US-053: Update badge on browser startup
+  await updateBadge();
 });
 
 /**
@@ -921,5 +934,80 @@ async function checkForCompletedTimers() {
   }
 }
 
+// ============================================
+// US-053: Browser Badge - Goal Count
+// ============================================
+
+/**
+ * Badge color constants
+ */
+const BADGE_COLORS = {
+  ALL_COMPLETE: '#22c55e', // Green when all goals done
+  INCOMPLETE: '#f97316',   // Orange when there are incomplete goals
+  NO_GOALS: '#94a3b8'      // Gray when no goals exist (badge will be cleared)
+};
+
+/**
+ * Update the extension badge to show incomplete goals count.
+ * - Shows count of incomplete goals when there are some
+ * - Shows green background when all goals are complete
+ * - Shows orange background when there are incomplete goals
+ * - Clears the badge when there are no goals
+ * @returns {Promise<void>}
+ */
+async function updateBadge() {
+  console.log('[Service Worker] Updating badge...');
+
+  try {
+    const goals = await getGoals();
+
+    if (goals.length === 0) {
+      // No goals - clear the badge
+      await chrome.action.setBadgeText({ text: '' });
+      console.log('[Service Worker] Badge cleared - no goals');
+      return;
+    }
+
+    // Count incomplete goals (progress < target)
+    const incompleteCount = goals.filter(goal => goal.progress < goal.target).length;
+    const totalCount = goals.length;
+    const allComplete = incompleteCount === 0;
+
+    if (allComplete) {
+      // All goals complete - show checkmark or empty with green background
+      await chrome.action.setBadgeText({ text: '✓' });
+      await chrome.action.setBadgeBackgroundColor({ color: BADGE_COLORS.ALL_COMPLETE });
+      console.log('[Service Worker] Badge updated - all goals complete');
+    } else {
+      // Show incomplete count with orange background
+      const badgeText = incompleteCount.toString();
+      await chrome.action.setBadgeText({ text: badgeText });
+      await chrome.action.setBadgeBackgroundColor({ color: BADGE_COLORS.INCOMPLETE });
+      console.log(`[Service Worker] Badge updated - ${incompleteCount}/${totalCount} incomplete`);
+    }
+  } catch (error) {
+    console.error('[Service Worker] Error updating badge:', error);
+  }
+}
+
+// ============================================
+// US-053: Storage Change Listener for Badge Updates
+// ============================================
+
+/**
+ * Listen for changes to storage to update badge when goals change.
+ * This ensures the badge stays in sync even when changes come from
+ * other parts of the extension (popup, content scripts).
+ */
+chrome.storage.onChanged.addListener((changes, areaName) => {
+  if (areaName === 'local' && changes[STORAGE_KEYS.GOALS]) {
+    console.log('[Service Worker] Goals changed in storage - updating badge');
+    updateBadge();
+  }
+});
+
 // Log that service worker has loaded
 console.log('[Service Worker] Daily Goals Tracker service worker loaded');
+
+// US-053: Initial badge update when service worker loads
+updateBadge();
