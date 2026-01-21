@@ -3480,3 +3480,110 @@ body.modal-open {
   font-size: var(--font-size-sm);
   font-weight: var(--font-weight-medium);
 }
+
+/* ----------------------------------------
+   US-047: Weekly Chart Styles
+   ---------------------------------------- */
+.weekly-chart {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+  padding: var(--spacing-md);
+  background-color: var(--card-bg);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+}
+
+.chart-bars {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  height: 100px;
+  gap: var(--spacing-xs);
+  padding: var(--spacing-xs) 0;
+}
+
+.chart-bar-container {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  align-items: flex-end;
+  height: 100%;
+  min-width: 28px;
+}
+
+.chart-bar {
+  width: 100%;
+  max-width: 32px;
+  min-height: 0;
+  border-radius: var(--radius-sm) var(--radius-sm) 0 0;
+  transition: height 0.3s ease, background-color 0.2s ease;
+  cursor: default;
+  position: relative;
+}
+
+/* Bar color classes - matching discipline score colors */
+.chart-bar-empty {
+  background-color: var(--border);
+  min-height: 4px;
+}
+
+.chart-bar-excellent {
+  background-color: var(--success);
+}
+
+.chart-bar-moderate {
+  background-color: var(--warning);
+}
+
+.chart-bar-low {
+  background-color: var(--danger);
+}
+
+/* Hover effect for bars */
+.chart-bar:hover {
+  filter: brightness(1.1);
+}
+
+/* Show percentage on hover */
+.chart-bar::after {
+  content: attr(data-percentage) '%';
+  position: absolute;
+  bottom: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  background-color: var(--text);
+  color: var(--background);
+  padding: 2px 6px;
+  border-radius: var(--radius-sm);
+  font-size: var(--font-size-xs);
+  white-space: nowrap;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s ease;
+  margin-bottom: 4px;
+}
+
+.chart-bar:hover::after {
+  opacity: 1;
+}
+
+/* Day labels */
+.chart-labels {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--spacing-xs);
+}
+
+.chart-label {
+  flex: 1;
+  text-align: center;
+  font-size: var(--font-size-xs);
+  color: var(--text-muted);
+  min-width: 28px;
+}
+
+.chart-label-today {
+  font-weight: var(--font-weight-semibold);
+  color: var(--primary);
+}

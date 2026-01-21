@@ -702,7 +702,7 @@
         "Responsive sizing"
       ],
       "priority": 6,
-      "passes": false,
+      "passes": true,
       "dependsOn": ["US-046"]
     },
     {

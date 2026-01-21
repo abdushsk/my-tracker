@@ -2393,3 +2393,74 @@ Created the full Reports screen layout with all required UI sections.
 - The stats will show 0/0 for new users with no history and no goals
 - Stats will update in real-time when goals are completed and Reports screen is refreshed
 - Week starts on Monday (ISO week standard)
+## Iteration: US-047 - Reports - Weekly Chart
+
+### Task completed: US-047 - Weekly Chart Implementation
+**Date:** 2026-01-22
+**Status:** PASSED
+
+### What was implemented:
+
+1. **HTML Structure Update** in renderReportsScreen() (popup.js):
+   - Replaced the "charts-placeholder" div with a proper "weekly-chart" container
+   - Added "chart-bars" div for the 7 bar elements
+   - Added "chart-labels" div for day abbreviations (Mon-Sun)
+
+2. **renderWeeklyChart(history, currentGoals)** - New function in popup.js:
+   - Calculates chart data for last 7 days using calculateWeeklyChartData()
+   - Creates bar containers and bars dynamically
+   - Sets bar height based on completion percentage (0-100%)
+   - Applies color coding classes:
+     - chart-bar-empty: No data (border color)
+     - chart-bar-excellent: >=80% (green/success)
+     - chart-bar-moderate: >=50% (yellow/warning)
+     - chart-bar-low: <50% (red/danger)
+   - Adds tooltips showing "X/Y completed (Z%)" on hover
+   - Marks today's day label with special styling
+
+3. **calculateWeeklyChartData(history, currentGoals)** - New function in popup.js:
+   - Iterates through last 7 days (6 days ago to today)
+   - Uses history data for past days (grouped by date)
+   - Uses currentGoals for today's data
+   - Returns array of objects: { date, dayOfWeek, completed, total, percentage, isToday }
+   - Handles days with no goals gracefully (0% shown as empty bar)
+
+4. **CSS Styles** added to popup.css:
+   - .weekly-chart: Container with card styling (bg, radius, shadow)
+   - .chart-bars: Flexbox container with 100px height for bars
+   - .chart-bar-container: Individual bar container with flex layout
+   - .chart-bar: Bar element with color classes and hover effects
+   - .chart-bar::after: Percentage tooltip on hover
+   - .chart-labels: Day label container
+   - .chart-label: Day abbreviation styling
+   - .chart-label-today: Highlighted styling for today
+
+### Acceptance criteria verification:
+- [x] 7 bars for 7 days - Dynamic bars for last 7 days
+- [x] Height represents completion % - Bar height = percentage (0-100%)
+- [x] Day labels below bars - Mon-Sun labels with flex layout
+- [x] Color coding for bars - Green (>=80%), Yellow (>=50%), Red (<50%), Empty
+- [x] Responsive sizing - Flexbox layout with min/max widths
+
+### Technical details:
+- Updated src/popup/popup.js:
+  - Modified renderReportsScreen() HTML template
+  - Added renderWeeklyChart() call in updateReportsStats()
+  - Added renderWeeklyChart() function (~50 lines)
+  - Added calculateWeeklyChartData() function (~40 lines)
+- Updated src/popup/popup.css:
+  - Added ~100 lines of weekly chart styles
+
+### Features:
+- Hover tooltips show exact count and percentage
+- Today's label is highlighted with primary color
+- Smooth transitions for bar heights
+- Empty state shows thin gray bar for visibility
+- Reuses existing color scheme (--success, --warning, --danger variables)
+
+### Notes for next iteration:
+- US-048 (Activity Timeline - Data Structure) and US-049 (Activity Timeline - Heatmap) are next
+- US-050 (Dark Mode - CSS Variables) is also ready (depends on US-005 which passed)
+- US-053 (Browser Badge - Goal Count) is unblocked (depends on US-006, US-019)
+- Chart will show empty bars for days before the extension was installed
+- Chart updates when Reports screen is opened/refreshed

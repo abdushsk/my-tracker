@@ -2557,17 +2557,15 @@ function renderReportsScreen() {
           </div>
         </section>
 
-        <!-- Charts Placeholder Section -->
+        <!-- US-047: Weekly Chart Section -->
         <section class="reports-section charts-section">
           <h2 class="section-title">Weekly Overview</h2>
-          <div class="charts-placeholder" id="weekly-chart-container">
-            <div class="chart-coming-soon">
-              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="chart-placeholder-icon">
-                <line x1="18" y1="20" x2="18" y2="10"/>
-                <line x1="12" y1="20" x2="12" y2="4"/>
-                <line x1="6" y1="20" x2="6" y2="14"/>
-              </svg>
-              <span class="chart-placeholder-text">Weekly chart coming soon</span>
+          <div class="weekly-chart" id="weekly-chart-container">
+            <div class="chart-bars" id="chart-bars">
+              <!-- Bars will be rendered dynamically -->
+            </div>
+            <div class="chart-labels" id="chart-labels">
+              <!-- Day labels will be rendered dynamically -->
             </div>
           </div>
         </section>
@@ -2620,6 +2618,9 @@ async function updateReportsStats() {
 
   // US-045: Calculate and display streak data
   await updateStreakDisplay();
+
+  // US-047: Render weekly chart
+  renderWeeklyChart(history, state.goals);
 }
 
 /**
@@ -2782,6 +2783,126 @@ function calculateMonthCompletionStats(history, currentGoals) {
   total += currentGoals.length;
 
   return { completed, total };
+}
+
+/**
+ * Render the weekly chart showing completion rates for the last 7 days
+ * US-047: Weekly Chart Implementation
+ *
+ * @param {Array} history - Array of history entries
+ * @param {Array} currentGoals - Current goals array (for today's data)
+ */
+function renderWeeklyChart(history, currentGoals) {
+  const chartBarsContainer = document.getElementById('chart-bars');
+  const chartLabelsContainer = document.getElementById('chart-labels');
+
+  if (!chartBarsContainer || !chartLabelsContainer) return;
+
+  // Calculate chart data for last 7 days
+  const chartData = calculateWeeklyChartData(history, currentGoals);
+
+  // Day abbreviations (Mon-Sun)
+  const dayNames = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+
+  // Clear existing content
+  chartBarsContainer.innerHTML = '';
+  chartLabelsContainer.innerHTML = '';
+
+  // Render bars and labels
+  chartData.forEach((dayData, index) => {
+    // Create bar container
+    const barContainer = document.createElement('div');
+    barContainer.className = 'chart-bar-container';
+
+    // Create the bar
+    const bar = document.createElement('div');
+    bar.className = 'chart-bar';
+
+    // Apply color class based on percentage
+    if (dayData.percentage === 0) {
+      bar.classList.add('chart-bar-empty');
+    } else if (dayData.percentage >= 80) {
+      bar.classList.add('chart-bar-excellent');
+    } else if (dayData.percentage >= 50) {
+      bar.classList.add('chart-bar-moderate');
+    } else {
+      bar.classList.add('chart-bar-low');
+    }
+
+    // Set bar height based on percentage (minimum 4px for visibility)
+    const barHeight = dayData.percentage > 0 ? Math.max(4, dayData.percentage) : 0;
+    bar.style.height = `${barHeight}%`;
+
+    // Add tooltip with details
+    bar.setAttribute('title', `${dayData.completed}/${dayData.total} completed (${Math.round(dayData.percentage)}%)`);
+    bar.setAttribute('data-percentage', Math.round(dayData.percentage));
+
+    barContainer.appendChild(bar);
+    chartBarsContainer.appendChild(barContainer);
+
+    // Create label
+    const label = document.createElement('span');
+    label.className = 'chart-label';
+    label.textContent = dayNames[dayData.dayOfWeek];
+
+    // Mark today's label
+    if (dayData.isToday) {
+      label.classList.add('chart-label-today');
+    }
+
+    chartLabelsContainer.appendChild(label);
+  });
+}
+
+/**
+ * Calculate chart data for the last 7 days
+ * US-047: Data calculation for weekly chart
+ *
+ * @param {Array} history - Array of history entries
+ * @param {Array} currentGoals - Current goals array (for today's data)
+ * @returns {Array} Array of objects with completed, total, percentage, dayOfWeek, isToday
+ */
+function calculateWeeklyChartData(history, currentGoals) {
+  const today = getTodayDateString();
+  const chartData = [];
+
+  // Group history by date for efficient lookup
+  const historyByDate = groupHistoryByDate(history);
+
+  // Get data for last 7 days (starting from 6 days ago to today)
+  for (let i = 6; i >= 0; i--) {
+    const date = new Date();
+    date.setDate(date.getDate() - i);
+    const dateStr = date.toISOString().split('T')[0];
+    const dayOfWeek = date.getDay() === 0 ? 6 : date.getDay() - 1; // Convert to Mon=0, Sun=6
+
+    let completed = 0;
+    let total = 0;
+
+    if (dateStr === today) {
+      // Use current goals for today
+      total = currentGoals.length;
+      completed = currentGoals.filter(goal => isGoalCompleted(goal)).length;
+    } else {
+      // Use history for past days
+      const dayHistory = historyByDate[dateStr] || [];
+      total = dayHistory.length;
+      completed = dayHistory.filter(entry => entry.completed).length;
+    }
+
+    const percentage = total > 0 ? (completed / total) * 100 : 0;
+
+    chartData.push({
+      date: dateStr,
+      dayOfWeek,
+      completed,
+      total,
+      percentage,
+      isToday: dateStr === today
+    });
+  }
+
+  return chartData;
 }
 
 /**
