@@ -545,6 +545,12 @@ async function handleTimerToggle(goalId) {
       delete state.activeTimers[goalId];
       await saveActiveTimers(state.activeTimers);
 
+      // US-031: Notify service worker of pause
+      sendToServiceWorker({
+        type: 'TIMER_PAUSE',
+        goalId: goalId
+      });
+
       console.log(`[Timer] Paused goal ${goalId}: +${elapsedSinceStart}s, total progress: ${newProgress}s`);
     }
   } else {
@@ -572,16 +578,16 @@ async function handleTimerToggle(goalId) {
     // Start the timer update interval if not already running
     startTimerUpdateInterval();
 
-    // Notify service worker (for background tracking)
-    try {
-      chrome.runtime.sendMessage({
-        type: 'TIMER_START',
-        goalId: goalId,
-        startTime: now
-      });
-    } catch (e) {
-      console.log('[Timer] Could not notify service worker:', e);
-    }
+    // US-031: Notify service worker (for background tracking)
+    sendToServiceWorker({
+      type: 'TIMER_START',
+      goalId: goalId,
+      startTime: now
+    }).then(response => {
+      if (response && response.success) {
+        console.log('[Timer] Service worker notified of timer start');
+      }
+    });
 
     console.log(`[Timer] Started goal ${goalId} at ${new Date(now).toLocaleTimeString()}`);
   }
@@ -2488,6 +2494,7 @@ function attachNavigationListeners(container) {
 
 /**
  * Load all necessary data from storage
+ * US-031: Enhanced to sync with service worker for background timer tracking
  */
 async function loadData() {
   try {
@@ -2514,10 +2521,114 @@ async function loadData() {
       streakData: streakData
     });
 
+    // US-031: Sync active timers with goals - ensure isActive flags are in sync
+    await syncActiveTimersWithGoals();
+
     state.isLoading = false;
   } catch (error) {
     console.error('Error loading data:', error);
     state.isLoading = false;
+  }
+}
+
+// =============================================================================
+// US-031: Background Timer Sync
+// =============================================================================
+
+/**
+ * Sync active timers with goals to ensure consistency
+ * This handles the case where a timer was running when popup was closed
+ * and we need to recalculate elapsed time
+ */
+async function syncActiveTimersWithGoals() {
+  const activeTimerIds = Object.keys(state.activeTimers);
+
+  if (activeTimerIds.length === 0) {
+    console.log('[Sync] No active timers to sync');
+    return;
+  }
+
+  console.log(`[Sync] Syncing ${activeTimerIds.length} active timer(s)`);
+
+  for (const goalId of activeTimerIds) {
+    const timerData = state.activeTimers[goalId];
+    const goal = state.goals.find(g => g.id === goalId);
+
+    if (!goal) {
+      // Goal was deleted while timer was running - clean up
+      console.log(`[Sync] Goal ${goalId} not found, removing timer`);
+      delete state.activeTimers[goalId];
+      await saveActiveTimers(state.activeTimers);
+      continue;
+    }
+
+    if (timerData && timerData.startTime) {
+      // Calculate elapsed time since timer started
+      const now = Date.now();
+      const elapsedSinceStart = Math.floor((now - timerData.startTime) / 1000);
+      const currentProgress = goal.progress + elapsedSinceStart;
+
+      // Check if timer should be auto-completed (progress >= target)
+      if (currentProgress >= goal.target) {
+        console.log(`[Sync] Timer goal ${goalId} completed while popup was closed`);
+
+        // Cap progress at target
+        goal.progress = goal.target;
+        goal.isActive = false;
+
+        // Update in storage
+        await updateGoal(goalId, { progress: goal.target, isActive: false });
+
+        // Remove from active timers
+        delete state.activeTimers[goalId];
+        await saveActiveTimers(state.activeTimers);
+
+        // Log completion
+        const completeLog = createActivityLog({
+          goalId: goalId,
+          action: ACTIVITY_ACTIONS.COMPLETE,
+          value: goal.target
+        });
+        await addActivityLogEntry(completeLog);
+
+        // Trigger celebration when screen renders
+        state.justCompletedGoals.add(goalId);
+        setTimeout(() => {
+          state.justCompletedGoals.delete(goalId);
+        }, 1500);
+      } else {
+        // Timer is still running - ensure goal.isActive is true
+        if (!goal.isActive) {
+          goal.isActive = true;
+          await updateGoal(goalId, { isActive: true });
+        }
+        console.log(`[Sync] Timer goal ${goalId} running: ${formatTime(currentProgress)} elapsed`);
+      }
+    }
+  }
+
+  // Clean up any timers for goals that aren't marked as active
+  for (const goal of state.goals) {
+    if (goal.type === GOAL_TYPES.TIMER && goal.isActive && !state.activeTimers[goal.id]) {
+      // Goal marked active but no timer data - reset isActive
+      console.log(`[Sync] Goal ${goal.id} marked active but no timer data - resetting`);
+      goal.isActive = false;
+      await updateGoal(goal.id, { isActive: false });
+    }
+  }
+}
+
+/**
+ * Send message to service worker
+ * @param {Object} message - Message to send
+ * @returns {Promise<Object|null>} Response from service worker or null on error
+ */
+async function sendToServiceWorker(message) {
+  try {
+    return await chrome.runtime.sendMessage(message);
+  } catch (error) {
+    console.log('[Message] Could not send to service worker:', error.message);
+    return null;
   }
 }
 
@@ -2619,5 +2730,8 @@ export {
   // US-030 Delete goal confirmation functions
   openDeleteConfirmModal,
   closeDeleteConfirmModal,
-  handleConfirmDelete
+  handleConfirmDelete,
+  // US-031 Background timer sync functions
+  syncActiveTimersWithGoals,
+  sendToServiceWorker
 };

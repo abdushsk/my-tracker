@@ -461,7 +461,7 @@
         "Multiple timers can exist (one active)"
       ],
       "priority": 4,
-      "passes": false,
+      "passes": true,
       "dependsOn": ["US-016", "US-006"]
     },
     {

@@ -1681,3 +1681,58 @@
 - Goal management CRUD is now complete (Create, Read, Update, Delete)
 - The Manage Goals screen is fully functional
 
+## Iteration 32 - US-031: Timer - Background Tracking
+**Status:** Completed
+**Date:** 2026-01-22
+
+### What was done:
+- Implemented persistent timer tracking in the service worker (Manifest V3)
+- Added storage helper functions to service-worker.js:
+  - getActiveTimers() / saveActiveTimers() - manage active timer state
+  - getGoals() / saveGoals() - access goal data
+  - updateGoal() - update individual goals
+- Enhanced message handlers in service worker:
+  - TIMER_START: Stores startTime and goalId in activeTimers storage
+  - TIMER_PAUSE: Calculates elapsed time, updates progress, removes from activeTimers
+  - GET_ACTIVE_TIMERS: Returns all active timers with calculated elapsed times
+  - SYNC_TIMER_PROGRESS: Syncs progress calculated by popup to storage
+- Added checkForCompletedTimers() function:
+  - Called on browser startup (onStartup event)
+  - Detects timers that completed while browser was closed
+  - Auto-completes goals that exceeded their target
+- Enhanced popup.js with background timer sync:
+  - syncActiveTimersWithGoals() - called on popup load
+  - Calculates elapsed time for any running timers
+  - Auto-completes timers that finished while popup was closed
+  - Triggers completion celebration animation
+  - Cleans up orphaned timers (goal deleted while timer running)
+  - Cleans up stale isActive flags (goal marked active but no timer data)
+- Added sendToServiceWorker() helper function for message passing
+- Updated handleTimerToggle() to notify service worker on start/pause
+
+### Technical details:
+- Service worker uses chrome.storage.local for persistence
+- Timer state stored as: { [goalId]: { startTime: timestamp, goalId: id } }
+- Elapsed time calculated as: Math.floor((Date.now() - startTime) / 1000)
+- Progress capped at target when timer completes
+- Both service worker and popup maintain consistent state through storage
+- Multiple timers can exist in storage (though typically one is active at a time)
+- Timer continues tracking even when popup is closed - this is the key feature
+
+### Acceptance criteria verification:
+- [x] Timer continues when popup closed - startTime stored, elapsed recalculated on reopen
+- [x] startTime stored in storage - In activeTimers[goalId].startTime
+- [x] Elapsed time calculated correctly - Math.floor((now - startTime) / 1000)
+- [x] Progress updates on popup open - syncActiveTimersWithGoals() handles this
+- [x] Multiple timers can exist (one active) - activeTimers object supports multiple entries
+
+### Notes for next iteration:
+- US-032 (Timer - Play/Pause Logic) is now unblocked (depends on US-031)
+  - Note: Much of US-032's functionality was already implemented in US-016
+  - US-032 may just need minor enhancements or can be marked as done
+- US-033 (Timer - Live Display Update) depends on US-032
+- Other priority 4 tasks available:
+  - US-034 (Counter - Increment Logic) - already implemented in US-017
+  - US-036 (Checkbox - Toggle Logic) - already implemented in US-018
+  - US-037 (Sound - Audio Utility) - depends on US-001 (done)
+
