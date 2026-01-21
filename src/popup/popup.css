@@ -1317,58 +1317,173 @@ select:focus {
   color: var(--success);
 }
 
-/* Checkbox Controls */
+/* ========================================
+   US-018: Checkbox Type Controls
+   ======================================== */
+
+/* Checkbox Controls Container */
 .goal-controls-checkbox {
   justify-content: center;
 }
 
+/* Large Clickable Checkbox Toggle Button */
 .checkbox-toggle-btn {
   display: flex;
   align-items: center;
-  gap: var(--spacing-sm);
-  padding: var(--spacing-sm) var(--spacing-md);
+  gap: var(--spacing-md);
+  padding: var(--spacing-md) var(--spacing-lg);
   background-color: var(--background-secondary);
-  border-radius: var(--radius);
+  border-radius: var(--radius-lg);
   color: var(--text-secondary);
-  font-size: var(--font-size-sm);
+  font-size: var(--font-size-base);
   font-weight: var(--font-weight-medium);
   width: 100%;
   justify-content: center;
+  transition: all var(--transition);
+  cursor: pointer;
+  min-height: 56px;
 }
 
 .checkbox-toggle-btn:hover {
   background-color: var(--primary-light);
   color: var(--primary);
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-sm);
 }
 
+.checkbox-toggle-btn:active {
+  transform: scale(0.98);
+}
+
+/* Checked/Completed State */
 .checkbox-toggle-btn.checked {
-  background-color: var(--primary);
+  background-color: var(--success);
   color: var(--text-inverse);
+  box-shadow: var(--shadow-sm);
 }
 
+.checkbox-toggle-btn.checked:hover {
+  background-color: #388E3C;
+  box-shadow: var(--shadow);
+}
+
+/* Checkbox Box - Large and Prominent */
 .checkbox-box {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 20px;
-  height: 20px;
-  border: 2px solid currentColor;
-  border-radius: var(--radius-sm);
+  width: 28px;
+  height: 28px;
+  border: 3px solid currentColor;
+  border-radius: var(--radius);
   flex-shrink: 0;
+  transition: all var(--transition-fast);
+  background-color: transparent;
+}
+
+.checkbox-toggle-btn:hover .checkbox-box {
+  border-width: 3px;
+  transform: scale(1.05);
 }
 
 .checkbox-toggle-btn.checked .checkbox-box {
   background-color: transparent;
   border-color: var(--text-inverse);
+  animation: checkbox-pop 0.3s ease;
 }
 
+@keyframes checkbox-pop {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.2);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+/* Checkmark Icon */
 .checkbox-box svg {
-  width: 14px;
-  height: 14px;
+  width: 18px;
+  height: 18px;
+  animation: checkmark-draw 0.3s ease forwards;
 }
 
+@keyframes checkmark-draw {
+  0% {
+    opacity: 0;
+    transform: scale(0);
+  }
+  50% {
+    transform: scale(1.2);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* Checkbox Label */
 .checkbox-label {
-  line-height: 1;
+  line-height: 1.2;
+  font-size: var(--font-size-base);
+  transition: all var(--transition-fast);
+}
+
+.checkbox-toggle-btn.checked .checkbox-label {
+  font-weight: var(--font-weight-semibold);
+}
+
+/* Checkbox Goal - Completed Title Strike-through */
+.goal-type-checkbox.goal-completed .goal-title {
+  text-decoration: line-through;
+  text-decoration-color: var(--success);
+  text-decoration-thickness: 2px;
+  opacity: 0.85;
+}
+
+/* Checkbox Goal - Enhanced Completed State */
+.goal-type-checkbox.goal-completed {
+  border-color: var(--success);
+  background: linear-gradient(135deg, var(--background-card) 0%, var(--success-light) 100%);
+}
+
+.goal-type-checkbox.goal-completed .goal-type-indicator {
+  background-color: var(--success-light);
+}
+
+.goal-type-checkbox.goal-completed .goal-type-indicator .goal-type-icon {
+  color: var(--success);
+}
+
+/* Visual feedback ripple effect on click */
+.checkbox-toggle-btn::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0;
+  height: 0;
+  background: rgba(76, 175, 80, 0.2);
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  transition: width 0.3s ease, height 0.3s ease, opacity 0.3s ease;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.checkbox-toggle-btn:active::after {
+  width: 200px;
+  height: 200px;
+  opacity: 1;
+}
+
+/* Ensure toggle button is positioned for ripple effect */
+.checkbox-toggle-btn {
+  position: relative;
+  overflow: hidden;
 }
 
 /* Completed Goal State */

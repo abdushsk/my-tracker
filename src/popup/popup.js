@@ -784,6 +784,58 @@ async function handleCounterDecrement(goalId) {
   renderCurrentScreen();
 }
 
+// =============================================================================
+// US-018: Checkbox Type Controls
+// =============================================================================
+
+/**
+ * Handle checkbox toggle
+ * @param {string} goalId - The ID of the checkbox goal
+ */
+async function handleCheckboxToggle(goalId) {
+  const goal = state.goals.find(g => g.id === goalId);
+  if (!goal || goal.type !== GOAL_TYPES.CHECKBOX) {
+    console.error('Invalid goal for checkbox toggle:', goalId);
+    return;
+  }
+
+  const wasCompleted = isGoalCompleted(goal);
+  // Toggle between 0 and 1 (target is always 1 for checkbox)
+  const newProgress = goal.progress >= goal.target ? 0 : 1;
+
+  // Update goal in state
+  goal.progress = newProgress;
+
+  // Save to storage
+  await updateGoal(goalId, { progress: newProgress });
+
+  // Log the toggle activity
+  const activityLog = createActivityLog({
+    goalId: goalId,
+    action: ACTIVITY_ACTIONS.TOGGLE,
+    value: newProgress
+  });
+  await addActivityLogEntry(activityLog);
+
+  console.log(`[Checkbox] Toggled goal ${goalId}: progress now ${newProgress} (${newProgress >= goal.target ? 'completed' : 'not completed'})`);
+
+  // Check if goal just completed
+  const isNowCompleted = isGoalCompleted(goal);
+  if (!wasCompleted && isNowCompleted) {
+    // Log completion
+    const completeLog = createActivityLog({
+      goalId: goalId,
+      action: ACTIVITY_ACTIONS.COMPLETE,
+      value: newProgress
+    });
+    await addActivityLogEntry(completeLog);
+    console.log(`[Checkbox] Goal ${goalId} completed!`);
+  }
+
+  // Re-render to update UI
+  renderCurrentScreen();
+}
+
 /**
  * Attach goal control event listeners to the current screen
  * @param {HTMLElement} container - The container element
@@ -824,6 +876,19 @@ function attachGoalControlListeners(container) {
       const goalId = btn.getAttribute('data-goal-id');
       if (goalId) {
         handleCounterDecrement(goalId);
+      }
+    });
+  });
+
+  // Checkbox toggle buttons (US-018)
+  const checkboxToggleBtns = container.querySelectorAll('[data-action="checkbox-toggle"]');
+  checkboxToggleBtns.forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      const goalId = btn.getAttribute('data-goal-id');
+      if (goalId) {
+        handleCheckboxToggle(goalId);
       }
     });
   });
@@ -1057,5 +1122,7 @@ export {
   stopTimerUpdateInterval,
   // US-017 Counter functions
   handleCounterIncrement,
-  handleCounterDecrement
+  handleCounterDecrement,
+  // US-018 Checkbox functions
+  handleCheckboxToggle
 };

@@ -818,3 +818,60 @@
 - After US-018, US-019 will be unblocked (depends on US-016, US-017, US-018)
 - Counter functionality is now complete with immediate persistence and activity logging
 
+## Iteration 19 - US-018: Goal Card - Checkbox Type Controls
+**Status:** Completed
+**Date:** 2026-01-22
+
+### What was done:
+- Implemented fully functional checkbox controls for checkbox-type goals
+- Created handleCheckboxToggle() function:
+  - Toggles progress between 0 and 1 (target is always 1 for checkbox)
+  - Saves to Chrome storage via updateGoal()
+  - Logs TOGGLE activity with createActivityLog()
+  - Checks for goal completion and logs COMPLETE activity if threshold reached
+  - Re-renders UI immediately
+- Added checkbox toggle event listeners in attachGoalControlListeners():
+  - Handles data-action="checkbox-toggle" click events
+- Enhanced CSS styling for checkbox controls (~170 lines added):
+  - Large clickable checkbox button (min-height: 56px)
+  - Checkbox box element (28x28px with 3px border)
+  - Hover states with transform and shadow effects
+  - Checked/completed state with green background
+  - Strike-through title for completed checkbox goals
+  - Checkbox pop animation on completion
+  - Checkmark draw animation
+  - Ripple effect on click for visual feedback
+  - Type indicator color changes for completed state
+
+### Technical details:
+- Updated src/popup/popup.js:
+  - Added handleCheckboxToggle() async function
+  - Extended attachGoalControlListeners() with checkbox toggle button handlers
+  - Added handleCheckboxToggle to module exports
+  - CSS class 'checked' applied based on isGoalCompleted() state
+- Updated src/popup/popup.css (~170 lines):
+  - Added US-018 section header
+  - .checkbox-toggle-btn - large clickable element with transitions
+  - .checkbox-box - prominent checkbox with border animation
+  - .checkbox-label - text label with state transitions
+  - @keyframes checkbox-pop - scale animation on check
+  - @keyframes checkmark-draw - SVG checkmark animation
+  - .goal-type-checkbox.goal-completed - strike-through title styling
+  - Ripple effect pseudo-element for click feedback
+- CSS brace count: 218 (balanced)
+
+### Acceptance criteria verification:
+- [x] Clickable checkbox element - Large button with 56px min-height
+- [x] Checked state: checkmark, strike-through title - SVG checkmark, title has line-through
+- [x] Unchecked state: empty box - Empty bordered box shown
+- [x] Click toggles progress (0 or 1) - handleCheckboxToggle toggles between 0 and 1
+- [x] Visual feedback on state change - Animations, color changes, ripple effect
+
+### Notes for next iteration:
+- US-019 (Goal Card - Completion State) is now unblocked
+  - Depends on US-016 (done), US-017 (done), US-018 (done)
+  - Has priority 2
+- US-019 will add unified completion visuals across all goal types
+- US-020 (Manage Goals Screen Layout) has priority 3 and depends on US-014 (done)
+- All goal card controls are now complete (timer, counter, checkbox)
+
