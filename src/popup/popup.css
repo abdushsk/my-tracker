@@ -398,6 +398,11 @@ select:focus {
   overflow: hidden;
 }
 
+/* US-068: View Goals screen needs position: relative for FAB positioning */
+.view-goals-screen {
+  position: relative;
+}
+
 /* Screen header */
 .screen-header {
   display: flex;
@@ -5735,4 +5740,342 @@ body.modal-open {
 
 [data-theme="dark"] .focus-mode-screen.focus-completed {
   background: linear-gradient(180deg, rgba(76, 175, 80, 0.1) 0%, var(--background) 50%);
+}
+
+/* ========================================
+   US-068: Quick Add Floating Action Button (FAB)
+   ======================================== */
+
+/* Container for FAB and form - positioned relative to the view-goals-screen */
+.quick-add-container {
+  position: absolute;
+  bottom: 80px; /* Above the footer */
+  right: var(--spacing-md);
+  z-index: 100;
+}
+
+/* Floating Action Button */
+.quick-add-fab {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--primary) 0%, var(--primary-hover) 100%);
+  color: white;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 12px rgba(76, 175, 80, 0.4), 0 2px 4px rgba(0, 0, 0, 0.1);
+  transition: all var(--transition-normal);
+  position: relative;
+  z-index: 101;
+}
+
+.quick-add-fab:hover {
+  transform: scale(1.08);
+  box-shadow: 0 6px 16px rgba(76, 175, 80, 0.5), 0 3px 6px rgba(0, 0, 0, 0.15);
+}
+
+.quick-add-fab:active {
+  transform: scale(0.95);
+}
+
+.quick-add-fab:focus-visible {
+  outline: 3px solid var(--primary-light);
+  outline-offset: 2px;
+}
+
+/* FAB Icons */
+.quick-add-fab .fab-icon-plus,
+.quick-add-fab .fab-icon-close {
+  position: absolute;
+  transition: all var(--transition-normal);
+}
+
+.quick-add-fab .fab-icon-plus {
+  opacity: 1;
+  transform: rotate(0deg);
+}
+
+.quick-add-fab .fab-icon-close {
+  opacity: 0;
+  transform: rotate(-90deg);
+}
+
+/* FAB open state - rotate icon */
+.quick-add-fab.open .fab-icon-plus {
+  opacity: 0;
+  transform: rotate(90deg);
+}
+
+.quick-add-fab.open .fab-icon-close {
+  opacity: 1;
+  transform: rotate(0deg);
+}
+
+.quick-add-fab.open {
+  background: linear-gradient(135deg, var(--text-secondary) 0%, var(--text-muted) 100%);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+/* Quick Add Form */
+.quick-add-form {
+  position: absolute;
+  bottom: calc(100% + var(--spacing-sm));
+  right: 0;
+  width: 300px;
+  background: var(--background-card);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-lg), 0 0 0 1px var(--border);
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(10px) scale(0.95);
+  transform-origin: bottom right;
+  transition: all var(--transition-normal);
+  z-index: 102;
+  overflow: hidden;
+}
+
+.quick-add-form.open {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0) scale(1);
+}
+
+/* Form header */
+.quick-add-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--spacing-sm) var(--spacing-md);
+  border-bottom: 1px solid var(--border);
+  background: var(--background-secondary);
+}
+
+.quick-add-header h3 {
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-semibold);
+  color: var(--text);
+  margin: 0;
+}
+
+.quick-add-close {
+  width: 28px;
+  height: 28px;
+  border-radius: var(--radius);
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-secondary);
+  transition: all var(--transition-fast);
+}
+
+.quick-add-close:hover {
+  background: var(--background);
+  color: var(--text);
+}
+
+/* Form body */
+.quick-add-body {
+  padding: var(--spacing-md);
+}
+
+.quick-add-field {
+  margin-bottom: var(--spacing-md);
+}
+
+.quick-add-input {
+  width: 100%;
+  padding: var(--spacing-sm) var(--spacing-md);
+  font-size: var(--font-size-base);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--background);
+  color: var(--text);
+  transition: all var(--transition-fast);
+}
+
+.quick-add-input:focus {
+  outline: none;
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px var(--primary-light);
+}
+
+.quick-add-input::placeholder {
+  color: var(--text-muted);
+}
+
+/* Shake animation for validation error */
+.quick-add-input.shake {
+  animation: quick-add-shake 0.5s ease-in-out;
+  border-color: var(--danger);
+}
+
+@keyframes quick-add-shake {
+  0%, 100% { transform: translateX(0); }
+  10%, 30%, 50%, 70%, 90% { transform: translateX(-4px); }
+  20%, 40%, 60%, 80% { transform: translateX(4px); }
+}
+
+/* Type selector */
+.quick-add-type-selector {
+  display: flex;
+  gap: var(--spacing-xs);
+}
+
+.quick-add-type-btn {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  padding: var(--spacing-sm);
+  background: var(--background);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  cursor: pointer;
+  color: var(--text-secondary);
+  font-size: var(--font-size-xs);
+  transition: all var(--transition-fast);
+}
+
+.quick-add-type-btn:hover {
+  border-color: var(--primary);
+  color: var(--text);
+}
+
+.quick-add-type-btn.active {
+  background: var(--primary-light);
+  border-color: var(--primary);
+  color: var(--primary);
+}
+
+.quick-add-type-btn svg {
+  stroke: currentColor;
+}
+
+.quick-add-type-btn span {
+  font-weight: var(--font-weight-medium);
+}
+
+/* Form footer */
+.quick-add-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--spacing-sm) var(--spacing-md);
+  border-top: 1px solid var(--border);
+  background: var(--background-secondary);
+}
+
+.quick-add-more-link {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+  background: none;
+  border: none;
+  color: var(--text-secondary);
+  font-size: var(--font-size-sm);
+  cursor: pointer;
+  padding: var(--spacing-xs);
+  border-radius: var(--radius-sm);
+  transition: all var(--transition-fast);
+}
+
+.quick-add-more-link:hover {
+  color: var(--primary);
+  background: var(--background);
+}
+
+.quick-add-more-link svg {
+  stroke: currentColor;
+  transition: transform var(--transition-fast);
+}
+
+.quick-add-more-link:hover svg {
+  transform: translateX(2px);
+}
+
+.quick-add-save {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+  padding: var(--spacing-xs) var(--spacing-md);
+  font-size: var(--font-size-sm);
+}
+
+.quick-add-save svg {
+  stroke: currentColor;
+}
+
+/* Dark mode styles */
+[data-theme="dark"] .quick-add-fab {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4), 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+[data-theme="dark"] .quick-add-fab:hover {
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.5), 0 3px 6px rgba(0, 0, 0, 0.25);
+}
+
+[data-theme="dark"] .quick-add-form {
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4), 0 0 0 1px var(--border);
+}
+
+[data-theme="dark"] .quick-add-header {
+  background: var(--background);
+}
+
+[data-theme="dark"] .quick-add-footer {
+  background: var(--background);
+}
+
+[data-theme="dark"] .quick-add-input {
+  background: var(--background-card);
+}
+
+[data-theme="dark"] .quick-add-type-btn {
+  background: var(--background-card);
+}
+
+[data-theme="dark"] .quick-add-type-btn.active {
+  background: rgba(76, 175, 80, 0.2);
+}
+
+/* Responsive adjustments - ensure FAB doesn't obstruct goal cards */
+@media (max-height: 550px) {
+  .quick-add-container {
+    bottom: 70px;
+  }
+
+  .quick-add-fab {
+    width: 48px;
+    height: 48px;
+  }
+
+  .quick-add-form {
+    width: 280px;
+  }
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+  .quick-add-fab,
+  .quick-add-fab .fab-icon-plus,
+  .quick-add-fab .fab-icon-close,
+  .quick-add-form,
+  .quick-add-input,
+  .quick-add-type-btn,
+  .quick-add-close,
+  .quick-add-more-link,
+  .quick-add-more-link svg {
+    transition: none;
+  }
+
+  .quick-add-input.shake {
+    animation: none;
+  }
 }

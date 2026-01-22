@@ -856,3 +856,75 @@ Implemented Focus Mode that allows users to concentrate on a single goal at a ti
 - Easy exit back to normal view (X button or Escape key)
 - Keyboard shortcut to toggle (Escape key to exit)
 
+---
+
+## US-068: Quick Add Floating Button
+**Date**: 2026-01-22
+**Status**: Completed
+
+### What was done:
+Implemented a floating action button (FAB) for quick goal creation in the View Goals screen. The FAB opens a minimal quick-add form that allows users to create goals with just a title and type selection. Users can also access the full goal form via a "More options" link.
+
+### Implementation details:
+
+1. **Quick Add State** (`src/popup/popup.js`):
+   - Added `quickAddState` object to track form state (isOpen, selectedType)
+   - State is separate from the main app state for encapsulation
+
+2. **FAB and Form Rendering** (`src/popup/popup.js` lines 3221-3303):
+   - `renderQuickAddFAB()` - Renders the FAB button and quick-add form HTML
+   - FAB positioned in bottom-right corner using absolute positioning
+   - Form appears above the FAB with smooth animation
+   - Form includes: title input, type selector (timer/counter/checkbox), save button, and "More options" link
+
+3. **Event Handling** (`src/popup/popup.js` lines 3306-3594):
+   - `attachQuickAddFABListeners()` - Attaches all event listeners
+   - `toggleQuickAddForm()`, `openQuickAddForm()`, `closeQuickAddForm()` - Control form visibility
+   - `setQuickAddType()` - Updates selected goal type
+   - `handleQuickAddSave()` - Validates title and creates goal with default values
+   - `handleQuickAddMoreOptions()` - Closes form and navigates to full goal form with pre-filled data
+   - `handleQuickAddOutsideClick()` - Closes form when clicking outside
+
+4. **Default Values for Quick Add**:
+   - Timer goals: 1 hour (3600 seconds)
+   - Counter goals: 10 count
+   - Checkbox goals: 1 (always)
+   - Timeframe: Daily (default)
+   - Category: None
+
+5. **CSS Styles** (`src/popup/popup.css` lines 5740-6077):
+   - FAB button: 56px circular button with green gradient, shadow, hover/active states
+   - Icon animation: Plus rotates to X when form opens
+   - Form: 300px wide card with header, body, and footer sections
+   - Type selector: Button group with timer/counter/checkbox options
+   - Smooth animations for open/close transitions
+   - Dark mode support
+   - Reduced motion support
+   - Responsive adjustments for smaller heights
+
+6. **Integration** (`src/popup/popup.js`):
+   - Added `${renderQuickAddFAB()}` to View Goals screen HTML
+   - Added `attachQuickAddFABListeners(screen)` after screen render
+   - Added `position: relative` to `.view-goals-screen` for FAB positioning
+
+### Files modified:
+- `src/popup/popup.js` (lines 272, 288-289, 3209-3594)
+- `src/popup/popup.css` (lines 401-404, 5740-6077)
+
+### Key design decisions:
+- FAB positioned 80px from bottom to clear the footer navigation
+- Quick form uses sensible defaults so users can create goals in 2-3 taps
+- "More options" link preserves entered title and selected type when navigating to full form
+- Form closes when clicking outside for intuitive UX
+- Enter key submits form, Escape key closes it
+- Invalid title triggers shake animation on input
+- Sound feedback on form open and save
+
+### Acceptance criteria met:
+- Floating + button in bottom-right corner (56px green FAB)
+- Opens minimal quick-add form (title, type selector, save button)
+- Quick form: title, type selector, save button (all implemented)
+- More options link to full form (navigates with pre-filled data)
+- Smooth animation on open/close (CSS transitions)
+- Doesn't obstruct goal cards (positioned above footer, 80px from bottom)
+
