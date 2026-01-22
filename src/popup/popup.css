@@ -6466,14 +6466,41 @@ body.modal-open {
   display: inline-block;
 }
 
-/* Checkbox Display */
+/* Checkbox Display (US-016: Streamlined clickable checkbox) */
 .focus-checkbox-display {
   text-align: center;
 }
 
+/* Clickable checkbox button styling */
+.focus-checkbox-clickable {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background: transparent;
+  border: none;
+  padding: var(--spacing-lg);
+  border-radius: var(--radius-lg);
+  cursor: pointer;
+  transition: all var(--transition-normal);
+  margin: 0 auto;
+}
+
+.focus-checkbox-clickable:hover {
+  background-color: var(--accent-subtle);
+}
+
+.focus-checkbox-clickable:active {
+  transform: scale(0.98);
+}
+
+.focus-checkbox-clickable:focus {
+  outline: none;
+  box-shadow: 0 0 0 2px var(--accent-subtle);
+}
+
 .focus-checkbox-icon {
-  width: 80px;
-  height: 80px;
+  width: 100px;
+  height: 100px;
   margin: 0 auto var(--spacing-md);
   display: flex;
   align-items: center;
@@ -6484,15 +6511,26 @@ body.modal-open {
   transition: all var(--transition-normal);
 }
 
+.focus-checkbox-clickable:hover .focus-checkbox-icon {
+  border-color: var(--accent);
+  color: var(--accent);
+  transform: scale(1.05);
+}
+
 .focus-checkbox-icon svg {
-  width: 48px;
-  height: 48px;
+  width: 56px;
+  height: 56px;
 }
 
 .focus-checkbox-display.checked .focus-checkbox-icon {
-  background-color: var(--success);
-  border-color: var(--success);
-  color: white;
+  background-color: var(--accent);
+  border-color: var(--accent);
+  color: var(--text-inverse);
+}
+
+.focus-checkbox-clickable.checked:hover .focus-checkbox-icon {
+  background-color: var(--accent-hover);
+  border-color: var(--accent-hover);
 }
 
 .focus-checkbox-status {
@@ -6502,7 +6540,7 @@ body.modal-open {
 }
 
 .focus-checkbox-display.checked .focus-checkbox-status {
-  color: var(--success);
+  color: var(--accent);
 }
 
 /* Progress Bar */

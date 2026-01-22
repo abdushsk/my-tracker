@@ -105,6 +105,7 @@ export function renderFocusModeScreen() {
   const isCompleted = isGoalCompleted(goal);
   const typeIcon = callbacks.getGoalTypeIcon ? callbacks.getGoalTypeIcon(goal.type) : '';
   const timeframeLabel = callbacks.capitalizeFirst ? callbacks.capitalizeFirst(goal.timeframe) : goal.timeframe;
+  const isCheckbox = goal.type === GOAL_TYPES.CHECKBOX;
 
   // Get category info for display
   const categoryInfo = goal.category ? state.categories.find(c => c.id === goal.category) : null;
@@ -135,6 +136,7 @@ export function renderFocusModeScreen() {
           ${renderFocusModeDisplay(goal)}
         </div>
 
+        ${!isCheckbox ? `
         <div class="focus-progress-bar-container">
           <div class="focus-progress-bar">
             <div class="focus-progress-fill ${isCompleted ? 'completed' : ''}" style="width: ${progressPercent}%"></div>
@@ -145,6 +147,7 @@ export function renderFocusModeScreen() {
         <div class="focus-controls-section">
           ${renderFocusModeControls(goal)}
         </div>
+        ` : ''}
       </main>
     </div>
   `;
@@ -231,7 +234,8 @@ function renderFocusCounterDisplay(goal) {
 }
 
 /**
- * Render large checkbox display for focus mode
+ * Render large checkbox display for focus mode (US-016)
+ * The checkbox itself is clickable - no separate button needed
  * @param {Object} goal - The checkbox goal object
  * @returns {string} HTML string
  */
@@ -239,7 +243,10 @@ function renderFocusCheckboxDisplay(goal) {
   const isChecked = isGoalCompleted(goal);
 
   return `
-    <div class="focus-checkbox-display ${isChecked ? 'checked' : ''}" data-goal-id="${goal.id}">
+    <button class="focus-checkbox-display focus-checkbox-clickable ${isChecked ? 'checked' : ''}"
+            data-goal-id="${goal.id}"
+            data-action="checkbox-toggle"
+            title="${isChecked ? 'Mark as not done' : 'Mark as done'}">
       <div class="focus-checkbox-icon">
         ${isChecked
           ? `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
@@ -251,9 +258,9 @@ function renderFocusCheckboxDisplay(goal) {
         }
       </div>
       <div class="focus-checkbox-status">
-        ${isChecked ? 'Completed' : 'Not completed'}
+        ${isChecked ? 'Completed' : 'Click to complete'}
       </div>
-    </div>
+    </button>
   `;
 }
 

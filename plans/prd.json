@@ -114,7 +114,7 @@
       "title": "Optimize checkbox goal focus mode",
       "description": "In the focus mode for checkbox goals, streamline the interface by displaying only the checkbox itself. Remove additional elements such as the 'mark as done' text button and the progress bar to create a cleaner and more focused user experience.",
       "priority": 16,
-      "passes": false
+      "passes": true
     },
     {
       "id": "US-017",

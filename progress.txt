@@ -607,3 +607,59 @@
 - CSS variables (`--accent`, `--text-muted`, etc.) handle theme switching automatically for new components
 - Using `data-action="checkbox-toggle"` ensures the existing event delegation continues to work
 
+## US-016: Optimize Checkbox Goal Focus Mode (Completed)
+**Date**: 2026-01-23
+
+### Changes Made
+
+1. **Removed progress bar and controls section for checkbox goals** (focusMode.js:108, 139-150):
+   - Added `isCheckbox` flag to conditionally render UI elements
+   - Progress bar (`focus-progress-bar-container`) and controls section (`focus-controls-section`) are now hidden for checkbox goals
+   - Timer and counter goals still display these elements as before
+
+2. **Made checkbox display itself clickable** (focusMode.js:236-265):
+   - Changed `renderFocusCheckboxDisplay()` from returning a `div` to returning a `button`
+   - Added `focus-checkbox-clickable` class for button-specific styling
+   - Added `data-action="checkbox-toggle"` attribute for event handling (reuses existing listener)
+   - Changed status text from "Not completed" to "Click to complete" for better affordance
+   - When checked, displays "Completed" status
+
+3. **Added CSS for clickable checkbox button** (popup.css:6474-6544):
+   - New `.focus-checkbox-clickable` styles: transparent background, no border, cursor pointer
+   - Hover state: `--accent-subtle` background, checkbox icon scales up 1.05x with accent border
+   - Active state: `scale(0.98)` for tactile feedback
+   - Focus state: subtle box-shadow ring for accessibility
+   - Increased checkbox icon size from 80x80px to 100x100px for better clickability
+   - Increased SVG icon from 48x48px to 56x56px
+   - Changed completed state colors from `--success` to `--accent` for theme consistency
+   - Added hover state for checked checkbox with `--accent-hover` background
+
+### Layout Changes
+
+**Before (old checkbox focus mode):**
+```
+[Header: Exit Button]
+[Goal Info: Category | Timeframe]
+[Title: Type Icon | Goal Title]
+[Large Checkbox Display: 80px icon + "Completed/Not completed" text]
+[Progress Bar: 0% or 100% + percentage text]
+[Controls: "Mark as done" / "Mark as not done" button]
+```
+
+**After (streamlined checkbox focus mode):**
+```
+[Header: Exit Button]
+[Goal Info: Category | Timeframe]
+[Title: Type Icon | Goal Title]
+[Clickable Checkbox: 100px icon + "Completed/Click to complete" text]
+```
+
+### Key Learnings
+- Converting the display element to a `<button>` provides proper semantics and keyboard accessibility
+- Reusing `data-action="checkbox-toggle"` attribute leverages existing event listeners without additional code
+- Larger click target (100px icon) improves touch/click usability
+- "Click to complete" text provides better affordance than "Not completed"
+- Progress bars for binary (0/100%) goals add visual clutter without informational value
+- Using `--accent` colors instead of `--success` ensures consistency with theme selection
+- Hover/active feedback (scale, background) makes the checkbox feel interactive and responsive
+
