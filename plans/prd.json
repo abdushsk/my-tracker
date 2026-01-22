@@ -45,7 +45,7 @@
       "title": "Improve timeline and chart display",
       "description": "Ensure that the activity timeline correctly reflects the current day by addressing any potential UTC issues. Adjust the chart to utilize nearly the full width of the display and modify the Y-axis labels to show only the first two initials of each day (e.g., Mo, Tu, We, Th, Fr, Sa, Su) in uppercase for better readability. Plus in case of dark mode, the no progress boxes is not visible, make it lighter shade" ,
       "priority": 6,
-      "passes": false
+      "passes": true
     },
     {
       "id": "US-007",

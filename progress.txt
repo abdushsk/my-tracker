@@ -195,3 +195,29 @@
 - When parsing date strings like '2026-01-23' with `new Date()`, add 'T12:00:00' to avoid timezone edge cases that can shift the date
 - For 2-letter day abbreviations, reduce the width of label containers to maximize chart space
 
+## US-006: Improve Timeline and Chart Display - Dark Mode Heatmap (Completed)
+**Date**: 2026-01-23
+
+### Changes Made
+
+1. **Enhanced dark mode heatmap level-0 visibility** (popup.css:290):
+   - Changed `--heatmap-level-0` from `#2A2A2A` to `#3A3A3A` for better visibility of no-progress cells
+
+2. **Added theme-specific heatmap level-0 colors** (theme-config.js):
+   - Added `heatmap0` property to all themes with custom heatmap colors (ocean, forest, sunset, lavender)
+   - Light mode values use very light theme-tinted colors (e.g., `#E8F6F9` for ocean, `#F0F5EB` for forest)
+   - Dark mode values use subtle theme-tinted grays (e.g., `#2A3A4A` for ocean, `#2A3A2A` for forest)
+   - Added CSS generator line for `--heatmap-level-0` in `generateThemeCSS()` function
+
+3. **Theme-specific heatmap0 colors added**:
+   - Ocean light: `#E8F6F9`, dark: `#2A3A4A`
+   - Forest light: `#F0F5EB`, dark: `#2A3A2A`
+   - Sunset light: `#FFF5EB`, dark: `#3A2A2A`
+   - Lavender light: `#F5F3FF`, dark: `#2A2A3A`
+
+### Key Learnings
+- The heatmap level-0 (no progress) cells need distinct background colors that contrast with the overall background
+- `#2A2A2A` on `#121212` background is too subtle; `#3A3A3A` provides better visibility
+- Theme-specific level-0 colors should have a subtle hint of the theme's accent color for visual consistency
+- Dark mode level-0 colors should be lighter than the page background but darker than level-1
+

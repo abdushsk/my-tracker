@@ -57,6 +57,7 @@ export const THEMES = {
       typeTimerSubtle: '#CAF0F8',
       typeCheckbox: '#0077B6',
       typeCheckboxSubtle: '#90E0EF',
+      heatmap0: '#E8F6F9',
       heatmap1: '#CAF0F8',
       heatmap2: '#90E0EF',
       heatmap3: '#00B4D8',
@@ -76,6 +77,7 @@ export const THEMES = {
       typeTimerSubtle: 'rgba(72, 202, 228, 0.25)',
       typeCheckbox: '#00B4D8',
       typeCheckboxSubtle: 'rgba(0, 180, 216, 0.25)',
+      heatmap0: '#2A3A4A',
       heatmap1: '#0A5272',
       heatmap2: '#0088CC',
       heatmap3: '#00B4D8',
@@ -103,6 +105,7 @@ export const THEMES = {
       typeTimerSubtle: '#E8F5E0',
       typeCheckbox: '#4A7C23',
       typeCheckboxSubtle: '#D4E9C7',
+      heatmap0: '#F0F5EB',
       heatmap1: '#E8F5E0',
       heatmap2: '#C5E1A5',
       heatmap3: '#7CB342',
@@ -122,6 +125,7 @@ export const THEMES = {
       typeTimerSubtle: 'rgba(156, 204, 101, 0.25)',
       typeCheckbox: '#7CB342',
       typeCheckboxSubtle: 'rgba(124, 179, 66, 0.25)',
+      heatmap0: '#2A3A2A',
       heatmap1: '#2A4A1A',
       heatmap2: '#5A8C33',
       heatmap3: '#7CB342',
@@ -151,6 +155,7 @@ export const THEMES = {
       typeCounterSubtle: '#FFCCBC',
       typeCheckbox: '#FF6B35',
       typeCheckboxSubtle: '#FFCCBC',
+      heatmap0: '#FFF5EB',
       heatmap1: '#FFE0B2',
       heatmap2: '#FFCC80',
       heatmap3: '#FF9800',
@@ -172,6 +177,7 @@ export const THEMES = {
       typeCounterSubtle: 'rgba(255, 138, 80, 0.25)',
       typeCheckbox: '#FF8A50',
       typeCheckboxSubtle: 'rgba(255, 138, 80, 0.25)',
+      heatmap0: '#3A2A2A',
       heatmap1: '#5A2E17',
       heatmap2: '#CF460C',
       heatmap3: '#E65100',
@@ -201,6 +207,7 @@ export const THEMES = {
       typeCheckboxSubtle: '#DDD6FE',
       typeAvoidance: '#7C3AED',
       typeAvoidanceSubtle: '#EDE9FE',
+      heatmap0: '#F5F3FF',
       heatmap1: '#EDE9FE',
       heatmap2: '#DDD6FE',
       heatmap3: '#A78BFA',
@@ -222,6 +229,7 @@ export const THEMES = {
       typeCheckboxSubtle: 'rgba(167, 139, 250, 0.25)',
       typeAvoidance: '#A78BFA',
       typeAvoidanceSubtle: 'rgba(167, 139, 250, 0.25)',
+      heatmap0: '#2A2A3A',
       heatmap1: '#3D2F6B',
       heatmap2: '#6B31C6',
       heatmap3: '#7C3AED',
@@ -271,6 +279,7 @@ function generateThemeCSS(id, colors, isDark) {
   if (colors.typeCheckboxSubtle) vars.push(`--type-checkbox-subtle: ${colors.typeCheckboxSubtle}`);
   if (colors.typeAvoidance) vars.push(`--type-avoidance: ${colors.typeAvoidance}`);
   if (colors.typeAvoidanceSubtle) vars.push(`--type-avoidance-subtle: ${colors.typeAvoidanceSubtle}`);
+  if (colors.heatmap0) vars.push(`--heatmap-level-0: ${colors.heatmap0}`);
   if (colors.heatmap1) vars.push(`--heatmap-level-1: ${colors.heatmap1}`);
   if (colors.heatmap2) vars.push(`--heatmap-level-2: ${colors.heatmap2}`);
   if (colors.heatmap3) vars.push(`--heatmap-level-3: ${colors.heatmap3}`);
