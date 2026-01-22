@@ -82,6 +82,9 @@ INSTRUCTIONS:
    - Key implementation details
    - Any learnings or notes for the next iteration
 7. Make a git commit with a descriptive message.
+8. Do not make files huge - keep changes focused on the task.
+9. Use different files for different features.
+10. File Lines of Code (FLOC) limit: Max 1000 lines per file.
 
 RULES:
 - ONLY WORK ON A SINGLE TASK PER ITERATION

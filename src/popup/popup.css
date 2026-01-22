@@ -124,7 +124,7 @@
   --border-focus: var(--accent);
 
   /* Goal type colors */
-  --type-timer: #3B82F6;
+  --type-timer: var(--type-counter);
   --type-timer-subtle: #DBEAFE;
   --type-counter: #F59E0B;
   --type-counter-subtle: #FEF3C7;
@@ -2933,21 +2933,7 @@ select:focus {
 }
 
 /* Type-specific progress fill colors - single solid color */
-.goal-type-timer .goal-progress-fill {
-  background-color: var(--type-timer);
-}
 
-.goal-type-counter .goal-progress-fill {
-  background-color: var(--type-counter);
-}
-
-.goal-type-checkbox .goal-progress-fill {
-  background-color: var(--type-checkbox);
-}
-
-.goal-type-avoidance .goal-progress-fill {
-  background-color: var(--type-avoidance);
-}
 
 /* Goal Controls Container - Minimal */
 .goal-controls {

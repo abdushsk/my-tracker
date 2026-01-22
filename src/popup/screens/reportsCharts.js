@@ -195,7 +195,7 @@ export async function renderActivityHeatmap() {
   }
 
   // Render day labels with 2-letter uppercase abbreviations
-  const dayNames = ['SU', 'MO', 'TU', 'WE', 'TH', 'FR', 'SA'];
+  const dayNames = ['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa'];
   dayLabelsContainer.innerHTML = dates.map(dateStr => {
     // Parse with noon time to avoid timezone edge cases
     const date = new Date(dateStr + 'T12:00:00');
