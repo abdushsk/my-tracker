@@ -221,3 +221,38 @@
 - Theme-specific level-0 colors should have a subtle hint of the theme's accent color for visual consistency
 - Dark mode level-0 colors should be lighter than the page background but darker than level-1
 
+## US-007: New Achievements Unlock Toast (Completed)
+**Date**: 2026-01-23
+
+### Changes Made
+
+1. **Redesigned achievement toast positioning** (popup.css:9373-9427):
+   - Changed from centered (`left: 50%; transform: translateX(-50%)`) to bottom-left (`left: var(--spacing-md)`)
+   - Reduced from intrusive modal-style to subtle toast notification
+   - Changed background from gold gradient to `var(--card-bg)` with gold accent border-left
+   - Reduced icon size from 36px to 20px
+   - Reduced padding from `var(--spacing-md) var(--spacing-lg)` to `var(--spacing-sm) var(--spacing-md)`
+   - Added `max-width: 280px` to keep toast compact
+   - Uses theme-aware colors (`var(--card-bg)`, `var(--text)`, `var(--reward)`, `var(--shadow-lg)`)
+
+2. **Updated toast styling** (popup.css):
+   - Label now uses `var(--reward)` color (gold) instead of dark text
+   - Title uses smaller font (`var(--font-sm)`) with text-overflow ellipsis
+   - Reduced gap between elements for more compact appearance
+
+3. **Updated toast behavior** (achievements.js:361-402):
+   - Reduced display duration from 4 seconds to 3 seconds (per user request)
+   - Reduced confetti intensity from 'high' to 'medium' (less intrusive)
+   - Reduced confetti duration from 2500ms to 2000ms
+   - Changed label text from "Achievement Unlocked!" to "Achievement Unlocked" (no exclamation)
+
+4. **Updated reduced motion support** (popup.css:9451-9458):
+   - Changed transform from `translateX(-50%)` to `none` for new positioning
+
+### Key Learnings
+- Toast notifications should be positioned in corners (bottom-left is standard for non-critical notifications)
+- Accent borders (border-left with theme color) provide visual interest without overwhelming the UI
+- Using CSS variables (`--reward`, `--card-bg`) ensures the toast adapts to all themes
+- Confetti animations should be less intense for small toast notifications to avoid visual overload
+- 3 seconds is a good duration for achievement toasts - long enough to read, short enough not to be annoying
+

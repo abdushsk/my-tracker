@@ -359,7 +359,7 @@ export function countPerfectDays(history, goals) {
  * @param {Object} definition - Achievement definition
  */
 export function showAchievementUnlockNotification(definition) {
-  // Create toast notification
+  // Create small toast notification in bottom-left corner (US-007)
   const existingToast = document.querySelector('.achievement-toast');
   if (existingToast) {
     existingToast.remove();
@@ -371,7 +371,7 @@ export function showAchievementUnlockNotification(definition) {
     <div class="achievement-toast-content">
       <div class="achievement-toast-icon">${definition.icon}</div>
       <div class="achievement-toast-info">
-        <span class="achievement-toast-label">Achievement Unlocked!</span>
+        <span class="achievement-toast-label">Achievement Unlocked</span>
         <span class="achievement-toast-title">${definition.title}</span>
       </div>
     </div>
@@ -384,19 +384,19 @@ export function showAchievementUnlockNotification(definition) {
     playSound(SOUNDS.COMPLETE);
   }
 
-  // Trigger confetti
-  launchConfetti({ intensity: 'high', duration: 2500 });
+  // Trigger confetti animation
+  launchConfetti({ intensity: 'medium', duration: 2000 });
 
   // Animate in
   setTimeout(() => {
     toast.classList.add('show');
   }, 10);
 
-  // Remove after delay
+  // Remove after 3 seconds (US-007)
   setTimeout(() => {
     toast.classList.remove('show');
     setTimeout(() => {
       toast.remove();
     }, 300);
-  }, 4000);
+  }, 3000);
 }

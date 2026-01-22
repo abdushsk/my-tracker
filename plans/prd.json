@@ -52,7 +52,7 @@
       "title": "New Achievements unlock",
       "description": "I dont like the achivement announcement popup, its too intrusive, instead add a small toast notification at the bottom left corner that says 'Achievement Unlocked: <achievement name>' and disappears after 3 seconds with some nice confetti animation." ,
       "priority": 7,
-      "passes": false
+      "passes": true
     },
     {
       "id": "US-008",

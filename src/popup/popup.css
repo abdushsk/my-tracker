@@ -3031,10 +3031,6 @@ select:focus {
   transition: all var(--duration-fast) var(--ease-out);
 }
 
-.timer-play-btn:hover {
-  background-color: var(--secondary-hover);
-  transform: scale(1.05);
-}
 
 .timer-play-btn:active {
   transform: scale(0.95);
@@ -3047,14 +3043,6 @@ select:focus {
   margin-left: 2px;
 }
 
-/* Active/Playing state for timer button - shows pause icon */
-.timer-play-btn.is-active {
-  background-color: var(--success);
-}
-
-.timer-play-btn.is-active:hover {
-  background-color: var(--success-hover, var(--accent-hover));
-}
 
 /* Timer goal card active state - subtle */
 .goal-type-timer.goal-timer-active {
@@ -9376,54 +9364,61 @@ body.modal-open {
 
 /* ----------------------------------------
    Achievement Unlock Toast Notification
+   Small toast in bottom-left corner (US-007)
    ---------------------------------------- */
 .achievement-toast {
   position: fixed;
-  bottom: 80px;
-  left: 50%;
-  transform: translateX(-50%) translateY(100px);
-  background: linear-gradient(135deg, #FFD700 0%, #FFA500 100%);
-  color: #333;
-  padding: var(--spacing-md) var(--spacing-lg);
-  border-radius: var(--radius-lg);
-  box-shadow: 0 4px 20px rgba(255, 215, 0, 0.4);
+  bottom: var(--spacing-md);
+  left: var(--spacing-md);
+  transform: translateY(100%);
+  background: var(--card-bg);
+  color: var(--text);
+  padding: var(--spacing-sm) var(--spacing-md);
+  border-radius: var(--radius-md);
+  border-left: 3px solid var(--reward);
+  box-shadow: var(--shadow-lg);
   z-index: 1000;
   opacity: 0;
-  transition: all 0.3s ease;
+  transition: transform 0.3s ease, opacity 0.3s ease;
+  max-width: 280px;
 }
 
 .achievement-toast.show {
-  transform: translateX(-50%) translateY(0);
+  transform: translateY(0);
   opacity: 1;
 }
 
 .achievement-toast-content {
   display: flex;
   align-items: center;
-  gap: var(--spacing-md);
+  gap: var(--spacing-sm);
 }
 
 .achievement-toast-icon {
-  font-size: 36px;
+  font-size: 20px;
   line-height: 1;
+  flex-shrink: 0;
 }
 
 .achievement-toast-info {
   display: flex;
   flex-direction: column;
-  gap: 2px;
+  gap: 1px;
+  min-width: 0;
 }
 
 .achievement-toast-label {
   font-size: var(--font-xs);
-  font-weight: 500;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
+  font-weight: 600;
+  color: var(--reward);
 }
 
 .achievement-toast-title {
-  font-size: var(--font-md);
-  font-weight: 700;
+  font-size: var(--font-sm);
+  font-weight: 500;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 /* ----------------------------------------
@@ -9451,11 +9446,11 @@ body.modal-open {
 @media (prefers-reduced-motion: reduce) {
   .achievement-toast {
     transition: opacity 0.1s ease;
-    transform: translateX(-50%);
+    transform: none;
   }
 
   .achievement-toast.show {
-    transform: translateX(-50%);
+    transform: none;
   }
 
   .achievement-progress-fill {
