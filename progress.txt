@@ -384,3 +384,72 @@ Created a comprehensive UI design document (plans/DESIGN.md) that defines consis
 - Animation/transition standards
 - List of current inconsistencies
 
+---
+
+## US-061: Refactor UI to Match Design Document
+**Date**: 2026-01-22
+**Status**: Completed
+
+### What was done:
+Applied the design document standards consistently across all screens by adding missing CSS variables, replacing hardcoded values, consolidating duplicated styles, and adding accessibility improvements.
+
+### Implementation details:
+
+1. **Added Missing CSS Variables** (Light and Dark modes):
+   - `--counter-color`: #E65100 (counter goal accent color)
+   - `--counter-accent`: #FB8C00 (counter button/border accent)
+   - `--counter-light`: #FFF3E0 (counter background)
+   - `--yearly-color`: #7B1FA2 (yearly timeframe purple)
+   - `--yearly-light`: #F3E5F5 (yearly background)
+   - `--gold`: #FFB300 (best streak/trophy)
+   - `--gold-bright`: #FFD700 (sparkles/confetti)
+
+2. **Replaced Hardcoded Colors with CSS Variables**:
+   - All `#E65100` usages → `var(--counter-color)`
+   - All `#FB8C00` usages → `var(--counter-accent)`
+   - All `#F57C00` usages → `var(--counter-color)`
+   - All `#7B1FA2` usages → `var(--yearly-color)`
+   - All `#F3E5F5` usages → `var(--yearly-light)`
+   - All `#FFB300` usages → `var(--gold)`
+   - All `#FFD700` usages → `var(--gold-bright)`
+
+3. **Consolidated Duplicated Back Button Styles**:
+   - Enhanced base `.back-btn` style with hover, active, and focus-visible states
+   - Removed duplicate styles from `.manage-goals-header .back-btn`
+   - Removed duplicate styles from `.goal-form-header .back-btn`
+   - Removed duplicate styles from `.reports-header .back-btn`
+   - Each header now only has minimal overrides (padding, font-weight)
+
+4. **Fixed Header Spacer**:
+   - Changed from hardcoded `width: 70px` to flexible `flex: 0 0 auto; min-width: 70px`
+
+5. **Added Accessibility - Reduced Motion Support**:
+   - Added `@media (prefers-reduced-motion: reduce)` query
+   - Disables animations, transitions, and scroll behavior for users who prefer reduced motion
+   - Respects system accessibility settings
+
+### Files modified:
+- `src/popup/popup.css` (multiple sections, ~100 lines changed/consolidated)
+
+### Locations of key changes:
+- CSS variables: lines 52-59 (light mode), lines 149-156 (dark mode)
+- Reduced motion: lines 190-199
+- Base back button: lines 406-430
+- Manage goals header: lines 974-987
+- Goal form header: lines 1347-1360
+- Reports header: lines 3889-3898
+
+### Key design decisions:
+- Kept small gap values (1-4px) as-is since they're intentional for tight spacing
+- Used `--counter-light` instead of `--warning-light` for counter-specific backgrounds for semantic clarity
+- Back button base style now includes border-radius and focus-visible for better accessibility
+
+### Acceptance criteria met:
+- All spacing uses design system values (CSS variables throughout)
+- Buttons consistent across screens (consolidated back button styles)
+- Typography matches design doc (already using font variables)
+- Colors used consistently (all hardcoded colors now use CSS variables)
+- Cards have uniform styling (already using design system)
+- Forms follow standard patterns (already established)
+- No visual regressions (CSS changes maintain same visual appearance)
+

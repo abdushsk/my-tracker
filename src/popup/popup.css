@@ -49,6 +49,15 @@
   --border: #E0E0E0;
   --border-focus: #4CAF50;
 
+  /* Special colors - Goal types and timeframes */
+  --counter-color: #E65100;
+  --counter-accent: #FB8C00;
+  --counter-light: #FFF3E0;
+  --yearly-color: #7B1FA2;
+  --yearly-light: #F3E5F5;
+  --gold: #FFB300;
+  --gold-bright: #FFD700;
+
   /* Shadow */
   --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
   --shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
@@ -137,6 +146,15 @@
   --border: #333333;
   --border-focus: #66BB6A;
 
+  /* Special colors - Goal types and timeframes (adjusted for dark mode) */
+  --counter-color: #FFA726;
+  --counter-accent: #FFB74D;
+  --counter-light: #3A2E1B;
+  --yearly-color: #BA68C8;
+  --yearly-light: #2A1A2E;
+  --gold: #FFCA28;
+  --gold-bright: #FFE082;
+
   /* Shadow - more prominent on dark backgrounds */
   --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.3);
   --shadow: 0 2px 6px rgba(0, 0, 0, 0.4);
@@ -167,6 +185,18 @@ html.no-transition *,
 html.no-transition *::before,
 html.no-transition *::after {
   transition: none !important;
+}
+
+/* Respect user's motion preferences for accessibility */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
 }
 
 /* Base typography */
@@ -385,7 +415,7 @@ select:focus {
   margin: 0;
 }
 
-/* Back button */
+/* Back button - shared style for all screen headers */
 .back-btn {
   display: flex;
   align-items: center;
@@ -393,11 +423,22 @@ select:focus {
   padding: var(--spacing-xs) var(--spacing-sm);
   color: var(--text-secondary);
   font-size: var(--font-size-sm);
-  transition: color var(--transition-fast);
+  border-radius: var(--radius);
+  transition: all var(--transition-fast);
 }
 
 .back-btn:hover {
   color: var(--text);
+  background-color: var(--background-secondary);
+}
+
+.back-btn:active {
+  transform: scale(0.98);
+}
+
+.back-btn:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
 }
 
 /* Screen footer - US-055: Ensure footer stays at bottom regardless of content */
@@ -877,12 +918,12 @@ select:focus {
 
 .timeframe-monthly {
   background-color: var(--warning-light);
-  color: #E65100;
+  color: var(--counter-color);
 }
 
 .timeframe-yearly {
-  background-color: #F3E5F5;
-  color: #7B1FA2;
+  background-color: var(--yearly-light);
+  color: var(--yearly-color);
 }
 
 /* Goal progress section */
@@ -942,25 +983,10 @@ select:focus {
   border-bottom: 1px solid var(--border);
 }
 
+/* Back button overrides for manage-goals-header */
 .manage-goals-header .back-btn {
-  display: flex;
-  align-items: center;
-  gap: var(--spacing-xs);
   padding: var(--spacing-sm) var(--spacing-md);
-  color: var(--text-secondary);
-  font-size: var(--font-size-sm);
   font-weight: var(--font-weight-medium);
-  border-radius: var(--radius);
-  transition: all var(--transition-fast);
-}
-
-.manage-goals-header .back-btn:hover {
-  color: var(--text);
-  background-color: var(--background-secondary);
-}
-
-.manage-goals-header .back-btn:active {
-  transform: scale(0.98);
 }
 
 .manage-goals-header .back-icon {
@@ -979,9 +1005,10 @@ select:focus {
   margin: 0;
 }
 
-/* Spacer for flex alignment (keeps title centered) */
+/* Spacer for flex alignment (keeps title centered) - matches back button width */
 .header-spacer {
-  width: 70px; /* Approximate width of back button to balance the layout */
+  flex: 0 0 auto;
+  min-width: 70px;
 }
 
 /* Manage Goals Content */
@@ -1152,8 +1179,8 @@ select:focus {
 }
 
 .manage-goal-type-indicator.type-counter {
-  background-color: var(--warning-light);
-  color: #E65100;
+  background-color: var(--counter-light);
+  color: var(--counter-color);
 }
 
 .manage-goal-type-indicator.type-checkbox {
@@ -1330,25 +1357,10 @@ select:focus {
   flex-shrink: 0;
 }
 
+/* Back button overrides for goal-form-header */
 .goal-form-header .back-btn {
-  display: flex;
-  align-items: center;
-  gap: var(--spacing-xs);
   padding: var(--spacing-sm) var(--spacing-md);
-  color: var(--text-secondary);
-  font-size: var(--font-size-sm);
   font-weight: var(--font-weight-medium);
-  border-radius: var(--radius);
-  transition: all var(--transition-fast);
-}
-
-.goal-form-header .back-btn:hover {
-  color: var(--text);
-  background-color: var(--background-secondary);
-}
-
-.goal-form-header .back-btn:active {
-  transform: scale(0.98);
 }
 
 .goal-form-header .back-icon {
@@ -1752,11 +1764,11 @@ select:focus {
 }
 
 .goal-type-counter .goal-type-indicator {
-  background-color: var(--warning-light);
+  background-color: var(--counter-light);
 }
 
 .goal-type-counter .goal-type-indicator .goal-type-icon {
-  color: #E65100;
+  color: var(--counter-color);
 }
 
 .goal-type-checkbox .goal-type-indicator {
@@ -1805,12 +1817,12 @@ select:focus {
 
 .timeframe-monthly {
   background-color: var(--warning-light);
-  color: #E65100;
+  color: var(--counter-color);
 }
 
 .timeframe-yearly {
-  background-color: #F3E5F5;
-  color: #7B1FA2;
+  background-color: var(--yearly-light);
+  color: var(--yearly-color);
 }
 
 /* Goal Card Body */
@@ -1868,7 +1880,7 @@ select:focus {
 }
 
 .goal-type-counter .goal-progress-fill {
-  background: linear-gradient(90deg, #FB8C00 0%, #F57C00 100%);
+  background: linear-gradient(90deg, var(--counter-accent) 0%, var(--counter-color) 100%);
 }
 
 .goal-type-checkbox .goal-progress-fill {
@@ -1981,7 +1993,7 @@ select:focus {
 }
 
 .timer-play-btn.is-active:hover {
-  background-color: #F57C00;
+  background-color: var(--counter-color);
 }
 
 @keyframes timer-pulse {
@@ -2050,8 +2062,8 @@ select:focus {
 }
 
 .counter-increment-btn:hover {
-  background-color: var(--warning-light);
-  color: #E65100;
+  background-color: var(--counter-light);
+  color: var(--counter-color);
   box-shadow: var(--shadow);
 }
 
@@ -2378,7 +2390,7 @@ select:focus {
   height: 100%;
   background-image:
     radial-gradient(circle, var(--success) 2px, transparent 2px),
-    radial-gradient(circle, #FFD700 2px, transparent 2px),
+    radial-gradient(circle, var(--gold-bright) 2px, transparent 2px),
     radial-gradient(circle, var(--warning) 2px, transparent 2px),
     radial-gradient(circle, var(--secondary) 2px, transparent 2px);
   background-size: 20px 20px;
@@ -2468,7 +2480,7 @@ select:focus {
   position: absolute;
   width: 4px;
   height: 4px;
-  background-color: #FFD700;
+  background-color: var(--gold-bright);
   border-radius: var(--radius-full);
   animation: sparkle 1.5s ease-in-out infinite;
 }
@@ -3226,7 +3238,7 @@ body.modal-open {
 }
 
 .type-option[data-type="counter"].active .type-option-icon {
-  color: #E65100;
+  color: var(--counter-color);
 }
 
 .type-option[data-type="checkbox"].active .type-option-icon {
@@ -3259,8 +3271,8 @@ body.modal-open {
 }
 
 .type-option[data-type="counter"].active {
-  border-color: #FB8C00;
-  background-color: var(--warning-light);
+  border-color: var(--counter-accent);
+  background-color: var(--counter-light);
   box-shadow: 0 0 0 3px rgba(251, 140, 0, 0.15);
 }
 
@@ -3433,8 +3445,8 @@ body.modal-open {
 
 /* Focus state with counter/orange theme */
 .counter-target-input:focus {
-  border-color: #FB8C00;
-  box-shadow: 0 0 0 3px var(--warning-light);
+  border-color: var(--counter-accent);
+  box-shadow: 0 0 0 3px var(--counter-light);
 }
 
 /* Hover state */
@@ -3517,14 +3529,14 @@ body.modal-open {
 }
 
 .timeframe-option[data-timeframe="monthly"].active {
-  border-color: #FB8C00;
-  background-color: var(--warning-light);
+  border-color: var(--counter-accent);
+  background-color: var(--counter-light);
   box-shadow: 0 0 0 2px rgba(251, 140, 0, 0.12);
 }
 
 .timeframe-option[data-timeframe="yearly"].active {
-  border-color: #7B1FA2;
-  background-color: #F3E5F5;
+  border-color: var(--yearly-color);
+  background-color: var(--yearly-light);
   box-shadow: 0 0 0 2px rgba(123, 31, 162, 0.12);
 }
 
@@ -3559,11 +3571,11 @@ body.modal-open {
 }
 
 .timeframe-option[data-timeframe="monthly"].active .timeframe-option-icon {
-  color: #E65100;
+  color: var(--counter-color);
 }
 
 .timeframe-option[data-timeframe="yearly"].active .timeframe-option-icon {
-  color: #7B1FA2;
+  color: var(--yearly-color);
 }
 
 /* Timeframe Option Label */
@@ -3887,25 +3899,10 @@ body.modal-open {
   flex-shrink: 0;
 }
 
+/* Back button overrides for reports-header */
 .reports-header .back-btn {
-  display: flex;
-  align-items: center;
-  gap: var(--spacing-xs);
   padding: var(--spacing-sm) var(--spacing-md);
-  color: var(--text-secondary);
-  font-size: var(--font-size-sm);
   font-weight: var(--font-weight-medium);
-  border-radius: var(--radius);
-  transition: all var(--transition-fast);
-}
-
-.reports-header .back-btn:hover {
-  color: var(--text);
-  background-color: var(--background-secondary);
-}
-
-.reports-header .back-btn:active {
-  transform: scale(0.98);
 }
 
 .reports-header .back-icon {
@@ -4075,7 +4072,7 @@ body.modal-open {
 }
 
 .best-streak-card .streak-icon.best {
-  color: #FFB300;
+  color: var(--gold);
 }
 
 .streak-icon {
@@ -4173,8 +4170,8 @@ body.modal-open {
 }
 
 .stat-card-icon.month-icon {
-  background-color: var(--warning-light);
-  color: #E65100;
+  background-color: var(--counter-light);
+  color: var(--counter-color);
 }
 
 .stat-card-content {
