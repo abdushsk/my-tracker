@@ -132,7 +132,7 @@
         "Matches overall design system"
       ],
       "priority": 8,
-      "passes": false,
+      "passes": true,
       "dependsOn": ["US-061"]
     },
     {

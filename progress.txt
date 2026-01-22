@@ -453,3 +453,50 @@ Applied the design document standards consistently across all screens by adding 
 - Forms follow standard patterns (already established)
 - No visual regressions (CSS changes maintain same visual appearance)
 
+---
+
+## US-062: Fix Stats Group Alignment in Daily Goals
+**Date**: 2026-01-22
+**Status**: Completed
+
+### What was done:
+Fixed the alignment issues in the Daily Goals screen header stats group (completed count and streak). The stats items now have proper vertical centering with icons and text properly aligned.
+
+### Implementation details:
+
+1. **Header Stats Container** (`.header-stats`):
+   - Added `min-height: 40px` to ensure consistent container height
+
+2. **Stat Item Alignment** (`.stat-item`):
+   - Added `line-height: 1` to prevent inconsistent text baseline issues
+
+3. **Stat Icon Alignment** (`.stat-icon`):
+   - Changed from simple font-size styling to a fixed-size container approach
+   - Added `display: inline-flex` with `align-items: center` and `justify-content: center`
+   - Set fixed dimensions: `width: 20px; height: 20px`
+   - Added `flex-shrink: 0` to prevent icon shrinking
+
+4. **Stat Value and Label**:
+   - Added `line-height: 1` to both `.stat-value` and `.stat-label` for consistent text alignment
+
+5. **Stat Divider** (`.stat-divider`):
+   - Reduced height from 24px to 20px to match icon container height
+   - Added `align-self: center` for explicit vertical centering
+   - Added `flex-shrink: 0` to prevent divider shrinking
+
+### Files modified:
+- `src/popup/popup.css` (lines 631-713)
+
+### Key design decisions:
+- Used a fixed-size container (20x20px) for icons to ensure consistent alignment regardless of icon content (emoji vs text character)
+- The flame emoji (🔥) and checkmark character now occupy the same visual space
+- Setting `line-height: 1` on flex items removes default line-height spacing that causes misalignment
+- The divider height was reduced to match the visual height of the icon containers
+
+### Acceptance criteria met:
+- Stats items vertically centered (flexbox with align-items: center)
+- Consistent spacing between stats (gap: var(--spacing-md) maintained)
+- Icons aligned with text (fixed-size icon containers with inline-flex centering)
+- Responsive on different content lengths (flex-shrink: 0 prevents shrinking)
+- Matches overall design system (uses CSS variables, follows spacing patterns)
+
