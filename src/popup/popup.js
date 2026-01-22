@@ -20,7 +20,12 @@ import {
   deleteGoal,
   addActivityLogEntry,
   getHistory,
-  getActivityLog
+  getActivityLog,
+  getCategories,
+  saveCategories,
+  addCategory,
+  deleteCategory,
+  DEFAULT_CATEGORIES
 } from '../utils/storage.js';
 import {
   GOAL_TYPES,
@@ -60,6 +65,8 @@ const state = {
   settings: null,
   activeTimers: {},
   streakData: null,
+  categories: [], // US-065: Goal categories with color coding
+  categoryFilter: 'all', // US-065: Current category filter for View Goals
   currentScreen: 'viewGoals',
   isLoading: true,
   timerIntervalId: null, // Interval ID for updating timer display
@@ -219,6 +226,7 @@ function renderViewGoalsScreen() {
             <span class="stat-label">day streak</span>
           </div>
         </div>
+        ${renderCategoryFilterBar()}
       </header>
       <main class="goals-list-container">
         ${state.goals.length === 0 ? renderEmptyState() : renderGoalsList()}
@@ -256,6 +264,9 @@ function renderViewGoalsScreen() {
   // US-056: Attach compact view toggle listener
   attachCompactViewToggleListener(screen);
 
+  // US-065: Attach category filter listeners
+  attachCategoryFilterListeners(screen);
+
   // Start timer update interval if there are active timers
   if (Object.keys(state.activeTimers).length > 0) {
     startTimerUpdateInterval();
@@ -268,6 +279,34 @@ function renderViewGoalsScreen() {
  */
 function getCompletedCount() {
   return state.goals.filter(goal => isGoalCompleted(goal)).length;
+}
+
+/**
+ * US-065: Render category filter bar
+ * @returns {string} HTML string for category filter bar
+ */
+function renderCategoryFilterBar() {
+  // Only show filter bar if there are goals with categories
+  const hasGoalsWithCategories = state.goals.some(goal => goal.category);
+  if (!hasGoalsWithCategories && state.categoryFilter === 'all') {
+    return ''; // Don't show filter bar if no goals have categories
+  }
+
+  const activeFilter = state.categoryFilter || 'all';
+
+  return `
+    <div class="category-filter-bar" role="group" aria-label="Filter by category">
+      <button class="category-filter-chip ${activeFilter === 'all' ? 'active' : ''}" data-category="all">
+        All
+      </button>
+      ${state.categories.map(cat => `
+        <button class="category-filter-chip ${activeFilter === cat.id ? 'active' : ''}" data-category="${cat.id}">
+          <span class="filter-dot" style="background-color: ${cat.color}"></span>
+          ${cat.name}
+        </button>
+      `).join('')}
+    </div>
+  `;
 }
 
 /**
@@ -312,15 +351,31 @@ function renderEmptyState() {
  */
 function renderGoalsList() {
   // Sort goals by order property, then by createdAt
-  const sortedGoals = [...state.goals].sort((a, b) => {
+  let sortedGoals = [...state.goals].sort((a, b) => {
     if (a.order !== b.order) {
       return (a.order || 0) - (b.order || 0);
     }
     return (a.createdAt || 0) - (b.createdAt || 0);
   });
 
+  // US-065: Filter by category if a filter is active
+  if (state.categoryFilter && state.categoryFilter !== 'all') {
+    sortedGoals = sortedGoals.filter(goal => goal.category === state.categoryFilter);
+  }
+
   // US-056: Check compact view setting
   const isCompactView = state.settings?.compactViewEnabled || false;
+
+  // Show empty message if no goals match the filter
+  if (sortedGoals.length === 0 && state.categoryFilter !== 'all') {
+    return `
+      <div class="goals-list ${isCompactView ? 'compact-view' : ''}">
+        <div class="empty-filter-state">
+          <p class="empty-filter-message">No goals in this category</p>
+        </div>
+      </div>
+    `;
+  }
 
   return `
     <div class="goals-list ${isCompactView ? 'compact-view' : ''}">
@@ -418,8 +473,12 @@ function renderGoalCard(goal) {
     isCompactView ? 'compact' : ''
   ].filter(Boolean).join(' ');
 
+  // US-065: Get category info for badge display
+  const categoryInfo = goal.category ? state.categories.find(c => c.id === goal.category) : null;
+  const categoryDataAttr = goal.category ? `data-category="${goal.category}"` : '';
+
   return `
-    <div class="${cardClasses}" data-goal-id="${goal.id}" draggable="true">
+    <div class="${cardClasses}" data-goal-id="${goal.id}" ${categoryDataAttr} draggable="true">
       <div class="goal-card-header">
         <div class="drag-handle" title="Drag to reorder">
           <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="16" height="16">
@@ -435,7 +494,10 @@ function renderGoalCard(goal) {
           <span class="goal-type-indicator">${typeIcon}</span>
           <h3 class="goal-title">${escapeHtml(goal.title)}</h3>
         </div>
-        <span class="goal-timeframe-badge timeframe-${goal.timeframe}">${capitalizeFirst(goal.timeframe)}</span>
+        <div class="goal-badges">
+          ${categoryInfo ? `<span class="goal-category-badge" style="background-color: ${categoryInfo.light}; color: ${categoryInfo.color}"><span class="category-color-dot" style="background-color: ${categoryInfo.color}"></span>${categoryInfo.name}</span>` : ''}
+          <span class="goal-timeframe-badge timeframe-${goal.timeframe}">${capitalizeFirst(goal.timeframe)}</span>
+        </div>
       </div>
       <div class="goal-card-body">
         <div class="goal-progress-section">
@@ -1898,6 +1960,24 @@ function renderGoalFormScreen() {
               <span class="hint-yearly" style="display:none;">Resets at midnight on January 1st</span>
             </p>
           </div>
+
+          <!-- US-065: Category Selector -->
+          <div class="form-group">
+            <label class="form-label">Category <span class="optional-indicator">(optional)</span></label>
+            <div class="category-selector" role="radiogroup" aria-label="Select goal category">
+              <button type="button" class="category-option active" data-category="none" role="radio" aria-checked="true" title="No category">
+                <span class="category-option-icon"></span>
+                <span class="category-option-label">None</span>
+              </button>
+              ${state.categories.map(cat => `
+                <button type="button" class="category-option" data-category="${cat.id}" role="radio" aria-checked="false" title="${cat.name}">
+                  <span class="category-option-icon" style="background-color: ${cat.color}"></span>
+                  <span class="category-option-label">${cat.name}</span>
+                </button>
+              `).join('')}
+            </div>
+            <input type="hidden" id="goal-form-category" name="category" value="">
+          </div>
         </form>
       </main>
       <footer class="goal-form-footer">
@@ -1991,6 +2071,25 @@ function attachGoalFormScreenListeners(screen, editingGoal) {
       }
     });
   });
+
+  // US-065: Category selector buttons
+  const categoryOptions = screen.querySelectorAll('.category-selector .category-option');
+  categoryOptions.forEach(option => {
+    option.addEventListener('click', (e) => {
+      e.preventDefault();
+      const category = option.getAttribute('data-category');
+      setGoalFormScreenCategory(screen, category);
+    });
+
+    // Keyboard support
+    option.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        const category = option.getAttribute('data-category');
+        setGoalFormScreenCategory(screen, category);
+      }
+    });
+  });
 }
 
 /**
@@ -2067,6 +2166,27 @@ function setGoalFormScreenTimeframe(screen, timeframe) {
 }
 
 /**
+ * US-065: Set the category in the goal form screen
+ * @param {HTMLElement} screen - The screen element
+ * @param {string} category - The category ID (or 'none' for no category)
+ */
+function setGoalFormScreenCategory(screen, category) {
+  // Update hidden input - 'none' means null/empty category
+  const categoryInput = screen.querySelector('#goal-form-category');
+  if (categoryInput) {
+    categoryInput.value = category === 'none' ? '' : category;
+  }
+
+  // Update button states
+  const categoryOptions = screen.querySelectorAll('.category-selector .category-option');
+  categoryOptions.forEach(option => {
+    const isSelected = option.getAttribute('data-category') === category;
+    option.classList.toggle('active', isSelected);
+    option.setAttribute('aria-checked', isSelected ? 'true' : 'false');
+  });
+}
+
+/**
  * Pre-fill the goal form screen with existing goal data
  * @param {Object} goal - The goal to pre-fill
  */
@@ -2105,6 +2225,10 @@ function prefillGoalFormScreen(goal) {
       counterInput.value = goal.target;
     }
   }
+
+  // US-065: Set category
+  const categoryValue = goal.category || 'none';
+  setGoalFormScreenCategory(screen, categoryValue);
 }
 
 /**
@@ -2190,7 +2314,11 @@ async function handleGoalFormScreenSubmit(e) {
   const timeframeInput = screen.querySelector('#goal-form-timeframe');
   const timeframe = timeframeInput?.value || TIMEFRAMES.DAILY;
 
-  console.log(`[GoalForm] Submitting in ${isEditMode ? 'edit' : 'add'} mode:`, { title, type, target, timeframe });
+  // US-065: Get category (null if 'none' or empty)
+  const categoryInput = screen.querySelector('#goal-form-category');
+  const category = categoryInput?.value || null;
+
+  console.log(`[GoalForm] Submitting in ${isEditMode ? 'edit' : 'add'} mode:`, { title, type, target, timeframe, category });
 
   try {
     if (isEditMode && goalId) {
@@ -2199,7 +2327,8 @@ async function handleGoalFormScreenSubmit(e) {
         title,
         type,
         target,
-        timeframe
+        timeframe,
+        category
       });
 
       if (success) {
@@ -2211,7 +2340,8 @@ async function handleGoalFormScreenSubmit(e) {
             title,
             type,
             target,
-            timeframe
+            timeframe,
+            category
           };
         }
         console.log(`[GoalForm] Goal ${goalId} updated successfully`);
@@ -2228,6 +2358,7 @@ async function handleGoalFormScreenSubmit(e) {
         type,
         target,
         timeframe,
+        category,
         order: state.goals.length
       });
 
@@ -4425,6 +4556,38 @@ function renderSettingsScreen() {
           </div>
         </div>
 
+        <!-- US-065: Categories Section -->
+        <div class="settings-section">
+          <h2>Categories</h2>
+          <p class="settings-section-description">Organize your goals with color-coded categories</p>
+          <div class="categories-list">
+            ${state.categories.map(cat => {
+              const isDefault = DEFAULT_CATEGORIES.some(dc => dc.id === cat.id);
+              return `
+                <div class="category-item" data-category-id="${cat.id}">
+                  <span class="category-color-indicator" style="background-color: ${cat.color}"></span>
+                  <span class="category-name">${cat.name}</span>
+                  ${!isDefault ? `
+                    <button class="category-delete-btn" data-action="delete-category" data-category-id="${cat.id}" title="Delete category">
+                      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="16" height="16">
+                        <line x1="18" y1="6" x2="6" y2="18"/>
+                        <line x1="6" y1="6" x2="18" y2="18"/>
+                      </svg>
+                    </button>
+                  ` : '<span class="category-badge-default">Default</span>'}
+                </div>
+              `;
+            }).join('')}
+          </div>
+          <button class="btn btn-secondary btn-sm add-category-btn" id="add-category-btn">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="16" height="16">
+              <line x1="12" y1="5" x2="12" y2="19"/>
+              <line x1="5" y1="12" x2="19" y2="12"/>
+            </svg>
+            Add Custom Category
+          </button>
+        </div>
+
         <!-- About Section -->
         <div class="settings-section about">
           <h2>About</h2>
@@ -4513,6 +4676,9 @@ function renderSettingsScreen() {
       }
     });
   }
+
+  // US-065: Attach category management listeners
+  attachCategoryManagementListeners(screen);
 }
 
 /**
@@ -4538,6 +4704,105 @@ function updateVolumeIcon(screen, volume, enabled) {
   }
 
   volumeIcon.innerHTML = iconSvg;
+}
+
+/**
+ * US-065: Attach category management listeners
+ * @param {HTMLElement} screen - The settings screen element
+ */
+function attachCategoryManagementListeners(screen) {
+  // Delete category buttons
+  const deleteButtons = screen.querySelectorAll('[data-action="delete-category"]');
+  deleteButtons.forEach(btn => {
+    btn.addEventListener('click', async (e) => {
+      e.preventDefault();
+      const categoryId = btn.getAttribute('data-category-id');
+      if (!categoryId) return;
+
+      // Check if any goals use this category
+      const goalsWithCategory = state.goals.filter(g => g.category === categoryId);
+      if (goalsWithCategory.length > 0) {
+        if (!confirm(`This category is used by ${goalsWithCategory.length} goal(s). Deleting it will remove the category from those goals. Continue?`)) {
+          return;
+        }
+        // Remove category from those goals
+        for (const goal of goalsWithCategory) {
+          await updateGoal(goal.id, { category: null });
+          const goalIndex = state.goals.findIndex(g => g.id === goal.id);
+          if (goalIndex !== -1) {
+            state.goals[goalIndex].category = null;
+          }
+        }
+      }
+
+      // Delete the category
+      await deleteCategory(categoryId);
+      state.categories = state.categories.filter(c => c.id !== categoryId);
+
+      // Re-render settings
+      renderSettingsScreen();
+    });
+  });
+
+  // Add category button
+  const addCategoryBtn = screen.querySelector('#add-category-btn');
+  if (addCategoryBtn) {
+    addCategoryBtn.addEventListener('click', () => {
+      showAddCategoryDialog();
+    });
+  }
+}
+
+/**
+ * US-065: Show dialog to add a custom category
+ */
+function showAddCategoryDialog() {
+  const name = prompt('Enter category name:');
+  if (!name || !name.trim()) return;
+
+  const trimmedName = name.trim();
+
+  // Check for duplicate names
+  if (state.categories.some(c => c.name.toLowerCase() === trimmedName.toLowerCase())) {
+    alert('A category with this name already exists.');
+    return;
+  }
+
+  // Preset colors for custom categories
+  const presetColors = ['#E91E63', '#00BCD4', '#8BC34A', '#795548', '#607D8B', '#FF5722'];
+  const usedColors = state.categories.map(c => c.color);
+  const availableColor = presetColors.find(c => !usedColors.includes(c)) || presetColors[0];
+
+  // Generate light color variant
+  const lightColor = lightenColor(availableColor, 0.9);
+
+  // Create new category
+  const newCategory = {
+    id: `custom-${Date.now()}`,
+    name: trimmedName,
+    color: availableColor,
+    light: lightColor
+  };
+
+  // Save category
+  addCategory(newCategory).then(() => {
+    state.categories.push(newCategory);
+    renderSettingsScreen();
+  });
+}
+
+/**
+ * US-065: Lighten a hex color
+ * @param {string} hex - Hex color string
+ * @param {number} amount - Amount to lighten (0-1)
+ * @returns {string} Lightened hex color
+ */
+function lightenColor(hex, amount) {
+  const num = parseInt(hex.replace('#', ''), 16);
+  const r = Math.min(255, Math.floor((num >> 16) + (255 - (num >> 16)) * amount));
+  const g = Math.min(255, Math.floor(((num >> 8) & 0x00FF) + (255 - ((num >> 8) & 0x00FF)) * amount));
+  const b = Math.min(255, Math.floor((num & 0x0000FF) + (255 - (num & 0x0000FF)) * amount));
+  return `#${(r << 16 | g << 8 | b).toString(16).padStart(6, '0').toUpperCase()}`;
 }
 
 /**
@@ -4581,6 +4846,25 @@ function attachCompactViewToggleListener(container) {
   });
 }
 
+/**
+ * US-065: Attach category filter listeners
+ * @param {HTMLElement} container - The screen container
+ */
+function attachCategoryFilterListeners(container) {
+  const filterChips = container.querySelectorAll('.category-filter-chip');
+  if (!filterChips.length) return;
+
+  filterChips.forEach(chip => {
+    chip.addEventListener('click', () => {
+      const category = chip.getAttribute('data-category');
+      state.categoryFilter = category;
+
+      // Re-render the view goals screen to apply filter
+      renderViewGoalsScreen();
+    });
+  });
+}
+
 // =============================================================================
 // Data Loading
 // =============================================================================
@@ -4593,12 +4877,13 @@ async function loadData() {
   try {
     state.isLoading = true;
 
-    // Load goals, settings, active timers, and streak data in parallel
-    const [goals, settings, activeTimers, streakData] = await Promise.all([
+    // Load goals, settings, active timers, streak data, and categories in parallel
+    const [goals, settings, activeTimers, streakData, categories] = await Promise.all([
       getGoals(),
       getSettings(),
       getActiveTimers(),
-      getStreakData()
+      getStreakData(),
+      getCategories()
     ]);
 
     // Update state
@@ -4606,12 +4891,14 @@ async function loadData() {
     state.settings = settings;
     state.activeTimers = activeTimers;
     state.streakData = streakData;
+    state.categories = categories;
 
     console.log('Data loaded:', {
       goalsCount: goals.length,
       settings: settings,
       activeTimersCount: Object.keys(activeTimers).length,
-      streakData: streakData
+      streakData: streakData,
+      categoriesCount: categories.length
     });
 
     // US-039: Initialize sound system with user settings

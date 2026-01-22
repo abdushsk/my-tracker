@@ -786,6 +786,21 @@ select:focus {
   line-height: 1.5;
 }
 
+/* US-065: Empty filter state - shown when no goals match the category filter */
+.empty-filter-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: var(--spacing-xl);
+  text-align: center;
+}
+
+.empty-filter-message {
+  font-size: var(--font-size-base);
+  color: var(--text-muted);
+}
+
 /* Add first goal button - large variant */
 .add-first-goal {
   padding: var(--spacing-md) var(--spacing-lg);
@@ -937,6 +952,73 @@ select:focus {
 .timeframe-yearly {
   background-color: var(--yearly-light);
   color: var(--yearly-color);
+}
+
+/* ========================================
+   US-065: Goal Categories with Color Coding
+   Category badge styles for goal cards
+   ======================================== */
+
+/* Category badge on goal cards - similar to timeframe badge */
+.goal-category-badge {
+  font-size: var(--font-size-xs);
+  padding: 2px var(--spacing-sm);
+  border-radius: var(--radius-full);
+  font-weight: var(--font-weight-medium);
+  text-transform: capitalize;
+  white-space: nowrap;
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+/* Category color indicator dot */
+.category-color-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: var(--radius-full);
+  flex-shrink: 0;
+}
+
+/* Category side stripe on goal cards */
+.goal-card[data-category] {
+  position: relative;
+}
+
+.goal-card[data-category]::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 4px;
+  border-radius: var(--radius-lg) 0 0 var(--radius-lg);
+}
+
+/* Category-specific stripe colors */
+.goal-card[data-category="work"]::before {
+  background-color: #2196F3;
+}
+
+.goal-card[data-category="health"]::before {
+  background-color: #4CAF50;
+}
+
+.goal-card[data-category="learning"]::before {
+  background-color: #9C27B0;
+}
+
+.goal-card[data-category="personal"]::before {
+  background-color: #FF9800;
+}
+
+/* Header badges container - holds both timeframe and category badges */
+.goal-badges {
+  display: flex;
+  gap: var(--spacing-xs);
+  align-items: center;
+  flex-wrap: wrap;
 }
 
 /* Goal progress section */
@@ -1555,6 +1637,78 @@ select:focus {
 .settings-section.about .app-description {
   color: var(--text-muted);
   line-height: 1.5;
+}
+
+/* US-065: Settings section description */
+.settings-section-description {
+  font-size: var(--font-size-sm);
+  color: var(--text-muted);
+  margin-bottom: var(--spacing-md);
+}
+
+/* US-065: Categories list in settings */
+.categories-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+  margin-bottom: var(--spacing-md);
+}
+
+.category-item {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  padding: var(--spacing-sm) var(--spacing-md);
+  background-color: var(--background-secondary);
+  border-radius: var(--radius);
+}
+
+.category-color-indicator {
+  width: 16px;
+  height: 16px;
+  border-radius: var(--radius-full);
+  flex-shrink: 0;
+}
+
+.category-name {
+  flex: 1;
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  color: var(--text);
+}
+
+.category-badge-default {
+  font-size: var(--font-size-xs);
+  color: var(--text-muted);
+  padding: 2px var(--spacing-xs);
+  background-color: var(--background);
+  border-radius: var(--radius-sm);
+}
+
+.category-delete-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  background: none;
+  border: none;
+  border-radius: var(--radius);
+  cursor: pointer;
+  color: var(--text-muted);
+  transition: all var(--transition-fast);
+}
+
+.category-delete-btn:hover {
+  background-color: var(--danger-light);
+  color: var(--danger);
+}
+
+.add-category-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--spacing-xs);
 }
 
 /* US-052: Setting item row with toggle */
@@ -3709,6 +3863,267 @@ body.modal-open {
 .timeframe-hint .hint-monthly.visible,
 .timeframe-hint .hint-yearly.visible {
   display: inline;
+}
+
+/* ========================================
+   US-065: Category Selector Styles
+   ======================================== */
+
+/* Category selector container - similar to timeframe selector */
+.category-selector {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: var(--spacing-sm);
+  width: 100%;
+}
+
+/* Category option button */
+.category-option {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  padding: var(--spacing-sm) var(--spacing-xs);
+  background-color: var(--background);
+  border: 2px solid var(--border);
+  border-radius: var(--radius);
+  cursor: pointer;
+  transition: all var(--transition);
+  min-height: 60px;
+  position: relative;
+}
+
+.category-option:hover {
+  border-color: var(--text-muted);
+  background-color: var(--background-secondary);
+}
+
+.category-option:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
+}
+
+/* Active state for category option */
+.category-option.active {
+  border-color: currentColor;
+  box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.08);
+}
+
+/* Category-specific active colors */
+.category-option[data-category="work"].active {
+  border-color: #2196F3;
+  background-color: #E3F2FD;
+  box-shadow: 0 0 0 2px rgba(33, 150, 243, 0.12);
+}
+
+.category-option[data-category="health"].active {
+  border-color: #4CAF50;
+  background-color: #E8F5E9;
+  box-shadow: 0 0 0 2px rgba(76, 175, 80, 0.12);
+}
+
+.category-option[data-category="learning"].active {
+  border-color: #9C27B0;
+  background-color: #F3E5F5;
+  box-shadow: 0 0 0 2px rgba(156, 39, 176, 0.12);
+}
+
+.category-option[data-category="personal"].active {
+  border-color: #FF9800;
+  background-color: #FFF3E0;
+  box-shadow: 0 0 0 2px rgba(255, 152, 0, 0.12);
+}
+
+/* Category option icon (color circle) */
+.category-option-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  border-radius: var(--radius-full);
+  transition: transform var(--transition-fast);
+}
+
+.category-option:hover .category-option-icon {
+  transform: scale(1.15);
+}
+
+/* Category-specific icon colors */
+.category-option[data-category="work"] .category-option-icon {
+  background-color: #2196F3;
+}
+
+.category-option[data-category="health"] .category-option-icon {
+  background-color: #4CAF50;
+}
+
+.category-option[data-category="learning"] .category-option-icon {
+  background-color: #9C27B0;
+}
+
+.category-option[data-category="personal"] .category-option-icon {
+  background-color: #FF9800;
+}
+
+/* Category option label */
+.category-option-label {
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-medium);
+  color: var(--text-secondary);
+  transition: color var(--transition-fast);
+  text-align: center;
+  white-space: nowrap;
+}
+
+.category-option:hover .category-option-label {
+  color: var(--text);
+}
+
+.category-option.active .category-option-label {
+  color: var(--text);
+  font-weight: var(--font-weight-semibold);
+}
+
+/* Selection animation */
+.category-option.active {
+  animation: timeframe-select 0.25s ease;
+}
+
+/* Active state press effect */
+.category-option:active {
+  transform: scale(0.96);
+}
+
+/* None option - no category selected */
+.category-option[data-category="none"] .category-option-icon {
+  background-color: var(--text-muted);
+  opacity: 0.5;
+}
+
+.category-option[data-category="none"].active {
+  border-color: var(--text-muted);
+  background-color: var(--background-secondary);
+  box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.05);
+}
+
+/* Category filter bar for View Goals screen */
+.category-filter-bar {
+  display: flex;
+  gap: var(--spacing-xs);
+  padding: var(--spacing-sm) 0;
+  overflow-x: auto;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.category-filter-bar::-webkit-scrollbar {
+  display: none;
+}
+
+/* Category filter chip/button */
+.category-filter-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px var(--spacing-sm);
+  border-radius: var(--radius-full);
+  border: 1px solid var(--border);
+  background-color: var(--background);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-medium);
+  color: var(--text-secondary);
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all var(--transition-fast);
+}
+
+.category-filter-chip:hover {
+  border-color: var(--text-muted);
+  background-color: var(--background-secondary);
+  color: var(--text);
+}
+
+.category-filter-chip.active {
+  border-color: currentColor;
+  color: var(--text);
+}
+
+/* Filter chip color dot */
+.category-filter-chip .filter-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: var(--radius-full);
+  flex-shrink: 0;
+}
+
+/* Category-specific filter chip colors */
+.category-filter-chip[data-category="all"].active {
+  border-color: var(--primary);
+  background-color: var(--primary-light);
+  color: var(--primary);
+}
+
+.category-filter-chip[data-category="work"].active {
+  border-color: #2196F3;
+  background-color: #E3F2FD;
+  color: #1976D2;
+}
+
+.category-filter-chip[data-category="health"].active {
+  border-color: #4CAF50;
+  background-color: #E8F5E9;
+  color: #388E3C;
+}
+
+.category-filter-chip[data-category="learning"].active {
+  border-color: #9C27B0;
+  background-color: #F3E5F5;
+  color: #7B1FA2;
+}
+
+.category-filter-chip[data-category="personal"].active {
+  border-color: #FF9800;
+  background-color: #FFF3E0;
+  color: #F57C00;
+}
+
+/* Dark mode adjustments for categories */
+[data-theme='dark'] .category-option[data-category="work"].active {
+  background-color: #1A2A3A;
+}
+
+[data-theme='dark'] .category-option[data-category="health"].active {
+  background-color: #1B3A1E;
+}
+
+[data-theme='dark'] .category-option[data-category="learning"].active {
+  background-color: #2A1A3A;
+}
+
+[data-theme='dark'] .category-option[data-category="personal"].active {
+  background-color: #3A2A1A;
+}
+
+[data-theme='dark'] .category-filter-chip[data-category="work"].active {
+  background-color: #1A2A3A;
+  color: #64B5F6;
+}
+
+[data-theme='dark'] .category-filter-chip[data-category="health"].active {
+  background-color: #1B3A1E;
+  color: #81C784;
+}
+
+[data-theme='dark'] .category-filter-chip[data-category="learning"].active {
+  background-color: #2A1A3A;
+  color: #CE93D8;
+}
+
+[data-theme='dark'] .category-filter-chip[data-category="personal"].active {
+  background-color: #3A2A1A;
+  color: #FFB74D;
 }
 
 /* ========================================

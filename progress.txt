@@ -603,3 +603,84 @@ Implemented an enhanced confetti animation system for goal completion celebratio
 - Works for all goal completions (timer, counter, checkbox)
 - Different intensity for different achievements (low/normal/high parameter available)
 
+---
+
+## US-065: Goal Categories with Color Coding
+**Date**: 2026-01-22
+**Status**: Completed
+
+### What was done:
+Implemented a comprehensive goal categories feature with color coding. Users can assign categories to goals, filter goals by category, and manage categories in Settings.
+
+### Implementation details:
+
+1. **Storage Layer** (`src/utils/storage.js`):
+   - Added `CATEGORIES` storage key
+   - Defined `DEFAULT_CATEGORIES` with 4 predefined categories:
+     - Work (blue: #2196F3)
+     - Health (green: #4CAF50)
+     - Learning (purple: #9C27B0)
+     - Personal (orange: #FF9800)
+   - Added functions: `getCategories()`, `saveCategories()`, `getDefaultCategories()`, `addCategory()`, `deleteCategory()`, `getCategoryById()`
+
+2. **State Management** (`src/popup/popup.js`):
+   - Added `categories` array to global state
+   - Added `categoryFilter` to track current filter ('all' or category id)
+   - Categories loaded during `loadData()` alongside other data
+
+3. **Goal Form Screen** (`src/popup/popup.js`):
+   - Added category selector with button group pattern (matching type/timeframe selectors)
+   - "None" option for goals without category
+   - Pre-fills category when editing existing goals
+   - Category saved with goal on submit
+
+4. **Goal Card Display** (`src/popup/popup.js`):
+   - Added `data-category` attribute to goal cards for CSS styling
+   - Category badge displayed alongside timeframe badge with color dot
+   - Category color stripe on left side of card (via CSS ::before)
+
+5. **Category Filter Bar** (`src/popup/popup.js`):
+   - Filter bar displayed in View Goals header when goals have categories
+   - "All" chip plus one chip per category with color dot
+   - Clicking chip filters goals list to that category
+   - Empty state message when no goals match filter
+
+6. **Settings Screen** (`src/popup/popup.js`):
+   - New "Categories" section between Appearance and About
+   - List of all categories with color indicator
+   - Default categories marked with "Default" badge
+   - Delete button for custom categories (with confirmation if goals use it)
+   - "Add Custom Category" button with prompt dialog
+   - Automatic color selection from preset palette for new categories
+
+7. **CSS Styles** (`src/popup/popup.css`):
+   - Category badge styles (similar to timeframe badges)
+   - Category color dot indicator
+   - Goal card side stripe via ::before pseudo-element
+   - Category selector styles (button group pattern)
+   - Category filter bar with chips
+   - Category management list in settings
+   - Dark mode support for all category styles
+
+### Files modified:
+- `src/utils/storage.js` (lines 7-28, 314-396, 398-427)
+- `src/popup/popup.js` (lines 10-28, 63-74, 229, 267-268, 281-307, 349-382, 405-452, 1909-1925, 2001-2037, 2113-2132, 2174-2176, 2258-2264, 2268-2308, 4559-4589, 4680-4681, 4709-4806, 4727-4733)
+- `src/popup/popup.css` (lines 942-1007, 789-802, 1642-1712, 3781-4040)
+
+### Key design decisions:
+- Used button group selector pattern for categories (consistent with type/timeframe)
+- Category side stripe provides clear visual indication without cluttering UI
+- Filter bar only appears when goals have categories assigned
+- Default categories cannot be deleted, only custom ones
+- Deleting a category used by goals prompts confirmation and clears category from those goals
+- Custom categories use a preset color palette with automatic selection
+- Category is optional - "None" option available
+
+### Acceptance criteria met:
+- Predefined categories with colors (work=blue, health=green, learning=purple, personal=orange)
+- Custom category creation with color picker (uses preset palette with auto-selection)
+- Category selector in goal form (button group with color indicators)
+- Visual category indicator on goal cards (color badge + side stripe)
+- Filter goals by category in View Goals (filter bar with chips)
+- Category management in Settings screen (list, add, delete)
+

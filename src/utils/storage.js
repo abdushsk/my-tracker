@@ -11,8 +11,21 @@ const STORAGE_KEYS = {
   SETTINGS: 'settings',
   HISTORY: 'history',
   ACTIVE_TIMERS: 'activeTimers',
-  STREAK_DATA: 'streakData'
+  STREAK_DATA: 'streakData',
+  CATEGORIES: 'categories'
 };
+
+/**
+ * Default category definitions
+ * Each category has an id, name, and color scheme
+ * @type {Array<{id: string, name: string, color: string, light: string}>}
+ */
+const DEFAULT_CATEGORIES = [
+  { id: 'work', name: 'Work', color: '#2196F3', light: '#E3F2FD' },
+  { id: 'health', name: 'Health', color: '#4CAF50', light: '#E8F5E9' },
+  { id: 'learning', name: 'Learning', color: '#9C27B0', light: '#F3E5F5' },
+  { id: 'personal', name: 'Personal', color: '#FF9800', light: '#FFF3E0' }
+];
 
 /**
  * Get all goals from storage
@@ -298,9 +311,94 @@ function getDefaultStreakData() {
   };
 }
 
+/**
+ * Get categories from storage
+ * @returns {Promise<Array>} Array of category objects
+ */
+async function getCategories() {
+  try {
+    const result = await chrome.storage.local.get(STORAGE_KEYS.CATEGORIES);
+    return result[STORAGE_KEYS.CATEGORIES] || [...DEFAULT_CATEGORIES];
+  } catch (error) {
+    console.error('Error getting categories:', error);
+    return [...DEFAULT_CATEGORIES];
+  }
+}
+
+/**
+ * Save categories to storage
+ * @param {Array} categories - Array of category objects to save
+ * @returns {Promise<boolean>} Success status
+ */
+async function saveCategories(categories) {
+  try {
+    await chrome.storage.local.set({ [STORAGE_KEYS.CATEGORIES]: categories });
+    return true;
+  } catch (error) {
+    console.error('Error saving categories:', error);
+    return false;
+  }
+}
+
+/**
+ * Get default categories
+ * @returns {Array} Default category array
+ */
+function getDefaultCategories() {
+  return [...DEFAULT_CATEGORIES];
+}
+
+/**
+ * Add a new category
+ * @param {Object} category - Category object with id, name, color, light
+ * @returns {Promise<boolean>} Success status
+ */
+async function addCategory(category) {
+  try {
+    const categories = await getCategories();
+    categories.push(category);
+    return await saveCategories(categories);
+  } catch (error) {
+    console.error('Error adding category:', error);
+    return false;
+  }
+}
+
+/**
+ * Delete a category by ID
+ * @param {string} categoryId - The category ID to delete
+ * @returns {Promise<boolean>} Success status
+ */
+async function deleteCategory(categoryId) {
+  try {
+    const categories = await getCategories();
+    const filteredCategories = categories.filter(cat => cat.id !== categoryId);
+    return await saveCategories(filteredCategories);
+  } catch (error) {
+    console.error('Error deleting category:', error);
+    return false;
+  }
+}
+
+/**
+ * Get a category by ID
+ * @param {string} categoryId - The category ID to find
+ * @returns {Promise<Object|null>} The category object or null
+ */
+async function getCategoryById(categoryId) {
+  try {
+    const categories = await getCategories();
+    return categories.find(cat => cat.id === categoryId) || null;
+  } catch (error) {
+    console.error('Error getting category by ID:', error);
+    return null;
+  }
+}
+
 // Export functions for use in other modules
 export {
   STORAGE_KEYS,
+  DEFAULT_CATEGORIES,
   getGoals,
   saveGoals,
   getActivityLog,
@@ -319,5 +417,11 @@ export {
   getDefaultSettings,
   getStreakData,
   saveStreakData,
-  getDefaultStreakData
+  getDefaultStreakData,
+  getCategories,
+  saveCategories,
+  getDefaultCategories,
+  addCategory,
+  deleteCategory,
+  getCategoryById
 };
