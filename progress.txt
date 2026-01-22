@@ -1984,3 +1984,65 @@ Implemented a comprehensive gamification system with achievements and badges. Us
 
 ### Note:
 The "Share achievement option" acceptance criterion was not fully implemented as it requires additional complexity (image generation, clipboard API, etc.) and was considered lower priority for the core gamification feature. The implementation covers all other acceptance criteria and provides a complete, functional achievements system.
+
+## US-081: Daily Challenges - COMPLETED
+Date: 2026-01-22
+
+### Task Description
+Implemented the Daily Challenges feature for extra motivation. System generates random daily challenges with varying difficulties.
+
+### Implementation Details
+
+1. **Models (src/utils/models.js)**
+   - Added `CHALLENGE_DIFFICULTY` enum (easy, medium, hard)
+   - Created `DAILY_CHALLENGE_DEFINITIONS` array with 22 unique challenges
+   - Challenge categories:
+     - Easy (6): Quick Win, Triple Threat, Morning Momentum, Quick Focus, Count It Up, Check It Off
+     - Medium (8): High Five, Half Hour Hero, Hour of Power, Double Digits, Mix It Up, Afternoon Achiever, Evening Excellence, Category Crosser
+     - Hard (8): Clean Sweep, Endurance Expert, Triple Variety, Dawn Patrol, Counter Master, Deep Focus, Category Champion, Night Warrior
+   - Helper functions: `getDefaultDailyChallengeData()`, `getChallengeDefinition()`, `selectDailyChallenge()`, `createDailyChallengeState()`, `isChallengeCompleted()`, `getChallengeProgressPercentage()`
+
+2. **Storage (src/utils/storage.js)**
+   - Added `DAILY_CHALLENGES` storage key
+   - Added `dailyChallengesEnabled` to default settings
+   - New storage functions: `getDailyChallenges()`, `saveDailyChallenges()`, `updateCurrentChallenge()`, `completeCurrentChallenge()`, `skipCurrentChallenge()`, `getChallengeHistory()`, `getChallengeStats()`
+
+3. **UI (src/popup/popup.js)**
+   - Added dailyChallenges to state
+   - `initializeDailyChallenge()` - Initializes or updates daily challenge on app load
+   - `renderDailyChallengeCard()` - Beautiful gradient card showing current challenge
+   - `attachDailyChallengeListeners()` - Skip button handler
+   - `handleSkipChallenge()` - Limited to 1 skip per day
+   - `updateChallengeProgress()` - Updates progress based on goal activity
+   - `handleChallengeCompletion()` - Celebration with confetti and sound
+   - `renderChallengeStatsSection()` - Challenge stats in Reports (total completed, streaks, history)
+   - Settings toggle for enabling/disabling challenges
+
+4. **Challenge Progress Tracking**
+   - Integrated with goal completion handlers (timer, counter, checkbox)
+   - Tracks various condition types: goals_completed, timer_minutes, counter_increments, checkbox_completed, goal_types_completed, categories_completed, time-based challenges
+
+5. **CSS (src/popup/popup.css)**
+   - Daily challenge card with gradient styling (purple for active, green for completed)
+   - Skip button with subtle styling
+   - Progress bar within card
+   - Challenge toast notification for completion
+   - Challenge stats section in Reports with history list
+   - Dark mode support
+   - Reduced motion support
+
+### Acceptance Criteria Met
+- [x] Daily challenge displayed on View Goals screen
+- [x] Challenge pool of 20+ different challenges (22 total)
+- [x] Challenge difficulty varies (easy: 40%, medium: 40%, hard: 20% distribution)
+- [x] Completion tracking and reward (confetti, sound, toast)
+- [x] Skip/refresh challenge option (limited to 1 per day)
+- [x] Challenge history in Reports (last 7 days with status)
+- [x] Toggle to disable in Settings
+
+### Notes
+- Challenges automatically reset at midnight
+- Skip uses are tracked per day, reset with new challenge
+- Challenge streak tracks consecutive days of completing challenges
+- Best streak is preserved in storage
+- Recent challenges (7 days) are avoided in selection to ensure variety

@@ -832,6 +832,381 @@ function getAchievementProgressPercentage(achievementId, currentProgress) {
 }
 
 // =============================================================================
+// US-081: Daily Challenges Model
+// =============================================================================
+
+/**
+ * Challenge difficulty levels
+ * @readonly
+ * @enum {string}
+ */
+const CHALLENGE_DIFFICULTY = {
+  EASY: 'easy',
+  MEDIUM: 'medium',
+  HARD: 'hard'
+};
+
+/**
+ * Daily Challenge definitions pool
+ * Contains 20+ different challenges of varying difficulty
+ * @type {Array<Object>}
+ */
+const DAILY_CHALLENGE_DEFINITIONS = [
+  // Easy challenges
+  {
+    id: 'challenge-complete-one',
+    title: 'Quick Win',
+    description: 'Complete at least 1 goal today',
+    icon: '🎯',
+    difficulty: CHALLENGE_DIFFICULTY.EASY,
+    condition: { type: 'goals_completed', target: 1 },
+    reward: 'Warm-up complete!'
+  },
+  {
+    id: 'challenge-complete-three',
+    title: 'Triple Threat',
+    description: 'Complete 3 goals today',
+    icon: '🌟',
+    difficulty: CHALLENGE_DIFFICULTY.EASY,
+    condition: { type: 'goals_completed', target: 3 },
+    reward: 'Three down!'
+  },
+  {
+    id: 'challenge-morning-start',
+    title: 'Morning Momentum',
+    description: 'Complete a goal before 10 AM',
+    icon: '🌅',
+    difficulty: CHALLENGE_DIFFICULTY.EASY,
+    condition: { type: 'complete_before_hour', target: 10 },
+    reward: 'Early starter!'
+  },
+  {
+    id: 'challenge-timer-15min',
+    title: 'Quick Focus',
+    description: 'Log 15 minutes on any timer goal',
+    icon: '⏰',
+    difficulty: CHALLENGE_DIFFICULTY.EASY,
+    condition: { type: 'timer_minutes', target: 15 },
+    reward: 'Focused mind!'
+  },
+  {
+    id: 'challenge-counter-5',
+    title: 'Count It Up',
+    description: 'Add 5 to any counter goal',
+    icon: '🔢',
+    difficulty: CHALLENGE_DIFFICULTY.EASY,
+    condition: { type: 'counter_increments', target: 5 },
+    reward: 'Numbers climbing!'
+  },
+  {
+    id: 'challenge-checkbox-one',
+    title: 'Check It Off',
+    description: 'Complete a checkbox goal',
+    icon: '✅',
+    difficulty: CHALLENGE_DIFFICULTY.EASY,
+    condition: { type: 'checkbox_completed', target: 1 },
+    reward: 'Done and dusted!'
+  },
+
+  // Medium challenges
+  {
+    id: 'challenge-complete-five',
+    title: 'High Five',
+    description: 'Complete 5 goals today',
+    icon: '🖐️',
+    difficulty: CHALLENGE_DIFFICULTY.MEDIUM,
+    condition: { type: 'goals_completed', target: 5 },
+    reward: 'Five star performance!'
+  },
+  {
+    id: 'challenge-timer-30min',
+    title: 'Half Hour Hero',
+    description: 'Log 30 minutes on any timer goal',
+    icon: '⏱️',
+    difficulty: CHALLENGE_DIFFICULTY.MEDIUM,
+    condition: { type: 'timer_minutes', target: 30 },
+    reward: 'Time well spent!'
+  },
+  {
+    id: 'challenge-timer-1hr',
+    title: 'Hour of Power',
+    description: 'Log 1 hour on any timer goal',
+    icon: '💪',
+    difficulty: CHALLENGE_DIFFICULTY.MEDIUM,
+    condition: { type: 'timer_minutes', target: 60 },
+    reward: 'Powerful progress!'
+  },
+  {
+    id: 'challenge-counter-10',
+    title: 'Double Digits',
+    description: 'Add 10 to any counter goal',
+    icon: '🔟',
+    difficulty: CHALLENGE_DIFFICULTY.MEDIUM,
+    condition: { type: 'counter_increments', target: 10 },
+    reward: 'Numbers soaring!'
+  },
+  {
+    id: 'challenge-variety-2types',
+    title: 'Mix It Up',
+    description: 'Complete goals of 2 different types',
+    icon: '🎨',
+    difficulty: CHALLENGE_DIFFICULTY.MEDIUM,
+    condition: { type: 'goal_types_completed', target: 2 },
+    reward: 'Versatile achiever!'
+  },
+  {
+    id: 'challenge-afternoon-productivity',
+    title: 'Afternoon Achiever',
+    description: 'Complete 2 goals between 12 PM and 5 PM',
+    icon: '☀️',
+    difficulty: CHALLENGE_DIFFICULTY.MEDIUM,
+    condition: { type: 'goals_completed_between', startHour: 12, endHour: 17, target: 2 },
+    reward: 'Afternoon champion!'
+  },
+  {
+    id: 'challenge-evening-finish',
+    title: 'Evening Excellence',
+    description: 'Complete a goal after 6 PM',
+    icon: '🌆',
+    difficulty: CHALLENGE_DIFFICULTY.MEDIUM,
+    condition: { type: 'complete_after_hour', target: 18 },
+    reward: 'Strong finish!'
+  },
+  {
+    id: 'challenge-two-categories',
+    title: 'Category Crosser',
+    description: 'Complete goals in 2 different categories',
+    icon: '🗂️',
+    difficulty: CHALLENGE_DIFFICULTY.MEDIUM,
+    condition: { type: 'categories_completed', target: 2 },
+    reward: 'Well-rounded day!'
+  },
+
+  // Hard challenges
+  {
+    id: 'challenge-all-goals',
+    title: 'Clean Sweep',
+    description: 'Complete ALL your goals today',
+    icon: '🧹',
+    difficulty: CHALLENGE_DIFFICULTY.HARD,
+    condition: { type: 'all_goals_completed', target: 1 },
+    reward: 'Perfect day!'
+  },
+  {
+    id: 'challenge-timer-2hr',
+    title: 'Endurance Expert',
+    description: 'Log 2 hours total on timer goals',
+    icon: '🏃',
+    difficulty: CHALLENGE_DIFFICULTY.HARD,
+    condition: { type: 'timer_minutes', target: 120 },
+    reward: 'Marathon mindset!'
+  },
+  {
+    id: 'challenge-variety-3types',
+    title: 'Triple Variety',
+    description: 'Complete all 3 goal types today',
+    icon: '🏆',
+    difficulty: CHALLENGE_DIFFICULTY.HARD,
+    condition: { type: 'goal_types_completed', target: 3 },
+    reward: 'Master of all!'
+  },
+  {
+    id: 'challenge-early-bird',
+    title: 'Dawn Patrol',
+    description: 'Complete 2 goals before 9 AM',
+    icon: '🐦',
+    difficulty: CHALLENGE_DIFFICULTY.HARD,
+    condition: { type: 'goals_completed_before', hour: 9, target: 2 },
+    reward: 'Early bird champion!'
+  },
+  {
+    id: 'challenge-counter-20',
+    title: 'Counter Master',
+    description: 'Add 20 to any counter goal',
+    icon: '📊',
+    difficulty: CHALLENGE_DIFFICULTY.HARD,
+    condition: { type: 'counter_increments', target: 20 },
+    reward: 'Numbers king!'
+  },
+  {
+    id: 'challenge-focus-session',
+    title: 'Deep Focus',
+    description: 'Complete a 45-minute uninterrupted timer session',
+    icon: '🧘',
+    difficulty: CHALLENGE_DIFFICULTY.HARD,
+    condition: { type: 'continuous_timer_minutes', target: 45 },
+    reward: 'Zen master!'
+  },
+  {
+    id: 'challenge-multi-category',
+    title: 'Category Champion',
+    description: 'Complete goals in 3+ different categories',
+    icon: '🎖️',
+    difficulty: CHALLENGE_DIFFICULTY.HARD,
+    condition: { type: 'categories_completed', target: 3 },
+    reward: 'Balanced excellence!'
+  },
+  {
+    id: 'challenge-night-owl',
+    title: 'Night Warrior',
+    description: 'Complete 3 goals after 8 PM',
+    icon: '🦉',
+    difficulty: CHALLENGE_DIFFICULTY.HARD,
+    condition: { type: 'goals_completed_after', hour: 20, target: 3 },
+    reward: 'Night champion!'
+  }
+];
+
+/**
+ * @typedef {Object} DailyChallengeState
+ * @property {string} id - Challenge definition ID
+ * @property {string} date - Date string (YYYY-MM-DD) when challenge was assigned
+ * @property {number} progress - Current progress towards challenge
+ * @property {boolean} completed - Whether challenge was completed
+ * @property {number|null} completedAt - Timestamp when completed, null if not completed
+ * @property {boolean} skipped - Whether challenge was skipped
+ * @property {number} skipsUsedToday - Number of skips used today (max 1 per day)
+ */
+
+/**
+ * @typedef {Object} DailyChallengeData
+ * @property {DailyChallengeState|null} currentChallenge - Today's active challenge
+ * @property {Array<DailyChallengeState>} history - Past challenge records
+ * @property {number} totalCompleted - Total challenges completed
+ * @property {number} currentChallengeStreak - Current consecutive days completing challenges
+ * @property {number} bestChallengeStreak - Best consecutive days completing challenges
+ */
+
+/**
+ * Get default daily challenge data structure
+ * @returns {DailyChallengeData} Default challenge data
+ */
+function getDefaultDailyChallengeData() {
+  return {
+    currentChallenge: null,
+    history: [],
+    totalCompleted: 0,
+    currentChallengeStreak: 0,
+    bestChallengeStreak: 0
+  };
+}
+
+/**
+ * Get a challenge definition by ID
+ * @param {string} challengeId - The challenge ID
+ * @returns {Object|null} Challenge definition or null if not found
+ */
+function getChallengeDefinition(challengeId) {
+  return DAILY_CHALLENGE_DEFINITIONS.find(c => c.id === challengeId) || null;
+}
+
+/**
+ * Select a random challenge for today
+ * Considers difficulty distribution and avoids recently completed challenges
+ * @param {Array<DailyChallengeState>} history - Past challenge history
+ * @param {string} [preferredDifficulty] - Optional preferred difficulty
+ * @returns {Object} Selected challenge definition
+ */
+function selectDailyChallenge(history = [], preferredDifficulty = null) {
+  // Get IDs of challenges completed in the last 7 days to avoid repetition
+  const recentDate = new Date();
+  recentDate.setDate(recentDate.getDate() - 7);
+  const recentDateStr = recentDate.toISOString().split('T')[0];
+
+  const recentChallengeIds = new Set(
+    history
+      .filter(h => h.date >= recentDateStr && h.completed)
+      .map(h => h.id)
+  );
+
+  // Filter out recently completed challenges
+  let availableChallenges = DAILY_CHALLENGE_DEFINITIONS.filter(
+    c => !recentChallengeIds.has(c.id)
+  );
+
+  // If all challenges were recently used, use all of them
+  if (availableChallenges.length === 0) {
+    availableChallenges = [...DAILY_CHALLENGE_DEFINITIONS];
+  }
+
+  // If preferred difficulty specified, filter by it
+  if (preferredDifficulty) {
+    const filteredByDifficulty = availableChallenges.filter(
+      c => c.difficulty === preferredDifficulty
+    );
+    if (filteredByDifficulty.length > 0) {
+      availableChallenges = filteredByDifficulty;
+    }
+  }
+
+  // Random weighted selection (easy: 40%, medium: 40%, hard: 20%)
+  if (!preferredDifficulty) {
+    const random = Math.random();
+    let targetDifficulty;
+    if (random < 0.4) {
+      targetDifficulty = CHALLENGE_DIFFICULTY.EASY;
+    } else if (random < 0.8) {
+      targetDifficulty = CHALLENGE_DIFFICULTY.MEDIUM;
+    } else {
+      targetDifficulty = CHALLENGE_DIFFICULTY.HARD;
+    }
+
+    const filteredByDifficulty = availableChallenges.filter(
+      c => c.difficulty === targetDifficulty
+    );
+    if (filteredByDifficulty.length > 0) {
+      availableChallenges = filteredByDifficulty;
+    }
+  }
+
+  // Select random challenge from available pool
+  const randomIndex = Math.floor(Math.random() * availableChallenges.length);
+  return availableChallenges[randomIndex];
+}
+
+/**
+ * Create a new daily challenge state for today
+ * @param {string} challengeId - The challenge definition ID
+ * @returns {DailyChallengeState} New challenge state
+ */
+function createDailyChallengeState(challengeId) {
+  return {
+    id: challengeId,
+    date: getTodayDateString(),
+    progress: 0,
+    completed: false,
+    completedAt: null,
+    skipped: false,
+    skipsUsedToday: 0
+  };
+}
+
+/**
+ * Check if a challenge is completed based on its condition
+ * @param {DailyChallengeState} challengeState - Current challenge state
+ * @returns {boolean} True if challenge is completed
+ */
+function isChallengeCompleted(challengeState) {
+  const definition = getChallengeDefinition(challengeState.id);
+  if (!definition) return false;
+  return challengeState.progress >= definition.condition.target;
+}
+
+/**
+ * Get challenge progress percentage
+ * @param {DailyChallengeState} challengeState - Current challenge state
+ * @returns {number} Progress percentage (0-100)
+ */
+function getChallengeProgressPercentage(challengeState) {
+  const definition = getChallengeDefinition(challengeState.id);
+  if (!definition || !definition.condition || !definition.condition.target) {
+    return 0;
+  }
+  const percentage = (challengeState.progress / definition.condition.target) * 100;
+  return Math.min(100, Math.max(0, percentage));
+}
+
+// =============================================================================
 // Exports
 // =============================================================================
 
@@ -874,5 +1249,14 @@ export {
   createDefaultAchievementProgress,
   getAchievementDefinition,
   isAchievementUnlocked,
-  getAchievementProgressPercentage
+  getAchievementProgressPercentage,
+  // US-081: Daily Challenge functions
+  CHALLENGE_DIFFICULTY,
+  DAILY_CHALLENGE_DEFINITIONS,
+  getDefaultDailyChallengeData,
+  getChallengeDefinition,
+  selectDailyChallenge,
+  createDailyChallengeState,
+  isChallengeCompleted,
+  getChallengeProgressPercentage
 };

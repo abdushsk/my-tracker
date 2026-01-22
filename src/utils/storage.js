@@ -15,7 +15,8 @@ const STORAGE_KEYS = {
   CATEGORIES: 'categories',
   TEMPLATES: 'templates', // US-066: Goal templates
   ARCHIVED_GOALS: 'archivedGoals', // US-069: Archived goals
-  ACHIEVEMENTS: 'achievements' // US-080: Achievement progress data
+  ACHIEVEMENTS: 'achievements', // US-080: Achievement progress data
+  DAILY_CHALLENGES: 'dailyChallenges' // US-081: Daily challenges data
 };
 
 /**
@@ -283,7 +284,9 @@ function getDefaultSettings() {
     quietHoursStart: '22:00',        // Start of quiet hours (HH:MM format)
     quietHoursEnd: '07:00',          // End of quiet hours (HH:MM format)
     // US-077: Motivational Quotes
-    quotesEnabled: true              // Show motivational quotes in empty state, completion, and weekly review
+    quotesEnabled: true,             // Show motivational quotes in empty state, completion, and weekly review
+    // US-081: Daily Challenges
+    dailyChallengesEnabled: true     // Enable daily challenges feature
   };
 }
 
@@ -1130,6 +1133,213 @@ async function getUnlockedAchievementsCount() {
   }
 }
 
+// =============================================================================
+// US-081: Daily Challenges
+// =============================================================================
+
+/**
+ * Get daily challenges data from storage
+ * @returns {Promise<Object>} Daily challenges data object
+ */
+async function getDailyChallenges() {
+  try {
+    const result = await chrome.storage.local.get(STORAGE_KEYS.DAILY_CHALLENGES);
+    return result[STORAGE_KEYS.DAILY_CHALLENGES] || null;
+  } catch (error) {
+    console.error('Error getting daily challenges:', error);
+    return null;
+  }
+}
+
+/**
+ * Save daily challenges data to storage
+ * @param {Object} challengeData - Daily challenges data object
+ * @returns {Promise<boolean>} Success status
+ */
+async function saveDailyChallenges(challengeData) {
+  try {
+    await chrome.storage.local.set({ [STORAGE_KEYS.DAILY_CHALLENGES]: challengeData });
+    return true;
+  } catch (error) {
+    console.error('Error saving daily challenges:', error);
+    return false;
+  }
+}
+
+/**
+ * Update current challenge state
+ * @param {Object} updates - Object with properties to update (progress, completed, etc.)
+ * @returns {Promise<boolean>} Success status
+ */
+async function updateCurrentChallenge(updates) {
+  try {
+    const challengeData = await getDailyChallenges();
+    if (!challengeData || !challengeData.currentChallenge) return false;
+
+    challengeData.currentChallenge = {
+      ...challengeData.currentChallenge,
+      ...updates
+    };
+
+    return await saveDailyChallenges(challengeData);
+  } catch (error) {
+    console.error('Error updating current challenge:', error);
+    return false;
+  }
+}
+
+/**
+ * Complete the current challenge
+ * Updates stats, adds to history, and resets current challenge
+ * @returns {Promise<boolean>} Success status
+ */
+async function completeCurrentChallenge() {
+  try {
+    const challengeData = await getDailyChallenges();
+    if (!challengeData || !challengeData.currentChallenge) return false;
+
+    const completedChallenge = {
+      ...challengeData.currentChallenge,
+      completed: true,
+      completedAt: Date.now()
+    };
+
+    // Add to history
+    challengeData.history.push(completedChallenge);
+
+    // Update stats
+    challengeData.totalCompleted = (challengeData.totalCompleted || 0) + 1;
+
+    // Update challenge streak
+    const today = new Date().toISOString().split('T')[0];
+    const yesterday = new Date(Date.now() - 86400000).toISOString().split('T')[0];
+
+    // Check if we completed a challenge yesterday
+    const completedYesterday = challengeData.history.some(
+      h => h.date === yesterday && h.completed
+    );
+
+    if (completedYesterday || challengeData.currentChallengeStreak === 0) {
+      challengeData.currentChallengeStreak = (challengeData.currentChallengeStreak || 0) + 1;
+    } else {
+      challengeData.currentChallengeStreak = 1;
+    }
+
+    // Update best streak if needed
+    if (challengeData.currentChallengeStreak > (challengeData.bestChallengeStreak || 0)) {
+      challengeData.bestChallengeStreak = challengeData.currentChallengeStreak;
+    }
+
+    // Keep current challenge marked as completed (will be replaced on new day)
+    challengeData.currentChallenge = completedChallenge;
+
+    return await saveDailyChallenges(challengeData);
+  } catch (error) {
+    console.error('Error completing current challenge:', error);
+    return false;
+  }
+}
+
+/**
+ * Skip the current challenge and get a new one
+ * Limited to 1 skip per day
+ * @returns {Promise<{success: boolean, newChallenge?: Object, reason?: string}>}
+ */
+async function skipCurrentChallenge() {
+  try {
+    const challengeData = await getDailyChallenges();
+    if (!challengeData || !challengeData.currentChallenge) {
+      return { success: false, reason: 'No active challenge' };
+    }
+
+    // Check if already used skip today
+    if (challengeData.currentChallenge.skipsUsedToday >= 1) {
+      return { success: false, reason: 'Already used skip today' };
+    }
+
+    // Mark current as skipped and add to history
+    const skippedChallenge = {
+      ...challengeData.currentChallenge,
+      skipped: true
+    };
+    challengeData.history.push(skippedChallenge);
+
+    // Import selectDailyChallenge and createDailyChallengeState dynamically
+    // (These are defined in models.js, we'll handle this in popup.js)
+
+    return {
+      success: true,
+      skippedChallenge,
+      skipsUsedToday: 1
+    };
+  } catch (error) {
+    console.error('Error skipping challenge:', error);
+    return { success: false, reason: 'Error occurred' };
+  }
+}
+
+/**
+ * Get challenge history for reports
+ * @param {number} [limit=30] - Maximum number of history entries to return
+ * @returns {Promise<Array>} Array of challenge history entries
+ */
+async function getChallengeHistory(limit = 30) {
+  try {
+    const challengeData = await getDailyChallenges();
+    if (!challengeData || !challengeData.history) return [];
+
+    // Return most recent entries first
+    return challengeData.history
+      .slice(-limit)
+      .reverse();
+  } catch (error) {
+    console.error('Error getting challenge history:', error);
+    return [];
+  }
+}
+
+/**
+ * Get challenge statistics
+ * @returns {Promise<Object>} Challenge stats object
+ */
+async function getChallengeStats() {
+  try {
+    const challengeData = await getDailyChallenges();
+    if (!challengeData) {
+      return {
+        totalCompleted: 0,
+        currentStreak: 0,
+        bestStreak: 0,
+        completionRate: 0
+      };
+    }
+
+    // Calculate completion rate from last 30 days
+    const thirtyDaysAgo = new Date();
+    thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+    const thirtyDaysAgoStr = thirtyDaysAgo.toISOString().split('T')[0];
+
+    const recentHistory = challengeData.history?.filter(h => h.date >= thirtyDaysAgoStr) || [];
+    const completedRecent = recentHistory.filter(h => h.completed).length;
+    const totalRecent = recentHistory.length;
+
+    return {
+      totalCompleted: challengeData.totalCompleted || 0,
+      currentStreak: challengeData.currentChallengeStreak || 0,
+      bestStreak: challengeData.bestChallengeStreak || 0,
+      completionRate: totalRecent > 0 ? Math.round((completedRecent / totalRecent) * 100) : 0
+    };
+  } catch (error) {
+    console.error('Error getting challenge stats:', error);
+    return {
+      totalCompleted: 0,
+      currentStreak: 0,
+      bestStreak: 0,
+      completionRate: 0
+    };
+  }
+}
+
 // Export functions for use in other modules
 export {
   STORAGE_KEYS,
@@ -1185,5 +1395,13 @@ export {
   updateAchievement,
   getAchievementById,
   unlockAchievement,
-  getUnlockedAchievementsCount
+  getUnlockedAchievementsCount,
+  // US-081: Daily Challenges functions
+  getDailyChallenges,
+  saveDailyChallenges,
+  updateCurrentChallenge,
+  completeCurrentChallenge,
+  skipCurrentChallenge,
+  getChallengeHistory,
+  getChallengeStats
 };

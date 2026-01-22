@@ -445,7 +445,7 @@
         "Toggle to disable in Settings"
       ],
       "priority": 27,
-      "passes": false,
+      "passes": true,
       "dependsOn": ["US-080"]
     },
     {
