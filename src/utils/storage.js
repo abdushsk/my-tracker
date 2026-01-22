@@ -252,7 +252,8 @@ function getDefaultSettings() {
     soundVolume: 0.5,
     theme: 'auto', // 'light', 'dark', 'auto'
     notificationsEnabled: true,
-    reminderTime: '09:00'
+    reminderTime: '09:00',
+    compactViewEnabled: false // US-056: Compact view mode for Daily Goals
   };
 }
 

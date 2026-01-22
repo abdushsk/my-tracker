@@ -2416,6 +2416,211 @@ select:focus {
 }
 
 /* ========================================
+   US-056: Compact View Mode
+   ======================================== */
+
+/* Header actions container for toggle and settings buttons */
+.header-actions {
+  position: absolute;
+  right: 0;
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+}
+
+/* Adjust settings button position when inside header-actions */
+.header-actions .settings-btn {
+  position: static;
+}
+
+/* View toggle button - matches settings button style */
+.view-toggle-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  border: none;
+  background: transparent;
+  color: var(--text-secondary);
+  border-radius: var(--radius);
+  cursor: pointer;
+  transition: color var(--transition), background-color var(--transition);
+}
+
+.view-toggle-btn:hover {
+  color: var(--primary);
+  background-color: var(--primary-light);
+}
+
+.view-toggle-btn:active {
+  transform: scale(0.95);
+}
+
+/* Active state when compact view is on */
+.view-toggle-btn.compact-active {
+  color: var(--primary);
+  background-color: var(--primary-light);
+}
+
+/* Compact view goals list - reduced gap */
+.goals-list.compact-view {
+  gap: var(--spacing-sm);
+}
+
+/* Compact goal card styles */
+.goal-card.compact {
+  padding: var(--spacing-sm) var(--spacing-md);
+}
+
+.goal-card.compact .goal-card-header {
+  margin-bottom: var(--spacing-xs);
+}
+
+.goal-card.compact .goal-card-title-row {
+  gap: var(--spacing-xs);
+}
+
+/* Smaller type indicator in compact mode */
+.goal-card.compact .goal-type-indicator {
+  width: 22px;
+  height: 22px;
+}
+
+.goal-card.compact .goal-type-indicator .goal-type-icon {
+  width: 12px;
+  height: 12px;
+}
+
+/* Smaller title in compact mode */
+.goal-card.compact .goal-title {
+  font-size: var(--font-size-sm);
+}
+
+/* Hide timeframe badge in compact mode */
+.goal-card.compact .goal-timeframe-badge {
+  display: none;
+}
+
+/* Compact card body - inline layout */
+.goal-card.compact .goal-card-body {
+  flex-direction: row;
+  align-items: center;
+  gap: var(--spacing-md);
+}
+
+/* Progress section takes available space */
+.goal-card.compact .goal-progress-section {
+  flex: 1;
+  min-width: 0;
+}
+
+/* Smaller progress bar in compact mode */
+.goal-card.compact .goal-progress-bar {
+  height: 6px;
+}
+
+/* Hide progress text in compact mode, show only percentage */
+.goal-card.compact .goal-progress-text {
+  display: none;
+}
+
+.goal-card.compact .goal-progress-percent {
+  font-size: var(--font-size-xs);
+}
+
+/* Compact controls - no border, smaller margin */
+.goal-card.compact .goal-controls {
+  margin-top: 0;
+  padding-top: 0;
+  border-top: none;
+  flex-shrink: 0;
+}
+
+/* Timer controls compact */
+.goal-card.compact .goal-controls-timer {
+  gap: var(--spacing-sm);
+}
+
+.goal-card.compact .timer-display {
+  display: none;
+}
+
+.goal-card.compact .timer-play-btn {
+  width: 36px;
+  height: 36px;
+}
+
+.goal-card.compact .timer-play-btn svg {
+  width: 18px;
+  height: 18px;
+}
+
+/* Counter controls compact */
+.goal-card.compact .goal-controls-counter {
+  gap: var(--spacing-xs);
+}
+
+.goal-card.compact .counter-decrement-btn,
+.goal-card.compact .counter-increment-btn {
+  width: 28px;
+  height: 28px;
+}
+
+.goal-card.compact .counter-value {
+  font-size: var(--font-size-lg);
+  min-width: 40px;
+}
+
+/* Checkbox controls compact */
+.goal-card.compact .checkbox-toggle-btn {
+  padding: var(--spacing-sm) var(--spacing-md);
+  gap: var(--spacing-sm);
+  min-height: 40px;
+  font-size: var(--font-size-sm);
+}
+
+.goal-card.compact .checkbox-box {
+  width: 22px;
+  height: 22px;
+  border-width: 2px;
+}
+
+.goal-card.compact .checkbox-box svg {
+  width: 14px;
+  height: 14px;
+}
+
+/* Compact completed indicator - smaller and adjusted position */
+.goal-card.compact .goal-completed-indicator {
+  width: 20px;
+  height: 20px;
+  top: var(--spacing-xs);
+  right: var(--spacing-xs);
+}
+
+.goal-card.compact .completed-checkmark {
+  font-size: var(--font-size-xs);
+}
+
+/* Hide sparkle effects in compact mode */
+.goal-card.compact .goal-completed-indicator::before,
+.goal-card.compact .goal-completed-indicator::after {
+  display: none;
+}
+
+/* Smooth transition for view changes */
+.goals-list {
+  transition: gap var(--transition);
+}
+
+.goal-card {
+  transition: box-shadow var(--transition), transform var(--transition),
+              border-color var(--transition), padding var(--transition);
+}
+
+/* ========================================
    US-022: Add Goal Form - Modal
    ======================================== */
 

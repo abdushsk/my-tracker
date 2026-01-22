@@ -29,3 +29,63 @@ Fixed the footer positioning issue in the Daily Goals screen where the navigatio
 - Works with 1-2 goals
 - Content area scrolls when many goals
 - Layout remains consistent across all scenarios
+
+---
+
+## US-056: Compact View Mode for Daily Goals
+**Date**: 2026-01-22
+**Status**: Completed
+
+### What was done:
+Added a compact view mode toggle for the Daily Goals screen. Users can switch between expanded (default) and compact views using an icon button in the header. The preference is saved to settings.
+
+### Implementation details:
+
+1. **Settings Storage** (`src/utils/storage.js`):
+   - Added `compactViewEnabled: false` to default settings
+
+2. **Toggle Button in Header** (`src/popup/popup.js`):
+   - Added a view toggle button next to the settings button in the View Goals header
+   - Created `header-actions` container to hold both buttons
+   - Toggle button shows different icons for expanded vs compact view (grid icon vs lines icon)
+   - Added `attachCompactViewToggleListener()` function to handle toggle clicks
+
+3. **Goal Card and List Modifications** (`src/popup/popup.js`):
+   - `renderGoalsList()` adds `compact-view` class to goals list when compact mode is enabled
+   - `renderGoalCard()` adds `compact` class to individual goal cards when compact mode is enabled
+
+4. **Compact View CSS Styles** (`src/popup/popup.css` - ~200 lines added):
+   - Header actions container styling
+   - View toggle button with hover/active states
+   - Compact goals list with reduced gap
+   - Compact goal cards with:
+     - Reduced padding
+     - Smaller type indicators
+     - Hidden timeframe badges
+     - Inline body layout (progress + controls on same row)
+     - Smaller progress bar
+     - Hidden progress text (shows only percentage)
+     - Compact controls (no border, smaller buttons)
+   - Type-specific compact styles for timer, counter, and checkbox controls
+   - Smaller completed indicator in compact mode
+   - Smooth transitions for gap and padding changes
+
+### Files modified:
+- `src/utils/storage.js` (line 256)
+- `src/popup/popup.js` (lines 172-202, 314-315, 399-410, 251-252, 3475-3497)
+- `src/popup/popup.css` (lines 2418-2621)
+
+### Key design decisions:
+- Compact view hides: timeframe badge, timer display, detailed progress text
+- Compact view shows: title, type icon, progress bar, percentage, essential controls
+- Both views use the same control patterns (play/pause, +/-, checkbox toggle)
+- Controls remain fully functional in both views
+- Smooth CSS transitions enhance the user experience when switching views
+
+### Acceptance criteria met:
+- Toggle button to switch views (expand/collapse icon)
+- Compact view shows: title, type icon, progress bar, essential controls
+- Expanded view remains as current (default)
+- View preference saved to settings
+- Smooth transition between views
+- Both views remain functional for all goal types

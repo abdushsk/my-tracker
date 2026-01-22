@@ -33,7 +33,7 @@
         "Both views remain functional for all goal types"
       ],
       "priority": 2,
-      "passes": false,
+      "passes": true,
       "dependsOn": ["US-055"]
     },
     {

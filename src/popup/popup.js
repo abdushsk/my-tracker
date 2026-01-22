@@ -169,17 +169,37 @@ function renderViewGoalsScreen() {
   const totalCount = state.goals.length;
   const currentStreak = state.streakData?.currentStreak || 0;
 
+  // US-056: Check compact view setting
+  const isCompactView = state.settings?.compactViewEnabled || false;
+
   screen.innerHTML = `
     <div class="view-goals-screen">
       <header class="screen-header view-goals-header">
         <div class="header-main">
           <h1 class="app-title">Daily Goals</h1>
-          <button class="settings-btn" data-screen="${SCREENS.SETTINGS}" aria-label="Settings">
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="20" height="20">
-              <circle cx="12" cy="12" r="3"/>
-              <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/>
-            </svg>
-          </button>
+          <div class="header-actions">
+            <button class="view-toggle-btn ${isCompactView ? 'compact-active' : ''}" id="compact-view-toggle" aria-label="${isCompactView ? 'Switch to expanded view' : 'Switch to compact view'}" title="${isCompactView ? 'Expanded view' : 'Compact view'}">
+              ${isCompactView
+                ? `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="18" height="18">
+                    <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+                    <line x1="3" y1="9" x2="21" y2="9"/>
+                    <line x1="3" y1="15" x2="21" y2="15"/>
+                  </svg>`
+                : `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="18" height="18">
+                    <rect x="3" y="3" width="7" height="7"/>
+                    <rect x="14" y="3" width="7" height="7"/>
+                    <rect x="14" y="14" width="7" height="7"/>
+                    <rect x="3" y="14" width="7" height="7"/>
+                  </svg>`
+              }
+            </button>
+            <button class="settings-btn" data-screen="${SCREENS.SETTINGS}" aria-label="Settings">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="20" height="20">
+                <circle cx="12" cy="12" r="3"/>
+                <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+              </svg>
+            </button>
+          </div>
         </div>
         <div class="header-stats">
           <div class="stat-item completed-stat">
@@ -227,6 +247,9 @@ function renderViewGoalsScreen() {
 
   // Attach goal control listeners (timer play/pause, etc.)
   attachGoalControlListeners(screen);
+
+  // US-056: Attach compact view toggle listener
+  attachCompactViewToggleListener(screen);
 
   // Start timer update interval if there are active timers
   if (Object.keys(state.activeTimers).length > 0) {
@@ -291,8 +314,11 @@ function renderGoalsList() {
     return (a.createdAt || 0) - (b.createdAt || 0);
   });
 
+  // US-056: Check compact view setting
+  const isCompactView = state.settings?.compactViewEnabled || false;
+
   return `
-    <div class="goals-list">
+    <div class="goals-list ${isCompactView ? 'compact-view' : ''}">
       ${sortedGoals.map(goal => renderGoalCard(goal)).join('')}
     </div>
   `;
@@ -373,6 +399,8 @@ function renderGoalCard(goal) {
   // Build CSS classes for the card
   // US-019: Check if goal just completed for celebration animation
   const justCompleted = state.justCompletedGoals.has(goal.id);
+  // US-056: Check compact view setting
+  const isCompactView = state.settings?.compactViewEnabled || false;
   const cardClasses = [
     'goal-card',
     `goal-type-${goal.type}`,
@@ -380,7 +408,9 @@ function renderGoalCard(goal) {
     // Add active class for running timers (US-016)
     goal.type === GOAL_TYPES.TIMER && goal.isActive ? 'goal-timer-active' : '',
     // US-019: Add just-completed class for celebration animation
-    justCompleted ? 'just-completed' : ''
+    justCompleted ? 'just-completed' : '',
+    // US-056: Add compact class for compact view mode
+    isCompactView ? 'compact' : ''
   ].filter(Boolean).join(' ');
 
   return `
@@ -3439,6 +3469,31 @@ function attachNavigationListeners(container) {
       const targetScreen = element.getAttribute('data-screen');
       showScreen(targetScreen);
     });
+  });
+}
+
+// =============================================================================
+// US-056: Compact View Mode Toggle
+// =============================================================================
+
+/**
+ * Attach compact view toggle listener
+ * @param {HTMLElement} container - The screen container
+ */
+function attachCompactViewToggleListener(container) {
+  const toggleBtn = container.querySelector('#compact-view-toggle');
+  if (!toggleBtn) return;
+
+  toggleBtn.addEventListener('click', async () => {
+    // Toggle compact view setting
+    const newValue = !state.settings.compactViewEnabled;
+    state.settings = { ...state.settings, compactViewEnabled: newValue };
+
+    // Save to storage
+    await saveSettings(state.settings);
+
+    // Re-render the view goals screen with smooth transition
+    renderViewGoalsScreen();
   });
 }
 
