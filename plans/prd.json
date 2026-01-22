@@ -164,7 +164,7 @@
         "Optional: different intensity for different achievements"
       ],
       "priority": 10,
-      "passes": false,
+      "passes": true,
       "dependsOn": ["US-063"]
     },
     {

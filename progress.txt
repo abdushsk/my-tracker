@@ -541,3 +541,65 @@ Fixed the completion checkmark overlay position so it no longer obscures the goa
 - Works for all goal types (CSS applies to all .goal-completed-indicator elements)
 - Works in both view modes (updated both expanded and compact view styles)
 
+---
+
+## US-064: Enhanced Completion Confetti
+**Date**: 2026-01-22
+**Status**: Completed
+
+### What was done:
+Implemented an enhanced confetti animation system for goal completion celebrations. The new system uses both a canvas-based JavaScript confetti and improved CSS pseudo-element animations for a more impressive and satisfying celebration effect.
+
+### Implementation details:
+
+1. **Canvas-Based Confetti System** (`src/popup/popup.js` lines 514-740):
+   - Created `ConfettiParticle` class with physics-based animation (gravity, drag, wobble)
+   - Three particle shapes: rectangles, circles, and strips for visual variety
+   - Rotation animation for realistic falling effect
+   - Opacity fade-out near bottom of screen
+   - `getConfettiColors()` function reads CSS variables to match app theme
+   - `launchConfetti()` function creates canvas overlay and manages animation loop
+   - Configurable intensity levels: 'low' (30 particles), 'normal' (50), 'high' (80)
+   - Respects `prefers-reduced-motion` accessibility setting
+
+2. **Enhanced CSS Confetti** (`src/popup/popup.css` lines 2398-2488):
+   - Primary burst (::before) with 6 colors, larger particles (3-4px)
+   - Secondary burst (::after) with delayed animation for layered effect
+   - Rotation added to burst animations for more dynamic feel
+   - Longer duration (1.2s primary, 1.4s secondary) vs old 0.8s
+   - Cubic-bezier easing for smoother animation curves
+   - Expanded scale (2.5x and 3x) for more impressive spread
+
+3. **Updated Celebration Function** (`src/popup/popup.js` lines 742-772):
+   - `triggerCompletionCelebration()` now accepts optional `intensity` parameter
+   - Launches canvas confetti alongside CSS animation
+   - Extended timeout to 2000ms to match new animation duration
+
+### Files modified:
+- `src/popup/popup.js` (lines 509-772, ~260 lines added)
+- `src/popup/popup.css` (lines 2398-2488, enhanced from ~37 lines to ~91 lines)
+
+### Key design decisions:
+- Used canvas for true particle physics (gravity, drag, wobble) that CSS can't achieve
+- Kept CSS pseudo-element animation as a complement for instant visual feedback
+- Colors pulled from CSS variables ensure theme consistency (light/dark mode)
+- Three intensity levels allow for future differentiation (e.g., streak milestones)
+- Animation duration of 2 seconds is celebratory but not disruptive
+- Respects prefers-reduced-motion for accessibility
+
+### Color palette used:
+- `--success` (green) - primary completion color
+- `--gold-bright` (gold/yellow) - celebratory highlight
+- `--secondary` (blue) - variety
+- `--warning` (orange) - variety
+- `#FF6B6B` (coral red) - added for more color variety
+- `#A78BFA` (purple) - added for more color variety
+
+### Acceptance criteria met:
+- Confetti is visually impressive (50 canvas particles + CSS burst animation)
+- Colors match app theme (reads from CSS variables, works in dark mode)
+- Animation is smooth (60fps via requestAnimationFrame)
+- Duration is satisfying but not too long (2 seconds)
+- Works for all goal completions (timer, counter, checkbox)
+- Different intensity for different achievements (low/normal/high parameter available)
+

@@ -2395,40 +2395,94 @@ select:focus {
   }
 }
 
-/* Confetti burst effect for completion celebration */
+/* US-064: Enhanced Confetti burst effect for completion celebration */
+/* Primary burst - larger particles with more colors */
 .goal-card.goal-completed.just-completed::before {
   content: '';
   position: absolute;
   top: 50%;
   left: 50%;
-  width: 100%;
-  height: 100%;
+  width: 150%;
+  height: 150%;
   background-image:
-    radial-gradient(circle, var(--success) 2px, transparent 2px),
-    radial-gradient(circle, var(--gold-bright) 2px, transparent 2px),
-    radial-gradient(circle, var(--warning) 2px, transparent 2px),
-    radial-gradient(circle, var(--secondary) 2px, transparent 2px);
-  background-size: 20px 20px;
+    radial-gradient(circle, var(--success) 4px, transparent 4px),
+    radial-gradient(circle, var(--gold-bright) 3px, transparent 3px),
+    radial-gradient(circle, var(--warning) 4px, transparent 4px),
+    radial-gradient(circle, var(--secondary) 3px, transparent 3px),
+    radial-gradient(circle, #FF6B6B 3px, transparent 3px),
+    radial-gradient(circle, #A78BFA 4px, transparent 4px);
+  background-size: 25px 25px, 20px 20px, 22px 22px, 18px 18px, 24px 24px, 21px 21px;
   background-position:
     0 0,
-    10px 10px,
-    5px 15px,
-    15px 5px;
-  animation: confetti-burst 0.8s ease-out forwards;
+    12px 8px,
+    6px 16px,
+    18px 4px,
+    3px 12px,
+    15px 18px;
+  animation: confetti-burst-primary 1.2s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
   pointer-events: none;
   z-index: 10;
 }
 
-@keyframes confetti-burst {
+/* Secondary burst - delayed smaller particles for layered effect */
+.goal-card.goal-completed.just-completed::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 120%;
+  height: 120%;
+  background-image:
+    radial-gradient(circle, var(--gold-bright) 2px, transparent 2px),
+    radial-gradient(circle, var(--success) 2px, transparent 2px),
+    radial-gradient(circle, #FF6B6B 2px, transparent 2px),
+    radial-gradient(circle, var(--secondary) 2px, transparent 2px);
+  background-size: 15px 15px, 12px 12px, 14px 14px, 13px 13px;
+  background-position:
+    4px 4px,
+    8px 10px,
+    2px 8px,
+    10px 2px;
+  animation: confetti-burst-secondary 1.4s cubic-bezier(0.25, 0.46, 0.45, 0.94) 0.1s forwards;
+  pointer-events: none;
+  z-index: 9;
+  opacity: 0;
+}
+
+/* Primary burst animation - faster expansion with rotation */
+@keyframes confetti-burst-primary {
   0% {
-    transform: translate(-50%, -50%) scale(0);
+    transform: translate(-50%, -50%) scale(0) rotate(0deg);
     opacity: 1;
   }
-  50% {
-    opacity: 0.8;
+  30% {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1.2) rotate(15deg);
+  }
+  60% {
+    opacity: 0.7;
   }
   100% {
-    transform: translate(-50%, -50%) scale(2);
+    transform: translate(-50%, -50%) scale(2.5) rotate(30deg);
+    opacity: 0;
+  }
+}
+
+/* Secondary burst animation - slower, delayed for layered effect */
+@keyframes confetti-burst-secondary {
+  0% {
+    transform: translate(-50%, -50%) scale(0.5) rotate(0deg);
+    opacity: 0;
+  }
+  20% {
+    opacity: 0.9;
+  }
+  50% {
+    opacity: 0.6;
+    transform: translate(-50%, -50%) scale(1.5) rotate(-10deg);
+  }
+  100% {
+    transform: translate(-50%, -50%) scale(3) rotate(-20deg);
     opacity: 0;
   }
 }
