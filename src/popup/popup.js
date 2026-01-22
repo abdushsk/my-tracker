@@ -7523,6 +7523,69 @@ function renderSettingsScreen() {
           </div>
         </div>
 
+        <!-- US-076: Notifications Settings Section -->
+        <div class="settings-section">
+          <h2>Notifications</h2>
+          <p class="settings-section-description">Get reminders to complete your goals</p>
+
+          <!-- Daily Reminder Toggle -->
+          <div class="setting-item setting-item-row" id="daily-reminder-toggle-row">
+            <div class="setting-info">
+              <span class="setting-label">Daily Reminder</span>
+              <span class="setting-description">Remind me about incomplete goals</span>
+            </div>
+            <label class="toggle-switch" aria-label="Toggle daily reminder">
+              <input type="checkbox" id="daily-reminder-toggle" ${state.settings?.dailyReminderEnabled ? 'checked' : ''}>
+              <span class="toggle-slider"></span>
+            </label>
+          </div>
+
+          <!-- Daily Reminder Time -->
+          <div class="setting-item setting-item-time ${!state.settings?.dailyReminderEnabled ? 'disabled' : ''}">
+            <div class="setting-info">
+              <span class="setting-label">Reminder Time</span>
+              <span class="setting-description">When to send the daily reminder</span>
+            </div>
+            <input type="time" id="daily-reminder-time-input" class="notification-time-input" value="${state.settings?.dailyReminderTime || '09:00'}" ${!state.settings?.dailyReminderEnabled ? 'disabled' : ''}>
+          </div>
+
+          <!-- Quiet Hours Toggle -->
+          <div class="setting-item setting-item-row" id="quiet-hours-toggle-row">
+            <div class="setting-info">
+              <span class="setting-label">Quiet Hours</span>
+              <span class="setting-description">Pause notifications during set hours</span>
+            </div>
+            <label class="toggle-switch" aria-label="Toggle quiet hours">
+              <input type="checkbox" id="quiet-hours-toggle" ${state.settings?.quietHoursEnabled ? 'checked' : ''}>
+              <span class="toggle-slider"></span>
+            </label>
+          </div>
+
+          <!-- Quiet Hours Time Range -->
+          <div class="setting-item setting-item-time-range ${!state.settings?.quietHoursEnabled ? 'disabled' : ''}">
+            <div class="quiet-hours-inputs">
+              <div class="quiet-hours-input-group">
+                <span class="quiet-hours-label">From</span>
+                <input type="time" id="quiet-hours-start" class="notification-time-input" value="${state.settings?.quietHoursStart || '22:00'}" ${!state.settings?.quietHoursEnabled ? 'disabled' : ''}>
+              </div>
+              <span class="quiet-hours-separator">to</span>
+              <div class="quiet-hours-input-group">
+                <span class="quiet-hours-label">Until</span>
+                <input type="time" id="quiet-hours-end" class="notification-time-input" value="${state.settings?.quietHoursEnd || '07:00'}" ${!state.settings?.quietHoursEnabled ? 'disabled' : ''}>
+              </div>
+            </div>
+          </div>
+
+          <!-- Test Notification Button -->
+          <button class="btn btn-secondary btn-sm test-notification-btn" id="test-notification-btn">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="16" height="16">
+              <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/>
+              <path d="M13.73 21a2 2 0 0 1-3.46 0"/>
+            </svg>
+            Test Notification
+          </button>
+        </div>
+
         <!-- Appearance Settings Section -->
         <div class="settings-section">
           <h2>Appearance</h2>
@@ -7732,6 +7795,9 @@ function renderSettingsScreen() {
     });
   }
 
+  // US-076: Attach notification settings listeners
+  attachNotificationSettingsListeners(screen);
+
   // US-051: Attach theme toggle listener
   const themeToggle = screen.querySelector('#theme-toggle');
   if (themeToggle) {
@@ -7787,6 +7853,198 @@ function updateVolumeIcon(screen, volume, enabled) {
   }
 
   volumeIcon.innerHTML = iconSvg;
+}
+
+// ============================================
+// US-076: Notification Settings Functions
+// ============================================
+
+/**
+ * US-076: Attach notification settings event listeners
+ * @param {HTMLElement} screen - The settings screen element
+ */
+function attachNotificationSettingsListeners(screen) {
+  // Daily Reminder Toggle
+  const dailyReminderToggle = screen.querySelector('#daily-reminder-toggle');
+  if (dailyReminderToggle) {
+    dailyReminderToggle.addEventListener('change', async (e) => {
+      const enabled = e.target.checked;
+
+      // Update state
+      state.settings = {
+        ...state.settings,
+        dailyReminderEnabled: enabled
+      };
+
+      // Save to storage
+      await saveSettings(state.settings);
+
+      // Notify service worker
+      try {
+        await chrome.runtime.sendMessage({
+          type: 'NOTIFICATION_SETTINGS_CHANGED',
+          settings: state.settings
+        });
+        console.log(`[Settings] Daily reminder: ${enabled ? 'enabled' : 'disabled'}`);
+      } catch (error) {
+        console.error('[Settings] Error updating notification settings:', error);
+      }
+
+      // Re-render to update disabled states
+      renderSettingsScreen();
+
+      // Play feedback sound
+      playSound('click');
+    });
+  }
+
+  // Daily Reminder Time
+  const dailyReminderTimeInput = screen.querySelector('#daily-reminder-time-input');
+  if (dailyReminderTimeInput) {
+    dailyReminderTimeInput.addEventListener('change', async (e) => {
+      const newTime = e.target.value;
+
+      // Update state
+      state.settings = {
+        ...state.settings,
+        dailyReminderTime: newTime
+      };
+
+      // Save to storage
+      await saveSettings(state.settings);
+
+      // Notify service worker
+      try {
+        await chrome.runtime.sendMessage({
+          type: 'NOTIFICATION_SETTINGS_CHANGED',
+          settings: state.settings
+        });
+        console.log(`[Settings] Daily reminder time set to: ${newTime}`);
+      } catch (error) {
+        console.error('[Settings] Error updating notification settings:', error);
+      }
+
+      // Play feedback sound
+      playSound('click');
+    });
+  }
+
+  // Quiet Hours Toggle
+  const quietHoursToggle = screen.querySelector('#quiet-hours-toggle');
+  if (quietHoursToggle) {
+    quietHoursToggle.addEventListener('change', async (e) => {
+      const enabled = e.target.checked;
+
+      // Update state
+      state.settings = {
+        ...state.settings,
+        quietHoursEnabled: enabled
+      };
+
+      // Save to storage
+      await saveSettings(state.settings);
+
+      console.log(`[Settings] Quiet hours: ${enabled ? 'enabled' : 'disabled'}`);
+
+      // Re-render to update disabled states
+      renderSettingsScreen();
+
+      // Play feedback sound
+      playSound('click');
+    });
+  }
+
+  // Quiet Hours Start Time
+  const quietHoursStart = screen.querySelector('#quiet-hours-start');
+  if (quietHoursStart) {
+    quietHoursStart.addEventListener('change', async (e) => {
+      const newTime = e.target.value;
+
+      // Update state
+      state.settings = {
+        ...state.settings,
+        quietHoursStart: newTime
+      };
+
+      // Save to storage
+      await saveSettings(state.settings);
+
+      console.log(`[Settings] Quiet hours start set to: ${newTime}`);
+
+      // Play feedback sound
+      playSound('click');
+    });
+  }
+
+  // Quiet Hours End Time
+  const quietHoursEnd = screen.querySelector('#quiet-hours-end');
+  if (quietHoursEnd) {
+    quietHoursEnd.addEventListener('change', async (e) => {
+      const newTime = e.target.value;
+
+      // Update state
+      state.settings = {
+        ...state.settings,
+        quietHoursEnd: newTime
+      };
+
+      // Save to storage
+      await saveSettings(state.settings);
+
+      console.log(`[Settings] Quiet hours end set to: ${newTime}`);
+
+      // Play feedback sound
+      playSound('click');
+    });
+  }
+
+  // Test Notification Button
+  const testNotificationBtn = screen.querySelector('#test-notification-btn');
+  if (testNotificationBtn) {
+    testNotificationBtn.addEventListener('click', async () => {
+      try {
+        // Show loading state
+        testNotificationBtn.disabled = true;
+        testNotificationBtn.textContent = 'Sending...';
+
+        const response = await chrome.runtime.sendMessage({ type: 'TEST_NOTIFICATION' });
+
+        if (response && response.success) {
+          console.log('[Settings] Test notification sent successfully');
+          testNotificationBtn.textContent = 'Sent!';
+          playSound('complete');
+        } else {
+          console.error('[Settings] Failed to send test notification');
+          testNotificationBtn.textContent = 'Failed';
+        }
+
+        // Reset button after a delay
+        setTimeout(() => {
+          testNotificationBtn.disabled = false;
+          testNotificationBtn.innerHTML = `
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="16" height="16">
+              <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/>
+              <path d="M13.73 21a2 2 0 0 1-3.46 0"/>
+            </svg>
+            Test Notification
+          `;
+        }, 2000);
+      } catch (error) {
+        console.error('[Settings] Error sending test notification:', error);
+        testNotificationBtn.textContent = 'Error';
+        setTimeout(() => {
+          testNotificationBtn.disabled = false;
+          testNotificationBtn.innerHTML = `
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="16" height="16">
+              <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/>
+              <path d="M13.73 21a2 2 0 0 1-3.46 0"/>
+            </svg>
+            Test Notification
+          `;
+        }, 2000);
+      }
+    });
+  }
 }
 
 // ============================================

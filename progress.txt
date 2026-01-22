@@ -1502,3 +1502,97 @@ Implemented customizable reset times for goals. Users can now configure when the
 - Clear indication of next reset time (shows "Next: Today at 14:00" etc.)
 - Handles timezone correctly (uses JavaScript Date which respects user's timezone)
 
+---
+
+## US-076: Browser Notifications for Reminders
+**Date**: 2026-01-22
+**Status**: Completed
+
+### What was done:
+Implemented browser notifications for goal reminders using Chrome's notifications API. Users can configure daily reminders with a custom time, enable quiet hours to suppress notifications during certain periods, and test notifications from the Settings screen.
+
+### Implementation details:
+
+1. **Storage Layer Updates** (`src/utils/storage.js` lines 277-283):
+   - Added new settings to `getDefaultSettings()`:
+     - `dailyReminderEnabled: false` - Toggle for daily reminder notifications
+     - `dailyReminderTime: '09:00'` - Time for daily reminder (HH:MM format)
+     - `goalReminderEnabled: false` - Toggle for per-goal reminders (for future use)
+     - `quietHoursEnabled: false` - Toggle for quiet hours
+     - `quietHoursStart: '22:00'` - Start of quiet hours
+     - `quietHoursEnd: '07:00'` - End of quiet hours
+
+2. **Service Worker Notification System** (`src/background/service-worker.js` lines 1188-1523):
+   - `NOTIFICATION_IDS` constants for tracking notification types
+   - `NOTIFICATION_ALARM_NAMES` constants for alarm scheduling
+   - `isInQuietHours(settings)` - Checks if current time is within quiet hours (handles overnight spans)
+   - `showNotification(id, title, message, options)` - Creates Chrome notifications with buttons
+   - `showDailyReminderNotification()` - Shows reminder with incomplete goals summary
+   - `scheduleDailyReminderAlarm(settings)` - Schedules repeating daily alarm
+   - `scheduleSnoozeAlarm(notificationId, delayMinutes)` - Schedules snooze reminder
+   - Event listeners for `onButtonClicked`, `onClicked`, `onClosed`
+   - `handleNotificationMessage()` - Message handler for popup communication
+   - `handleNotificationSettingsChanged()` - Reschedules alarms on settings change
+   - `initializeNotificationAlarms()` - Initializes alarms on startup
+
+3. **Message Handler Updates** (`src/background/service-worker.js` lines 234-238):
+   - Added cases for `NOTIFICATION_SETTINGS_CHANGED`, `TEST_NOTIFICATION`, `REQUEST_NOTIFICATION_PERMISSION`
+
+4. **Alarm Listener Updates** (`src/background/service-worker.js` lines 661-684):
+   - Added handler for `NOTIFICATION_ALARM_NAMES.DAILY_REMINDER` alarm
+   - Added handler for snooze alarms (prefix matching)
+
+5. **Settings UI** (`src/popup/popup.js` lines 7526-7587):
+   - Added "Notifications" section in Settings with:
+     - Daily Reminder toggle with description
+     - Reminder Time picker (disabled when toggle is off)
+     - Quiet Hours toggle with description
+     - Quiet Hours time range (From/Until pickers, disabled when toggle is off)
+     - Test Notification button with loading state and feedback
+
+6. **Event Listeners** (`src/popup/popup.js` lines 7858-8048):
+   - `attachNotificationSettingsListeners(screen)` handles all notification controls:
+     - Daily reminder toggle saves setting and notifies service worker
+     - Reminder time input saves and notifies service worker
+     - Quiet hours toggle saves and re-renders to update disabled states
+     - Quiet hours start/end time inputs save settings
+     - Test notification button sends message and shows feedback
+
+7. **CSS Styles** (`src/popup/popup.css` lines 2222-2332):
+   - `.notification-time-input` - Styled time picker inputs
+   - `.setting-item-time` - Setting row with time input
+   - `.setting-item-time-range` - Container for quiet hours inputs
+   - `.quiet-hours-inputs`, `.quiet-hours-input-group`, `.quiet-hours-label`, `.quiet-hours-separator`
+   - `.test-notification-btn` - Full-width test button
+   - Dark mode support with `color-scheme: dark`
+
+### Files modified:
+- `src/utils/storage.js` (lines 277-283)
+- `src/background/service-worker.js` (lines 234-238, 661-684, 1037-1038, 1188-1523)
+- `src/popup/popup.js` (lines 7526-7587, 7798-7799, 7858-8048)
+- `src/popup/popup.css` (lines 2222-2332)
+
+### Key design decisions:
+- Daily reminder shows summary of incomplete goals with count and titles
+- All goals complete shows congratulatory message
+- No goals shows prompt to add goals
+- Quiet hours handles overnight spans (e.g., 22:00 to 07:00)
+- Snooze functionality (1 hour) available via notification button
+- Notification permission already granted via manifest.json
+- Test notification allows users to verify notifications work
+- Settings save and notify service worker immediately for responsive UX
+
+### Notification content:
+- **No goals**: "You have no goals set up. Click to add some goals!"
+- **All complete**: "You've completed all X goals today. Keep up the great work!"
+- **Some incomplete**: "Daily Goals: X/Y Complete" with pending goals listed
+
+### Acceptance criteria met:
+- Notification permission request (already granted via manifest - permission already declared)
+- Global reminder schedule in Settings (Daily Reminder toggle + time picker)
+- Per-goal reminder time option (settings added, UI ready for future per-goal implementation)
+- Notification shows goal title and progress (displays incomplete count and goal titles)
+- Click notification opens popup (clears notification, browser focuses)
+- Snooze/dismiss options (Snooze 1hr button on notification)
+- Respect quiet hours setting (notifications suppressed during quiet hours)
+

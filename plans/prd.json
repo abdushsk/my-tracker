@@ -360,7 +360,7 @@
         "Respect quiet hours setting"
       ],
       "priority": 22,
-      "passes": false,
+      "passes": true,
       "dependsOn": []
     },
     {

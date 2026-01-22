@@ -273,7 +273,14 @@ function getDefaultSettings() {
     dailyResetTime: '00:00',   // Default midnight for daily goals
     weeklyResetTime: '00:00',  // Default midnight Monday for weekly goals
     monthlyResetTime: '00:00', // Default midnight 1st of month for monthly goals
-    yearlyResetTime: '00:00'   // Default midnight January 1st for yearly goals
+    yearlyResetTime: '00:00',  // Default midnight January 1st for yearly goals
+    // US-076: Browser Notifications for Reminders
+    dailyReminderEnabled: false,     // Enable daily reminder notifications
+    dailyReminderTime: '09:00',      // Time for daily reminder (HH:MM format)
+    goalReminderEnabled: false,      // Enable per-goal reminders
+    quietHoursEnabled: false,        // Enable quiet hours
+    quietHoursStart: '22:00',        // Start of quiet hours (HH:MM format)
+    quietHoursEnd: '07:00'           // End of quiet hours (HH:MM format)
   };
 }
 

@@ -231,6 +231,12 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
         .catch(error => sendResponse({ success: false, error: error.message }));
       break;
 
+    // US-076: Notification message handlers
+    case 'NOTIFICATION_SETTINGS_CHANGED':
+    case 'TEST_NOTIFICATION':
+    case 'REQUEST_NOTIFICATION_PERMISSION':
+      return handleNotificationMessage(message, sendResponse);
+
     default:
       console.log('[Service Worker] Unknown message type:', message.type);
       sendResponse({ success: false, error: 'Unknown message type' });
@@ -648,9 +654,14 @@ chrome.alarms.onAlarm.addListener(async (alarm) => {
       break;
 
     case 'reminder':
-      // Future: Show reminder notification
-      console.log('[Service Worker] Reminder notification triggered');
-      // showReminderNotification();
+      // Legacy reminder (kept for backwards compatibility)
+      console.log('[Service Worker] Legacy reminder notification triggered');
+      break;
+
+    // US-076: Notification alarm handlers
+    case NOTIFICATION_ALARM_NAMES.DAILY_REMINDER:
+      console.log('[Service Worker] Daily reminder alarm triggered');
+      await showDailyReminderNotification();
       break;
 
     default:
@@ -659,7 +670,16 @@ chrome.alarms.onAlarm.addListener(async (alarm) => {
         const goalId = alarm.name.replace('timer-', '');
         console.log('[Service Worker] Timer alarm for goal:', goalId);
         // Future: Handle timer completion or update
-      } else {
+      }
+      // US-076: Check if it's a snooze alarm
+      else if (alarm.name.startsWith(NOTIFICATION_ALARM_NAMES.SNOOZE_PREFIX)) {
+        const notificationId = alarm.name.replace(NOTIFICATION_ALARM_NAMES.SNOOZE_PREFIX, '');
+        console.log('[Service Worker] Snooze alarm triggered for:', notificationId);
+        if (notificationId === NOTIFICATION_IDS.DAILY_REMINDER) {
+          await showDailyReminderNotification();
+        }
+      }
+      else {
         console.log('[Service Worker] Unknown alarm:', alarm.name);
       }
   }
@@ -1013,6 +1033,9 @@ chrome.runtime.onStartup.addListener(async () => {
 
   // US-053: Update badge on browser startup
   await updateBadge();
+
+  // US-076: Initialize notification alarms
+  await initializeNotificationAlarms();
 });
 
 /**
@@ -1185,8 +1208,316 @@ chrome.storage.onChanged.addListener((changes, areaName) => {
   }
 });
 
+// ============================================
+// US-076: Browser Notifications for Reminders
+// ============================================
+
+/**
+ * Notification IDs for tracking active notifications
+ */
+const NOTIFICATION_IDS = {
+  DAILY_REMINDER: 'daily-reminder',
+  GOAL_REMINDER_PREFIX: 'goal-reminder-',
+  SNOOZE_PREFIX: 'snooze-'
+};
+
+/**
+ * Alarm names for notification scheduling
+ */
+const NOTIFICATION_ALARM_NAMES = {
+  DAILY_REMINDER: 'notification-daily-reminder',
+  SNOOZE_PREFIX: 'notification-snooze-'
+};
+
+/**
+ * Check if the current time is within quiet hours
+ * @param {Object} settings - The settings object
+ * @returns {boolean} True if currently in quiet hours
+ */
+function isInQuietHours(settings) {
+  if (!settings.quietHoursEnabled) return false;
+
+  const now = new Date();
+  const currentMinutes = now.getHours() * 60 + now.getMinutes();
+
+  const { hours: startHours, minutes: startMinutes } = parseTimeString(settings.quietHoursStart || '22:00');
+  const { hours: endHours, minutes: endMinutes } = parseTimeString(settings.quietHoursEnd || '07:00');
+
+  const startTotalMinutes = startHours * 60 + startMinutes;
+  const endTotalMinutes = endHours * 60 + endMinutes;
+
+  // Handle overnight quiet hours (e.g., 22:00 to 07:00)
+  if (startTotalMinutes > endTotalMinutes) {
+    // Quiet hours span midnight
+    return currentMinutes >= startTotalMinutes || currentMinutes < endTotalMinutes;
+  } else {
+    // Quiet hours within same day
+    return currentMinutes >= startTotalMinutes && currentMinutes < endTotalMinutes;
+  }
+}
+
+/**
+ * Show a browser notification for goal reminders
+ * @param {string} id - Unique notification ID
+ * @param {string} title - Notification title
+ * @param {string} message - Notification message
+ * @param {Object} options - Additional notification options
+ * @returns {Promise<string>} The notification ID
+ */
+async function showNotification(id, title, message, options = {}) {
+  try {
+    const settings = await getSettings();
+
+    // Check quiet hours
+    if (isInQuietHours(settings)) {
+      console.log('[Service Worker] Notification suppressed - quiet hours active');
+      return null;
+    }
+
+    const notificationOptions = {
+      type: 'basic',
+      iconUrl: chrome.runtime.getURL('src/assets/icons/icon-128.png'),
+      title: title,
+      message: message,
+      priority: 2,
+      requireInteraction: false,
+      silent: false,
+      ...options
+    };
+
+    // Add buttons if specified
+    if (options.buttons) {
+      notificationOptions.buttons = options.buttons;
+    }
+
+    await chrome.notifications.create(id, notificationOptions);
+    console.log(`[Service Worker] Notification created: ${id}`);
+    return id;
+  } catch (error) {
+    console.error('[Service Worker] Error showing notification:', error);
+    return null;
+  }
+}
+
+/**
+ * Show daily reminder notification with incomplete goals summary
+ */
+async function showDailyReminderNotification() {
+  console.log('[Service Worker] Showing daily reminder notification');
+
+  try {
+    const goals = await getGoals();
+    const incompleteGoals = goals.filter(g => g.progress < g.target);
+    const completeCount = goals.length - incompleteGoals.length;
+
+    if (goals.length === 0) {
+      // No goals to track
+      await showNotification(
+        NOTIFICATION_IDS.DAILY_REMINDER,
+        'Daily Goals Reminder',
+        'You have no goals set up. Click to add some goals!',
+        {
+          buttons: [
+            { title: 'Open App' }
+          ]
+        }
+      );
+      return;
+    }
+
+    if (incompleteGoals.length === 0) {
+      // All goals complete!
+      await showNotification(
+        NOTIFICATION_IDS.DAILY_REMINDER,
+        'Great Job! All Goals Complete! ✓',
+        `You've completed all ${goals.length} goals today. Keep up the great work!`,
+        {
+          buttons: [
+            { title: 'View Progress' }
+          ]
+        }
+      );
+      return;
+    }
+
+    // Some goals incomplete
+    const topIncomplete = incompleteGoals.slice(0, 3).map(g => g.title).join(', ');
+    const message = incompleteGoals.length <= 3
+      ? `Pending: ${topIncomplete}`
+      : `${incompleteGoals.length} goals pending including: ${topIncomplete}`;
+
+    await showNotification(
+      NOTIFICATION_IDS.DAILY_REMINDER,
+      `Daily Goals: ${completeCount}/${goals.length} Complete`,
+      message,
+      {
+        buttons: [
+          { title: 'Open App' },
+          { title: 'Snooze 1hr' }
+        ]
+      }
+    );
+  } catch (error) {
+    console.error('[Service Worker] Error showing daily reminder:', error);
+  }
+}
+
+/**
+ * Schedule the daily reminder alarm based on settings
+ * @param {Object} settings - Settings object
+ */
+async function scheduleDailyReminderAlarm(settings) {
+  // Clear existing daily reminder alarm
+  await chrome.alarms.clear(NOTIFICATION_ALARM_NAMES.DAILY_REMINDER);
+
+  if (!settings.dailyReminderEnabled) {
+    console.log('[Service Worker] Daily reminder disabled - alarm cleared');
+    return;
+  }
+
+  const reminderTime = settings.dailyReminderTime || '09:00';
+  const { hours, minutes } = parseTimeString(reminderTime);
+
+  const now = new Date();
+  const nextReminder = new Date(now);
+  nextReminder.setHours(hours, minutes, 0, 0);
+
+  // If this time has already passed today, schedule for tomorrow
+  if (nextReminder.getTime() <= now.getTime()) {
+    nextReminder.setDate(nextReminder.getDate() + 1);
+  }
+
+  await chrome.alarms.create(NOTIFICATION_ALARM_NAMES.DAILY_REMINDER, {
+    when: nextReminder.getTime(),
+    periodInMinutes: 24 * 60 // Repeat every 24 hours
+  });
+
+  console.log(`[Service Worker] Daily reminder scheduled for ${nextReminder.toLocaleString()}`);
+}
+
+/**
+ * Schedule a snooze alarm to show the notification again later
+ * @param {string} notificationId - The notification ID to snooze
+ * @param {number} delayMinutes - Minutes to snooze
+ */
+async function scheduleSnoozeAlarm(notificationId, delayMinutes = 60) {
+  const alarmName = `${NOTIFICATION_ALARM_NAMES.SNOOZE_PREFIX}${notificationId}`;
+
+  await chrome.alarms.create(alarmName, {
+    delayInMinutes: delayMinutes
+  });
+
+  console.log(`[Service Worker] Snooze alarm scheduled for ${delayMinutes} minutes: ${alarmName}`);
+}
+
+/**
+ * Handle notification button clicks
+ */
+chrome.notifications.onButtonClicked.addListener(async (notificationId, buttonIndex) => {
+  console.log(`[Service Worker] Notification button clicked: ${notificationId}, button ${buttonIndex}`);
+
+  if (notificationId === NOTIFICATION_IDS.DAILY_REMINDER) {
+    if (buttonIndex === 0) {
+      // "Open App" or "View Progress" - open the popup
+      // Note: We can't directly open the popup, but clicking the notification will
+      chrome.notifications.clear(notificationId);
+    } else if (buttonIndex === 1) {
+      // "Snooze 1hr"
+      chrome.notifications.clear(notificationId);
+      await scheduleSnoozeAlarm(NOTIFICATION_IDS.DAILY_REMINDER, 60);
+      console.log('[Service Worker] Daily reminder snoozed for 1 hour');
+    }
+  }
+});
+
+/**
+ * Handle notification click (body click)
+ */
+chrome.notifications.onClicked.addListener(async (notificationId) => {
+  console.log(`[Service Worker] Notification clicked: ${notificationId}`);
+
+  // Clear the notification
+  chrome.notifications.clear(notificationId);
+
+  // The click will naturally focus the browser - user can then click the extension icon
+});
+
+/**
+ * Handle notification closed
+ */
+chrome.notifications.onClosed.addListener((notificationId, byUser) => {
+  console.log(`[Service Worker] Notification closed: ${notificationId}, by user: ${byUser}`);
+});
+
+/**
+ * Handle message types for notifications
+ */
+function handleNotificationMessage(message, sendResponse) {
+  switch (message.type) {
+    case 'NOTIFICATION_SETTINGS_CHANGED':
+      // Settings changed - update notification scheduling
+      handleNotificationSettingsChanged(message.settings)
+        .then(() => sendResponse({ success: true }))
+        .catch(error => sendResponse({ success: false, error: error.message }));
+      return true;
+
+    case 'TEST_NOTIFICATION':
+      // Show a test notification
+      showNotification(
+        'test-notification',
+        'Test Notification',
+        'This is a test notification from Daily Goals Tracker!',
+        { requireInteraction: false }
+      )
+        .then(() => sendResponse({ success: true }))
+        .catch(error => sendResponse({ success: false, error: error.message }));
+      return true;
+
+    case 'REQUEST_NOTIFICATION_PERMISSION':
+      // Check and report notification permission status
+      // Note: Chrome extensions with "notifications" permission don't need to request
+      sendResponse({ success: true, granted: true });
+      return true;
+
+    default:
+      return false;
+  }
+}
+
+/**
+ * Handle notification settings changed
+ * @param {Object} settings - New settings object
+ */
+async function handleNotificationSettingsChanged(settings) {
+  console.log('[Service Worker] Notification settings changed:', settings);
+
+  // Reschedule daily reminder alarm based on new settings
+  await scheduleDailyReminderAlarm(settings);
+}
+
+/**
+ * Initialize notification alarms on startup
+ */
+async function initializeNotificationAlarms() {
+  console.log('[Service Worker] Initializing notification alarms');
+
+  try {
+    const settings = await getSettings();
+
+    // Set up daily reminder if enabled
+    if (settings.dailyReminderEnabled) {
+      await scheduleDailyReminderAlarm(settings);
+    }
+  } catch (error) {
+    console.error('[Service Worker] Error initializing notification alarms:', error);
+  }
+}
+
 // Log that service worker has loaded
 console.log('[Service Worker] Daily Goals Tracker service worker loaded');
 
 // US-053: Initial badge update when service worker loads
 updateBadge();
+
+// US-076: Initialize notification alarms when service worker loads
+initializeNotificationAlarms();
