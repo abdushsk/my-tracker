@@ -275,3 +275,112 @@ Implemented drag-to-reorder functionality for goals in the Daily Goals screen us
 - Order persisted to storage (saveGoals called after reorder)
 - Order maintained after refresh (goals sorted by order property)
 - Works in both expanded and compact views (responsive CSS styles)
+
+---
+
+## US-060: UI Design Document
+**Date**: 2026-01-22
+**Status**: Completed
+
+### What was done:
+Created a comprehensive UI design document (plans/DESIGN.md) that defines consistent patterns for spacing, typography, colors, buttons, forms, cards, icons, and animations. Also documented current inconsistencies that should be fixed.
+
+### Implementation details:
+
+1. **Document Structure**: Created 14 comprehensive sections covering all UI aspects:
+   - Design Principles
+   - Spacing System (4px/8px base)
+   - Typography Scale
+   - Color Palette (light and dark modes)
+   - Shadows & Elevation
+   - Border Radius
+   - Transitions & Animations
+   - Button Variants
+   - Form Patterns
+   - Card Components
+   - Icon Usage
+   - Animation Standards
+   - Current Inconsistencies
+   - Accessibility Guidelines
+
+2. **Spacing System**: Documented the 4px base unit system:
+   - `--spacing-xs`: 4px (icon gaps, tight spacing)
+   - `--spacing-sm`: 8px (component internal padding)
+   - `--spacing-md`: 16px (card padding, standard gaps)
+   - `--spacing-lg`: 24px (section margins)
+   - `--spacing-xl`: 32px (page margins)
+
+3. **Typography Scale**: Documented 6 font sizes with usage:
+   - `--font-size-xs` (11px): Badges, timestamps
+   - `--font-size-sm` (12px): Labels, captions
+   - `--font-size-base` (14px): Body, buttons, inputs
+   - `--font-size-lg` (16px): Card titles
+   - `--font-size-xl` (18px): Screen titles
+   - `--font-size-2xl` (24px): Large numbers
+
+4. **Color System**: Documented all CSS variables for:
+   - Primary colors (green) for actions/success
+   - Secondary colors (blue) for timers/info
+   - Status colors (success, danger, warning)
+   - Neutral colors (backgrounds, text, borders)
+   - Special colors (counter orange, yearly purple, trophy gold)
+   - Goal type specific colors
+   - Timeframe badge colors
+   - Dark mode adjustments
+
+5. **Button Variants**: Documented 4 button types:
+   - Primary (green, main actions)
+   - Secondary (outlined, cancel actions)
+   - Danger (red, destructive actions)
+   - Ghost (transparent, subtle actions)
+   - Icon buttons (various sizes)
+
+6. **Form Patterns**: Documented structure and states:
+   - Form group layout
+   - Input styles and states (focus, error, valid)
+   - Type selector button groups
+   - Error message display
+
+7. **Card Patterns**: Documented goal card structure:
+   - Header, body, controls sections
+   - Compact variant modifications
+   - Management list items
+
+8. **Animation Standards**: Documented keyframe animations:
+   - Button press (scale 0.95)
+   - Checkbox toggle (pop effect)
+   - Completion badge appearance
+   - Timer pulse (active state)
+   - Progress shimmer (completed)
+   - Flame glow (streak)
+   - Empty state float
+
+9. **Current Inconsistencies Identified**:
+   - Spacing: Inconsistent gaps, button padding variance
+   - Typography: Hardcoded font sizes, letter-spacing variance
+   - Colors: Counter/yearly/gold colors not in CSS variables
+   - Components: Duplicated back button styles, hardcoded spacer width
+   - Borders: Inconsistent border widths
+   - Accessibility: Missing focus states, contrast issues
+
+### Files created:
+- `plans/DESIGN.md` (~500 lines)
+
+### Key learnings:
+- The codebase already uses CSS variables extensively, which is excellent
+- The 4px/8px spacing system is well-established
+- Some colors (counter orange, yearly purple) need to be added as CSS variables
+- Back button styles are duplicated across headers - candidate for refactoring
+- Animation patterns are consistent and well-structured
+
+### Acceptance criteria met:
+- Spacing system (4px/8px base unit)
+- Typography scale (headings, body, labels)
+- Color palette usage guide
+- Button variants and states
+- Form field patterns
+- Card component patterns
+- Icon usage guidelines
+- Animation/transition standards
+- List of current inconsistencies
+
