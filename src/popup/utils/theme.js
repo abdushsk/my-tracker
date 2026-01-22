@@ -1,7 +1,19 @@
 /**
- * Theme Management Utilities (US-051)
- * Light/dark theme switching with auto detection support
+ * Theme Management Utilities
+ *
+ * All theme configuration is in: /themes/theme-config.js
+ * CSS is auto-generated from that single file.
  */
+
+import {
+  AVAILABLE_COLOR_THEMES,
+  getThemeMetadata,
+  getAllThemes,
+  injectThemeCSS,
+} from '../themes/index.js';
+
+// Re-export for convenience
+export { AVAILABLE_COLOR_THEMES, getThemeMetadata, getAllThemes, injectThemeCSS };
 
 // =============================================================================
 // Callback Registration
@@ -82,6 +94,9 @@ export function initTheme(settings) {
 
   // Add no-transition class to prevent flash during initial load
   document.documentElement.classList.add('no-transition');
+
+  // Inject theme CSS from config (auto-generated)
+  injectThemeCSS();
 
   applyTheme(effectiveTheme);
   applyColorTheme(colorTheme);
@@ -188,4 +203,37 @@ export function getThemeDisplayText(themeSetting) {
     default:
       return 'Auto';
   }
+}
+
+// =============================================================================
+// Color Theme Utilities
+// =============================================================================
+
+/**
+ * Get the display name for a color theme
+ * @param {string} colorTheme - The color theme ID
+ * @returns {string} Human-readable theme name
+ */
+export function getColorThemeDisplayText(colorTheme) {
+  const metadata = getThemeMetadata(colorTheme);
+  return metadata ? metadata.name : 'Default';
+}
+
+/**
+ * Get the preview gradient for a color theme
+ * @param {string} colorTheme - The color theme ID
+ * @returns {string} CSS gradient string
+ */
+export function getColorThemePreviewGradient(colorTheme) {
+  const metadata = getThemeMetadata(colorTheme);
+  return metadata ? metadata.preview : 'linear-gradient(135deg, #10B981, #059669)';
+}
+
+/**
+ * Check if a color theme ID is valid
+ * @param {string} colorTheme - The color theme ID to check
+ * @returns {boolean} True if valid
+ */
+export function isValidColorTheme(colorTheme) {
+  return AVAILABLE_COLOR_THEMES.includes(colorTheme);
 }

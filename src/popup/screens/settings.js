@@ -26,6 +26,12 @@ import {
   attachDataManagementListeners
 } from './dataManagement.js';
 import { attachNotificationSettingsListeners } from './notificationSettings.js';
+import {
+  AVAILABLE_COLOR_THEMES,
+  getThemeMetadata,
+  getColorThemePreviewGradient,
+  applyColorTheme
+} from '../utils/theme.js';
 
 // Callbacks to be registered from popup.js
 let callbacks = {
@@ -48,6 +54,35 @@ export function registerSettingsCallbacks(cbs) {
     loadData: cbs.loadData,
     renderSettingsScreen: renderSettingsScreen
   });
+}
+
+/**
+ * Generate HTML for color theme selector buttons
+ * Dynamically creates buttons based on available themes from theme-config.js
+ * @param {string} currentTheme - Currently selected color theme
+ * @returns {string} HTML string for theme buttons
+ */
+function generateColorThemeButtons(currentTheme) {
+  return AVAILABLE_COLOR_THEMES.map(themeId => {
+    const metadata = getThemeMetadata(themeId);
+    if (!metadata) return '';
+
+    const isActive = themeId === 'default'
+      ? (!currentTheme || currentTheme === 'default')
+      : currentTheme === themeId;
+
+    const gradient = getColorThemePreviewGradient(themeId);
+
+    return `
+      <button type="button"
+              class="color-theme-option ${isActive ? 'active' : ''}"
+              data-theme="${themeId}"
+              title="${metadata.name} theme">
+        <span class="color-theme-preview" style="background: ${gradient}"></span>
+        <span class="color-theme-name">${metadata.name}</span>
+      </button>
+    `;
+  }).join('');
 }
 
 /**
@@ -201,33 +236,14 @@ export function renderSettingsScreen() {
             </div>
           </div>
 
-          <!-- Color Theme Selector -->
+          <!-- Color Theme Selector (themes defined in /themes/theme-config.js) -->
           <div class="setting-item setting-item-column">
             <div class="setting-info">
               <span class="setting-label">Color Theme</span>
               <span class="setting-description">Choose a color scheme for the app</span>
             </div>
             <div class="color-theme-selector" role="radiogroup" aria-label="Select color theme">
-              <button type="button" class="color-theme-option ${!state.settings?.colorTheme || state.settings?.colorTheme === 'default' ? 'active' : ''}" data-theme="default" title="Default theme">
-                <span class="color-theme-preview default-preview"></span>
-                <span class="color-theme-name">Default</span>
-              </button>
-              <button type="button" class="color-theme-option ${state.settings?.colorTheme === 'ocean' ? 'active' : ''}" data-theme="ocean" title="Ocean theme">
-                <span class="color-theme-preview ocean-preview"></span>
-                <span class="color-theme-name">Ocean</span>
-              </button>
-              <button type="button" class="color-theme-option ${state.settings?.colorTheme === 'forest' ? 'active' : ''}" data-theme="forest" title="Forest theme">
-                <span class="color-theme-preview forest-preview"></span>
-                <span class="color-theme-name">Forest</span>
-              </button>
-              <button type="button" class="color-theme-option ${state.settings?.colorTheme === 'sunset' ? 'active' : ''}" data-theme="sunset" title="Sunset theme">
-                <span class="color-theme-preview sunset-preview"></span>
-                <span class="color-theme-name">Sunset</span>
-              </button>
-              <button type="button" class="color-theme-option ${state.settings?.colorTheme === 'lavender' ? 'active' : ''}" data-theme="lavender" title="Lavender theme">
-                <span class="color-theme-preview lavender-preview"></span>
-                <span class="color-theme-name">Lavender</span>
-              </button>
+              ${generateColorThemeButtons(state.settings?.colorTheme)}
             </div>
           </div>
 
@@ -655,8 +671,8 @@ function attachColorThemeListener(screen) {
         colorTheme: theme
       };
 
-      // Apply theme to body
-      document.body.setAttribute('data-color-theme', theme);
+      // Apply theme using centralized theme utility
+      applyColorTheme(theme);
 
       // Save to storage
       await saveSettings(state.settings);

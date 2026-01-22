@@ -1,6 +1,6 @@
 /* ========================================
-   Daily Goals Tracker - Minimal Design System v2.0
-   "When in doubt, leave it out"
+   Daily Goals Tracker - Design System v3.0
+   Theme Configuration: see /themes/theme-config.js
    ======================================== */
 
 /* CSS Reset */
@@ -13,29 +13,102 @@
 }
 
 /* ========================================
-   Design Tokens - Light Mode (default)
+   SECTION 1: Base Design Tokens (shared)
+   These don't change between themes
    ======================================== */
 :root {
-  /* Surface colors - clean, minimal hierarchy */
+  /* Spacing - 4px base unit */
+  --space-0: 0;
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --space-8: 32px;
+  --spacing-xs: var(--space-1);
+  --spacing-sm: var(--space-2);
+  --spacing-md: var(--space-4);
+  --spacing-lg: var(--space-6);
+  --spacing-xl: var(--space-8);
+
+  /* Border radius */
+  --radius-sm: 6px;
+  --radius-md: 8px;
+  --radius: 8px;
+  --radius-lg: 12px;
+  --radius-xl: 16px;
+  --radius-full: 9999px;
+
+  /* Motion */
+  --duration-instant: 50ms;
+  --duration-fast: 100ms;
+  --duration-normal: 150ms;
+  --duration-slow: 250ms;
+  --ease-out: cubic-bezier(0, 0, 0.2, 1);
+  --ease-in: cubic-bezier(0.4, 0, 1, 1);
+  --ease-in-out: cubic-bezier(0.4, 0, 0.2, 1);
+  --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+  --transition-fast: var(--duration-fast) var(--ease-out);
+  --transition-normal: var(--duration-normal) var(--ease-out);
+  --transition: var(--duration-normal) var(--ease-out);
+  --transition-slow: var(--duration-slow) var(--ease-out);
+
+  /* Typography */
+  --font-sans: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+  --font-mono: 'SF Mono', 'Fira Code', 'JetBrains Mono', Consolas, monospace;
+  --font-family: var(--font-sans);
+  --text-xs: 11px;
+  --text-sm: 13px;
+  --text-base: 14px;
+  --text-lg: 16px;
+  --text-xl: 20px;
+  --font-size-xs: var(--text-xs);
+  --font-size-sm: var(--text-sm);
+  --font-size-base: var(--text-base);
+  --font-size-lg: var(--text-lg);
+  --font-size-xl: var(--text-xl);
+  --font-size-2xl: 24px;
+  --weight-normal: 400;
+  --weight-medium: 500;
+  --weight-semibold: 600;
+  --weight-bold: 700;
+  --font-weight-normal: var(--weight-normal);
+  --font-weight-medium: var(--weight-medium);
+  --font-weight-semibold: var(--weight-semibold);
+  --font-weight-bold: var(--weight-bold);
+  --line-height: 1.5;
+  --line-height-tight: 1.25;
+
+  /* Theme-specific variables (placeholder for gradients) */
+  --body-gradient: none;
+  --header-gradient: none;
+}
+
+/* ========================================
+   SECTION 2: Default Theme - Light Mode
+   ======================================== */
+:root {
+  /* Surface colors */
   --surface: #FFFFFF;
   --surface-raised: #FAFAFA;
   --surface-sunken: #F5F5F5;
 
-  /* Text colors - clear hierarchy */
+  /* Text colors */
   --text-primary: #1A1A1A;
   --text-secondary: #666666;
   --text-muted: #999999;
   --text-disabled: #BDBDBD;
   --text-inverse: #FFFFFF;
 
-  /* Single accent color - emerald green */
+  /* Accent colors (emerald green) */
   --accent: #10B981;
   --accent-hover: #059669;
   --accent-active: #047857;
   --accent-subtle: #D1FAE5;
   --accent-text: #065F46;
 
-  /* Semantic colors - used sparingly */
+  /* Semantic colors */
   --danger: #EF4444;
   --danger-hover: #DC2626;
   --danger-subtle: #FEE2E2;
@@ -44,12 +117,12 @@
   --info: #3B82F6;
   --info-subtle: #DBEAFE;
 
-  /* Border colors - subtle */
+  /* Borders */
   --border: #E5E5E5;
   --border-subtle: #F0F0F0;
   --border-focus: var(--accent);
 
-  /* Goal type colors - muted, badge-only */
+  /* Goal type colors */
   --type-timer: #3B82F6;
   --type-timer-subtle: #DBEAFE;
   --type-counter: #F59E0B;
@@ -69,12 +142,6 @@
   --timeframe-yearly: var(--type-avoidance);
   --timeframe-yearly-subtle: var(--type-avoidance-subtle);
 
-  /* Shadows - very subtle */
-  --shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.03);
-  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.04);
-  --shadow-md: 0 2px 8px rgba(0, 0, 0, 0.06);
-  --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.08);
-
   /* Heatmap colors */
   --heatmap-level-0: #F0F0F0;
   --heatmap-level-1: #D1FAE5;
@@ -82,84 +149,13 @@
   --heatmap-level-3: #34D399;
   --heatmap-level-4: #10B981;
 
-  /* Spacing - 4px base unit */
-  --space-0: 0;
-  --space-1: 4px;
-  --space-2: 8px;
-  --space-3: 12px;
-  --space-4: 16px;
-  --space-5: 20px;
-  --space-6: 24px;
-  --space-8: 32px;
+  /* Shadows */
+  --shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.03);
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.04);
+  --shadow-md: 0 2px 8px rgba(0, 0, 0, 0.06);
+  --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.08);
 
-  /* Legacy spacing aliases */
-  --spacing-xs: var(--space-1);
-  --spacing-sm: var(--space-2);
-  --spacing-md: var(--space-4);
-  --spacing-lg: var(--space-6);
-  --spacing-xl: var(--space-8);
-
-  /* Border radius - consistent */
-  --radius-sm: 6px;
-  --radius-md: 8px;
-  --radius: 8px;
-  --radius-lg: 12px;
-  --radius-xl: 16px;
-  --radius-full: 9999px;
-
-  /* Motion - fast and purposeful */
-  --duration-instant: 50ms;
-  --duration-fast: 100ms;
-  --duration-normal: 150ms;
-  --duration-slow: 250ms;
-
-  --ease-out: cubic-bezier(0, 0, 0.2, 1);
-  --ease-in: cubic-bezier(0.4, 0, 1, 1);
-  --ease-in-out: cubic-bezier(0.4, 0, 0.2, 1);
-  --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
-
-  /* Legacy transition aliases */
-  --transition-fast: var(--duration-fast) var(--ease-out);
-  --transition-normal: var(--duration-normal) var(--ease-out);
-  --transition: var(--duration-normal) var(--ease-out);
-  --transition-slow: var(--duration-slow) var(--ease-out);
-
-  /* Typography - clean system fonts */
-  --font-sans: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
-  --font-mono: 'SF Mono', 'Fira Code', 'JetBrains Mono', Consolas, monospace;
-  --font-family: var(--font-sans);
-
-  /* Type scale - reduced */
-  --text-xs: 11px;
-  --text-sm: 13px;
-  --text-base: 14px;
-  --text-lg: 16px;
-  --text-xl: 20px;
-
-  /* Legacy font size aliases */
-  --font-size-xs: var(--text-xs);
-  --font-size-sm: var(--text-sm);
-  --font-size-base: var(--text-base);
-  --font-size-lg: var(--text-lg);
-  --font-size-xl: var(--text-xl);
-  --font-size-2xl: 24px;
-
-  /* Font weights */
-  --weight-normal: 400;
-  --weight-medium: 500;
-  --weight-semibold: 600;
-  --weight-bold: 700;
-
-  /* Legacy weight aliases */
-  --font-weight-normal: var(--weight-normal);
-  --font-weight-medium: var(--weight-medium);
-  --font-weight-semibold: var(--weight-semibold);
-  --font-weight-bold: var(--weight-bold);
-
-  --line-height: 1.5;
-  --line-height-tight: 1.25;
-
-  /* Legacy color aliases for backward compatibility */
+  /* Legacy aliases */
   --primary: var(--accent);
   --primary-hover: var(--accent-hover);
   --primary-light: var(--accent-subtle);
@@ -177,6 +173,7 @@
   --success: var(--accent);
   --success-light: var(--accent-subtle);
   --danger-light: var(--danger-subtle);
+  --warning-light: var(--warning-subtle);
   --counter-color: var(--type-counter);
   --counter-accent: #FBBF24;
   --counter-light: var(--type-counter-subtle);
@@ -185,29 +182,26 @@
   --gold: #FBBF24;
   --gold-bright: #FCD34D;
   --gold-subtle: #FFF8E1;
-  --warning-light: var(--warning-subtle);
   --shadow: var(--shadow-md);
 }
 
 /* ========================================
-   US-050: Dark Mode - CSS Variables
+   SECTION 3: Default Theme - Dark Mode
    ======================================== */
-
-/* Dark Mode CSS Variables */
 [data-theme='dark'] {
-  /* Surface colors - dark with visible hierarchy */
+  /* Surface colors */
   --surface: #0F0F0F;
   --surface-raised: #1A1A1A;
   --surface-sunken: #080808;
 
-  /* Text colors - light text on dark */
+  /* Text colors */
   --text-primary: #FAFAFA;
   --text-secondary: #A3A3A3;
   --text-muted: #737373;
   --text-disabled: #525252;
   --text-inverse: #0A0A0A;
 
-  /* Accent colors - slightly brighter for dark mode */
+  /* Accent colors (brighter for dark mode) */
   --accent: #34D399;
   --accent-hover: #6EE7B7;
   --accent-active: #A7F3D0;
@@ -223,12 +217,12 @@
   --info: #60A5FA;
   --info-subtle: rgba(96, 165, 250, 0.15);
 
-  /* Border colors - more visible for card differentiation */
+  /* Borders */
   --border: #333333;
   --border-subtle: #252525;
   --border-focus: var(--accent);
 
-  /* Goal type colors - adjusted for dark mode */
+  /* Goal type colors */
   --type-timer: #60A5FA;
   --type-timer-subtle: rgba(96, 165, 250, 0.15);
   --type-counter: #FBBF24;
@@ -238,28 +232,18 @@
   --type-avoidance: #A78BFA;
   --type-avoidance-subtle: rgba(167, 139, 250, 0.15);
 
-  /* Timeframe colors */
-  --timeframe-daily: var(--accent);
-  --timeframe-daily-subtle: var(--accent-subtle);
-  --timeframe-weekly: var(--info);
-  --timeframe-weekly-subtle: var(--info-subtle);
-  --timeframe-monthly: var(--warning);
-  --timeframe-monthly-subtle: var(--warning-subtle);
-  --timeframe-yearly: var(--type-avoidance);
-  --timeframe-yearly-subtle: var(--type-avoidance-subtle);
-
-  /* Shadows - subtle on dark */
-  --shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.2);
-  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.25);
-  --shadow-md: 0 2px 8px rgba(0, 0, 0, 0.3);
-  --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.4);
-
   /* Heatmap colors */
   --heatmap-level-0: #1A1A1A;
   --heatmap-level-1: #064E3B;
   --heatmap-level-2: #059669;
   --heatmap-level-3: #10B981;
   --heatmap-level-4: #34D399;
+
+  /* Shadows */
+  --shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.2);
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.25);
+  --shadow-md: 0 2px 8px rgba(0, 0, 0, 0.3);
+  --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.4);
 
   /* Legacy aliases */
   --primary: var(--accent);
@@ -279,6 +263,7 @@
   --success: var(--accent);
   --success-light: var(--accent-subtle);
   --danger-light: var(--danger-subtle);
+  --warning-light: var(--warning-subtle);
   --counter-color: var(--type-counter);
   --counter-accent: #FCD34D;
   --counter-light: var(--type-counter-subtle);
@@ -287,11 +272,12 @@
   --gold: #FBBF24;
   --gold-bright: #FCD34D;
   --gold-subtle: rgba(251, 191, 36, 0.15);
-  --warning-light: var(--warning-subtle);
   --shadow: var(--shadow-md);
 }
 
-/* Smooth theme transition for all elements */
+/* ========================================
+   SECTION 4: Theme Transitions
+   ======================================== */
 html,
 html *,
 html *::before,
@@ -299,10 +285,11 @@ html *::after {
   transition: background-color var(--transition),
               border-color var(--transition),
               color var(--transition),
-              box-shadow var(--transition);
+              box-shadow var(--transition),
+              fill var(--transition),
+              stroke var(--transition);
 }
 
-/* Disable transitions during initial page load to prevent flash */
 html.no-transition,
 html.no-transition *,
 html.no-transition *::before,
@@ -310,7 +297,6 @@ html.no-transition *::after {
   transition: none !important;
 }
 
-/* Respect user's motion preferences for accessibility */
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,
@@ -1892,26 +1878,7 @@ select:focus {
   height: 32px;
   border-radius: var(--radius);
   border: 1px solid rgba(0,0,0,0.1);
-}
-
-.default-preview {
-  background: linear-gradient(135deg, #4CAF50 0%, #2196F3 100%);
-}
-
-.ocean-preview {
-  background: linear-gradient(135deg, #0077B6 0%, #00B4D8 50%, #90E0EF 100%);
-}
-
-.forest-preview {
-  background: linear-gradient(135deg, #2D5016 0%, #4A7C23 50%, #7CB342 100%);
-}
-
-.sunset-preview {
-  background: linear-gradient(135deg, #FF6B35 0%, #F7931E 50%, #FFD23F 100%);
-}
-
-.lavender-preview {
-  background: linear-gradient(135deg, #7C3AED 0%, #A78BFA 50%, #DDD6FE 100%);
+  /* Theme gradients are now applied via inline styles from theme-config.js */
 }
 
 .color-theme-name {
@@ -11160,146 +11127,4 @@ body.modal-open {
   gap: 4px;
 }
 
-/* =============================================================================
-   Color Themes - Subtle background and accent variations
-   ============================================================================= */
-
-/* Ocean Theme */
-[data-color-theme="ocean"] {
-  --accent: #0077B6;
-  --accent-hover: #005F8D;
-  --accent-subtle: #CAF0F8;
-  --primary: #0077B6;
-  --primary-hover: #005F8D;
-  --primary-light: #CAF0F8;
-  --type-timer: #00B4D8;
-  --type-timer-subtle: #CAF0F8;
-  --type-checkbox: #0077B6;
-  --type-checkbox-subtle: #90E0EF;
-}
-
-[data-color-theme="ocean"] body,
-[data-color-theme="ocean"] .popup-container {
-  background: linear-gradient(180deg, #E8F6F9 0%, #FFFFFF 20%);
-}
-
-[data-color-theme="ocean"] .screen-header {
-  background: linear-gradient(180deg, rgba(0, 119, 182, 0.06) 0%, transparent 100%);
-}
-
-[data-theme="dark"][data-color-theme="ocean"] {
-  --accent: #00B4D8;
-  --accent-subtle: rgba(0, 180, 216, 0.15);
-  --primary: #00B4D8;
-  --primary-light: rgba(0, 180, 216, 0.15);
-}
-
-[data-theme="dark"][data-color-theme="ocean"] body,
-[data-theme="dark"][data-color-theme="ocean"] .popup-container {
-  background: linear-gradient(180deg, #0A1929 0%, #121212 20%);
-}
-
-/* Forest Theme */
-[data-color-theme="forest"] {
-  --accent: #2D5016;
-  --accent-hover: #1E3A0F;
-  --accent-subtle: #D4E9C7;
-  --primary: #4A7C23;
-  --primary-hover: #3D6A1B;
-  --primary-light: #E8F5E0;
-  --type-timer: #7CB342;
-  --type-timer-subtle: #E8F5E0;
-  --type-checkbox: #4A7C23;
-  --type-checkbox-subtle: #D4E9C7;
-}
-
-[data-color-theme="forest"] body,
-[data-color-theme="forest"] .popup-container {
-  background: linear-gradient(180deg, #EDF5E8 0%, #FFFFFF 20%);
-}
-
-[data-color-theme="forest"] .screen-header {
-  background: linear-gradient(180deg, rgba(74, 124, 35, 0.06) 0%, transparent 100%);
-}
-
-[data-theme="dark"][data-color-theme="forest"] {
-  --accent: #7CB342;
-  --accent-subtle: rgba(124, 179, 66, 0.15);
-  --primary: #7CB342;
-  --primary-light: rgba(124, 179, 66, 0.15);
-}
-
-[data-theme="dark"][data-color-theme="forest"] body,
-[data-theme="dark"][data-color-theme="forest"] .popup-container {
-  background: linear-gradient(180deg, #0D1F0A 0%, #121212 20%);
-}
-
-/* Sunset Theme */
-[data-color-theme="sunset"] {
-  --accent: #E65100;
-  --accent-hover: #BF360C;
-  --accent-subtle: #FFE0B2;
-  --primary: #FF6B35;
-  --primary-hover: #E65100;
-  --primary-light: #FFF3E0;
-  --type-timer: #F7931E;
-  --type-timer-subtle: #FFE0B2;
-  --type-checkbox: #FF6B35;
-  --type-checkbox-subtle: #FFCCBC;
-}
-
-[data-color-theme="sunset"] body,
-[data-color-theme="sunset"] .popup-container {
-  background: linear-gradient(180deg, #FFF8F0 0%, #FFFFFF 20%);
-}
-
-[data-color-theme="sunset"] .screen-header {
-  background: linear-gradient(180deg, rgba(255, 107, 53, 0.06) 0%, transparent 100%);
-}
-
-[data-theme="dark"][data-color-theme="sunset"] {
-  --accent: #FF8A50;
-  --accent-subtle: rgba(255, 138, 80, 0.15);
-  --primary: #FF8A50;
-  --primary-light: rgba(255, 138, 80, 0.15);
-}
-
-[data-theme="dark"][data-color-theme="sunset"] body,
-[data-theme="dark"][data-color-theme="sunset"] .popup-container {
-  background: linear-gradient(180deg, #291005 0%, #121212 20%);
-}
-
-/* Lavender Theme */
-[data-color-theme="lavender"] {
-  --accent: #7C3AED;
-  --accent-hover: #6D28D9;
-  --accent-subtle: #EDE9FE;
-  --primary: #8B5CF6;
-  --primary-hover: #7C3AED;
-  --primary-light: #EDE9FE;
-  --type-timer: #A78BFA;
-  --type-timer-subtle: #EDE9FE;
-  --type-checkbox: #8B5CF6;
-  --type-checkbox-subtle: #DDD6FE;
-}
-
-[data-color-theme="lavender"] body,
-[data-color-theme="lavender"] .popup-container {
-  background: linear-gradient(180deg, #F5F3FF 0%, #FFFFFF 20%);
-}
-
-[data-color-theme="lavender"] .screen-header {
-  background: linear-gradient(180deg, rgba(139, 92, 246, 0.06) 0%, transparent 100%);
-}
-
-[data-theme="dark"][data-color-theme="lavender"] {
-  --accent: #A78BFA;
-  --accent-subtle: rgba(167, 139, 250, 0.15);
-  --primary: #A78BFA;
-  --primary-light: rgba(167, 139, 250, 0.15);
-}
-
-[data-theme="dark"][data-color-theme="lavender"] body,
-[data-theme="dark"][data-color-theme="lavender"] .popup-container {
-  background: linear-gradient(180deg, #1A0F29 0%, #121212 20%);
-}
+/* Color themes are auto-generated from /themes/theme-config.js */
