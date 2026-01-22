@@ -93,7 +93,7 @@
       "title": "Fix in-progress bar color inconsistency",
       "description": "Address the color inconsistency of the in-progress bar in dark mode, which currently displays a blue shade. Ensure that the in-progress bar color aligns with the overall color scheme used for other progress bars to maintain visual consistency throughout the extension.",
       "priority": 13,
-      "passes": false
+      "passes": true
     },
     {
       "id": "US-014",

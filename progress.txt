@@ -455,3 +455,24 @@
 - Active states should have consistent transforms across similar elements (e.g., all buttons using `scale(0.98)`)
 - Dark mode subtle colors should use CSS variables with rgba notation (e.g., `var(--danger-subtle)`) which are pre-defined with appropriate opacity
 
+## US-013: Fix In-Progress Bar Color Inconsistency (Completed)
+**Date**: 2026-01-23
+
+### Changes Made
+
+1. **Fixed active timer progress fill gradient** (popup.css:3086-3088):
+   - Changed from `linear-gradient(90deg, var(--type-timer) 0%, var(--info) 100%)` to `linear-gradient(90deg, var(--accent) 0%, var(--accent-hover) 100%)`
+   - The previous blue gradient (`--type-timer` and `--info`) was inconsistent with the theme-aware accent colors used elsewhere
+   - Now uses accent colors that adapt to the selected color theme (default green, ocean blue, forest green, sunset orange, lavender purple)
+
+2. **Fixed active timer card border** (popup.css:3068-3070):
+   - Changed from `border-color: var(--type-timer)` to `border-color: var(--accent)`
+   - Ensures the active timer card border also matches the theme accent color
+
+### Key Learnings
+- The `--type-timer` variable is hardcoded blue (#3B82F6 light, #60A5FA dark) and doesn't adapt to themes
+- For in-progress/active states, using `--accent` and `--accent-hover` ensures consistency with theme selection
+- Other progress bars (chart bars, performance fills) already use `--accent` family variables (set in US-008)
+- The shimmer animation on active timer progress bars still works with the new accent color gradient
+- Active state borders should also use accent colors for full visual consistency
+

@@ -3066,7 +3066,7 @@ select:focus {
 
 /* Timer goal card active state - subtle */
 .goal-type-timer.goal-timer-active {
-  border-color: var(--type-timer);
+  border-color: var(--accent);
 }
 
 /* Pomodoro button - subtle */
@@ -3084,7 +3084,7 @@ select:focus {
 }
 
 .goal-type-timer.goal-timer-active .goal-progress-fill {
-  background: linear-gradient(90deg, var(--type-timer) 0%, var(--info) 100%);
+  background: linear-gradient(90deg, var(--accent) 0%, var(--accent-hover) 100%);
   animation: progress-shimmer 2s ease-in-out infinite;
 }
 
