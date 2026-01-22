@@ -65,7 +65,7 @@
         "Remove old modal code"
       ],
       "priority": 4,
-      "passes": false,
+      "passes": true,
       "dependsOn": ["US-057"]
     },
     {

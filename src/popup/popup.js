@@ -78,6 +78,7 @@ const state = {
 const SCREENS = {
   VIEW_GOALS: 'viewGoals',
   MANAGE_GOALS: 'manageGoals',
+  GOAL_FORM: 'goalForm',
   REPORTS: 'reports',
   SETTINGS: 'settings'
 };
@@ -88,6 +89,7 @@ const SCREENS = {
 const SCREEN_IDS = {
   [SCREENS.VIEW_GOALS]: 'screen-view-goals',
   [SCREENS.MANAGE_GOALS]: 'screen-manage-goals',
+  [SCREENS.GOAL_FORM]: 'screen-goal-form',
   [SCREENS.REPORTS]: 'screen-reports',
   [SCREENS.SETTINGS]: 'screen-settings'
 };
@@ -145,6 +147,9 @@ function renderCurrentScreen() {
       break;
     case SCREENS.MANAGE_GOALS:
       renderManageGoalsScreen();
+      break;
+    case SCREENS.GOAL_FORM:
+      renderGoalFormScreen();
       break;
     case SCREENS.REPORTS:
       renderReportsScreen();
@@ -1125,12 +1130,12 @@ function renderManageGoalsScreen() {
   // Attach navigation event listeners
   attachNavigationListeners(screen);
 
-  // Attach Add Goal button click listener (US-022)
+  // US-058: Attach Add Goal button click listener - navigate to full-page form
   const addGoalBtn = screen.querySelector('#add-goal-btn');
   if (addGoalBtn) {
     addGoalBtn.addEventListener('click', (e) => {
       e.preventDefault();
-      openGoalModal('add');
+      openGoalFormScreen('add');
     });
   }
 
@@ -1170,6 +1175,593 @@ function renderManageGoalsList(goals) {
       ${goals.map(goal => renderManageGoalItem(goal)).join('')}
     </div>
   `;
+}
+
+// =============================================================================
+// US-058: Goal Form Screen (Full-Page Add/Edit)
+// =============================================================================
+
+/**
+ * State for goal form screen
+ * @type {Object}
+ */
+const goalFormState = {
+  mode: 'add', // 'add' or 'edit'
+  editingGoalId: null
+};
+
+/**
+ * Open goal form screen for adding or editing a goal
+ * @param {string} mode - 'add' for new goal, 'edit' for editing existing
+ * @param {Object|null} goal - The goal to edit (null for add mode)
+ */
+function openGoalFormScreen(mode = 'add', goal = null) {
+  goalFormState.mode = mode;
+  goalFormState.editingGoalId = goal ? goal.id : null;
+
+  // Navigate to the goal form screen
+  showScreen(SCREENS.GOAL_FORM);
+}
+
+/**
+ * Render the Goal Form screen (full-page add/edit)
+ * US-058: Full-page layout with header, form, and footer
+ */
+function renderGoalFormScreen() {
+  const screen = document.getElementById(SCREEN_IDS[SCREENS.GOAL_FORM]);
+  if (!screen) return;
+
+  const isEditMode = goalFormState.mode === 'edit';
+  const editingGoal = isEditMode ? state.goals.find(g => g.id === goalFormState.editingGoalId) : null;
+
+  // If editing but goal not found, go back
+  if (isEditMode && !editingGoal) {
+    console.error('[GoalForm] Goal not found for editing');
+    showScreen(SCREENS.MANAGE_GOALS);
+    return;
+  }
+
+  const title = isEditMode ? 'Edit Goal' : 'Add New Goal';
+
+  screen.innerHTML = `
+    <div class="goal-form-screen">
+      <header class="screen-header goal-form-header">
+        <button class="back-btn" id="goal-form-back-btn" title="Back to Manage Goals">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="back-icon">
+            <line x1="19" y1="12" x2="5" y2="12"/>
+            <polyline points="12 19 5 12 12 5"/>
+          </svg>
+          <span class="back-label">Back</span>
+        </button>
+        <h1 class="goal-form-title">${title}</h1>
+        <div class="header-spacer"></div>
+      </header>
+      <main class="goal-form-content">
+        <form id="goal-form-page" class="goal-form" novalidate>
+          <!-- Title Input -->
+          <div class="form-group">
+            <label for="goal-form-title" class="form-label">Goal Title <span class="required-indicator">*</span></label>
+            <input
+              type="text"
+              id="goal-form-title"
+              name="title"
+              class="form-input"
+              placeholder="e.g., Study for exam"
+              required
+              maxlength="100"
+              autocomplete="off"
+            >
+            <span class="form-error" id="goal-form-title-error" role="alert" aria-live="polite"></span>
+          </div>
+
+          <!-- Type Selector -->
+          <div class="form-group">
+            <label class="form-label">Goal Type <span class="required-indicator">*</span></label>
+            <div class="type-selector" role="radiogroup" aria-label="Select goal type">
+              <button type="button" class="type-option active" data-type="timer" role="radio" aria-checked="true" title="Timer - Track time spent on a goal">
+                <span class="type-option-icon">
+                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="12" cy="12" r="10"/>
+                    <polyline points="12 6 12 12 16 14"/>
+                  </svg>
+                </span>
+                <span class="type-option-label">Timer</span>
+              </button>
+              <button type="button" class="type-option" data-type="counter" role="radio" aria-checked="false" title="Counter - Track a count towards a target">
+                <span class="type-option-icon">
+                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="12" y1="1" x2="12" y2="23"/>
+                    <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
+                  </svg>
+                </span>
+                <span class="type-option-label">Counter</span>
+              </button>
+              <button type="button" class="type-option" data-type="checkbox" role="radio" aria-checked="false" title="Checkbox - Simple yes/no completion">
+                <span class="type-option-icon">
+                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+                    <polyline points="9 11 12 14 22 4"/>
+                  </svg>
+                </span>
+                <span class="type-option-label">Checkbox</span>
+              </button>
+            </div>
+            <input type="hidden" id="goal-form-type" name="type" value="timer">
+          </div>
+
+          <!-- Timer Target Input -->
+          <div class="form-group target-input-group" id="goal-form-timer-target-group">
+            <label for="goal-form-timer-hours" class="form-label">Target Time <span class="required-indicator">*</span></label>
+            <div class="timer-target-inputs">
+              <div class="time-input-field">
+                <input
+                  type="number"
+                  id="goal-form-timer-hours"
+                  name="timer-hours"
+                  class="form-input time-input"
+                  placeholder="0"
+                  min="0"
+                  max="23"
+                  value="1"
+                  autocomplete="off"
+                >
+                <span class="time-input-label">hours</span>
+              </div>
+              <span class="time-separator">:</span>
+              <div class="time-input-field">
+                <input
+                  type="number"
+                  id="goal-form-timer-minutes"
+                  name="timer-minutes"
+                  class="form-input time-input"
+                  placeholder="0"
+                  min="0"
+                  max="59"
+                  value="0"
+                  autocomplete="off"
+                >
+                <span class="time-input-label">minutes</span>
+              </div>
+            </div>
+            <span class="form-error" id="goal-form-timer-error" role="alert" aria-live="polite"></span>
+            <p class="form-hint">Set the duration you want to track (e.g., 1 hour 30 minutes)</p>
+          </div>
+
+          <!-- Counter Target Input -->
+          <div class="form-group target-input-group hidden" id="goal-form-counter-target-group">
+            <label for="goal-form-counter-target" class="form-label">Target Count <span class="required-indicator">*</span></label>
+            <input
+              type="number"
+              id="goal-form-counter-target"
+              name="counter-target"
+              class="form-input counter-target-input"
+              placeholder="e.g., 10"
+              min="1"
+              value="10"
+              autocomplete="off"
+            >
+            <span class="form-error" id="goal-form-counter-error" role="alert" aria-live="polite"></span>
+            <p class="form-hint">Set the target count you want to reach (minimum 1)</p>
+          </div>
+
+          <!-- Timeframe Selector -->
+          <div class="form-group">
+            <label class="form-label">Reset Schedule <span class="required-indicator">*</span></label>
+            <div class="timeframe-selector" role="radiogroup" aria-label="Select reset schedule">
+              <button type="button" class="timeframe-option active" data-timeframe="daily" role="radio" aria-checked="true" title="Goal resets at midnight every day">
+                <span class="timeframe-option-icon">
+                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="12" cy="12" r="5"/>
+                    <line x1="12" y1="1" x2="12" y2="3"/>
+                    <line x1="12" y1="21" x2="12" y2="23"/>
+                    <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/>
+                    <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/>
+                    <line x1="1" y1="12" x2="3" y2="12"/>
+                    <line x1="21" y1="12" x2="23" y2="12"/>
+                    <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/>
+                    <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>
+                  </svg>
+                </span>
+                <span class="timeframe-option-label">Daily</span>
+              </button>
+              <button type="button" class="timeframe-option" data-timeframe="weekly" role="radio" aria-checked="false" title="Goal resets at midnight on Monday">
+                <span class="timeframe-option-icon">
+                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
+                    <line x1="16" y1="2" x2="16" y2="6"/>
+                    <line x1="8" y1="2" x2="8" y2="6"/>
+                    <line x1="3" y1="10" x2="21" y2="10"/>
+                  </svg>
+                </span>
+                <span class="timeframe-option-label">Weekly</span>
+              </button>
+              <button type="button" class="timeframe-option" data-timeframe="monthly" role="radio" aria-checked="false" title="Goal resets at midnight on the 1st of each month">
+                <span class="timeframe-option-icon">
+                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
+                    <line x1="16" y1="2" x2="16" y2="6"/>
+                    <line x1="8" y1="2" x2="8" y2="6"/>
+                    <line x1="3" y1="10" x2="21" y2="10"/>
+                    <text x="12" y="18" text-anchor="middle" font-size="8" font-weight="bold" fill="currentColor" stroke="none">1</text>
+                  </svg>
+                </span>
+                <span class="timeframe-option-label">Monthly</span>
+              </button>
+              <button type="button" class="timeframe-option" data-timeframe="yearly" role="radio" aria-checked="false" title="Goal resets at midnight on January 1st">
+                <span class="timeframe-option-icon">
+                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="12" cy="12" r="10"/>
+                    <polyline points="12 6 12 12 16 10"/>
+                    <path d="M12 2 L12 4"/>
+                    <path d="M12 20 L12 22"/>
+                  </svg>
+                </span>
+                <span class="timeframe-option-label">Yearly</span>
+              </button>
+            </div>
+            <input type="hidden" id="goal-form-timeframe" name="timeframe" value="daily">
+            <p class="form-hint timeframe-hint" id="goal-form-timeframe-hint">
+              <span class="hint-daily">Resets at midnight every day</span>
+              <span class="hint-weekly" style="display:none;">Resets at midnight on Monday</span>
+              <span class="hint-monthly" style="display:none;">Resets at midnight on the 1st of each month</span>
+              <span class="hint-yearly" style="display:none;">Resets at midnight on January 1st</span>
+            </p>
+          </div>
+        </form>
+      </main>
+      <footer class="goal-form-footer">
+        <button type="button" class="btn btn-secondary" id="goal-form-cancel-btn">Cancel</button>
+        <button type="submit" form="goal-form-page" class="btn btn-primary" id="goal-form-save-btn">Save Goal</button>
+      </footer>
+    </div>
+  `;
+
+  // Attach event listeners
+  attachGoalFormScreenListeners(screen, editingGoal);
+
+  // If editing, pre-fill the form
+  if (isEditMode && editingGoal) {
+    prefillGoalFormScreen(editingGoal);
+  }
+
+  // Focus the title input
+  const titleInput = screen.querySelector('#goal-form-title');
+  if (titleInput) {
+    setTimeout(() => titleInput.focus(), 100);
+  }
+
+  console.log(`[GoalForm] Rendered in ${goalFormState.mode} mode`);
+}
+
+/**
+ * Attach event listeners for goal form screen
+ * @param {HTMLElement} screen - The screen element
+ * @param {Object|null} editingGoal - The goal being edited (null for add mode)
+ */
+function attachGoalFormScreenListeners(screen, editingGoal) {
+  // Back button
+  const backBtn = screen.querySelector('#goal-form-back-btn');
+  if (backBtn) {
+    backBtn.addEventListener('click', (e) => {
+      e.preventDefault();
+      showScreen(SCREENS.MANAGE_GOALS);
+    });
+  }
+
+  // Cancel button
+  const cancelBtn = screen.querySelector('#goal-form-cancel-btn');
+  if (cancelBtn) {
+    cancelBtn.addEventListener('click', (e) => {
+      e.preventDefault();
+      showScreen(SCREENS.MANAGE_GOALS);
+    });
+  }
+
+  // Form submission
+  const form = screen.querySelector('#goal-form-page');
+  if (form) {
+    form.addEventListener('submit', handleGoalFormScreenSubmit);
+  }
+
+  // Type selector buttons
+  const typeOptions = screen.querySelectorAll('.type-selector .type-option');
+  typeOptions.forEach(option => {
+    option.addEventListener('click', (e) => {
+      e.preventDefault();
+      const type = option.getAttribute('data-type');
+      setGoalFormScreenType(screen, type);
+    });
+
+    // Keyboard support
+    option.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        const type = option.getAttribute('data-type');
+        setGoalFormScreenType(screen, type);
+      }
+    });
+  });
+
+  // Timeframe selector buttons
+  const timeframeOptions = screen.querySelectorAll('.timeframe-selector .timeframe-option');
+  timeframeOptions.forEach(option => {
+    option.addEventListener('click', (e) => {
+      e.preventDefault();
+      const timeframe = option.getAttribute('data-timeframe');
+      setGoalFormScreenTimeframe(screen, timeframe);
+    });
+
+    // Keyboard support
+    option.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        const timeframe = option.getAttribute('data-timeframe');
+        setGoalFormScreenTimeframe(screen, timeframe);
+      }
+    });
+  });
+}
+
+/**
+ * Set the type in the goal form screen
+ * @param {HTMLElement} screen - The screen element
+ * @param {string} type - The goal type
+ */
+function setGoalFormScreenType(screen, type) {
+  // Update hidden input
+  const typeInput = screen.querySelector('#goal-form-type');
+  if (typeInput) {
+    typeInput.value = type;
+  }
+
+  // Update button states
+  const typeOptions = screen.querySelectorAll('.type-selector .type-option');
+  typeOptions.forEach(option => {
+    const isSelected = option.getAttribute('data-type') === type;
+    option.classList.toggle('active', isSelected);
+    option.setAttribute('aria-checked', isSelected ? 'true' : 'false');
+  });
+
+  // Show/hide target input groups
+  const timerGroup = screen.querySelector('#goal-form-timer-target-group');
+  const counterGroup = screen.querySelector('#goal-form-counter-target-group');
+
+  if (timerGroup && counterGroup) {
+    if (type === GOAL_TYPES.TIMER) {
+      timerGroup.classList.remove('hidden');
+      counterGroup.classList.add('hidden');
+    } else if (type === GOAL_TYPES.COUNTER) {
+      timerGroup.classList.add('hidden');
+      counterGroup.classList.remove('hidden');
+    } else {
+      // Checkbox - hide both
+      timerGroup.classList.add('hidden');
+      counterGroup.classList.add('hidden');
+    }
+  }
+}
+
+/**
+ * Set the timeframe in the goal form screen
+ * @param {HTMLElement} screen - The screen element
+ * @param {string} timeframe - The timeframe
+ */
+function setGoalFormScreenTimeframe(screen, timeframe) {
+  // Update hidden input
+  const timeframeInput = screen.querySelector('#goal-form-timeframe');
+  if (timeframeInput) {
+    timeframeInput.value = timeframe;
+  }
+
+  // Update button states
+  const timeframeOptions = screen.querySelectorAll('.timeframe-selector .timeframe-option');
+  timeframeOptions.forEach(option => {
+    const isSelected = option.getAttribute('data-timeframe') === timeframe;
+    option.classList.toggle('active', isSelected);
+    option.setAttribute('aria-checked', isSelected ? 'true' : 'false');
+  });
+
+  // Update hint text
+  const hintContainer = screen.querySelector('#goal-form-timeframe-hint');
+  if (hintContainer) {
+    const hints = hintContainer.querySelectorAll('span');
+    hints.forEach(hint => {
+      hint.style.display = 'none';
+    });
+    const activeHint = hintContainer.querySelector(`.hint-${timeframe}`);
+    if (activeHint) {
+      activeHint.style.display = 'inline';
+    }
+  }
+}
+
+/**
+ * Pre-fill the goal form screen with existing goal data
+ * @param {Object} goal - The goal to pre-fill
+ */
+function prefillGoalFormScreen(goal) {
+  const screen = document.getElementById(SCREEN_IDS[SCREENS.GOAL_FORM]);
+  if (!screen || !goal) return;
+
+  // Set title
+  const titleInput = screen.querySelector('#goal-form-title');
+  if (titleInput) {
+    titleInput.value = goal.title || '';
+  }
+
+  // Set type
+  setGoalFormScreenType(screen, goal.type);
+
+  // Set timeframe
+  setGoalFormScreenTimeframe(screen, goal.timeframe);
+
+  // Set timer target (if timer type)
+  if (goal.type === GOAL_TYPES.TIMER && goal.target) {
+    const hours = Math.floor(goal.target / 3600);
+    const minutes = Math.floor((goal.target % 3600) / 60);
+
+    const hoursInput = screen.querySelector('#goal-form-timer-hours');
+    const minutesInput = screen.querySelector('#goal-form-timer-minutes');
+
+    if (hoursInput) hoursInput.value = hours;
+    if (minutesInput) minutesInput.value = minutes;
+  }
+
+  // Set counter target (if counter type)
+  if (goal.type === GOAL_TYPES.COUNTER && goal.target) {
+    const counterInput = screen.querySelector('#goal-form-counter-target');
+    if (counterInput) {
+      counterInput.value = goal.target;
+    }
+  }
+}
+
+/**
+ * Handle goal form screen submission
+ * @param {Event} e - Submit event
+ */
+async function handleGoalFormScreenSubmit(e) {
+  e.preventDefault();
+
+  const screen = document.getElementById(SCREEN_IDS[SCREENS.GOAL_FORM]);
+  if (!screen) return;
+
+  const isEditMode = goalFormState.mode === 'edit';
+  const goalId = goalFormState.editingGoalId;
+
+  // Validate title
+  const titleInput = screen.querySelector('#goal-form-title');
+  const titleError = screen.querySelector('#goal-form-title-error');
+  const title = titleInput?.value?.trim() || '';
+
+  if (!title) {
+    if (titleInput && titleError) {
+      showInputError(titleInput, titleError, 'Goal title is required');
+      titleInput.focus();
+    }
+    return;
+  } else if (titleInput && titleError) {
+    clearInputError(titleInput, titleError);
+  }
+
+  // Get type
+  const typeInput = screen.querySelector('#goal-form-type');
+  const type = typeInput?.value || GOAL_TYPES.TIMER;
+
+  // Validate and get target based on type
+  let target;
+
+  if (type === GOAL_TYPES.TIMER) {
+    const hoursInput = screen.querySelector('#goal-form-timer-hours');
+    const minutesInput = screen.querySelector('#goal-form-timer-minutes');
+    const timerError = screen.querySelector('#goal-form-timer-error');
+
+    const hours = parseInt(hoursInput?.value, 10) || 0;
+    const minutes = parseInt(minutesInput?.value, 10) || 0;
+
+    if (hours === 0 && minutes === 0) {
+      if (hoursInput && timerError) {
+        showInputError(hoursInput, timerError, 'Please set a target time');
+        hoursInput.focus();
+      }
+      return;
+    }
+
+    if (hoursInput && timerError) {
+      clearInputError(hoursInput, timerError);
+    }
+
+    target = (hours * 3600) + (minutes * 60);
+  } else if (type === GOAL_TYPES.COUNTER) {
+    const counterInput = screen.querySelector('#goal-form-counter-target');
+    const counterError = screen.querySelector('#goal-form-counter-error');
+    const count = parseInt(counterInput?.value, 10);
+
+    if (!count || count < 1) {
+      if (counterInput && counterError) {
+        showInputError(counterInput, counterError, 'Please set a target count (minimum 1)');
+        counterInput.focus();
+      }
+      return;
+    }
+
+    if (counterInput && counterError) {
+      clearInputError(counterInput, counterError);
+    }
+
+    target = count;
+  } else {
+    // Checkbox
+    target = 1;
+  }
+
+  // Get timeframe
+  const timeframeInput = screen.querySelector('#goal-form-timeframe');
+  const timeframe = timeframeInput?.value || TIMEFRAMES.DAILY;
+
+  console.log(`[GoalForm] Submitting in ${isEditMode ? 'edit' : 'add'} mode:`, { title, type, target, timeframe });
+
+  try {
+    if (isEditMode && goalId) {
+      // Edit mode: update existing goal
+      const success = await updateGoal(goalId, {
+        title,
+        type,
+        target,
+        timeframe
+      });
+
+      if (success) {
+        // Update the goal in local state
+        const goalIndex = state.goals.findIndex(g => g.id === goalId);
+        if (goalIndex !== -1) {
+          state.goals[goalIndex] = {
+            ...state.goals[goalIndex],
+            title,
+            type,
+            target,
+            timeframe
+          };
+        }
+        console.log(`[GoalForm] Goal ${goalId} updated successfully`);
+        showSuccessFeedback('Goal updated successfully!');
+      } else {
+        console.error('[GoalForm] Failed to update goal');
+        showFormError('Failed to update goal. Please try again.');
+        return;
+      }
+    } else {
+      // Add mode: create new goal
+      const newGoal = createGoal({
+        title,
+        type,
+        target,
+        timeframe,
+        order: state.goals.length
+      });
+
+      // Save to storage
+      const updatedGoals = [...state.goals, newGoal];
+      const success = await saveGoals(updatedGoals);
+
+      if (success) {
+        state.goals = updatedGoals;
+        console.log(`[GoalForm] New goal created:`, newGoal);
+        showSuccessFeedback('Goal created successfully!');
+      } else {
+        console.error('[GoalForm] Failed to save new goal');
+        showFormError('Failed to save goal. Please try again.');
+        return;
+      }
+    }
+
+    // Navigate back to Manage Goals on success
+    showScreen(SCREENS.MANAGE_GOALS);
+
+  } catch (error) {
+    console.error('[GoalForm] Error saving goal:', error);
+    showFormError('An error occurred while saving. Please try again.');
+  }
 }
 
 // =============================================================================
@@ -1213,7 +1805,8 @@ function attachManageGoalsListeners(container) {
 // =============================================================================
 
 /**
- * Handle Edit button click to open modal with goal data
+ * Handle Edit button click to open goal form screen with goal data
+ * US-058: Updated to use full-page form instead of modal
  * @param {string} goalId - The ID of the goal to edit
  */
 function handleEditGoal(goalId) {
@@ -1225,10 +1818,10 @@ function handleEditGoal(goalId) {
     return;
   }
 
-  console.log(`[Edit] Opening edit modal for goal: ${goal.title} (${goalId})`);
+  console.log(`[Edit] Opening edit screen for goal: ${goal.title} (${goalId})`);
 
-  // Open the modal in edit mode with the goal data
-  openGoalModal('edit', goal);
+  // US-058: Open the full-page form in edit mode with the goal data
+  openGoalFormScreen('edit', goal);
 }
 
 // =============================================================================
@@ -3881,6 +4474,14 @@ export {
   // US-029 Edit goal functions
   handleEditGoal,
   attachManageGoalsListeners,
+  // US-058 Full-page Goal Form Screen functions
+  openGoalFormScreen,
+  renderGoalFormScreen,
+  attachGoalFormScreenListeners,
+  setGoalFormScreenType,
+  setGoalFormScreenTimeframe,
+  prefillGoalFormScreen,
+  handleGoalFormScreenSubmit,
   // US-030 Delete goal confirmation functions
   openDeleteConfirmModal,
   closeDeleteConfirmModal,

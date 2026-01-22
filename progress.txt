@@ -141,3 +141,72 @@ Verified that the dynamic goal form fields feature was already implemented in th
 - Fields animate in/out smoothly (200ms CSS transitions)
 - Form validates only visible fields (conditional validation in handleGoalFormSubmit)
 - Edit mode pre-selects type and shows correct fields (setFormType called in openGoalModal)
+
+---
+
+## US-058: Full-Page Add/Edit Goal Screen
+**Date**: 2026-01-22
+**Status**: Completed
+
+### What was done:
+Replaced the modal/popup for Add/Edit goal with a dedicated full-page screen. This provides better UX with more space for form fields and maintains consistency with the app's navigation pattern.
+
+### Implementation details:
+
+1. **Screen Registration** (`src/popup/popup.js`):
+   - Added `GOAL_FORM: 'goalForm'` to SCREENS enum
+   - Added `[SCREENS.GOAL_FORM]: 'screen-goal-form'` to SCREEN_IDS mapping
+   - Added case in `renderCurrentScreen()` switch to call `renderGoalFormScreen()`
+
+2. **HTML Structure** (`src/popup/popup.html`):
+   - Added new screen container: `<div id="screen-goal-form" class="screen">`
+   - Removed the old goal form modal HTML (US-022 modal code)
+
+3. **New Screen Rendering** (`src/popup/popup.js` - ~600 lines added):
+   - `goalFormState` object to track mode ('add'/'edit') and editingGoalId
+   - `openGoalFormScreen(mode, goal)` - Sets state and navigates to form screen
+   - `renderGoalFormScreen()` - Renders full-page form with:
+     - Header with back button and dynamic title ("Add New Goal" / "Edit Goal")
+     - Main content area with all form fields (title, type selector, targets, timeframe)
+     - Footer with Cancel and Save buttons
+   - `attachGoalFormScreenListeners()` - Event listeners for all form interactions
+   - `setGoalFormScreenType()` - Updates type selection and shows/hides target inputs
+   - `setGoalFormScreenTimeframe()` - Updates timeframe selection and hint text
+   - `prefillGoalFormScreen()` - Pre-fills form data for edit mode
+   - `handleGoalFormScreenSubmit()` - Validates and saves goal (add or edit)
+
+4. **Navigation Updates** (`src/popup/popup.js`):
+   - Add Goal button now calls `openGoalFormScreen('add')` instead of `openGoalModal('add')`
+   - Edit button (handleEditGoal) now calls `openGoalFormScreen('edit', goal)` instead of `openGoalModal('edit', goal)`
+   - Back and Cancel buttons navigate to SCREENS.MANAGE_GOALS
+
+5. **CSS Styles** (`src/popup/popup.css` - ~80 lines added):
+   - `.goal-form-screen` - Full-height flex container
+   - `.goal-form-header` - Consistent header with back button, title, spacer
+   - `.goal-form-content` - Scrollable content area
+   - `.goal-form-footer` - Fixed footer with action buttons
+
+### Files modified:
+- `src/popup/popup.html` (removed modal, added screen placeholder)
+- `src/popup/popup.js` (lines 78-95, 143-162, 1133-1140, 1180-1765, 1821-1824, 4474-4484)
+- `src/popup/popup.css` (lines 1309-1388)
+
+### Key design decisions:
+- Form fields are dynamically rendered in JavaScript (not static HTML) for consistency
+- Reused existing validation helpers (showInputError, clearInputError)
+- Form state is managed via dedicated `goalFormState` object, not DOM attributes
+- Old modal functions retained (but unused) for backward compatibility with tests
+
+### Architecture notes:
+- Full-page screens follow consistent pattern: header (back, title, spacer) + main + footer
+- Navigation is unidirectional: Manage Goals → Goal Form → Manage Goals
+- Form submission navigates back automatically on success
+- Error handling shows inline errors without blocking navigation
+
+### Acceptance criteria met:
+- New SCREENS.GOAL_FORM screen added
+- Full-page layout with header (back button, title)
+- All form fields from current modal (title, type, targets, timeframe)
+- Save/Cancel buttons at bottom
+- Back navigation returns to Manage Goals
+- Old modal code removed from HTML
