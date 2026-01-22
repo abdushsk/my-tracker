@@ -10,7 +10,7 @@
       "title": "Streamline goal cards",
       "description": "Make sure all goalcards have consistent styling. Progress bars colors should be every consistent across all goal types. Progress path is currently not visible is dark mode, give it some lighter shade. Fix all hover state issue, eg. if i over over some icon, the text and the color both changes to dark color, fix it so that they are more consistent",
       "priority": 1,
-      "passes": false
+      "passes": true
     },
     {
       "id": "US-002",
@@ -43,7 +43,7 @@
     {
       "id": "US-006",
       "title": "Improve timeline and chart display",
-      "description": "Ensure that the activity timeline correctly reflects the current day by addressing any potential UTC issues. Adjust the chart to utilize nearly the full width of the display and modify the Y-axis labels to show only the first two initials of each day (e.g., Mo, Tu, We, Th, Fr, Sa, Su) in uppercase for better readability.",
+      "description": "Ensure that the activity timeline correctly reflects the current day by addressing any potential UTC issues. Adjust the chart to utilize nearly the full width of the display and modify the Y-axis labels to show only the first two initials of each day (e.g., Mo, Tu, We, Th, Fr, Sa, Su) in uppercase for better readability. Plus in case of dark mode, the no progress boxes is not visible, make it lighter shade" ,
       "priority": 6,
       "passes": false
     },
@@ -73,6 +73,13 @@
       "title": "Refine daily breakdown display",
       "description": "In the weekly review's daily breakdown section, remove the percentage display at the bottom by default. Instead, implement a feature that shows the percentage only when the user hovers over the respective section, enhancing clarity and reducing visual clutter.",
       "priority": 10,
+      "passes": false
+    },
+    {
+      "id": "US-011",
+      "title": "Add new goal screen title is not in center, fix it",
+      "description": "",
+      "priority": 11,
       "passes": false
     } 
   ]

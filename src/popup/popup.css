@@ -2698,8 +2698,8 @@ select:focus {
 
 .stats-btn:hover,
 .focus-btn:hover {
-  color: var(--text-primary);
-  background-color: var(--surface-sunken);
+  color: var(--accent);
+  background-color: var(--accent-subtle);
 }
 
 /* Badges container - Always visible */
@@ -2845,7 +2845,7 @@ select:focus {
 /* Progress Bar - Thin and clean */
 .goal-progress-bar {
   height: 4px;
-  background-color: var(--surface-sunken);
+  background-color: var(--border);
   border-radius: var(--radius-full);
   overflow: hidden;
 }
@@ -2904,8 +2904,8 @@ select:focus {
 }
 
 .goal-control-btn:hover {
-  color: var(--text-primary);
-  background-color: var(--surface-sunken);
+  color: var(--accent);
+  background-color: var(--accent-subtle);
 }
 
 .goal-control-btn:active {
@@ -3017,12 +3017,12 @@ select:focus {
 }
 
 .timer-pomodoro-btn:hover {
-  background-color: var(--surface-sunken);
+  background-color: var(--danger-subtle);
   color: var(--danger);
 }
 
 .goal-type-timer.goal-timer-active .goal-progress-fill {
-  background: linear-gradient(90deg, var(--secondary) 0%, #42A5F5 100%);
+  background: linear-gradient(90deg, var(--type-timer) 0%, var(--info) 100%);
   animation: progress-shimmer 2s ease-in-out infinite;
 }
 
@@ -3365,25 +3365,25 @@ select:focus {
 
 /* Avoidance Goal Card Styling */
 .goal-type-avoidance {
-  border-left: 4px solid var(--warning);
+  border-left: 4px solid var(--type-avoidance);
 }
 
 .goal-type-avoidance .goal-type-indicator {
-  background-color: var(--warning-light);
+  background-color: var(--type-avoidance-subtle);
 }
 
 .goal-type-avoidance .goal-type-indicator .goal-type-icon {
-  color: var(--warning);
+  color: var(--type-avoidance);
 }
 
 /* Avoidance Goal - Active Streak State */
 .goal-type-avoidance.goal-completed {
-  border-color: var(--warning);
-  background: linear-gradient(135deg, var(--background-card) 0%, var(--warning-light) 100%);
+  border-color: var(--type-avoidance);
+  background: linear-gradient(135deg, var(--background-card) 0%, var(--type-avoidance-subtle) 100%);
 }
 
 .goal-type-avoidance.goal-completed .goal-progress-fill {
-  background: linear-gradient(90deg, var(--warning) 0%, #F57C00 100%);
+  background: var(--type-avoidance);
 }
 
 /* ========================================
@@ -3785,7 +3785,7 @@ select:focus {
 .drag-handle:hover {
   opacity: 1 !important;
   color: var(--accent);
-  background-color: var(--surface-sunken);
+  background-color: var(--accent-subtle);
 }
 
 .drag-handle:active {
@@ -6128,7 +6128,7 @@ body.modal-open {
 
 /* Focus button hover styles - base styles defined earlier */
 .focus-btn:hover {
-  background-color: var(--surface-sunken);
+  background-color: var(--accent-subtle);
   color: var(--accent);
 }
 
@@ -7781,9 +7781,7 @@ body.modal-open {
   background: var(--bg-tertiary);
 }
 
-[data-theme="dark"] .stats-btn:hover {
-  background: var(--bg-tertiary);
-}
+/* Dark mode stats-btn hover uses base styles with accent-subtle */
 
 /* Reduced motion */
 @media (prefers-reduced-motion: reduce) {
