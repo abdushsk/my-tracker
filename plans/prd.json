@@ -278,7 +278,7 @@
         "Comparison to average"
       ],
       "priority": 17,
-      "passes": false,
+      "passes": true,
       "dependsOn": []
     },
     {

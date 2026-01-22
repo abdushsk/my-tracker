@@ -1103,3 +1103,88 @@ Implemented a comprehensive data export/import feature that allows users to back
 - Merge or replace options on import (modal dialog with both options)
 - Success/error feedback (animated toasts with appropriate colors)
 
+---
+
+## US-071: Individual Goal Statistics
+**Date**: 2026-01-22
+**Status**: Completed
+
+### What was done:
+Implemented a detailed statistics view for each individual goal. Users can now view comprehensive statistics for any goal by clicking a stats button (bar chart icon) on the goal card. The statistics screen shows completion rate, best streak, total accumulated progress, average daily progress, days tracked, and a 30-day progress chart.
+
+### Implementation details:
+
+1. **Screen Registration** (`src/popup/popup.js`):
+   - Added `SCREENS.GOAL_STATISTICS` to the SCREENS enum
+   - Added `SCREEN_IDS[SCREENS.GOAL_STATISTICS]` mapping to 'screen-goal-statistics'
+   - Added `state.statisticsGoalId` to track which goal's statistics are being viewed
+   - Added case in `renderCurrentScreen()` switch to call `renderGoalStatisticsScreen()`
+
+2. **Stats Button on Goal Cards** (`src/popup/popup.js` lines 541-547):
+   - Added a stats button with bar chart icon to each goal card header
+   - Button placed in `.goal-header-actions` container alongside focus button
+   - Event listener in `attachGoalControlListeners()` for `[data-action="view-stats"]`
+
+3. **Goal Statistics Screen** (`src/popup/popup.js` lines 3116-3612):
+   - `openGoalStatistics(goalId)` - Sets statistics goal ID and navigates to screen
+   - `renderGoalStatisticsScreen()` - Renders the full statistics UI:
+     - Header with back button and title
+     - Goal info card (type icon, title, category, timeframe)
+     - Key stats cards (completion rate, best streak, total accumulated)
+     - Comparison section (average daily progress, days tracked)
+     - 30-day progress chart with legend
+   - `updateGoalStatistics(goalId)` - Async function that calculates and displays stats
+
+4. **Statistics Calculation Functions** (`src/popup/popup.js` lines 3339-3514):
+   - `calculateGoalCompletionRate()` - Percentage of completed days from history
+   - `calculateGoalBestStreak()` - Longest consecutive completion streak
+   - `calculateGoalTotalAccumulated()` - Sum of all progress (time/count)
+   - `calculateGoalAverageProgress()` - Average daily progress value
+   - `formatTotalAccumulated()` - Formats total based on goal type (hours/mins for timer, count for counter, completions for checkbox)
+   - `formatAverageProgress()` - Formats average with "/ day" suffix
+
+5. **30-Day Progress Chart** (`src/popup/popup.js` lines 3516-3612):
+   - `renderGoal30DayChart()` - Renders bar chart showing last 30 days
+   - Color coding: green (completed), yellow (partial), gray (no data)
+   - Today's bar highlighted with a ring
+   - Tooltips show date and percentage
+   - Labels show day of month for key dates
+
+6. **HTML Structure** (`src/popup/popup.html`):
+   - Added `<div id="screen-goal-statistics" class="screen">` placeholder
+
+7. **CSS Styles** (`src/popup/popup.css` lines 6615-7037):
+   - Goal statistics screen layout (header, scrollable content)
+   - Goal info card with type indicator styling
+   - Stats cards grid (3 columns)
+   - Completion rate color coding (excellent=green, good=blue, moderate=yellow, low=red)
+   - Comparison card styling
+   - 30-day progress chart bars
+   - Chart legend
+   - Stats button styling for goal cards
+   - Dark mode support
+   - Reduced motion support
+
+### Files modified:
+- `src/popup/popup.js` (lines 57, 87, 109, 124, 197-198, 541-547, 1415-1426, 3116-3612)
+- `src/popup/popup.html` (lines 51-54)
+- `src/popup/popup.css` (lines 6615-7037)
+
+### Key design decisions:
+- Stats button uses bar chart icon (distinct from focus button's target icon)
+- Full-page screen pattern (consistent with other screens like Goal Form, Archive)
+- Stats cards show 3 key metrics in a grid layout
+- Progress chart uses 30-day window for meaningful trend visualization
+- Color coding provides quick visual feedback on performance
+- Today is always highlighted in the chart
+- Comparison section provides context with average and total days
+
+### Acceptance criteria met:
+- Stats button/link on goal card (bar chart icon in goal-header-actions)
+- Goal stats screen/modal (full-page screen with dedicated layout)
+- Completion rate percentage (calculated from history, color coded)
+- Best streak for this goal (consecutive completion days)
+- Total accumulated (time/count) (sum of all progress, formatted by type)
+- Progress chart (last 30 days) (bar chart with completion status)
+- Comparison to average (average daily progress and days tracked)
+
