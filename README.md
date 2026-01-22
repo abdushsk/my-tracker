@@ -39,7 +39,7 @@ A Chrome extension for tracking daily goals with timers, counters, and checkboxe
 
 1. **Clone the repository**
    ```bash
-   git clone https://github.com/abdushsk/daily-goals-tracker.git
+   git clone https://github.com/abdushsk/my-tracker.git
    ```
 
 2. **Open Chrome Extensions page**
@@ -51,7 +51,7 @@ A Chrome extension for tracking daily goals with timers, counters, and checkboxe
 
 4. **Load the extension**
    - Click "Load unpacked"
-   - Select the `daily-goals-tracker` folder (the root directory containing `manifest.json`)
+   - Select the `my-tracker` folder (the root directory containing `manifest.json`)
 
 5. **Pin the extension (optional)**
    - Click the puzzle piece icon in Chrome's toolbar
@@ -77,7 +77,7 @@ To update the extension after pulling new changes:
 ## Project Structure
 
 ```
-daily-goals-tracker/
+my-tracker/
 ├── manifest.json          # Chrome extension manifest (v3)
 ├── src/
 │   ├── assets/
