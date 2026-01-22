@@ -19,7 +19,9 @@ const STORAGE_KEYS = {
   DAILY_CHALLENGES: 'dailyChallenges', // US-081: Daily challenges data
   XP_DATA: 'xpData', // US-083: Level and XP system data
   POMODORO_SETTINGS: 'pomodoroSettings', // US-085: Pomodoro timer settings
-  POMODORO_STATES: 'pomodoroStates' // US-085: Pomodoro states for each goal
+  POMODORO_STATES: 'pomodoroStates', // US-085: Pomodoro states for each goal
+  BREAK_REMINDER_STATE: 'breakReminderState', // US-086: Break reminder state
+  BREAK_LOG: 'breakLog' // US-086: Break taken log
 };
 
 /**
@@ -289,7 +291,11 @@ function getDefaultSettings() {
     // US-077: Motivational Quotes
     quotesEnabled: true,             // Show motivational quotes in empty state, completion, and weekly review
     // US-081: Daily Challenges
-    dailyChallengesEnabled: true     // Enable daily challenges feature
+    dailyChallengesEnabled: true,    // Enable daily challenges feature
+    // US-086: Break Reminders
+    breakRemindersEnabled: true,     // Enable break reminders for long timer sessions
+    breakReminderInterval: 45,       // Minutes between break reminders (default 45min)
+    breakReminderSound: true         // Play sound when break reminder shows
   };
 }
 
@@ -1749,6 +1755,288 @@ async function disablePomodoroForGoal(goalId) {
   await removePomodoroStateForGoal(goalId);
 }
 
+// =============================================================================
+// US-086: Break Reminders Functions
+// =============================================================================
+
+/**
+ * Break activities to suggest during breaks
+ * @type {Array<{icon: string, activity: string, duration: string}>}
+ */
+const BREAK_ACTIVITIES = [
+  { icon: '🧘', activity: 'Stretch your body', duration: '2 min' },
+  { icon: '💧', activity: 'Drink some water', duration: '1 min' },
+  { icon: '👀', activity: 'Rest your eyes (20-20-20 rule)', duration: '20 sec' },
+  { icon: '🚶', activity: 'Take a short walk', duration: '3 min' },
+  { icon: '🌬️', activity: 'Deep breathing exercises', duration: '1 min' },
+  { icon: '🪟', activity: 'Look at something far away', duration: '30 sec' }
+];
+
+/**
+ * Get default break reminder state
+ * @returns {Object} Default break reminder state
+ */
+function getDefaultBreakReminderState() {
+  return {
+    lastBreakTime: null,           // Timestamp of last break taken/skipped
+    sessionDisabled: false,        // Disabled for current session
+    snoozedUntil: null,            // Timestamp when snooze expires
+    activeTimerStartTime: null,    // When the current timer session started
+    totalActiveTime: 0             // Total active timer time since last break
+  };
+}
+
+/**
+ * Get break reminder state from storage
+ * @returns {Promise<Object>} Break reminder state
+ */
+async function getBreakReminderState() {
+  try {
+    const result = await chrome.storage.local.get(STORAGE_KEYS.BREAK_REMINDER_STATE);
+    return result[STORAGE_KEYS.BREAK_REMINDER_STATE] || getDefaultBreakReminderState();
+  } catch (error) {
+    console.error('Error getting break reminder state:', error);
+    return getDefaultBreakReminderState();
+  }
+}
+
+/**
+ * Save break reminder state to storage
+ * @param {Object} state - Break reminder state
+ * @returns {Promise<boolean>} Success status
+ */
+async function saveBreakReminderState(state) {
+  try {
+    await chrome.storage.local.set({ [STORAGE_KEYS.BREAK_REMINDER_STATE]: state });
+    return true;
+  } catch (error) {
+    console.error('Error saving break reminder state:', error);
+    return false;
+  }
+}
+
+/**
+ * Update break reminder state with partial updates
+ * @param {Object} updates - Properties to update
+ * @returns {Promise<Object>} Updated state
+ */
+async function updateBreakReminderState(updates) {
+  const state = await getBreakReminderState();
+  const newState = { ...state, ...updates };
+  await saveBreakReminderState(newState);
+  return newState;
+}
+
+/**
+ * Reset break reminder state for a new session
+ * @returns {Promise<Object>} Reset state
+ */
+async function resetBreakReminderState() {
+  const newState = getDefaultBreakReminderState();
+  await saveBreakReminderState(newState);
+  return newState;
+}
+
+/**
+ * Disable break reminders for current session
+ * @returns {Promise<Object>} Updated state
+ */
+async function disableBreakRemindersForSession() {
+  return await updateBreakReminderState({ sessionDisabled: true });
+}
+
+/**
+ * Snooze break reminder for specified minutes
+ * @param {number} minutes - Minutes to snooze
+ * @returns {Promise<Object>} Updated state
+ */
+async function snoozeBreakReminder(minutes) {
+  const snoozedUntil = Date.now() + (minutes * 60 * 1000);
+  return await updateBreakReminderState({ snoozedUntil });
+}
+
+/**
+ * Record that a break was taken
+ * @returns {Promise<Object>} Updated state
+ */
+async function recordBreakTaken() {
+  const now = Date.now();
+  const state = await updateBreakReminderState({
+    lastBreakTime: now,
+    snoozedUntil: null,
+    totalActiveTime: 0
+  });
+
+  // Log the break
+  await addBreakLogEntry({
+    type: 'taken',
+    timestamp: now
+  });
+
+  return state;
+}
+
+/**
+ * Record that a break was skipped
+ * @returns {Promise<Object>} Updated state
+ */
+async function recordBreakSkipped() {
+  const now = Date.now();
+  const state = await updateBreakReminderState({
+    lastBreakTime: now,
+    snoozedUntil: null,
+    totalActiveTime: 0
+  });
+
+  // Log the skip
+  await addBreakLogEntry({
+    type: 'skipped',
+    timestamp: now
+  });
+
+  return state;
+}
+
+/**
+ * Get break log from storage
+ * @returns {Promise<Array>} Array of break log entries
+ */
+async function getBreakLog() {
+  try {
+    const result = await chrome.storage.local.get(STORAGE_KEYS.BREAK_LOG);
+    return result[STORAGE_KEYS.BREAK_LOG] || [];
+  } catch (error) {
+    console.error('Error getting break log:', error);
+    return [];
+  }
+}
+
+/**
+ * Save break log to storage
+ * @param {Array} log - Break log entries
+ * @returns {Promise<boolean>} Success status
+ */
+async function saveBreakLog(log) {
+  try {
+    await chrome.storage.local.set({ [STORAGE_KEYS.BREAK_LOG]: log });
+    return true;
+  } catch (error) {
+    console.error('Error saving break log:', error);
+    return false;
+  }
+}
+
+/**
+ * Add a break log entry
+ * @param {Object} entry - Log entry with type and timestamp
+ * @returns {Promise<boolean>} Success status
+ */
+async function addBreakLogEntry(entry) {
+  try {
+    const log = await getBreakLog();
+    log.push({
+      id: `break-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+      ...entry
+    });
+
+    // Keep last 100 entries
+    if (log.length > 100) {
+      log.splice(0, log.length - 100);
+    }
+
+    return await saveBreakLog(log);
+  } catch (error) {
+    console.error('Error adding break log entry:', error);
+    return false;
+  }
+}
+
+/**
+ * Get break statistics
+ * @returns {Promise<Object>} Break stats object
+ */
+async function getBreakStats() {
+  try {
+    const log = await getBreakLog();
+
+    // Calculate stats from last 7 days
+    const weekAgo = Date.now() - (7 * 24 * 60 * 60 * 1000);
+    const recentLog = log.filter(entry => entry.timestamp >= weekAgo);
+
+    const taken = recentLog.filter(entry => entry.type === 'taken').length;
+    const skipped = recentLog.filter(entry => entry.type === 'skipped').length;
+    const total = taken + skipped;
+
+    return {
+      breaksTakenThisWeek: taken,
+      breaksSkippedThisWeek: skipped,
+      totalBreaksThisWeek: total,
+      breakComplianceRate: total > 0 ? Math.round((taken / total) * 100) : 100
+    };
+  } catch (error) {
+    console.error('Error getting break stats:', error);
+    return {
+      breaksTakenThisWeek: 0,
+      breaksSkippedThisWeek: 0,
+      totalBreaksThisWeek: 0,
+      breakComplianceRate: 100
+    };
+  }
+}
+
+/**
+ * Check if break reminder should be shown
+ * @param {Object} settings - App settings
+ * @returns {Promise<{shouldShow: boolean, reason?: string}>} Whether to show reminder
+ */
+async function shouldShowBreakReminder(settings) {
+  // Check if globally disabled
+  if (!settings.breakRemindersEnabled) {
+    return { shouldShow: false, reason: 'disabled_globally' };
+  }
+
+  const state = await getBreakReminderState();
+
+  // Check if disabled for session
+  if (state.sessionDisabled) {
+    return { shouldShow: false, reason: 'disabled_session' };
+  }
+
+  // Check if snoozed
+  if (state.snoozedUntil && Date.now() < state.snoozedUntil) {
+    return { shouldShow: false, reason: 'snoozed' };
+  }
+
+  // Check if enough time has passed since last break
+  const intervalMs = (settings.breakReminderInterval || 45) * 60 * 1000;
+  const timeSinceLastBreak = state.lastBreakTime
+    ? Date.now() - state.lastBreakTime
+    : state.totalActiveTime;
+
+  if (state.totalActiveTime >= intervalMs || timeSinceLastBreak >= intervalMs) {
+    return { shouldShow: true };
+  }
+
+  return { shouldShow: false, reason: 'not_enough_time' };
+}
+
+/**
+ * Get a random break activity suggestion
+ * @returns {Object} Break activity suggestion
+ */
+function getRandomBreakActivity() {
+  const index = Math.floor(Math.random() * BREAK_ACTIVITIES.length);
+  return BREAK_ACTIVITIES[index];
+}
+
+/**
+ * Get all break activities
+ * @returns {Array} All break activity suggestions
+ */
+function getAllBreakActivities() {
+  return [...BREAK_ACTIVITIES];
+}
+
 // Export functions for use in other modules
 export {
   STORAGE_KEYS,
@@ -1829,5 +2117,23 @@ export {
   updatePomodoroStateForGoal,
   removePomodoroStateForGoal,
   enablePomodoroForGoal,
-  disablePomodoroForGoal
+  disablePomodoroForGoal,
+  // US-086: Break Reminders functions
+  BREAK_ACTIVITIES,
+  getDefaultBreakReminderState,
+  getBreakReminderState,
+  saveBreakReminderState,
+  updateBreakReminderState,
+  resetBreakReminderState,
+  disableBreakRemindersForSession,
+  snoozeBreakReminder,
+  recordBreakTaken,
+  recordBreakSkipped,
+  getBreakLog,
+  saveBreakLog,
+  addBreakLogEntry,
+  getBreakStats,
+  shouldShowBreakReminder,
+  getRandomBreakActivity,
+  getAllBreakActivities
 };

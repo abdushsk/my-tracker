@@ -530,7 +530,7 @@
         "Disable per-session or globally"
       ],
       "priority": 32,
-      "passes": false,
+      "passes": true,
       "dependsOn": ["US-076"]
     },
     {

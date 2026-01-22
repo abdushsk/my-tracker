@@ -2406,3 +2406,120 @@ Implemented Pomodoro Timer Mode for timer goals. Users can now enable Pomodoro t
 - Consider adding browser notifications for phase changes when popup is closed
 - Could integrate with Achievements system for Pomodoro milestones
 - May want to add Pomodoro statistics in Reports screen
+
+# Iteration - US-086: Break Reminders
+
+## Task Completed
+Implemented Break Reminders for long timer sessions. Users now get gentle reminders to take breaks during extended work sessions.
+
+## Implementation Details
+
+### Storage Module (storage.js)
+
+#### New Settings
+Added break reminder settings to `getDefaultSettings()`:
+- `breakRemindersEnabled`: boolean (default true)
+- `breakReminderInterval`: number in minutes (default 45)
+- `breakReminderSound`: boolean (default true)
+
+#### New Storage Keys
+- `BREAK_REMINDER_STATE`: Tracks break reminder state
+- `BREAK_LOG`: Stores break taken/skipped history
+
+#### Break Activities Constant
+Created `BREAK_ACTIVITIES` array with 6 suggested break activities:
+- Stretch your body (2 min)
+- Drink some water (1 min)
+- Rest your eyes - 20-20-20 rule (20 sec)
+- Take a short walk (3 min)
+- Deep breathing exercises (1 min)
+- Look at something far away (30 sec)
+
+#### New Functions
+- `getDefaultBreakReminderState()` - Default state structure
+- `getBreakReminderState()` / `saveBreakReminderState()` - State persistence
+- `updateBreakReminderState()` - Partial state updates
+- `resetBreakReminderState()` - Reset for new session
+- `disableBreakRemindersForSession()` - Session-level disable
+- `snoozeBreakReminder(minutes)` - Snooze for specified time
+- `recordBreakTaken()` - Log break taken and reset state
+- `recordBreakSkipped()` - Log break skipped and reset state
+- `getBreakLog()` / `saveBreakLog()` / `addBreakLogEntry()` - Log management
+- `getBreakStats()` - Calculate break statistics for last 7 days
+- `shouldShowBreakReminder(settings)` - Check if reminder should show
+- `getRandomBreakActivity()` - Get random activity suggestion
+- `getAllBreakActivities()` - Get all activities
+
+### UI Components (popup.js)
+
+#### State Management
+Added to global state:
+- `breakReminderState`: Current break reminder state
+- `breakReminderVisible`: Boolean for overlay visibility
+- `breakReminderCheckTimeoutId`: Timeout for periodic checks
+
+#### Timer Integration
+Modified `updateTimerDisplays()` to call `checkBreakReminder()` when any timer is running.
+
+#### Core Functions
+- `checkBreakReminder()` - Check if reminder should be shown (called every second)
+- `trackActiveTimerTime()` - Track cumulative active timer time
+- `showBreakReminderOverlay()` - Create and display the break reminder overlay
+- `attachBreakReminderEventHandlers()` - Attach click handlers to overlay buttons
+- `handleBreakTaken()` - Handle "Take Break" button
+- `handleBreakSnooze(minutes)` - Handle snooze buttons (5/10/15 min)
+- `handleBreakSkipped()` - Handle "Skip this break" button
+- `handleBreakDisableForSession()` - Handle "Disable for session" button
+- `hideBreakReminderOverlay()` - Hide and remove the overlay
+
+#### Settings Screen
+Added "Break Reminders" section with:
+- Enable/disable toggle
+- Interval input (15-120 minutes, default 45)
+- Sound notification toggle
+
+Event listeners in `attachBreakReminderSettingsListeners()`:
+- Toggle enables/disables related inputs
+- Interval input clamped to valid range
+- Sound toggle updates settings
+
+### CSS Styling (popup.css)
+Added comprehensive styles for:
+- `.break-reminder-overlay` - Full-screen backdrop with blur
+- `.break-reminder-modal` - Centered modal with shadow
+- `.break-reminder-header` - Icon with bounce animation
+- `.break-reminder-suggestion` - Highlighted activity suggestion card
+- `.break-reminder-activities` - Secondary activity chips
+- `.break-reminder-actions` - Primary and snooze buttons
+- `.break-reminder-footer` - Skip and disable links
+- Dark mode variants
+- Reduced motion support
+- Responsive small screen adjustments
+
+## Acceptance Criteria Met
+- [x] Break reminder interval setting (default 45min)
+- [x] Notification/overlay when break due
+- [x] Suggested break activities (stretch, water, eyes)
+- [x] Snooze option (5/10/15 min)
+- [x] Skip break option
+- [x] Break taken logging
+- [x] Disable per-session or globally
+
+## Files Modified
+- src/utils/storage.js - Added break reminder constants, state management, and logging functions
+- src/popup/popup.js - Added break reminder UI, timer integration, and settings
+- src/popup/popup.css - Added break reminder overlay styling
+- plans/prd.json - Marked US-086 as passes: true
+
+## Technical Notes
+- Break reminders check runs every second while any timer is active
+- Active timer time is tracked cumulatively (works with multiple timers)
+- Snooze stores a timestamp until which reminders are suppressed
+- Session disable persists until app is closed/reopened
+- Break log keeps last 100 entries for statistics
+- Statistics available via `getBreakStats()` for future reporting integration
+
+## Notes for Next Iteration
+- Could add break reminder history to Reports screen
+- May want to add browser notification when popup is closed
+- Consider adding break duration tracking (how long breaks actually last)
