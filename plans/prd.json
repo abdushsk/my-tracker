@@ -411,7 +411,7 @@
         "Clear visual feedback"
       ],
       "priority": 25,
-      "passes": false,
+      "passes": true,
       "dependsOn": []
     },
     {

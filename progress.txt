@@ -1767,3 +1767,90 @@ Implemented comprehensive keyboard shortcuts for the Daily Goals Tracker. Users 
 - Escape: close modals/screens (help overlay, integrates with existing focus mode escape)
 - Shortcuts work when popup is focused (global keydown listener, disabled in inputs)
 
+---
+
+## US-079: Undo/Redo Actions
+**Date**: 2026-01-22
+**Status**: Completed
+
+### What was done:
+Implemented a comprehensive undo/redo system for goal actions. Users can now undo actions like counter increments/decrements, checkbox toggles, and timer starts/stops. A toast notification appears after each action with an "Undo" button, and users can also use Ctrl+Z (undo) and Ctrl+Y or Ctrl+Shift+Z (redo) keyboard shortcuts.
+
+### Implementation details:
+
+1. **State Management** (`src/popup/popup.js` lines 100-103):
+   - Added `undoStack: []` - stores up to 5 undoable actions
+   - Added `redoStack: []` - stores actions that were undone for redo
+   - Added `undoToastTimeoutId: null` - tracks toast auto-dismiss timeout
+
+2. **Undo Action Types** (`src/popup/popup.js` lines 2278-2284):
+   - `COUNTER_INCREMENT` - for counter increment actions
+   - `COUNTER_DECREMENT` - for counter decrement actions
+   - `CHECKBOX_TOGGLE` - for checkbox toggle actions
+   - `TIMER_START` - for timer start actions
+   - `TIMER_STOP` - for timer pause/stop actions
+
+3. **Core Functions** (`src/popup/popup.js` lines 2296-2641):
+   - `pushUndoAction(action)` - Adds action to undo stack, limits to 5 items, clears redo stack
+   - `getUndoActionDescription(action)` - Human-readable description for toast display
+   - `showUndoToast(action)` - Shows toast with action description, Undo button, and close button
+   - `hideUndoToast()` - Hides the undo toast and clears timeout
+   - `performUndo()` - Reverts most recent action based on type, pushes to redo stack
+   - `performRedo()` - Re-applies most recently undone action
+   - `canUndo()` / `canRedo()` - Check if undo/redo is available
+   - `clearUndoHistory()` - Clears both stacks (for data reload scenarios)
+
+4. **Action Handler Integration**:
+   - `handleTimerToggle()` (lines 1113-1223): Added undo action for both timer start and stop
+   - `handleCounterIncrement()` (lines 1378-1441): Added undo action after increment
+   - `handleCounterDecrement()` (lines 1447-1496): Added undo action after decrement
+   - `handleCheckboxToggle()` (lines 1506-1569): Added undo action after toggle
+
+5. **Keyboard Shortcuts** (`src/popup/popup.js` lines 2172-2184):
+   - Added Ctrl+Z (or Cmd+Z on Mac) for undo
+   - Added Ctrl+Y, Ctrl+Shift+Z (or Cmd equivalents) for redo
+   - Works globally, not just on View Goals screen
+
+6. **Help Overlay Update** (`src/popup/popup.js` lines 2147-2156):
+   - Added "Undo / Redo" section with Ctrl+Z and Ctrl+Y shortcuts
+
+7. **CSS Styles** (`src/popup/popup.css` lines 4716-4844):
+   - `.undo-toast` - Fixed position toast at bottom center
+   - Slide-up animation on appear, slide-down on dismiss
+   - `.undo-toast-btn` - Green "Undo" button with hover effects
+   - `.undo-toast-close` - Close (X) button to dismiss toast
+   - Dark mode support
+   - Reduced motion support
+
+### Files modified:
+- `src/popup/popup.js` (lines 100-103, 1113-1223, 1378-1496, 1506-1569, 2147-2156, 2172-2184, 2257-2641, 9983-9992)
+- `src/popup/popup.css` (lines 4716-4844)
+
+### Key design decisions:
+- Undo stack limited to 5 actions to balance memory usage and usability
+- 5-second auto-dismiss timeout for toast (configurable via constant)
+- Toast shows action description for clear feedback (e.g., "Incremented 'Read Books'")
+- Redo stack is cleared when a new action is performed (standard behavior)
+- Timer undo restores the exact progress value from before the action
+- Timer start undo stops the timer; timer stop undo restarts from previous progress
+- Keyboard shortcuts work globally (not just on View Goals) for convenience
+- Sound feedback (tick) plays on successful undo/redo
+
+### Undo behavior by action type:
+| Action | Undo Effect |
+|--------|-------------|
+| Counter increment | Restore previous count |
+| Counter decrement | Restore previous count |
+| Checkbox toggle | Restore previous state |
+| Timer start | Stop the timer |
+| Timer stop | Restart timer from previous progress |
+
+### Acceptance criteria met:
+- Undo toast appears after actions (shown with description and Undo button)
+- Undo reverts: increment, decrement, toggle, timer start/stop (all implemented)
+- 5-second window to undo (configurable UNDO_TOAST_DURATION constant)
+- Ctrl+Z triggers undo (works globally, respects meta key on Mac)
+- Redo available after undo (via Ctrl+Y or Ctrl+Shift+Z, or sequential undo removes from redo stack)
+- Undo stack (last 5 actions) (UNDO_STACK_MAX_SIZE = 5)
+- Clear visual feedback (toast notification, success message on undo/redo, sound feedback)
+

@@ -96,7 +96,11 @@ const state = {
   timerIntervalId: null, // Interval ID for updating timer display
   justCompletedGoals: new Set(), // Track goals that just completed for animation (US-019)
   keyboardSelectedGoalIndex: -1, // US-078: Currently selected goal index for keyboard navigation
-  keyboardShortcutsHelpVisible: false // US-078: Whether keyboard shortcuts help overlay is visible
+  keyboardShortcutsHelpVisible: false, // US-078: Whether keyboard shortcuts help overlay is visible
+  // US-079: Undo/Redo state management
+  undoStack: [], // Stack of undoable actions (max 5)
+  redoStack: [], // Stack of redoable actions
+  undoToastTimeoutId: null // Timeout ID for auto-dismissing undo toast
 };
 
 // =============================================================================
@@ -1115,6 +1119,7 @@ async function handleTimerToggle(goalId) {
 
   const isCurrentlyActive = goal.isActive;
   const now = Date.now();
+  const previousProgress = goal.progress; // US-079: Store for undo
 
   if (isCurrentlyActive) {
     // PAUSE: Calculate elapsed time and save progress
@@ -1150,6 +1155,15 @@ async function handleTimerToggle(goalId) {
 
       // US-039: Play pause sound
       playSound(SOUNDS.PAUSE);
+
+      // US-079: Push undo action for timer stop
+      pushUndoAction({
+        type: UNDO_ACTION_TYPES.TIMER_STOP,
+        goalId: goalId,
+        goalTitle: goal.title,
+        previousValue: previousProgress,
+        newValue: newProgress
+      });
 
       console.log(`[Timer] Paused goal ${goalId}: +${elapsedSinceStart}s, total progress: ${newProgress}s`);
     }
@@ -1190,6 +1204,15 @@ async function handleTimerToggle(goalId) {
       if (response && response.success) {
         console.log('[Timer] Service worker notified of timer start');
       }
+    });
+
+    // US-079: Push undo action for timer start
+    pushUndoAction({
+      type: UNDO_ACTION_TYPES.TIMER_START,
+      goalId: goalId,
+      goalTitle: goal.title,
+      previousValue: previousProgress,
+      newValue: previousProgress // Progress doesn't change on start
     });
 
     console.log(`[Timer] Started goal ${goalId} at ${new Date(now).toLocaleTimeString()}`);
@@ -1359,6 +1382,9 @@ async function handleCounterIncrement(goalId) {
     return;
   }
 
+  // US-079: Store previous progress for undo
+  const previousProgress = goal.progress;
+
   // Calculate new progress (don't exceed target for visual purposes, but allow tracking beyond)
   const newProgress = goal.progress + 1;
   const wasCompleted = isGoalCompleted(goal);
@@ -1401,6 +1427,15 @@ async function handleCounterIncrement(goalId) {
     playSound(SOUNDS.TICK);
   }
 
+  // US-079: Push undo action for counter increment
+  pushUndoAction({
+    type: UNDO_ACTION_TYPES.COUNTER_INCREMENT,
+    goalId: goalId,
+    goalTitle: goal.title,
+    previousValue: previousProgress,
+    newValue: newProgress
+  });
+
   // Re-render to update UI
   renderCurrentScreen();
 }
@@ -1421,6 +1456,9 @@ async function handleCounterDecrement(goalId) {
     console.log(`[Counter] Goal ${goalId} already at minimum (0)`);
     return;
   }
+
+  // US-079: Store previous progress for undo
+  const previousProgress = goal.progress;
 
   // Calculate new progress
   const newProgress = goal.progress - 1;
@@ -1444,6 +1482,15 @@ async function handleCounterDecrement(goalId) {
   // US-039: Play tick sound for decrement
   playSound(SOUNDS.TICK);
 
+  // US-079: Push undo action for counter decrement
+  pushUndoAction({
+    type: UNDO_ACTION_TYPES.COUNTER_DECREMENT,
+    goalId: goalId,
+    goalTitle: goal.title,
+    previousValue: previousProgress,
+    newValue: newProgress
+  });
+
   // Re-render to update UI
   renderCurrentScreen();
 }
@@ -1462,6 +1509,9 @@ async function handleCheckboxToggle(goalId) {
     console.error('Invalid goal for checkbox toggle:', goalId);
     return;
   }
+
+  // US-079: Store previous progress for undo
+  const previousProgress = goal.progress;
 
   const wasCompleted = isGoalCompleted(goal);
   // Toggle between 0 and 1 (target is always 1 for checkbox)
@@ -1504,6 +1554,15 @@ async function handleCheckboxToggle(goalId) {
     // US-039: Play tick sound for regular toggle
     playSound(SOUNDS.TICK);
   }
+
+  // US-079: Push undo action for checkbox toggle
+  pushUndoAction({
+    type: UNDO_ACTION_TYPES.CHECKBOX_TOGGLE,
+    goalId: goalId,
+    goalTitle: goal.title,
+    previousValue: previousProgress,
+    newValue: newProgress
+  });
 
   // Re-render to update UI
   renderCurrentScreen();
@@ -2086,6 +2145,17 @@ function renderKeyboardShortcutsHelp() {
             </div>
           </div>
           <div class="shortcut-section">
+            <h3 class="shortcut-section-title">Undo / Redo</h3>
+            <div class="shortcut-row">
+              <span class="shortcut-keys"><kbd>Ctrl</kbd>+<kbd>Z</kbd></span>
+              <span class="shortcut-description">Undo last action</span>
+            </div>
+            <div class="shortcut-row">
+              <span class="shortcut-keys"><kbd>Ctrl</kbd>+<kbd>Y</kbd></span>
+              <span class="shortcut-description">Redo last undone action</span>
+            </div>
+          </div>
+          <div class="shortcut-section">
             <h3 class="shortcut-section-title">General</h3>
             <div class="shortcut-row">
               <span class="shortcut-keys"><kbd>?</kbd></span>
@@ -2164,6 +2234,20 @@ function isInputFocused() {
 function handleGlobalKeyboardShortcut(e) {
   // Don't handle if typing in an input field
   if (isInputFocused()) return;
+
+  // US-079: Handle Ctrl+Z for undo (works globally, not just on View Goals)
+  if ((e.ctrlKey || e.metaKey) && e.key === 'z' && !e.shiftKey) {
+    e.preventDefault();
+    performUndo();
+    return;
+  }
+
+  // US-079: Handle Ctrl+Y or Ctrl+Shift+Z for redo (works globally)
+  if ((e.ctrlKey || e.metaKey) && (e.key === 'y' || (e.key === 'z' && e.shiftKey) || (e.key === 'Z' && e.shiftKey))) {
+    e.preventDefault();
+    performRedo();
+    return;
+  }
 
   // Handle Escape key globally (close help overlay, modals, or exit focus mode)
   if (e.key === 'Escape') {
@@ -2248,6 +2332,392 @@ function initKeyboardShortcuts() {
 function resetKeyboardSelection() {
   state.keyboardSelectedGoalIndex = -1;
   updateKeyboardSelectionVisual();
+}
+
+// =============================================================================
+// US-079: Undo/Redo Actions
+// =============================================================================
+
+/**
+ * Maximum number of undo actions to keep in the stack
+ * @constant {number}
+ */
+const UNDO_STACK_MAX_SIZE = 5;
+
+/**
+ * Duration in milliseconds for the undo toast to remain visible
+ * @constant {number}
+ */
+const UNDO_TOAST_DURATION = 5000;
+
+/**
+ * Action types for undo/redo
+ * @readonly
+ * @enum {string}
+ */
+const UNDO_ACTION_TYPES = {
+  COUNTER_INCREMENT: 'counterIncrement',
+  COUNTER_DECREMENT: 'counterDecrement',
+  CHECKBOX_TOGGLE: 'checkboxToggle',
+  TIMER_START: 'timerStart',
+  TIMER_STOP: 'timerStop'
+};
+
+/**
+ * Push an undoable action to the stack
+ * @param {Object} action - The action to push
+ * @param {string} action.type - The type of action (from UNDO_ACTION_TYPES)
+ * @param {string} action.goalId - The ID of the goal affected
+ * @param {*} action.previousValue - The value before the action
+ * @param {*} action.newValue - The value after the action
+ * @param {string} action.goalTitle - The title of the goal (for display)
+ * @param {Object} [action.extraData] - Extra data needed for undo (e.g., timer state)
+ */
+function pushUndoAction(action) {
+  // Add timestamp to action
+  action.timestamp = Date.now();
+
+  // Push to stack
+  state.undoStack.push(action);
+
+  // Limit stack size to UNDO_STACK_MAX_SIZE
+  if (state.undoStack.length > UNDO_STACK_MAX_SIZE) {
+    state.undoStack.shift(); // Remove oldest action
+  }
+
+  // Clear redo stack when a new action is performed
+  state.redoStack = [];
+
+  // Show undo toast
+  showUndoToast(action);
+
+  console.log(`[Undo] Action pushed: ${action.type} for "${action.goalTitle}"`);
+}
+
+/**
+ * Get a human-readable description of an undo action
+ * @param {Object} action - The action
+ * @returns {string} Human-readable description
+ */
+function getUndoActionDescription(action) {
+  const goalTitle = action.goalTitle.length > 20
+    ? action.goalTitle.substring(0, 20) + '...'
+    : action.goalTitle;
+
+  switch (action.type) {
+    case UNDO_ACTION_TYPES.COUNTER_INCREMENT:
+      return `Incremented "${goalTitle}"`;
+    case UNDO_ACTION_TYPES.COUNTER_DECREMENT:
+      return `Decremented "${goalTitle}"`;
+    case UNDO_ACTION_TYPES.CHECKBOX_TOGGLE:
+      return action.newValue >= 1 ? `Completed "${goalTitle}"` : `Uncompleted "${goalTitle}"`;
+    case UNDO_ACTION_TYPES.TIMER_START:
+      return `Started "${goalTitle}"`;
+    case UNDO_ACTION_TYPES.TIMER_STOP:
+      return `Paused "${goalTitle}"`;
+    default:
+      return `Changed "${goalTitle}"`;
+  }
+}
+
+/**
+ * Show the undo toast notification
+ * @param {Object} action - The action that can be undone
+ */
+function showUndoToast(action) {
+  // Clear any existing timeout
+  if (state.undoToastTimeoutId) {
+    clearTimeout(state.undoToastTimeoutId);
+    state.undoToastTimeoutId = null;
+  }
+
+  // Get or create toast element
+  let toast = document.getElementById('undo-toast');
+  if (!toast) {
+    toast = document.createElement('div');
+    toast.id = 'undo-toast';
+    toast.className = 'undo-toast';
+    document.body.appendChild(toast);
+  }
+
+  const description = getUndoActionDescription(action);
+
+  toast.innerHTML = `
+    <span class="undo-toast-message">${escapeHtml(description)}</span>
+    <button class="undo-toast-btn" id="undo-btn" title="Undo (Ctrl+Z)">
+      Undo
+    </button>
+    <button class="undo-toast-close" id="undo-toast-close" title="Dismiss">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <line x1="18" y1="6" x2="6" y2="18"/>
+        <line x1="6" y1="6" x2="18" y2="18"/>
+      </svg>
+    </button>
+  `;
+
+  // Show the toast
+  requestAnimationFrame(() => {
+    toast.classList.add('visible');
+  });
+
+  // Attach event listeners
+  const undoBtn = toast.querySelector('#undo-btn');
+  const closeBtn = toast.querySelector('#undo-toast-close');
+
+  // Remove old listeners by cloning
+  const newUndoBtn = undoBtn.cloneNode(true);
+  const newCloseBtn = closeBtn.cloneNode(true);
+  undoBtn.parentNode.replaceChild(newUndoBtn, undoBtn);
+  closeBtn.parentNode.replaceChild(newCloseBtn, closeBtn);
+
+  newUndoBtn.addEventListener('click', (e) => {
+    e.preventDefault();
+    performUndo();
+  });
+
+  newCloseBtn.addEventListener('click', (e) => {
+    e.preventDefault();
+    hideUndoToast();
+  });
+
+  // Auto-hide after duration
+  state.undoToastTimeoutId = setTimeout(() => {
+    hideUndoToast();
+  }, UNDO_TOAST_DURATION);
+}
+
+/**
+ * Hide the undo toast notification
+ */
+function hideUndoToast() {
+  // Clear timeout
+  if (state.undoToastTimeoutId) {
+    clearTimeout(state.undoToastTimeoutId);
+    state.undoToastTimeoutId = null;
+  }
+
+  const toast = document.getElementById('undo-toast');
+  if (toast) {
+    toast.classList.remove('visible');
+  }
+}
+
+/**
+ * Perform undo action
+ * Reverts the most recent action in the undo stack
+ * @returns {Promise<boolean>} True if undo was performed, false if stack was empty
+ */
+async function performUndo() {
+  if (state.undoStack.length === 0) {
+    console.log('[Undo] Stack is empty, nothing to undo');
+    return false;
+  }
+
+  // Pop the most recent action
+  const action = state.undoStack.pop();
+
+  // Find the goal
+  const goal = state.goals.find(g => g.id === action.goalId);
+  if (!goal) {
+    console.error('[Undo] Goal not found:', action.goalId);
+    return false;
+  }
+
+  console.log(`[Undo] Undoing: ${action.type} for "${action.goalTitle}"`);
+
+  // Perform the undo based on action type
+  switch (action.type) {
+    case UNDO_ACTION_TYPES.COUNTER_INCREMENT:
+    case UNDO_ACTION_TYPES.COUNTER_DECREMENT:
+      // Revert counter progress
+      goal.progress = action.previousValue;
+      await updateGoal(action.goalId, { progress: action.previousValue });
+      break;
+
+    case UNDO_ACTION_TYPES.CHECKBOX_TOGGLE:
+      // Revert checkbox progress
+      goal.progress = action.previousValue;
+      await updateGoal(action.goalId, { progress: action.previousValue });
+      break;
+
+    case UNDO_ACTION_TYPES.TIMER_START:
+      // Revert timer start - stop the timer
+      goal.isActive = false;
+      await updateGoal(action.goalId, { isActive: false });
+
+      // Remove from active timers
+      if (state.activeTimers[action.goalId]) {
+        delete state.activeTimers[action.goalId];
+        await saveActiveTimers(state.activeTimers);
+      }
+
+      // Notify service worker
+      sendToServiceWorker({
+        type: 'TIMER_PAUSE',
+        goalId: action.goalId
+      });
+      break;
+
+    case UNDO_ACTION_TYPES.TIMER_STOP:
+      // Revert timer stop - restart the timer from where it was
+      goal.isActive = true;
+      goal.progress = action.previousValue;
+      await updateGoal(action.goalId, { isActive: true, progress: action.previousValue });
+
+      // Restore active timer
+      const now = Date.now();
+      state.activeTimers[action.goalId] = {
+        startTime: now,
+        goalId: action.goalId
+      };
+      await saveActiveTimers(state.activeTimers);
+
+      // Start timer interval
+      startTimerUpdateInterval();
+
+      // Notify service worker
+      sendToServiceWorker({
+        type: 'TIMER_START',
+        goalId: action.goalId,
+        startTime: now
+      });
+      break;
+  }
+
+  // Push to redo stack (create reverse action)
+  const redoAction = {
+    ...action,
+    previousValue: action.newValue,
+    newValue: action.previousValue,
+    timestamp: Date.now()
+  };
+  state.redoStack.push(redoAction);
+
+  // Hide undo toast and show success feedback
+  hideUndoToast();
+  showSuccessFeedback('Action undone');
+
+  // Play tick sound for feedback
+  playSound(SOUNDS.TICK);
+
+  // Re-render
+  renderCurrentScreen();
+
+  return true;
+}
+
+/**
+ * Perform redo action
+ * Re-applies the most recently undone action
+ * @returns {Promise<boolean>} True if redo was performed, false if stack was empty
+ */
+async function performRedo() {
+  if (state.redoStack.length === 0) {
+    console.log('[Redo] Stack is empty, nothing to redo');
+    return false;
+  }
+
+  // Pop the most recent redo action
+  const action = state.redoStack.pop();
+
+  // Find the goal
+  const goal = state.goals.find(g => g.id === action.goalId);
+  if (!goal) {
+    console.error('[Redo] Goal not found:', action.goalId);
+    return false;
+  }
+
+  console.log(`[Redo] Redoing: ${action.type} for "${action.goalTitle}"`);
+
+  // Perform the redo (same as original action, swapped values)
+  switch (action.type) {
+    case UNDO_ACTION_TYPES.COUNTER_INCREMENT:
+    case UNDO_ACTION_TYPES.COUNTER_DECREMENT:
+      // Apply counter progress change
+      goal.progress = action.previousValue; // After redo swap, previousValue is the target
+      await updateGoal(action.goalId, { progress: action.previousValue });
+      break;
+
+    case UNDO_ACTION_TYPES.CHECKBOX_TOGGLE:
+      // Apply checkbox progress change
+      goal.progress = action.previousValue;
+      await updateGoal(action.goalId, { progress: action.previousValue });
+      break;
+
+    case UNDO_ACTION_TYPES.TIMER_START:
+      // Redo timer start - stop it (since undo started it, redo stops it)
+      goal.isActive = false;
+      await updateGoal(action.goalId, { isActive: false });
+
+      if (state.activeTimers[action.goalId]) {
+        delete state.activeTimers[action.goalId];
+        await saveActiveTimers(state.activeTimers);
+      }
+
+      sendToServiceWorker({
+        type: 'TIMER_PAUSE',
+        goalId: action.goalId
+      });
+      break;
+
+    case UNDO_ACTION_TYPES.TIMER_STOP:
+      // Redo timer stop - restart it (since undo stopped it, redo starts it)
+      goal.isActive = true;
+      await updateGoal(action.goalId, { isActive: true });
+
+      const now = Date.now();
+      state.activeTimers[action.goalId] = {
+        startTime: now,
+        goalId: action.goalId
+      };
+      await saveActiveTimers(state.activeTimers);
+
+      startTimerUpdateInterval();
+
+      sendToServiceWorker({
+        type: 'TIMER_START',
+        goalId: action.goalId,
+        startTime: now
+      });
+      break;
+  }
+
+  // Show success feedback
+  showSuccessFeedback('Action redone');
+
+  // Play tick sound for feedback
+  playSound(SOUNDS.TICK);
+
+  // Re-render
+  renderCurrentScreen();
+
+  return true;
+}
+
+/**
+ * Check if there are actions that can be undone
+ * @returns {boolean} True if undo is available
+ */
+function canUndo() {
+  return state.undoStack.length > 0;
+}
+
+/**
+ * Check if there are actions that can be redone
+ * @returns {boolean} True if redo is available
+ */
+function canRedo() {
+  return state.redoStack.length > 0;
+}
+
+/**
+ * Clear the undo/redo stacks
+ * Called when major state changes occur (e.g., loading data)
+ */
+function clearUndoHistory() {
+  state.undoStack = [];
+  state.redoStack = [];
+  hideUndoToast();
 }
 
 // =============================================================================
@@ -9509,5 +9979,15 @@ export {
   initTheme,
   toggleTheme,
   setupSystemThemeListener,
-  getThemeDisplayText
+  getThemeDisplayText,
+  // US-079 Undo/Redo functions
+  UNDO_ACTION_TYPES,
+  pushUndoAction,
+  performUndo,
+  performRedo,
+  canUndo,
+  canRedo,
+  clearUndoHistory,
+  showUndoToast,
+  hideUndoToast
 };
