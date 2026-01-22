@@ -182,7 +182,7 @@ function renderTimerStatsCompact(goal) {
     const elapsedSinceStart = Math.floor((Date.now() - activeTimer.startTime) / 1000);
     displayProgress = goal.progress + elapsedSinceStart;
   }
-  displayProgress = Math.min(displayProgress, goal.target);
+  // Allow overflow past target
 
   const timerDisplay = formatTimerDisplay(displayProgress);
   const targetDisplay = formatTimerDisplay(goal.target);

@@ -619,14 +619,14 @@ function updateTimerDisplays() {
       }
     }
 
-    // Update the live timer display (HH:MM:SS format)
-    const liveDisplay = document.querySelector(`.timer-live-display[data-goal-id="${goalId}"]`);
-    if (liveDisplay) {
+    // Update the compact timer stats display (HH:MM:SS format)
+    const timerCurrent = document.querySelector(`.timer-current[data-goal-id="${goalId}"]`);
+    if (timerCurrent) {
       const hours = Math.floor(currentProgress / 3600);
       const minutes = Math.floor((currentProgress % 3600) / 60);
       const seconds = currentProgress % 60;
       const pad = (n) => n.toString().padStart(2, '0');
-      liveDisplay.textContent = hours > 0
+      timerCurrent.textContent = hours > 0
         ? `${pad(hours)}:${pad(minutes)}:${pad(seconds)}`
         : `${pad(minutes)}:${pad(seconds)}`;
     }

@@ -2814,6 +2814,8 @@ select:focus {
 }
 
 .timer-stats-compact .timer-current {
+  font-size: inherit;
+  font-weight: var(--weight-medium);
   color: var(--text-secondary);
 }
 
@@ -2827,6 +2829,14 @@ select:focus {
 }
 
 .timer-stats-compact.is-active .timer-current {
+  color: var(--success);
+}
+
+.goal-card:hover .timer-stats-compact .timer-current {
+  color: var(--text-primary);
+}
+
+.goal-card:hover .timer-stats-compact.is-active .timer-current {
   color: var(--success);
 }
 
