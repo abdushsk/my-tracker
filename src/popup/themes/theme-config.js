@@ -148,6 +148,7 @@ export const THEMES = {
       accentSubtle: '#FFE0B2',
       accentText: '#BF360C',
       warning: '#F7931E',
+      warningHover: '#E07A00',
       warningSubtle: '#FFE0B2',
       typeTimer: '#F7931E',
       typeTimerSubtle: '#FFE0B2',
@@ -170,6 +171,7 @@ export const THEMES = {
       accentSubtle: 'rgba(255, 138, 80, 0.25)',
       accentText: '#FFCCBC',
       warning: '#FFB74D',
+      warningHover: '#FFA726',
       warningSubtle: 'rgba(255, 183, 77, 0.25)',
       typeTimer: '#FFB74D',
       typeTimerSubtle: 'rgba(255, 183, 77, 0.25)',
@@ -270,6 +272,7 @@ function generateThemeCSS(id, colors, isDark) {
   if (colors.info) vars.push(`--info: ${colors.info}`);
   if (colors.infoSubtle) vars.push(`--info-subtle: ${colors.infoSubtle}`);
   if (colors.warning) vars.push(`--warning: ${colors.warning}`);
+  if (colors.warningHover) vars.push(`--warning-hover: ${colors.warningHover}`);
   if (colors.warningSubtle) vars.push(`--warning-subtle: ${colors.warningSubtle}`);
   if (colors.typeTimer) vars.push(`--type-timer: ${colors.typeTimer}`);
   if (colors.typeTimerSubtle) vars.push(`--type-timer-subtle: ${colors.typeTimerSubtle}`);

@@ -113,6 +113,7 @@
   --danger-hover: #DC2626;
   --danger-subtle: #FEE2E2;
   --warning: #F59E0B;
+  --warning-hover: #D97706;
   --warning-subtle: #FEF3C7;
   --info: #3B82F6;
   --info-subtle: #DBEAFE;
@@ -248,6 +249,7 @@
   --danger-hover: #FCA5A5;
   --danger-subtle: rgba(248, 113, 113, 0.2);
   --warning: #FBBF24;
+  --warning-hover: #F59E0B;
   --warning-subtle: rgba(251, 191, 36, 0.2);
   --info: #60A5FA;
   --info-subtle: rgba(96, 165, 250, 0.2);
@@ -4051,23 +4053,6 @@ select:focus {
   flex-shrink: 0;
 }
 
-/* Secondary Button */
-.btn-secondary {
-  background-color: var(--background);
-  color: var(--text-secondary);
-  border: 1px solid var(--border);
-}
-
-.btn-secondary:hover {
-  background-color: var(--background-secondary);
-  color: var(--text);
-  border-color: var(--text-muted);
-}
-
-.btn-secondary:active {
-  transform: scale(0.98);
-}
-
 /* Modal animation keyframes */
 @keyframes modal-fade-in {
   from {
@@ -5163,6 +5148,10 @@ body.modal-open {
   background-color: rgba(255, 255, 255, 0.1);
 }
 
+[data-theme="dark"] .undo-toast-close:active {
+  background-color: rgba(255, 255, 255, 0.2);
+}
+
 /* Reduced motion support */
 @media (prefers-reduced-motion: reduce) {
   .undo-toast {
@@ -5285,7 +5274,7 @@ body.modal-open {
 }
 
 .btn-danger:active {
-  transform: scale(0.97);
+  transform: scale(0.98);
 }
 
 .btn-danger:focus-visible {
@@ -5845,7 +5834,7 @@ body.modal-open {
 
 .heatmap-cell:hover {
   transform: scale(1.2);
-  box-shadow: 0 0 4px rgba(0, 0, 0, 0.2);
+  box-shadow: var(--shadow-sm);
   z-index: 1;
 }
 
@@ -6012,7 +6001,7 @@ body.modal-open {
 
 .template-card:hover {
   border-color: var(--primary);
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  box-shadow: var(--shadow-md);
 }
 
 .template-card.custom-template {
@@ -6944,15 +6933,15 @@ body.modal-open {
 
 /* Dark mode styles */
 [data-theme="dark"] .quick-add-fab {
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4), 0 2px 4px rgba(0, 0, 0, 0.2);
+  box-shadow: var(--shadow-lg), var(--shadow-sm);
 }
 
 [data-theme="dark"] .quick-add-fab:hover {
-  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.5), 0 3px 6px rgba(0, 0, 0, 0.25);
+  box-shadow: var(--shadow-lg), var(--shadow-md);
 }
 
 [data-theme="dark"] .quick-add-form {
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4), 0 0 0 1px var(--border);
+  box-shadow: var(--shadow-lg), 0 0 0 1px var(--border);
 }
 
 [data-theme="dark"] .quick-add-header {
@@ -9719,7 +9708,11 @@ body.modal-open {
 }
 
 .challenge-skip-btn:hover {
-  background: rgba(255, 255, 255, 0.3);
+  background: rgba(255, 255, 255, 0.25);
+}
+
+.challenge-skip-btn:active {
+  background: rgba(255, 255, 255, 0.35);
 }
 
 .challenge-skip-btn svg {
@@ -10770,7 +10763,7 @@ body.modal-open {
 }
 
 .pomodoro-play-btn.is-active:hover {
-  background: #e67e22;
+  background: var(--warning-hover);
 }
 
 .pomodoro-play-btn svg {
@@ -10902,11 +10895,11 @@ body.modal-open {
 }
 
 [data-theme="dark"] .pomodoro-phase-badge.work {
-  background: rgba(231, 76, 60, 0.2);
+  background: var(--danger-subtle);
 }
 
 [data-theme="dark"] .pomodoro-phase-badge.break {
-  background: rgba(39, 174, 96, 0.2);
+  background: var(--accent-subtle);
 }
 
 [data-theme="dark"] .pomodoro-session-dot {
@@ -10914,11 +10907,11 @@ body.modal-open {
 }
 
 [data-theme="dark"] .pomodoro-toggle-btn:hover {
-  background: rgba(231, 76, 60, 0.15);
+  background: var(--danger-subtle);
 }
 
 [data-theme="dark"] .pomodoro-close-btn:hover {
-  background: rgba(231, 76, 60, 0.15);
+  background: var(--danger-subtle);
 }
 
 [data-theme="dark"] .pomodoro-duration-input {

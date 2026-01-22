@@ -394,3 +394,64 @@
 - The generic `.header-spacer` class is used across multiple screens; screen-specific overrides should be scoped to avoid breaking other screens (e.g., `.goal-form-header .header-spacer`)
 - Using `text-align: center` on the title provides an additional safeguard for centering within its allocated flex space
 
+## US-012: Ensure Consistent Hover and Active Colors (Completed)
+**Date**: 2026-01-23
+
+### Changes Made
+
+1. **Added `--warning-hover` CSS variable** (popup.css:116, 252):
+   - Light mode: `#D97706` (darker shade of warning yellow)
+   - Dark mode: `#F59E0B` (lighter shade for dark backgrounds)
+   - Also added to theme-config.js for sunset theme (light: `#E07A00`, dark: `#FFA726`)
+
+2. **Fixed pomodoro play button active hover** (popup.css:10774-10775):
+   - Changed from hardcoded `#e67e22` to `var(--warning-hover)`
+   - Now theme-aware and consistent across light/dark modes
+
+3. **Removed duplicate `.btn-secondary` definitions** (popup.css:4056-4071):
+   - Deleted redundant `.btn-secondary`, `.btn-secondary:hover`, and `.btn-secondary:active` rules
+   - Kept the canonical definition in the general buttons section (lines 1179-1189)
+   - Eliminates CSS cascade conflicts
+
+4. **Fixed heatmap cell hover shadow** (popup.css:5833):
+   - Changed from hardcoded `rgba(0, 0, 0, 0.2)` to `var(--shadow-sm)`
+   - Adapts to dark mode with appropriate shadow opacity
+
+5. **Fixed template card hover shadow** (popup.css:6000):
+   - Changed from hardcoded `rgba(0, 0, 0, 0.08)` to `var(--shadow-md)`
+   - Theme-consistent shadow styling
+
+6. **Standardized button active transform** (popup.css:5273):
+   - Changed `.btn-danger:active` from `scale(0.97)` to `scale(0.98)`
+   - Consistent with the standard `.btn:active` transform
+
+7. **Added challenge skip button active state** (popup.css:9710-9711):
+   - Added `:active` state with `rgba(255, 255, 255, 0.35)` background
+   - Provides visual feedback when button is pressed
+
+8. **Fixed pomodoro dark mode hover states** (popup.css:10905-10910):
+   - Changed `.pomodoro-toggle-btn:hover` and `.pomodoro-close-btn:hover` from `rgba(231, 76, 60, 0.15)` to `var(--danger-subtle)`
+   - Uses semantic CSS variable that adapts to theme
+
+9. **Fixed pomodoro phase badges in dark mode** (popup.css:10893-10898):
+   - Changed `.pomodoro-phase-badge.work` from `rgba(231, 76, 60, 0.2)` to `var(--danger-subtle)`
+   - Changed `.pomodoro-phase-badge.break` from `rgba(39, 174, 96, 0.2)` to `var(--accent-subtle)`
+   - Theme-consistent badge backgrounds
+
+10. **Added undo toast close button dark mode active state** (popup.css:5151-5152):
+    - Added `[data-theme="dark"] .undo-toast-close:active` with `rgba(255, 255, 255, 0.2)`
+    - Consistent active feedback in dark mode
+
+11. **Fixed quick-add FAB dark mode shadows** (popup.css:6935-6944):
+    - Changed from hardcoded rgba shadows to CSS variables (`var(--shadow-lg)`, `var(--shadow-sm)`, `var(--shadow-md)`)
+    - Shadows now properly scale with dark mode opacity adjustments
+
+### Key Learnings
+- Always use CSS variables for hover and active states to ensure theme consistency
+- The `--warning-hover` variable was missing - semantic color variables should include hover variants for all states
+- Duplicate CSS rules can cause cascade issues; always check for redundant definitions when debugging inconsistencies
+- Shadows should use CSS variables (`--shadow-sm`, `--shadow-md`, `--shadow-lg`) which have appropriate opacity for light/dark modes
+- For buttons on gradient backgrounds, white overlays with opacity work well as they're theme-agnostic
+- Active states should have consistent transforms across similar elements (e.g., all buttons using `scale(0.98)`)
+- Dark mode subtle colors should use CSS variables with rgba notation (e.g., `var(--danger-subtle)`) which are pre-defined with appropriate opacity
+

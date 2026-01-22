@@ -86,7 +86,7 @@
       "title": "Ensure consistent hover and active colors",
       "description": "Review all interactive elements, such as buttons and icons, to ensure that the hover and active (after press) colors are consistent. Address any discrepancies to enhance the overall user experience and maintain visual coherence throughout the extension.",
       "priority": 12,
-      "passes": false
+      "passes": true
     },
     {
       "id": "US-013",
