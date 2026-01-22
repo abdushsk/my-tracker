@@ -21,6 +21,15 @@ import {
   showInputError,
   clearInputError
 } from './utils/feedback.js';
+import {
+  registerThemeCallbacks,
+  getEffectiveTheme,
+  applyTheme,
+  initTheme,
+  toggleTheme,
+  setupSystemThemeListener,
+  getThemeDisplayText
+} from './utils/theme.js';
 
 // Feature modules
 import {
@@ -1428,136 +1437,8 @@ async function sendToServiceWorker(message) {
 // US-051: Theme Management
 // =============================================================================
 
-/**
- * Get the effective theme based on system preference and user setting
- * @param {string} themeSetting - User's theme setting ('light', 'dark', 'auto')
- * @returns {string} The effective theme ('light' or 'dark')
- */
-function getEffectiveTheme(themeSetting) {
-  if (themeSetting === 'auto') {
-    // Check system preference
-    const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-    return prefersDark ? 'dark' : 'light';
-  }
-  return themeSetting;
-}
-
-/**
- * Apply the theme to the document
- * @param {string} theme - The theme to apply ('light' or 'dark')
- */
-function applyTheme(theme) {
-  if (theme === 'dark') {
-    document.documentElement.setAttribute('data-theme', 'dark');
-  } else {
-    document.documentElement.removeAttribute('data-theme');
-  }
-  console.log(`[Theme] Applied theme: ${theme}`);
-}
-
-/**
- * Initialize theme based on user settings and system preference
- * Should be called early to prevent theme flash
- * @param {Object} settings - Settings object with theme property
- */
-function initTheme(settings) {
-  const themeSetting = settings?.theme || 'auto';
-  const effectiveTheme = getEffectiveTheme(themeSetting);
-
-  // Add no-transition class to prevent flash during initial load
-  document.documentElement.classList.add('no-transition');
-
-  applyTheme(effectiveTheme);
-
-  // Remove no-transition class after a brief delay to enable transitions
-  requestAnimationFrame(() => {
-    requestAnimationFrame(() => {
-      document.documentElement.classList.remove('no-transition');
-    });
-  });
-
-  console.log(`[Theme] Initialized: setting=${themeSetting}, effective=${effectiveTheme}`);
-}
-
-/**
- * Handle theme toggle in settings
- * Cycles through: auto -> light -> dark -> auto
- * @returns {Promise<string>} The new theme setting
- */
-async function toggleTheme() {
-  const currentSetting = state.settings?.theme || 'auto';
-  let newSetting;
-
-  // Cycle through themes
-  switch (currentSetting) {
-    case 'auto':
-      newSetting = 'light';
-      break;
-    case 'light':
-      newSetting = 'dark';
-      break;
-    case 'dark':
-      newSetting = 'auto';
-      break;
-    default:
-      newSetting = 'auto';
-  }
-
-  // Update state
-  state.settings = {
-    ...state.settings,
-    theme: newSetting
-  };
-
-  // Save to storage
-  await saveSettings(state.settings);
-
-  // Apply the new theme
-  const effectiveTheme = getEffectiveTheme(newSetting);
-  applyTheme(effectiveTheme);
-
-  console.log(`[Theme] Toggled: ${currentSetting} -> ${newSetting} (effective: ${effectiveTheme})`);
-
-  return newSetting;
-}
-
-/**
- * Set up listener for system theme changes (when user has 'auto' selected)
- */
-function setupSystemThemeListener() {
-  const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
-
-  mediaQuery.addEventListener('change', (e) => {
-    // Only react to system changes if user has 'auto' selected
-    if (state.settings?.theme === 'auto') {
-      const newTheme = e.matches ? 'dark' : 'light';
-      applyTheme(newTheme);
-      console.log(`[Theme] System preference changed: ${newTheme}`);
-
-      // Re-render settings screen if it's currently showing
-      if (state.currentScreen === SCREENS.SETTINGS) {
-        renderSettingsScreen();
-      }
-    }
-  });
-}
-
-/**
- * Get the display text for the current theme setting
- * @param {string} themeSetting - The theme setting ('light', 'dark', 'auto')
- * @returns {string} Human-readable theme name
- */
-function getThemeDisplayText(themeSetting) {
-  switch (themeSetting) {
-    case 'light':
-      return 'Light';
-    case 'dark':
-      return 'Dark';
-    case 'auto':
-    default:
-      return 'Auto';
-  }
-}
+// Theme functions (getEffectiveTheme, applyTheme, initTheme, toggleTheme,
+// setupSystemThemeListener, getThemeDisplayText) are now in ./utils/theme.js
 
 // =============================================================================
 // Feature Module Callback Registration
@@ -1568,6 +1449,15 @@ function getThemeDisplayText(themeSetting) {
  * This must be called before feature modules are used
  */
 function registerFeatureModuleCallbacks() {
+  // Register theme callbacks
+  registerThemeCallbacks({
+    getState: () => state,
+    setState: (updates) => Object.assign(state, updates),
+    saveSettings,
+    renderSettingsScreen,
+    SCREENS
+  });
+
   // Register undo/redo callbacks
   registerUndoRedoCallbacks({
     renderCurrentScreen,
