@@ -48,7 +48,7 @@ export function registerManageGoalsCallbacks(cbs) {
  * @param {string} type - The goal type
  * @returns {string} SVG HTML string
  */
-function getGoalTypeIconSmall(type) {
+export function getGoalTypeIconSmall(type) {
   switch (type) {
     case GOAL_TYPES.TIMER:
       return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="manage-goal-type-icon">
@@ -80,7 +80,7 @@ function getGoalTypeIconSmall(type) {
  * @param {string} type - The goal type
  * @returns {string} Human-readable type label
  */
-function getGoalTypeLabel(type) {
+export function getGoalTypeLabel(type) {
   switch (type) {
     case GOAL_TYPES.TIMER:
       return 'Timer';
@@ -100,7 +100,7 @@ function getGoalTypeLabel(type) {
  * @param {Object} goal - The goal object
  * @returns {string} Formatted target string
  */
-function formatTargetForManage(goal) {
+export function formatTargetForManage(goal) {
   switch (goal.type) {
     case GOAL_TYPES.TIMER:
       const hours = Math.floor(goal.target / 3600);

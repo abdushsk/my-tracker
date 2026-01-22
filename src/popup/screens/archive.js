@@ -10,6 +10,11 @@ import {
   restoreArchivedGoal,
   deleteArchivedGoal
 } from '../../utils/storage.js';
+import {
+  getGoalTypeIconSmall,
+  getGoalTypeLabel,
+  formatTargetForManage
+} from './manageGoals.js';
 
 // =============================================================================
 // Callback Registration
@@ -22,9 +27,6 @@ const callbacks = {
   showSuccessFeedback: null,
   showFormError: null,
   attachNavigationListeners: null,
-  getGoalTypeIconSmall: null,
-  getGoalTypeLabel: null,
-  formatTargetForManage: null,
   capitalizeFirst: null
 };
 
@@ -122,9 +124,9 @@ function renderArchivedGoalsList(archivedGoals) {
  * @returns {string} HTML string for the goal item
  */
 function renderArchivedGoalItem(goal) {
-  const typeIcon = callbacks.getGoalTypeIconSmall ? callbacks.getGoalTypeIconSmall(goal.type) : '';
-  const typeLabel = callbacks.getGoalTypeLabel ? callbacks.getGoalTypeLabel(goal.type) : goal.type;
-  const targetDisplay = callbacks.formatTargetForManage ? callbacks.formatTargetForManage(goal) : '';
+  const typeIcon = getGoalTypeIconSmall(goal.type);
+  const typeLabel = getGoalTypeLabel(goal.type);
+  const targetDisplay = formatTargetForManage(goal);
   const archivedDate = goal.archivedAt ? formatArchivedDate(goal.archivedAt) : 'Unknown date';
   const timeframeLabel = callbacks.capitalizeFirst ? callbacks.capitalizeFirst(goal.timeframe) : goal.timeframe;
 
