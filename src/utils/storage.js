@@ -12,7 +12,8 @@ const STORAGE_KEYS = {
   HISTORY: 'history',
   ACTIVE_TIMERS: 'activeTimers',
   STREAK_DATA: 'streakData',
-  CATEGORIES: 'categories'
+  CATEGORIES: 'categories',
+  TEMPLATES: 'templates' // US-066: Goal templates
 };
 
 /**
@@ -395,10 +396,150 @@ async function getCategoryById(categoryId) {
   }
 }
 
+// =============================================================================
+// US-066: Goal Templates
+// =============================================================================
+
+/**
+ * Built-in template definitions
+ * Each template has: id, title, type, target, timeframe, category, isBuiltIn
+ * Target for timer is in seconds (3600 = 1 hour)
+ * @type {Array<Object>}
+ */
+const BUILT_IN_TEMPLATES = [
+  // Health category
+  { id: 'tpl-30min-reading', title: '30 Minutes Reading', type: 'timer', target: 1800, timeframe: 'daily', category: 'learning', isBuiltIn: true },
+  { id: 'tpl-10k-steps', title: '10,000 Steps', type: 'counter', target: 10000, timeframe: 'daily', category: 'health', isBuiltIn: true },
+  { id: 'tpl-8-glasses-water', title: '8 Glasses of Water', type: 'counter', target: 8, timeframe: 'daily', category: 'health', isBuiltIn: true },
+  { id: 'tpl-1hr-exercise', title: '1 Hour Exercise', type: 'timer', target: 3600, timeframe: 'daily', category: 'health', isBuiltIn: true },
+  { id: 'tpl-meditate', title: 'Meditate', type: 'checkbox', target: 1, timeframe: 'daily', category: 'health', isBuiltIn: true },
+  // Work category
+  { id: 'tpl-2hr-deep-work', title: '2 Hours Deep Work', type: 'timer', target: 7200, timeframe: 'daily', category: 'work', isBuiltIn: true },
+  { id: 'tpl-inbox-zero', title: 'Inbox Zero', type: 'checkbox', target: 1, timeframe: 'daily', category: 'work', isBuiltIn: true },
+  { id: 'tpl-5-tasks', title: 'Complete 5 Tasks', type: 'counter', target: 5, timeframe: 'daily', category: 'work', isBuiltIn: true },
+  // Learning category
+  { id: 'tpl-1hr-study', title: '1 Hour Study', type: 'timer', target: 3600, timeframe: 'daily', category: 'learning', isBuiltIn: true },
+  { id: 'tpl-practice-instrument', title: 'Practice Instrument', type: 'timer', target: 1800, timeframe: 'daily', category: 'learning', isBuiltIn: true },
+  // Personal category
+  { id: 'tpl-journal', title: 'Write in Journal', type: 'checkbox', target: 1, timeframe: 'daily', category: 'personal', isBuiltIn: true },
+  { id: 'tpl-no-screen-before-bed', title: 'No Screen Before Bed', type: 'checkbox', target: 1, timeframe: 'daily', category: 'personal', isBuiltIn: true }
+];
+
+/**
+ * Get all templates (built-in + custom)
+ * @returns {Promise<Array>} Array of template objects
+ */
+async function getTemplates() {
+  try {
+    const result = await chrome.storage.local.get(STORAGE_KEYS.TEMPLATES);
+    const customTemplates = result[STORAGE_KEYS.TEMPLATES] || [];
+    // Combine built-in templates with custom templates
+    return [...BUILT_IN_TEMPLATES, ...customTemplates];
+  } catch (error) {
+    console.error('Error getting templates:', error);
+    return [...BUILT_IN_TEMPLATES];
+  }
+}
+
+/**
+ * Get only custom templates (user-created)
+ * @returns {Promise<Array>} Array of custom template objects
+ */
+async function getCustomTemplates() {
+  try {
+    const result = await chrome.storage.local.get(STORAGE_KEYS.TEMPLATES);
+    return result[STORAGE_KEYS.TEMPLATES] || [];
+  } catch (error) {
+    console.error('Error getting custom templates:', error);
+    return [];
+  }
+}
+
+/**
+ * Save custom templates to storage
+ * @param {Array} templates - Array of custom template objects to save
+ * @returns {Promise<boolean>} Success status
+ */
+async function saveCustomTemplates(templates) {
+  try {
+    await chrome.storage.local.set({ [STORAGE_KEYS.TEMPLATES]: templates });
+    return true;
+  } catch (error) {
+    console.error('Error saving custom templates:', error);
+    return false;
+  }
+}
+
+/**
+ * Get built-in templates
+ * @returns {Array} Array of built-in template objects
+ */
+function getBuiltInTemplates() {
+  return [...BUILT_IN_TEMPLATES];
+}
+
+/**
+ * Add a custom template
+ * @param {Object} template - Template object with title, type, target, timeframe, category
+ * @returns {Promise<boolean>} Success status
+ */
+async function addTemplate(template) {
+  try {
+    const customTemplates = await getCustomTemplates();
+    const newTemplate = {
+      ...template,
+      id: `tpl-custom-${Date.now()}`,
+      isBuiltIn: false
+    };
+    customTemplates.push(newTemplate);
+    return await saveCustomTemplates(customTemplates);
+  } catch (error) {
+    console.error('Error adding template:', error);
+    return false;
+  }
+}
+
+/**
+ * Delete a custom template by ID
+ * @param {string} templateId - The template ID to delete
+ * @returns {Promise<boolean>} Success status
+ */
+async function deleteTemplate(templateId) {
+  try {
+    // Don't allow deleting built-in templates
+    if (BUILT_IN_TEMPLATES.some(t => t.id === templateId)) {
+      console.warn('Cannot delete built-in template:', templateId);
+      return false;
+    }
+    const customTemplates = await getCustomTemplates();
+    const filteredTemplates = customTemplates.filter(t => t.id !== templateId);
+    return await saveCustomTemplates(filteredTemplates);
+  } catch (error) {
+    console.error('Error deleting template:', error);
+    return false;
+  }
+}
+
+/**
+ * Get a template by ID
+ * @param {string} templateId - The template ID to find
+ * @returns {Promise<Object|null>} The template object or null
+ */
+async function getTemplateById(templateId) {
+  try {
+    const templates = await getTemplates();
+    return templates.find(t => t.id === templateId) || null;
+  } catch (error) {
+    console.error('Error getting template by ID:', error);
+    return null;
+  }
+}
+
 // Export functions for use in other modules
 export {
   STORAGE_KEYS,
   DEFAULT_CATEGORIES,
+  BUILT_IN_TEMPLATES,
   getGoals,
   saveGoals,
   getActivityLog,
@@ -423,5 +564,13 @@ export {
   getDefaultCategories,
   addCategory,
   deleteCategory,
-  getCategoryById
+  getCategoryById,
+  // US-066: Template functions
+  getTemplates,
+  getCustomTemplates,
+  saveCustomTemplates,
+  getBuiltInTemplates,
+  addTemplate,
+  deleteTemplate,
+  getTemplateById
 };

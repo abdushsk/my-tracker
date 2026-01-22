@@ -196,7 +196,7 @@
         "Templates include title, type, target, timeframe, category"
       ],
       "priority": 12,
-      "passes": false,
+      "passes": true,
       "dependsOn": ["US-065"]
     },
     {

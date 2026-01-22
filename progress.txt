@@ -684,3 +684,86 @@ Implemented a comprehensive goal categories feature with color coding. Users can
 - Filter goals by category in View Goals (filter bar with chips)
 - Category management in Settings screen (list, add, delete)
 
+---
+
+## US-066: Goal Templates
+**Date**: 2026-01-22
+**Status**: Completed
+
+### What was done:
+Implemented a comprehensive goal templates feature that allows users to quickly create goals from pre-made templates and save their own goals as templates for reuse.
+
+### Implementation details:
+
+1. **Storage Layer** (`src/utils/storage.js`):
+   - Added `TEMPLATES` storage key
+   - Defined `BUILT_IN_TEMPLATES` array with 12 pre-made templates across 4 categories:
+     - Health: 10,000 Steps, 8 Glasses of Water, 1 Hour Exercise, Meditate
+     - Work: 2 Hours Deep Work, Inbox Zero, Complete 5 Tasks
+     - Learning: 30 Minutes Reading, 1 Hour Study, Practice Instrument
+     - Personal: Write in Journal, No Screen Before Bed
+   - Added functions: `getTemplates()`, `getCustomTemplates()`, `saveCustomTemplates()`, `getBuiltInTemplates()`, `addTemplate()`, `deleteTemplate()`, `getTemplateById()`
+
+2. **State Management** (`src/popup/popup.js`):
+   - Added `templates` array to global state
+   - Templates loaded during `loadData()` alongside other data
+   - Added `SCREENS.TEMPLATE_GALLERY` to screen enum
+
+3. **Template Gallery Screen** (`src/popup/popup.js`):
+   - New `renderTemplateGalleryScreen()` function renders the gallery
+   - Templates grouped by category with color-coded headers
+   - Built-in templates shown first, custom templates in separate section
+   - `renderTemplateCard()` displays template with type icon, title, target, timeframe
+   - `formatTemplateTarget()` formats target display (e.g., "1 hour", "Target: 10,000")
+
+4. **Template Creation from Gallery**:
+   - `createGoalFromTemplate(templateId)` creates a new goal from a template
+   - One-tap creation with success feedback
+   - Navigates to Manage Goals after creation
+
+5. **Save Goal as Template**:
+   - Added "Save as Template" button to Manage Goals list items
+   - `handleSaveAsTemplate(goalId)` creates a custom template from a goal
+   - Template inherits: title, type, target, timeframe, category
+   - Success feedback shown after saving
+
+6. **Delete Custom Templates**:
+   - Delete button shown only on custom templates
+   - Confirmation dialog before deletion
+   - Built-in templates cannot be deleted
+
+7. **UI/UX Updates**:
+   - "From Template" button added to Manage Goals screen (next to "Add Goal")
+   - Template gallery accessible via button click
+   - Back navigation returns to Manage Goals
+   - Template cards show type icon, title, target info, and timeframe badge
+
+8. **CSS Styles** (`src/popup/popup.css`):
+   - Template gallery screen layout (header, content, scrollable area)
+   - Category sections with color-coded dots
+   - Template cards with hover effects
+   - Custom template cards with blue left border
+   - Save-as-template button styling
+   - Dark mode support
+
+### Files modified:
+- `src/utils/storage.js` (lines 16, 399-536)
+- `src/popup/popup.js` (lines 29-33, 75, 95, 107, 169-170, 1684-1691, 1714-1720, 2417-2730, 3979-3985, 4886-4910)
+- `src/popup/popup.html` (lines 36-39)
+- `src/popup/popup.css` (lines 4980-5196)
+
+### Key design decisions:
+- Built-in templates cannot be modified or deleted - ensures users always have defaults
+- Custom templates stored separately from built-in ones
+- Template gallery is a full-page screen (consistent with Goal Form pattern)
+- Templates include all goal properties for complete recreation
+- One-tap creation is immediate without requiring a form
+
+### Acceptance criteria met:
+- Template gallery screen/modal accessible from Add Goal (via "From Template" button)
+- At least 10 built-in templates across categories (12 templates in 4 categories)
+- One-tap to create goal from template (createGoalFromTemplate function)
+- Save existing goal as template option (Save as Template button in Manage Goals)
+- Delete custom templates (delete button on custom template cards)
+- Templates include title, type, target, timeframe, category (all properties preserved)
+
