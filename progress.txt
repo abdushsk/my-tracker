@@ -1266,3 +1266,77 @@ Implemented a comprehensive Weekly Review screen that summarizes the user's week
 - Comparison to previous week (shows percentage change with trend icon)
 - Optional: weekly notification prompt (not implemented - this is a separate feature)
 
+---
+
+## US-073: Custom Goal Colors
+**Date**: 2026-01-22
+**Status**: Completed
+
+### What was done:
+Implemented a custom goal colors feature that allows users to assign individual colors to goals (independent of category). Users can select from a preset color palette or enter a custom hex color. The goal card displays the chosen color as an accent stripe on the left side.
+
+### Implementation details:
+
+1. **Goal Model Update** (`src/utils/models.js`):
+   - Added `color: data.color || null` property to the Goal model in `createGoal()` function
+   - Color is stored as a hex string (e.g., "#F44336") or null if no custom color
+
+2. **Color Picker in Goal Form** (`src/popup/popup.js` lines 2109-2171):
+   - Added a color picker section after the category selector
+   - 12 preset colors from the Material Design palette:
+     - Red (#F44336), Pink (#E91E63), Purple (#9C27B0), Deep Purple (#673AB7)
+     - Indigo (#3F51B5), Blue (#2196F3), Cyan (#00BCD4), Teal (#009688)
+     - Green (#4CAF50), Orange (#FF9800), Brown (#795548), Blue Grey (#607D8B)
+   - "None" option for no custom color (uses category color or default)
+   - Custom hex color input with Apply button for any color
+
+3. **Color Picker Functions** (`src/popup/popup.js` lines 2418-2483):
+   - `setGoalFormScreenColor(screen, color)` - Updates hidden input and button states
+   - `applyCustomColorFromInput(screen, input)` - Validates and applies custom hex colors
+   - Validation ensures 6-character hex format (0-9, A-F)
+   - Error animation on invalid input, success feedback on applied
+
+4. **Form Pre-fill for Edit Mode** (`src/popup/popup.js` lines 2529-2555):
+   - Pre-fills color picker when editing a goal
+   - Detects preset vs custom colors and updates appropriate controls
+
+5. **Form Submission** (`src/popup/popup.js` lines 2645-2693):
+   - Reads color from hidden input
+   - Passes color to both createGoal and updateGoal
+
+6. **Goal Card Display** (`src/popup/popup.js` lines 528-533):
+   - Added `--goal-custom-color` CSS variable to cards with custom colors
+   - Added `has-custom-color` class for CSS targeting
+
+7. **CSS Styles** (`src/popup/popup.css` lines 7586-7775):
+   - Color picker grid layout with 32px circular swatches
+   - Active/hover/focus states for color options
+   - "None" swatch with diagonal line pattern
+   - Custom color input styling with monospace font
+   - Error shake animation and success feedback
+   - Goal card color stripe (4px left border using ::before pseudo-element)
+   - Compact view adjustments (3px stripe)
+   - Dark mode support for all color picker elements
+   - Reduced motion support
+
+### Files modified:
+- `src/utils/models.js` (line 133)
+- `src/popup/popup.js` (lines 528-533, 2109-2171, 2285-2321, 2418-2483, 2529-2555, 2645-2693)
+- `src/popup/popup.css` (lines 7586-7775)
+
+### Key design decisions:
+- Color is independent of category - a goal can have both a category color and a custom color
+- Custom color takes precedence visually (shown as left stripe)
+- Category color still shows in the badge if both are set
+- Used CSS custom property (`--goal-custom-color`) for easy theming
+- Color stripe width is 4px in expanded view, 3px in compact view
+- Colors work in both light and dark modes without adjustment (colors are bright enough)
+
+### Acceptance criteria met:
+- Color picker in goal form (radio button group with color swatches)
+- Preset color palette (8-12 colors) - 12 Material Design colors provided
+- Custom hex color input option (with validation and Apply button)
+- Goal card shows color accent (left side stripe using CSS ::before)
+- Color persisted with goal (stored as hex string in Goal model)
+- Works with both light and dark modes (colors remain visible, UI elements styled for both)
+

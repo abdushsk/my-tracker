@@ -311,7 +311,7 @@
         "Works with both light and dark modes"
       ],
       "priority": 19,
-      "passes": false,
+      "passes": true,
       "dependsOn": ["US-058"]
     },
     {

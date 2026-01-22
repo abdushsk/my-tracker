@@ -525,8 +525,12 @@ function renderGoalCard(goal) {
   const categoryInfo = goal.category ? state.categories.find(c => c.id === goal.category) : null;
   const categoryDataAttr = goal.category ? `data-category="${goal.category}"` : '';
 
+  // US-073: Custom goal color for accent stripe
+  const goalColorStyle = goal.color ? `style="--goal-custom-color: ${goal.color}"` : '';
+  const hasCustomColor = goal.color ? 'has-custom-color' : '';
+
   return `
-    <div class="${cardClasses}" data-goal-id="${goal.id}" ${categoryDataAttr} draggable="true">
+    <div class="${cardClasses} ${hasCustomColor}" data-goal-id="${goal.id}" ${categoryDataAttr} ${goalColorStyle} draggable="true">
       <div class="goal-card-header">
         <div class="drag-handle" title="Drag to reorder">
           <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="16" height="16">
@@ -2105,6 +2109,70 @@ function renderGoalFormScreen() {
             </div>
             <input type="hidden" id="goal-form-category" name="category" value="">
           </div>
+
+          <!-- US-073: Custom Goal Color -->
+          <div class="form-group">
+            <label class="form-label">Goal Color <span class="optional-indicator">(optional)</span></label>
+            <div class="goal-color-picker" role="radiogroup" aria-label="Select goal color">
+              <button type="button" class="color-option active" data-color="none" role="radio" aria-checked="true" title="No custom color">
+                <span class="color-option-swatch color-none"></span>
+              </button>
+              <button type="button" class="color-option" data-color="#F44336" role="radio" aria-checked="false" title="Red">
+                <span class="color-option-swatch" style="background-color: #F44336"></span>
+              </button>
+              <button type="button" class="color-option" data-color="#E91E63" role="radio" aria-checked="false" title="Pink">
+                <span class="color-option-swatch" style="background-color: #E91E63"></span>
+              </button>
+              <button type="button" class="color-option" data-color="#9C27B0" role="radio" aria-checked="false" title="Purple">
+                <span class="color-option-swatch" style="background-color: #9C27B0"></span>
+              </button>
+              <button type="button" class="color-option" data-color="#673AB7" role="radio" aria-checked="false" title="Deep Purple">
+                <span class="color-option-swatch" style="background-color: #673AB7"></span>
+              </button>
+              <button type="button" class="color-option" data-color="#3F51B5" role="radio" aria-checked="false" title="Indigo">
+                <span class="color-option-swatch" style="background-color: #3F51B5"></span>
+              </button>
+              <button type="button" class="color-option" data-color="#2196F3" role="radio" aria-checked="false" title="Blue">
+                <span class="color-option-swatch" style="background-color: #2196F3"></span>
+              </button>
+              <button type="button" class="color-option" data-color="#00BCD4" role="radio" aria-checked="false" title="Cyan">
+                <span class="color-option-swatch" style="background-color: #00BCD4"></span>
+              </button>
+              <button type="button" class="color-option" data-color="#009688" role="radio" aria-checked="false" title="Teal">
+                <span class="color-option-swatch" style="background-color: #009688"></span>
+              </button>
+              <button type="button" class="color-option" data-color="#4CAF50" role="radio" aria-checked="false" title="Green">
+                <span class="color-option-swatch" style="background-color: #4CAF50"></span>
+              </button>
+              <button type="button" class="color-option" data-color="#FF9800" role="radio" aria-checked="false" title="Orange">
+                <span class="color-option-swatch" style="background-color: #FF9800"></span>
+              </button>
+              <button type="button" class="color-option" data-color="#795548" role="radio" aria-checked="false" title="Brown">
+                <span class="color-option-swatch" style="background-color: #795548"></span>
+              </button>
+              <button type="button" class="color-option" data-color="#607D8B" role="radio" aria-checked="false" title="Blue Grey">
+                <span class="color-option-swatch" style="background-color: #607D8B"></span>
+              </button>
+            </div>
+            <div class="custom-color-input-group">
+              <label for="goal-form-custom-color" class="custom-color-label">Or enter custom hex:</label>
+              <div class="custom-color-wrapper">
+                <span class="custom-color-hash">#</span>
+                <input
+                  type="text"
+                  id="goal-form-custom-color"
+                  name="custom-color"
+                  class="form-input custom-color-input"
+                  placeholder="FF5733"
+                  maxlength="6"
+                  pattern="[0-9A-Fa-f]{6}"
+                  autocomplete="off"
+                >
+                <button type="button" class="btn btn-sm custom-color-apply" id="goal-form-apply-custom-color">Apply</button>
+              </div>
+            </div>
+            <input type="hidden" id="goal-form-color" name="color" value="">
+          </div>
         </form>
       </main>
       <footer class="goal-form-footer">
@@ -2217,6 +2285,44 @@ function attachGoalFormScreenListeners(screen, editingGoal) {
       }
     });
   });
+
+  // US-073: Color picker buttons
+  const colorOptions = screen.querySelectorAll('.goal-color-picker .color-option');
+  colorOptions.forEach(option => {
+    option.addEventListener('click', (e) => {
+      e.preventDefault();
+      const color = option.getAttribute('data-color');
+      setGoalFormScreenColor(screen, color);
+    });
+
+    // Keyboard support
+    option.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        const color = option.getAttribute('data-color');
+        setGoalFormScreenColor(screen, color);
+      }
+    });
+  });
+
+  // US-073: Custom color input
+  const customColorInput = screen.querySelector('#goal-form-custom-color');
+  const applyCustomColorBtn = screen.querySelector('#goal-form-apply-custom-color');
+
+  if (applyCustomColorBtn && customColorInput) {
+    applyCustomColorBtn.addEventListener('click', (e) => {
+      e.preventDefault();
+      applyCustomColorFromInput(screen, customColorInput);
+    });
+
+    // Also apply on Enter key
+    customColorInput.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        applyCustomColorFromInput(screen, customColorInput);
+      }
+    });
+  }
 }
 
 /**
@@ -2314,6 +2420,73 @@ function setGoalFormScreenCategory(screen, category) {
 }
 
 /**
+ * US-073: Set the color in the goal form screen
+ * @param {HTMLElement} screen - The screen element
+ * @param {string} color - The color hex value (or 'none' for no custom color)
+ */
+function setGoalFormScreenColor(screen, color) {
+  // Update hidden input - 'none' means null/empty color
+  const colorInput = screen.querySelector('#goal-form-color');
+  if (colorInput) {
+    colorInput.value = color === 'none' ? '' : color;
+  }
+
+  // Update button states
+  const colorOptions = screen.querySelectorAll('.goal-color-picker .color-option');
+  colorOptions.forEach(option => {
+    const optionColor = option.getAttribute('data-color');
+    const isSelected = optionColor === color;
+    option.classList.toggle('active', isSelected);
+    option.setAttribute('aria-checked', isSelected ? 'true' : 'false');
+  });
+
+  // Clear custom color input if selecting a preset
+  const customColorInput = screen.querySelector('#goal-form-custom-color');
+  if (customColorInput && color !== 'custom') {
+    // Only clear if not a custom color (i.e., it's a preset)
+    const presetColors = ['none', '#F44336', '#E91E63', '#9C27B0', '#673AB7', '#3F51B5', '#2196F3', '#00BCD4', '#009688', '#4CAF50', '#FF9800', '#795548', '#607D8B'];
+    if (presetColors.includes(color)) {
+      customColorInput.value = '';
+    }
+  }
+}
+
+/**
+ * US-073: Apply custom color from input field
+ * @param {HTMLElement} screen - The screen element
+ * @param {HTMLInputElement} input - The custom color input element
+ */
+function applyCustomColorFromInput(screen, input) {
+  const value = input.value.trim().toUpperCase();
+
+  // Validate hex color (6 characters, 0-9 and A-F)
+  if (!/^[0-9A-F]{6}$/.test(value)) {
+    input.classList.add('error');
+    setTimeout(() => input.classList.remove('error'), 500);
+    return;
+  }
+
+  const color = `#${value}`;
+
+  // Update hidden input
+  const colorInput = screen.querySelector('#goal-form-color');
+  if (colorInput) {
+    colorInput.value = color;
+  }
+
+  // Deselect all preset color options
+  const colorOptions = screen.querySelectorAll('.goal-color-picker .color-option');
+  colorOptions.forEach(option => {
+    option.classList.remove('active');
+    option.setAttribute('aria-checked', 'false');
+  });
+
+  // Mark as custom color applied
+  input.classList.add('applied');
+  setTimeout(() => input.classList.remove('applied'), 300);
+}
+
+/**
  * Pre-fill the goal form screen with existing goal data
  * @param {Object} goal - The goal to pre-fill
  */
@@ -2356,6 +2529,34 @@ function prefillGoalFormScreen(goal) {
   // US-065: Set category
   const categoryValue = goal.category || 'none';
   setGoalFormScreenCategory(screen, categoryValue);
+
+  // US-073: Set color
+  if (goal.color) {
+    // Check if it's a preset color
+    const presetColors = ['#F44336', '#E91E63', '#9C27B0', '#673AB7', '#3F51B5', '#2196F3', '#00BCD4', '#009688', '#4CAF50', '#FF9800', '#795548', '#607D8B'];
+    if (presetColors.includes(goal.color.toUpperCase())) {
+      setGoalFormScreenColor(screen, goal.color.toUpperCase());
+    } else {
+      // It's a custom color - fill in the custom color input
+      const customColorInput = screen.querySelector('#goal-form-custom-color');
+      if (customColorInput) {
+        customColorInput.value = goal.color.replace('#', '').toUpperCase();
+      }
+      // Update hidden input
+      const colorInput = screen.querySelector('#goal-form-color');
+      if (colorInput) {
+        colorInput.value = goal.color;
+      }
+      // Deselect all preset color options
+      const colorOptions = screen.querySelectorAll('.goal-color-picker .color-option');
+      colorOptions.forEach(option => {
+        option.classList.remove('active');
+        option.setAttribute('aria-checked', 'false');
+      });
+    }
+  } else {
+    setGoalFormScreenColor(screen, 'none');
+  }
 }
 
 /**
@@ -2445,7 +2646,11 @@ async function handleGoalFormScreenSubmit(e) {
   const categoryInput = screen.querySelector('#goal-form-category');
   const category = categoryInput?.value || null;
 
-  console.log(`[GoalForm] Submitting in ${isEditMode ? 'edit' : 'add'} mode:`, { title, type, target, timeframe, category });
+  // US-073: Get color (null if empty)
+  const colorInput = screen.querySelector('#goal-form-color');
+  const color = colorInput?.value || null;
+
+  console.log(`[GoalForm] Submitting in ${isEditMode ? 'edit' : 'add'} mode:`, { title, type, target, timeframe, category, color });
 
   try {
     if (isEditMode && goalId) {
@@ -2455,7 +2660,8 @@ async function handleGoalFormScreenSubmit(e) {
         type,
         target,
         timeframe,
-        category
+        category,
+        color
       });
 
       if (success) {
@@ -2468,7 +2674,8 @@ async function handleGoalFormScreenSubmit(e) {
             type,
             target,
             timeframe,
-            category
+            category,
+            color
           };
         }
         console.log(`[GoalForm] Goal ${goalId} updated successfully`);
@@ -2486,6 +2693,7 @@ async function handleGoalFormScreenSubmit(e) {
         target,
         timeframe,
         category,
+        color,
         order: state.goals.length
       });
 

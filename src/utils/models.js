@@ -130,6 +130,7 @@ function createGoal(data) {
     progress: data.progress !== undefined ? data.progress : 0,
     timeframe: data.timeframe || TIMEFRAMES.DAILY,
     category: data.category || null,
+    color: data.color || null, // US-073: Custom goal color (hex string or null)
     isActive: data.isActive !== undefined ? data.isActive : false,
     createdAt: data.createdAt || now,
     lastResetAt: data.lastResetAt || now,
