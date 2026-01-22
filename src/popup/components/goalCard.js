@@ -128,19 +128,94 @@ export function renderGoalCard(goal) {
       </div>
       <div class="goal-card-body">
         ${goal.notes ? renderGoalNotes(goal) : ''}
-        <div class="goal-progress-section">
-          <div class="goal-progress-info">
-            <span class="goal-progress-text">${progressDisplay}</span>
-            <span class="goal-progress-percent">${Math.round(progressPercent)}%</span>
-          </div>
-          <div class="goal-progress-bar">
-            <div class="goal-progress-fill" style="width: ${progressPercent}%"></div>
+        <div class="goal-progress-wrapper">
+          <div class="goal-progress-section">
+            <div class="goal-progress-info">
+              <span class="goal-progress-text">${progressDisplay}</span>
+              ${goal.type === GOAL_TYPES.TIMER ? renderTimerStatsCompact(goal) : `<span class="goal-progress-percent">${Math.round(progressPercent)}%</span>`}
+            </div>
+            <div class="goal-progress-bar">
+              <div class="goal-progress-fill" style="width: ${progressPercent}%"></div>
+            </div>
+            ${renderGoalSecondaryInfo(goal)}
           </div>
         </div>
         ${renderGoalControls(goal)}
       </div>
     </div>
   `;
+}
+
+// =============================================================================
+// Timer Live Display
+// =============================================================================
+
+/**
+ * Format seconds into HH:MM:SS display
+ * @param {number} totalSeconds - Total seconds to format
+ * @returns {string} Formatted time string
+ */
+function formatTimerDisplay(totalSeconds) {
+  const hours = Math.floor(totalSeconds / 3600);
+  const minutes = Math.floor((totalSeconds % 3600) / 60);
+  const seconds = totalSeconds % 60;
+
+  const pad = (n) => n.toString().padStart(2, '0');
+
+  if (hours > 0) {
+    return `${pad(hours)}:${pad(minutes)}:${pad(seconds)}`;
+  }
+  return `${pad(minutes)}:${pad(seconds)}`;
+}
+
+/**
+ * Render compact timer stats (inline with progress info)
+ * @param {Object} goal - The timer goal object
+ * @returns {string} HTML string for compact timer stats
+ */
+function renderTimerStatsCompact(goal) {
+  const isActive = goal.isActive;
+  const activeTimer = state.activeTimers[goal.id];
+
+  let displayProgress = goal.progress;
+  if (isActive && activeTimer && activeTimer.startTime) {
+    const elapsedSinceStart = Math.floor((Date.now() - activeTimer.startTime) / 1000);
+    displayProgress = goal.progress + elapsedSinceStart;
+  }
+  displayProgress = Math.min(displayProgress, goal.target);
+
+  const timerDisplay = formatTimerDisplay(displayProgress);
+  const targetDisplay = formatTimerDisplay(goal.target);
+
+  return `<span class="timer-stats-compact ${isActive ? 'is-active' : ''}"><span class="timer-current" data-goal-id="${goal.id}">${timerDisplay}</span><span class="timer-sep">/</span><span class="timer-target">${targetDisplay}</span></span>`;
+}
+
+// =============================================================================
+// Goal Secondary Info
+// =============================================================================
+
+/**
+ * Render secondary info line for goal cards
+ * Only shows when there's meaningful stats to display
+ * @param {Object} goal - The goal object
+ * @returns {string} HTML string for secondary info
+ */
+function renderGoalSecondaryInfo(goal) {
+  // For avoidance goals, show best streak if relevant
+  if (goal.type === GOAL_TYPES.AVOIDANCE) {
+    const longestStreak = goal.longestAvoidanceStreak || 0;
+    const currentStreak = goal.progress || 0;
+
+    if (longestStreak > 0 && longestStreak > currentStreak) {
+      return `<div class="goal-secondary-info">Best: ${longestStreak} days</div>`;
+    } else if (longestStreak > 0 && longestStreak === currentStreak && currentStreak > 1) {
+      return `<div class="goal-secondary-info">Personal best!</div>`;
+    }
+  }
+
+  // For other goal types, secondary info will be added once
+  // completion tracking is implemented (completionCount field)
+  return '';
 }
 
 // =============================================================================
@@ -270,14 +345,6 @@ function renderTimerControls(goal) {
 
   // Regular timer controls
   const isActive = goal.isActive;
-  const activeTimer = state.activeTimers[goal.id];
-
-  let displayProgress = goal.progress;
-  if (isActive && activeTimer && activeTimer.startTime) {
-    const elapsedSinceStart = Math.floor((Date.now() - activeTimer.startTime) / 1000);
-    displayProgress = goal.progress + elapsedSinceStart;
-  }
-  displayProgress = Math.min(displayProgress, goal.target);
 
   const playIcon = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"/></svg>';
   const pauseIcon = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>';

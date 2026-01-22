@@ -201,6 +201,36 @@ export function renderSettingsScreen() {
             </div>
           </div>
 
+          <!-- Color Theme Selector -->
+          <div class="setting-item setting-item-column">
+            <div class="setting-info">
+              <span class="setting-label">Color Theme</span>
+              <span class="setting-description">Choose a color scheme for the app</span>
+            </div>
+            <div class="color-theme-selector" role="radiogroup" aria-label="Select color theme">
+              <button type="button" class="color-theme-option ${!state.settings?.colorTheme || state.settings?.colorTheme === 'default' ? 'active' : ''}" data-theme="default" title="Default theme">
+                <span class="color-theme-preview default-preview"></span>
+                <span class="color-theme-name">Default</span>
+              </button>
+              <button type="button" class="color-theme-option ${state.settings?.colorTheme === 'ocean' ? 'active' : ''}" data-theme="ocean" title="Ocean theme">
+                <span class="color-theme-preview ocean-preview"></span>
+                <span class="color-theme-name">Ocean</span>
+              </button>
+              <button type="button" class="color-theme-option ${state.settings?.colorTheme === 'forest' ? 'active' : ''}" data-theme="forest" title="Forest theme">
+                <span class="color-theme-preview forest-preview"></span>
+                <span class="color-theme-name">Forest</span>
+              </button>
+              <button type="button" class="color-theme-option ${state.settings?.colorTheme === 'sunset' ? 'active' : ''}" data-theme="sunset" title="Sunset theme">
+                <span class="color-theme-preview sunset-preview"></span>
+                <span class="color-theme-name">Sunset</span>
+              </button>
+              <button type="button" class="color-theme-option ${state.settings?.colorTheme === 'lavender' ? 'active' : ''}" data-theme="lavender" title="Lavender theme">
+                <span class="color-theme-preview lavender-preview"></span>
+                <span class="color-theme-name">Lavender</span>
+              </button>
+            </div>
+          </div>
+
           <!-- US-077: Motivational Quotes Toggle -->
           <div class="setting-item setting-item-row" id="quotes-toggle-row">
             <div class="setting-info">
@@ -471,6 +501,9 @@ export function renderSettingsScreen() {
   // US-051: Attach theme toggle listener
   attachThemeToggleListener(screen);
 
+  // Color theme selector listener
+  attachColorThemeListener(screen);
+
   // US-077: Attach quotes toggle listener
   attachQuotesToggleListener(screen);
 
@@ -601,6 +634,36 @@ function attachThemeToggleListener(screen) {
       }
     });
   }
+}
+
+/**
+ * Attach color theme selector listener
+ */
+function attachColorThemeListener(screen) {
+  const themeOptions = screen.querySelectorAll('.color-theme-option');
+  themeOptions.forEach(option => {
+    option.addEventListener('click', async () => {
+      const theme = option.getAttribute('data-theme');
+
+      // Update active state
+      themeOptions.forEach(opt => opt.classList.remove('active'));
+      option.classList.add('active');
+
+      // Update state
+      state.settings = {
+        ...state.settings,
+        colorTheme: theme
+      };
+
+      // Apply theme to body
+      document.body.setAttribute('data-color-theme', theme);
+
+      // Save to storage
+      await saveSettings(state.settings);
+
+      console.log(`[Settings] Color theme changed to: ${theme}`);
+    });
+  });
 }
 
 /**

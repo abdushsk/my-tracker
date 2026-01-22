@@ -164,15 +164,6 @@ export function renderGoalFormScreen() {
                 </span>
                 <span class="type-option-label">Checkbox</span>
               </button>
-              <button type="button" class="type-option" data-type="avoidance" role="radio" aria-checked="false" title="Avoidance - Track days without doing something">
-                <span class="type-option-icon">
-                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
-                    <line x1="4" y1="4" x2="20" y2="20"/>
-                  </svg>
-                </span>
-                <span class="type-option-label">Avoidance</span>
-              </button>
             </div>
             <input type="hidden" id="goal-form-type" name="type" value="timer">
           </div>

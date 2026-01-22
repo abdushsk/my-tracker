@@ -170,6 +170,9 @@
   --background-secondary: var(--surface-sunken);
   --background-card: var(--surface);
   --card-bg: var(--surface);
+  --bg: var(--surface);
+  --bg-secondary: var(--surface-sunken);
+  --bg-tertiary: var(--surface-raised);
   --text: var(--text-primary);
   --success: var(--accent);
   --success-light: var(--accent-subtle);
@@ -181,6 +184,8 @@
   --yearly-light: var(--type-avoidance-subtle);
   --gold: #FBBF24;
   --gold-bright: #FCD34D;
+  --gold-subtle: #FFF8E1;
+  --warning-light: var(--warning-subtle);
   --shadow: var(--shadow-md);
 }
 
@@ -190,10 +195,10 @@
 
 /* Dark Mode CSS Variables */
 [data-theme='dark'] {
-  /* Surface colors - dark, minimal hierarchy */
-  --surface: #0A0A0A;
-  --surface-raised: #141414;
-  --surface-sunken: #050505;
+  /* Surface colors - dark with visible hierarchy */
+  --surface: #0F0F0F;
+  --surface-raised: #1A1A1A;
+  --surface-sunken: #080808;
 
   /* Text colors - light text on dark */
   --text-primary: #FAFAFA;
@@ -218,9 +223,9 @@
   --info: #60A5FA;
   --info-subtle: rgba(96, 165, 250, 0.15);
 
-  /* Border colors */
-  --border: #262626;
-  --border-subtle: #1A1A1A;
+  /* Border colors - more visible for card differentiation */
+  --border: #333333;
+  --border-subtle: #252525;
   --border-focus: var(--accent);
 
   /* Goal type colors - adjusted for dark mode */
@@ -267,6 +272,9 @@
   --background-secondary: var(--surface-sunken);
   --background-card: var(--surface-raised);
   --card-bg: var(--surface-raised);
+  --bg: var(--surface);
+  --bg-secondary: var(--surface-sunken);
+  --bg-tertiary: var(--surface-raised);
   --text: var(--text-primary);
   --success: var(--accent);
   --success-light: var(--accent-subtle);
@@ -278,6 +286,8 @@
   --yearly-light: var(--type-avoidance-subtle);
   --gold: #FBBF24;
   --gold-bright: #FCD34D;
+  --gold-subtle: rgba(251, 191, 36, 0.15);
+  --warning-light: var(--warning-subtle);
   --shadow: var(--shadow-md);
 }
 
@@ -1838,6 +1848,82 @@ select:focus {
   height: 18px;
 }
 
+/* Color Theme Selector */
+.setting-item-column {
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--spacing-sm);
+}
+
+.color-theme-selector {
+  display: flex;
+  gap: var(--spacing-sm);
+  width: 100%;
+  flex-wrap: wrap;
+}
+
+.color-theme-option {
+  flex: 1;
+  min-width: 60px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  padding: var(--spacing-sm);
+  background: var(--background);
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.color-theme-option:hover {
+  border-color: var(--text-muted);
+  background: var(--background-secondary);
+}
+
+.color-theme-option.active {
+  border-color: var(--primary);
+  background: var(--primary-light);
+}
+
+.color-theme-preview {
+  width: 32px;
+  height: 32px;
+  border-radius: var(--radius);
+  border: 1px solid rgba(0,0,0,0.1);
+}
+
+.default-preview {
+  background: linear-gradient(135deg, #4CAF50 0%, #2196F3 100%);
+}
+
+.ocean-preview {
+  background: linear-gradient(135deg, #0077B6 0%, #00B4D8 50%, #90E0EF 100%);
+}
+
+.forest-preview {
+  background: linear-gradient(135deg, #2D5016 0%, #4A7C23 50%, #7CB342 100%);
+}
+
+.sunset-preview {
+  background: linear-gradient(135deg, #FF6B35 0%, #F7931E 50%, #FFD23F 100%);
+}
+
+.lavender-preview {
+  background: linear-gradient(135deg, #7C3AED 0%, #A78BFA 50%, #DDD6FE 100%);
+}
+
+.color-theme-name {
+  font-size: var(--font-size-xs);
+  color: var(--text-secondary);
+  font-weight: var(--font-weight-medium);
+}
+
+.color-theme-option.active .color-theme-name {
+  color: var(--primary);
+}
+
 .settings-section.about p {
   font-size: var(--font-size-sm);
   color: var(--text-secondary);
@@ -2718,6 +2804,41 @@ select:focus {
   gap: var(--space-2);
 }
 
+/* Compact Timer Stats - inline with progress info */
+.timer-stats-compact {
+  font-family: var(--font-mono, 'SF Mono', 'Monaco', monospace);
+  font-size: var(--text-xs);
+  color: var(--text-muted);
+  font-weight: var(--weight-medium);
+  white-space: nowrap;
+}
+
+.timer-stats-compact .timer-current {
+  color: var(--text-secondary);
+}
+
+.timer-stats-compact .timer-sep {
+  color: var(--text-muted);
+  margin: 0 1px;
+}
+
+.timer-stats-compact .timer-target {
+  color: var(--text-tertiary);
+}
+
+.timer-stats-compact.is-active .timer-current {
+  color: var(--success);
+}
+
+/* Goal Progress Wrapper - keeps timer stats above progress bar */
+.goal-progress-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xs);
+  flex: 1;
+  min-width: 0;
+}
+
 /* Goal Progress Section - Streamlined */
 .goal-progress-section {
   display: flex;
@@ -2748,6 +2869,16 @@ select:focus {
 
 .goal-card:hover .goal-progress-percent {
   opacity: 1;
+}
+
+/* Secondary Info - Shows completion stats */
+.goal-secondary-info {
+  font-size: var(--font-size-xs);
+  color: var(--text-muted);
+  margin-top: var(--spacing-xs);
+  padding-top: var(--spacing-xs);
+  border-top: 1px solid var(--border-subtle);
+  line-height: 1.3;
 }
 
 /* Progress Bar - Thin and clean */
@@ -2828,8 +2959,8 @@ select:focus {
 .goal-controls-timer {
   display: flex;
   align-items: center;
-  justify-content: center;
-  gap: var(--space-3);
+  justify-content: flex-start;
+  gap: var(--spacing-sm);
 }
 
 /* Timer Display - Clean monospace */
@@ -2859,6 +2990,21 @@ select:focus {
   font-weight: var(--weight-normal);
 }
 
+/* Timer Live Display - Shows current elapsed time */
+.timer-live-display {
+  font-family: var(--font-mono, 'SF Mono', 'Monaco', 'Inconsolata', 'Roboto Mono', monospace);
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-semibold);
+  color: var(--text-secondary);
+  letter-spacing: 0.5px;
+  min-width: 70px;
+  text-align: center;
+}
+
+.timer-live-display.is-active {
+  color: var(--success);
+}
+
 /* Timer Play/Pause Button - Compact */
 .timer-play-btn {
   width: 40px;
@@ -2871,7 +3017,7 @@ select:focus {
 }
 
 .timer-play-btn:hover {
-  background-color: var(--info);
+  background-color: var(--secondary-hover);
   transform: scale(1.05);
 }
 
@@ -2880,17 +3026,19 @@ select:focus {
 }
 
 .timer-play-btn svg {
-  width: 18px;
-  height: 18px;
+  width: 16px;
+  height: 16px;
+  /* Shift play icon slightly right for visual centering (triangle optical illusion) */
+  margin-left: 2px;
 }
 
-/* Active state for timer button */
+/* Active/Playing state for timer button - shows pause icon */
 .timer-play-btn.is-active {
-  background-color: var(--warning);
+  background-color: var(--success);
 }
 
 .timer-play-btn.is-active:hover {
-  background-color: var(--type-counter);
+  background-color: var(--success-hover, var(--accent-hover));
 }
 
 /* Timer goal card active state - subtle */
@@ -3528,10 +3676,14 @@ select:focus {
   gap: var(--spacing-md);
 }
 
-/* Progress section takes available space */
-.goal-card.compact .goal-progress-section {
+/* Progress wrapper takes available space in compact mode */
+.goal-card.compact .goal-progress-wrapper {
   flex: 1;
   min-width: 0;
+}
+
+.goal-card.compact .goal-progress-section {
+  /* Already handled by wrapper */
 }
 
 /* Smaller progress bar in compact mode */
@@ -3565,14 +3717,20 @@ select:focus {
   display: none;
 }
 
+.goal-card.compact .timer-live-display {
+  font-size: var(--font-size-base);
+  min-width: 60px;
+}
+
 .goal-card.compact .timer-play-btn {
   width: 36px;
   height: 36px;
 }
 
 .goal-card.compact .timer-play-btn svg {
-  width: 18px;
-  height: 18px;
+  width: 16px;
+  height: 16px;
+  margin-left: 2px;
 }
 
 /* Counter controls compact */
@@ -4072,18 +4230,17 @@ body.modal-open {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: var(--spacing-xs);
-  padding: var(--spacing-md) var(--spacing-sm);
-  background-color: var(--background);
-  border: 2px solid var(--border);
-  border-radius: var(--radius-lg);
+  gap: 4px;
+  padding: 10px 6px;
+  background-color: transparent;
+  border: 1px solid transparent;
+  border-radius: var(--radius-md);
   cursor: pointer;
-  transition: all var(--transition);
-  min-height: 80px;
+  transition: all var(--transition-fast);
+  min-height: 54px;
 }
 
 .type-option:hover {
-  border-color: var(--text-muted);
   background-color: var(--background-secondary);
 }
 
@@ -4094,14 +4251,7 @@ body.modal-open {
 
 /* Active/Selected state */
 .type-option.active {
-  border-color: var(--primary);
-  background-color: var(--primary-light);
-  box-shadow: 0 0 0 3px rgba(76, 175, 80, 0.15);
-}
-
-.type-option.active:hover {
-  background-color: var(--primary-light);
-  border-color: var(--primary);
+  border-color: transparent;
 }
 
 /* Type Option Icon */
@@ -4109,20 +4259,20 @@ body.modal-open {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 32px;
-  height: 32px;
-  color: var(--text-secondary);
+  width: 24px;
+  height: 24px;
+  color: var(--text-muted);
   transition: all var(--transition-fast);
 }
 
 .type-option-icon svg {
-  width: 28px;
-  height: 28px;
+  width: 18px;
+  height: 18px;
+  stroke-width: 1.5;
 }
 
 .type-option:hover .type-option-icon {
-  color: var(--text);
-  transform: scale(1.1);
+  color: var(--text-secondary);
 }
 
 .type-option.active .type-option-icon {
@@ -4142,6 +4292,10 @@ body.modal-open {
   color: var(--primary);
 }
 
+.type-option[data-type="avoidance"].active .type-option-icon {
+  color: var(--type-avoidance);
+}
+
 /* Type Option Label */
 .type-option-label {
   font-size: var(--font-size-sm);
@@ -4157,44 +4311,33 @@ body.modal-open {
 
 .type-option.active .type-option-label {
   color: var(--text);
-  font-weight: var(--font-weight-semibold);
 }
 
-/* Type-specific active border colors */
-.type-option[data-type="timer"].active {
-  border-color: var(--secondary);
-  background-color: var(--secondary-light);
-  box-shadow: 0 0 0 3px rgba(33, 150, 243, 0.15);
+/* Type-specific active styles - subtle tints only */
+.type-option[data-type="timer"].active,
+.type-option[data-type="timer"].active:hover,
+.type-option[data-type="timer"].active:focus {
+  background-color: rgba(33, 150, 243, 0.15);
 }
 
-.type-option[data-type="counter"].active {
-  border-color: var(--counter-accent);
-  background-color: var(--counter-light);
-  box-shadow: 0 0 0 3px rgba(251, 140, 0, 0.15);
+.type-option[data-type="counter"].active,
+.type-option[data-type="counter"].active:hover,
+.type-option[data-type="counter"].active:focus {
+  background-color: rgba(251, 140, 0, 0.15);
 }
 
-.type-option[data-type="checkbox"].active {
-  border-color: var(--primary);
-  background-color: var(--primary-light);
-  box-shadow: 0 0 0 3px rgba(76, 175, 80, 0.15);
+.type-option[data-type="checkbox"].active,
+.type-option[data-type="checkbox"].active:hover,
+.type-option[data-type="checkbox"].active:focus {
+  background-color: rgba(76, 175, 80, 0.15);
 }
 
-/* Selection animation */
-.type-option.active {
-  animation: type-select 0.3s ease;
+.type-option[data-type="avoidance"].active,
+.type-option[data-type="avoidance"].active:hover,
+.type-option[data-type="avoidance"].active:focus {
+  background-color: rgba(139, 92, 246, 0.15);
 }
 
-@keyframes type-select {
-  0% {
-    transform: scale(1);
-  }
-  50% {
-    transform: scale(0.97);
-  }
-  100% {
-    transform: scale(1);
-  }
-}
 
 /* Active state press effect */
 .type-option:active {
@@ -5359,11 +5502,16 @@ body.modal-open {
 
 /* Best streak card */
 .best-streak-card {
-  background: linear-gradient(135deg, var(--background) 0%, #FFF8E1 100%);
+  background: linear-gradient(135deg, var(--background) 0%, var(--gold-subtle) 100%);
 }
 
 .best-streak-card .streak-icon.best {
   color: var(--gold);
+}
+
+/* Dark mode for best streak card */
+[data-theme="dark"] .best-streak-card {
+  background: linear-gradient(135deg, var(--card-bg) 0%, rgba(251, 191, 36, 0.15) 100%);
 }
 
 .streak-icon {
@@ -7285,6 +7433,115 @@ body.modal-open {
   flex-wrap: wrap;
 }
 
+/* Compact Goal Info Card */
+.goal-info-section-compact {
+  padding: 0;
+}
+
+.goal-info-card-compact {
+  background: var(--card-bg);
+  border-radius: var(--radius);
+  padding: var(--spacing-sm) var(--spacing-md);
+  border: 1px solid var(--border);
+}
+
+.goal-info-main {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+}
+
+.goal-info-card-compact .goal-type-indicator {
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius-sm);
+  flex-shrink: 0;
+}
+
+.goal-info-card-compact .goal-type-indicator svg {
+  width: 14px;
+  height: 14px;
+}
+
+.goal-info-card-compact .goal-type-indicator.type-timer {
+  background: var(--secondary-light);
+  color: var(--secondary);
+}
+
+.goal-info-card-compact .goal-type-indicator.type-counter {
+  background: var(--counter-light);
+  color: var(--counter-color);
+}
+
+.goal-info-card-compact .goal-type-indicator.type-checkbox {
+  background: var(--success-light);
+  color: var(--success);
+}
+
+.goal-info-card-compact .goal-type-indicator.type-avoidance {
+  background: var(--warning-light, rgba(255, 152, 0, 0.15));
+  color: var(--warning, #ff9800);
+}
+
+.goal-info-details {
+  flex: 1;
+  min-width: 0;
+}
+
+.goal-info-title-compact {
+  font-size: var(--font-size-base);
+  font-weight: 600;
+  color: var(--text-primary);
+  margin: 0 0 var(--spacing-xs) 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.goal-info-meta {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+  flex-wrap: wrap;
+}
+
+.goal-category-badge-sm,
+.goal-timeframe-badge-sm,
+.goal-target-badge {
+  font-size: 10px;
+  padding: 2px 6px;
+  border-radius: var(--radius-sm);
+  font-weight: 500;
+}
+
+.goal-category-badge-sm {
+  /* Colors set inline */
+}
+
+.goal-timeframe-badge-sm {
+  background: var(--bg-secondary);
+  color: var(--text-secondary);
+}
+
+.goal-timeframe-badge-sm.timeframe-daily {
+  background: var(--primary-light);
+  color: var(--primary);
+}
+
+.goal-timeframe-badge-sm.timeframe-weekly {
+  background: var(--secondary-light);
+  color: var(--secondary);
+}
+
+.goal-target-badge {
+  background: var(--surface-sunken);
+  color: var(--text-secondary);
+  font-family: var(--font-mono, 'SF Mono', monospace);
+}
+
 /* Stats Cards Grid */
 .goal-stats-cards {
   display: grid;
@@ -7423,6 +7680,7 @@ body.modal-open {
   border-radius: var(--radius);
   padding: var(--spacing-md);
   border: 1px solid var(--border);
+  overflow: hidden;
 }
 
 .progress-chart-bars {
@@ -7431,6 +7689,7 @@ body.modal-open {
   gap: 2px;
   height: 100px;
   margin-bottom: var(--spacing-sm);
+  overflow: hidden;
 }
 
 .progress-bar-container {
@@ -7468,13 +7727,19 @@ body.modal-open {
   display: flex;
   justify-content: space-between;
   gap: 2px;
+  overflow: hidden;
+  width: 100%;
 }
 
 .progress-chart-label {
   flex: 1;
+  min-width: 0;
   text-align: center;
-  font-size: 10px;
+  font-size: 9px;
   color: var(--text-tertiary);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .progress-chart-label.hidden {
@@ -9535,11 +9800,11 @@ body.modal-open {
 }
 
 .challenge-stat-card {
-  background: var(--card-bg, #ffffff);
-  border-radius: 12px;
+  background: var(--background);
+  border-radius: var(--radius-lg);
   padding: 12px;
   text-align: center;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  border: 1px solid var(--border);
 }
 
 .challenge-stat-icon {
@@ -9550,28 +9815,28 @@ body.modal-open {
 .challenge-stat-value {
   font-size: 20px;
   font-weight: 700;
-  color: var(--text-color, #1a1a2e);
+  color: var(--text);
 }
 
 .challenge-stat-label {
   font-size: 11px;
-  color: var(--text-muted, #6c6c7e);
+  color: var(--text-muted);
   text-transform: uppercase;
   letter-spacing: 0.3px;
 }
 
 /* Challenge History */
 .challenge-history {
-  background: var(--card-bg, #ffffff);
-  border-radius: 12px;
+  background: var(--background);
+  border-radius: var(--radius-lg);
   padding: 12px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  border: 1px solid var(--border);
 }
 
 .challenge-history-title {
   font-size: 13px;
   font-weight: 600;
-  color: var(--text-color, #1a1a2e);
+  color: var(--text);
   margin: 0 0 12px 0;
 }
 
@@ -9586,21 +9851,21 @@ body.modal-open {
   align-items: center;
   gap: 10px;
   padding: 8px 10px;
-  background: var(--bg-color, #f5f5f5);
-  border-radius: 8px;
-  border-left: 3px solid #ccc;
+  background: var(--background-secondary);
+  border-radius: var(--radius);
+  border-left: 3px solid var(--border);
 }
 
 .challenge-history-item.completed {
-  border-left-color: #10b981;
+  border-left-color: var(--success);
 }
 
 .challenge-history-item.skipped {
-  border-left-color: #f59e0b;
+  border-left-color: var(--warning);
 }
 
 .challenge-history-item.expired {
-  border-left-color: #ef4444;
+  border-left-color: var(--danger);
 }
 
 .challenge-history-icon {
@@ -9619,7 +9884,7 @@ body.modal-open {
 .challenge-history-info .challenge-history-title {
   font-size: 13px;
   font-weight: 500;
-  color: var(--text-color, #1a1a2e);
+  color: var(--text);
   margin: 0;
   white-space: nowrap;
   overflow: hidden;
@@ -9628,7 +9893,7 @@ body.modal-open {
 
 .challenge-history-date {
   font-size: 11px;
-  color: var(--text-muted, #6c6c7e);
+  color: var(--text-muted);
 }
 
 .challenge-history-status {
@@ -9637,30 +9902,15 @@ body.modal-open {
 }
 
 .challenge-history-item.completed .challenge-history-status {
-  color: #10b981;
+  color: var(--success);
 }
 
 .challenge-history-item.skipped .challenge-history-status {
-  color: #f59e0b;
+  color: var(--warning);
 }
 
 .challenge-history-item.expired .challenge-history-status {
-  color: #ef4444;
-}
-
-/* Dark Mode for Challenge Stats */
-[data-theme="dark"] .challenge-stat-card {
-  background: var(--card-bg, #1e1e2e);
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
-}
-
-[data-theme="dark"] .challenge-history {
-  background: var(--card-bg, #1e1e2e);
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
-}
-
-[data-theme="dark"] .challenge-history-item {
-  background: rgba(255, 255, 255, 0.05);
+  color: var(--danger);
 }
 
 /* ========================================
@@ -10898,4 +11148,148 @@ body.modal-open {
   display: flex;
   align-items: center;
   gap: 4px;
+}
+
+/* =============================================================================
+   Color Themes - Subtle background and accent variations
+   ============================================================================= */
+
+/* Ocean Theme */
+[data-color-theme="ocean"] {
+  --accent: #0077B6;
+  --accent-hover: #005F8D;
+  --accent-subtle: #CAF0F8;
+  --primary: #0077B6;
+  --primary-hover: #005F8D;
+  --primary-light: #CAF0F8;
+  --type-timer: #00B4D8;
+  --type-timer-subtle: #CAF0F8;
+  --type-checkbox: #0077B6;
+  --type-checkbox-subtle: #90E0EF;
+}
+
+[data-color-theme="ocean"] body,
+[data-color-theme="ocean"] .popup-container {
+  background: linear-gradient(180deg, #E8F6F9 0%, #FFFFFF 20%);
+}
+
+[data-color-theme="ocean"] .screen-header {
+  background: linear-gradient(180deg, rgba(0, 119, 182, 0.06) 0%, transparent 100%);
+}
+
+[data-theme="dark"][data-color-theme="ocean"] {
+  --accent: #00B4D8;
+  --accent-subtle: rgba(0, 180, 216, 0.15);
+  --primary: #00B4D8;
+  --primary-light: rgba(0, 180, 216, 0.15);
+}
+
+[data-theme="dark"][data-color-theme="ocean"] body,
+[data-theme="dark"][data-color-theme="ocean"] .popup-container {
+  background: linear-gradient(180deg, #0A1929 0%, #121212 20%);
+}
+
+/* Forest Theme */
+[data-color-theme="forest"] {
+  --accent: #2D5016;
+  --accent-hover: #1E3A0F;
+  --accent-subtle: #D4E9C7;
+  --primary: #4A7C23;
+  --primary-hover: #3D6A1B;
+  --primary-light: #E8F5E0;
+  --type-timer: #7CB342;
+  --type-timer-subtle: #E8F5E0;
+  --type-checkbox: #4A7C23;
+  --type-checkbox-subtle: #D4E9C7;
+}
+
+[data-color-theme="forest"] body,
+[data-color-theme="forest"] .popup-container {
+  background: linear-gradient(180deg, #EDF5E8 0%, #FFFFFF 20%);
+}
+
+[data-color-theme="forest"] .screen-header {
+  background: linear-gradient(180deg, rgba(74, 124, 35, 0.06) 0%, transparent 100%);
+}
+
+[data-theme="dark"][data-color-theme="forest"] {
+  --accent: #7CB342;
+  --accent-subtle: rgba(124, 179, 66, 0.15);
+  --primary: #7CB342;
+  --primary-light: rgba(124, 179, 66, 0.15);
+}
+
+[data-theme="dark"][data-color-theme="forest"] body,
+[data-theme="dark"][data-color-theme="forest"] .popup-container {
+  background: linear-gradient(180deg, #0D1F0A 0%, #121212 20%);
+}
+
+/* Sunset Theme */
+[data-color-theme="sunset"] {
+  --accent: #E65100;
+  --accent-hover: #BF360C;
+  --accent-subtle: #FFE0B2;
+  --primary: #FF6B35;
+  --primary-hover: #E65100;
+  --primary-light: #FFF3E0;
+  --type-timer: #F7931E;
+  --type-timer-subtle: #FFE0B2;
+  --type-checkbox: #FF6B35;
+  --type-checkbox-subtle: #FFCCBC;
+}
+
+[data-color-theme="sunset"] body,
+[data-color-theme="sunset"] .popup-container {
+  background: linear-gradient(180deg, #FFF8F0 0%, #FFFFFF 20%);
+}
+
+[data-color-theme="sunset"] .screen-header {
+  background: linear-gradient(180deg, rgba(255, 107, 53, 0.06) 0%, transparent 100%);
+}
+
+[data-theme="dark"][data-color-theme="sunset"] {
+  --accent: #FF8A50;
+  --accent-subtle: rgba(255, 138, 80, 0.15);
+  --primary: #FF8A50;
+  --primary-light: rgba(255, 138, 80, 0.15);
+}
+
+[data-theme="dark"][data-color-theme="sunset"] body,
+[data-theme="dark"][data-color-theme="sunset"] .popup-container {
+  background: linear-gradient(180deg, #291005 0%, #121212 20%);
+}
+
+/* Lavender Theme */
+[data-color-theme="lavender"] {
+  --accent: #7C3AED;
+  --accent-hover: #6D28D9;
+  --accent-subtle: #EDE9FE;
+  --primary: #8B5CF6;
+  --primary-hover: #7C3AED;
+  --primary-light: #EDE9FE;
+  --type-timer: #A78BFA;
+  --type-timer-subtle: #EDE9FE;
+  --type-checkbox: #8B5CF6;
+  --type-checkbox-subtle: #DDD6FE;
+}
+
+[data-color-theme="lavender"] body,
+[data-color-theme="lavender"] .popup-container {
+  background: linear-gradient(180deg, #F5F3FF 0%, #FFFFFF 20%);
+}
+
+[data-color-theme="lavender"] .screen-header {
+  background: linear-gradient(180deg, rgba(139, 92, 246, 0.06) 0%, transparent 100%);
+}
+
+[data-theme="dark"][data-color-theme="lavender"] {
+  --accent: #A78BFA;
+  --accent-subtle: rgba(167, 139, 250, 0.15);
+  --primary: #A78BFA;
+  --primary-light: rgba(167, 139, 250, 0.15);
+}
+
+[data-theme="dark"][data-color-theme="lavender"] body,
+[data-theme="dark"][data-color-theme="lavender"] .popup-container {
+  background: linear-gradient(180deg, #1A0F29 0%, #121212 20%);
 }

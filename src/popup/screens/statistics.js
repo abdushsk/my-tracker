@@ -95,16 +95,19 @@ export function renderGoalStatisticsScreen() {
         <div class="header-spacer"></div>
       </header>
       <main class="goal-statistics-content">
-        <!-- Goal Info Section -->
-        <section class="goal-statistics-section goal-info-section">
-          <div class="goal-info-card">
-            <div class="goal-info-header">
+        <!-- Goal Info Section - Compact -->
+        <section class="goal-statistics-section goal-info-section-compact">
+          <div class="goal-info-card-compact">
+            <div class="goal-info-main">
               <span class="goal-type-indicator type-${goal.type}">${typeIcon}</span>
-              <h2 class="goal-info-title">${escapeHtml(goal.title)}</h2>
-            </div>
-            <div class="goal-info-badges">
-              ${categoryInfo ? `<span class="goal-category-badge" style="background-color: ${categoryInfo.light}; color: ${categoryInfo.color}"><span class="category-color-dot" style="background-color: ${categoryInfo.color}"></span>${categoryInfo.name}</span>` : ''}
-              <span class="goal-timeframe-badge timeframe-${goal.timeframe}">${timeframeLabel}</span>
+              <div class="goal-info-details">
+                <h2 class="goal-info-title-compact">${escapeHtml(goal.title)}</h2>
+                <div class="goal-info-meta">
+                  ${categoryInfo ? `<span class="goal-category-badge-sm" style="background-color: ${categoryInfo.light}; color: ${categoryInfo.color}">${categoryInfo.name}</span>` : ''}
+                  <span class="goal-timeframe-badge-sm timeframe-${goal.timeframe}">${timeframeLabel}</span>
+                  <span class="goal-target-badge">Target: ${formatTargetDisplay(goal)}</span>
+                </div>
+              </div>
             </div>
           </div>
         </section>
@@ -394,6 +397,31 @@ function calculateGoalAverageProgress(goalHistory, goal) {
 
   const totalProgress = goalHistory.reduce((sum, entry) => sum + entry.progress, 0);
   return totalProgress / goalHistory.length;
+}
+
+/**
+ * Format target display based on goal type
+ * @param {Object} goal - Goal object
+ * @returns {string} Formatted target string
+ */
+function formatTargetDisplay(goal) {
+  switch (goal.type) {
+    case 'timer':
+      const hours = Math.floor(goal.target / 3600);
+      const minutes = Math.floor((goal.target % 3600) / 60);
+      if (hours > 0) {
+        return minutes > 0 ? `${hours}h ${minutes}m` : `${hours}h`;
+      }
+      return `${minutes}m`;
+    case 'counter':
+      return `${goal.target}`;
+    case 'checkbox':
+      return 'Complete';
+    case 'avoidance':
+      return `${goal.target} days`;
+    default:
+      return goal.target.toString();
+  }
 }
 
 /**

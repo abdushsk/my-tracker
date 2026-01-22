@@ -58,6 +58,19 @@ export function applyTheme(theme) {
 }
 
 /**
+ * Apply the color theme to the document
+ * @param {string} colorTheme - The color theme to apply ('default', 'ocean', 'forest', 'sunset', 'lavender')
+ */
+export function applyColorTheme(colorTheme) {
+  if (colorTheme && colorTheme !== 'default') {
+    document.documentElement.setAttribute('data-color-theme', colorTheme);
+  } else {
+    document.documentElement.removeAttribute('data-color-theme');
+  }
+  console.log(`[Theme] Applied color theme: ${colorTheme || 'default'}`);
+}
+
+/**
  * Initialize theme based on user settings and system preference
  * Should be called early to prevent theme flash
  * @param {Object} settings - Settings object with theme property
@@ -65,11 +78,13 @@ export function applyTheme(theme) {
 export function initTheme(settings) {
   const themeSetting = settings?.theme || 'auto';
   const effectiveTheme = getEffectiveTheme(themeSetting);
+  const colorTheme = settings?.colorTheme || 'default';
 
   // Add no-transition class to prevent flash during initial load
   document.documentElement.classList.add('no-transition');
 
   applyTheme(effectiveTheme);
+  applyColorTheme(colorTheme);
 
   // Remove no-transition class after a brief delay to enable transitions
   requestAnimationFrame(() => {
@@ -78,7 +93,7 @@ export function initTheme(settings) {
     });
   });
 
-  console.log(`[Theme] Initialized: setting=${themeSetting}, effective=${effectiveTheme}`);
+  console.log(`[Theme] Initialized: setting=${themeSetting}, effective=${effectiveTheme}, colorTheme=${colorTheme}`);
 }
 
 // =============================================================================
