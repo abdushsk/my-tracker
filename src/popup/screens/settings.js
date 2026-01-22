@@ -25,7 +25,7 @@ import {
   savePomodoroSettings,
   resetBreakReminderState
 } from '../../utils/storage.js';
-import { getTodayDateString } from '../../utils/history.js';
+import { getTodayDateString } from '../../utils/models.js';
 import { playSound, setMuted, setVolume } from '../../utils/sounds.js';
 
 // Callbacks to be registered from popup.js

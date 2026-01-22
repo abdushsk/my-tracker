@@ -21,10 +21,10 @@ import {
   getWeekStartDateString,
   getMonthStartDateString,
   filterHistoryByDateRange,
-  groupHistoryByDate
-} from '../../utils/history.js';
-import { getActivityByHourForDateRange } from '../../utils/activityLog.js';
-import { isGoalCompleted } from '../../utils/goalUtils.js';
+  groupHistoryByDate,
+  getActivityByHourForDateRange,
+  isGoalCompleted
+} from '../../utils/models.js';
 import { renderChallengeStatsSection } from '../features/dailyChallenges.js';
 import { checkAchievements } from '../features/achievements.js';
 
