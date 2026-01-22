@@ -83,6 +83,7 @@ import {
   checkBreakReminder
 } from './features/breakReminders.js';
 
+
 // Screen modules
 import {
   registerArchiveCallbacks,
@@ -575,123 +576,8 @@ function renderGoalsList() {
 
 // US-086: Break Reminder functions are now imported from ./features/breakReminders.js
 
-// NOTE: All Pomodoro and Break Reminder functions have been extracted to their respective modules.
-// The following marker helps track where the extracted code used to be.
-/**
- * Handle timer play/pause toggle
- * @param {string} goalId - The ID of the timer goal
- */
-async function handleTimerToggle(goalId) {
-  const goal = state.goals.find(g => g.id === goalId);
-  if (!goal || goal.type !== GOAL_TYPES.TIMER) {
-    console.error('Invalid goal for timer toggle:', goalId);
-    return;
-  }
-
-  const isCurrentlyActive = goal.isActive;
-  const now = Date.now();
-  const previousProgress = goal.progress; // US-079: Store for undo
-
-  if (isCurrentlyActive) {
-    // PAUSE: Calculate elapsed time and save progress
-    const activeTimer = state.activeTimers[goalId];
-    if (activeTimer && activeTimer.startTime) {
-      const elapsedSinceStart = Math.floor((now - activeTimer.startTime) / 1000);
-      const newProgress = Math.min(goal.progress + elapsedSinceStart, goal.target);
-
-      // Update goal in state
-      goal.progress = newProgress;
-      goal.isActive = false;
-
-      // Save goal to storage
-      await updateGoal(goalId, { progress: newProgress, isActive: false });
-
-      // Log the pause activity
-      const activityLog = createActivityLog({
-        goalId: goalId,
-        action: ACTIVITY_ACTIONS.PAUSE,
-        value: elapsedSinceStart
-      });
-      await addActivityLogEntry(activityLog);
-
-      // Clear active timer
-      delete state.activeTimers[goalId];
-      await saveActiveTimers(state.activeTimers);
-
-      // US-031: Notify service worker of pause
-      sendToServiceWorker({
-        type: 'TIMER_PAUSE',
-        goalId: goalId
-      });
-
-      // US-039: Play pause sound
-      playSound(SOUNDS.PAUSE);
-
-      // US-079: Push undo action for timer stop
-      pushUndoAction({
-        type: UNDO_ACTION_TYPES.TIMER_STOP,
-        goalId: goalId,
-        goalTitle: goal.title,
-        previousValue: previousProgress,
-        newValue: newProgress
-      });
-
-      console.log(`[Timer] Paused goal ${goalId}: +${elapsedSinceStart}s, total progress: ${newProgress}s`);
-    }
-  } else {
-    // PLAY: Start the timer
-    goal.isActive = true;
-
-    // US-039: Play start sound
-    playSound(SOUNDS.START);
-
-    // Update goal in storage
-    await updateGoal(goalId, { isActive: true });
-
-    // Store the start time
-    state.activeTimers[goalId] = {
-      startTime: now,
-      goalId: goalId
-    };
-    await saveActiveTimers(state.activeTimers);
-
-    // Log the start activity
-    const activityLog = createActivityLog({
-      goalId: goalId,
-      action: ACTIVITY_ACTIONS.START,
-      value: null
-    });
-    await addActivityLogEntry(activityLog);
-
-    // Start the timer update interval if not already running
-    startTimerUpdateInterval();
-
-    // US-031: Notify service worker (for background tracking)
-    sendToServiceWorker({
-      type: 'TIMER_START',
-      goalId: goalId,
-      startTime: now
-    }).then(response => {
-      if (response && response.success) {
-        console.log('[Timer] Service worker notified of timer start');
-      }
-    });
-
-    // US-079: Push undo action for timer start
-    pushUndoAction({
-      type: UNDO_ACTION_TYPES.TIMER_START,
-      goalId: goalId,
-      goalTitle: goal.title,
-      previousValue: previousProgress,
-      newValue: previousProgress // Progress doesn't change on start
-    });
-
-    console.log(`[Timer] Started goal ${goalId} at ${new Date(now).toLocaleTimeString()}`);
-  }
-
-  // Re-render to update UI
-  renderCurrentScreen();
-}
+// NOTE: All Pomodoro, Break Reminder, and Goal Handler functions have been extracted.
+// Goal control handlers (handleTimerToggle, handleCounterIncrement, etc.) are now in ./features/goalHandlers.js
 
 /**
  * Start the interval that updates timer displays every second
