@@ -216,6 +216,21 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
         .catch(error => sendResponse({ success: false, error: error.message }));
       break;
 
+    case 'RESET_TIMES_CHANGED':
+      // US-075: Reset times settings changed - reschedule all alarms
+      console.log('[Service Worker] Reset times changed, rescheduling alarms');
+      setupResetAlarms()
+        .then(() => sendResponse({ success: true, message: 'Alarms rescheduled' }))
+        .catch(error => sendResponse({ success: false, error: error.message }));
+      break;
+
+    case 'GET_NEXT_RESET_TIMES':
+      // US-075: Get the next scheduled reset times for display
+      handleGetNextResetTimes()
+        .then(result => sendResponse(result))
+        .catch(error => sendResponse({ success: false, error: error.message }));
+      break;
+
     default:
       console.log('[Service Worker] Unknown message type:', message.type);
       sendResponse({ success: false, error: 'Unknown message type' });
@@ -652,70 +667,214 @@ chrome.alarms.onAlarm.addListener(async (alarm) => {
 
 // ============================================
 // US-040: Auto Reset - Alarm Setup
+// US-075: Updated to support custom reset times
 // ============================================
 
 /**
- * Calculate the next midnight timestamp from now
- * @returns {number} Timestamp of next midnight in milliseconds
+ * Parse time string (HH:MM format) into hours and minutes
+ * @param {string} timeString - Time in HH:MM format (e.g., "09:30")
+ * @returns {{hours: number, minutes: number}} Parsed hours and minutes
  */
-function getNextMidnight() {
-  const now = new Date();
-  const midnight = new Date(now);
-  midnight.setDate(midnight.getDate() + 1);
-  midnight.setHours(0, 0, 0, 0);
-  return midnight.getTime();
+function parseTimeString(timeString) {
+  const [hours, minutes] = (timeString || '00:00').split(':').map(Number);
+  return {
+    hours: isNaN(hours) ? 0 : Math.max(0, Math.min(23, hours)),
+    minutes: isNaN(minutes) ? 0 : Math.max(0, Math.min(59, minutes))
+  };
 }
 
 /**
- * Calculate the next Monday midnight timestamp
- * @returns {number} Timestamp of next Monday at midnight in milliseconds
+ * Get settings from storage (for service worker)
+ * @returns {Promise<Object>} Settings object
  */
-function getNextMondayMidnight() {
+async function getSettings() {
+  try {
+    const result = await chrome.storage.local.get('settings');
+    return result.settings || {
+      dailyResetTime: '00:00',
+      weeklyResetTime: '00:00',
+      monthlyResetTime: '00:00',
+      yearlyResetTime: '00:00'
+    };
+  } catch (error) {
+    console.error('[Service Worker] Error getting settings:', error);
+    return {
+      dailyResetTime: '00:00',
+      weeklyResetTime: '00:00',
+      monthlyResetTime: '00:00',
+      yearlyResetTime: '00:00'
+    };
+  }
+}
+
+/**
+ * Calculate the next daily reset timestamp from now
+ * US-075: Now supports custom reset time
+ * @param {string} resetTime - Time in HH:MM format (default: '00:00')
+ * @returns {number} Timestamp of next reset in milliseconds
+ */
+function getNextDailyReset(resetTime = '00:00') {
+  const { hours, minutes } = parseTimeString(resetTime);
+  const now = new Date();
+  const resetDate = new Date(now);
+
+  // Set the reset time
+  resetDate.setHours(hours, minutes, 0, 0);
+
+  // If this time has already passed today, move to tomorrow
+  if (resetDate.getTime() <= now.getTime()) {
+    resetDate.setDate(resetDate.getDate() + 1);
+  }
+
+  return resetDate.getTime();
+}
+
+/**
+ * Calculate the next Monday reset timestamp
+ * US-075: Now supports custom reset time
+ * @param {string} resetTime - Time in HH:MM format (default: '00:00')
+ * @returns {number} Timestamp of next Monday at reset time in milliseconds
+ */
+function getNextMondayReset(resetTime = '00:00') {
+  const { hours, minutes } = parseTimeString(resetTime);
   const now = new Date();
   const monday = new Date(now);
+
   // Get days until next Monday (0 = Sunday, 1 = Monday, ..., 6 = Saturday)
-  const daysUntilMonday = (8 - now.getDay()) % 7 || 7;
+  const dayOfWeek = now.getDay();
+  let daysUntilMonday = (8 - dayOfWeek) % 7 || 7;
+
+  // Check if today is Monday and if the reset time hasn't passed yet
+  if (dayOfWeek === 1) {
+    const todayReset = new Date(now);
+    todayReset.setHours(hours, minutes, 0, 0);
+    if (now.getTime() < todayReset.getTime()) {
+      daysUntilMonday = 0; // Today is Monday and reset time hasn't passed
+    }
+  }
+
   monday.setDate(monday.getDate() + daysUntilMonday);
-  monday.setHours(0, 0, 0, 0);
+  monday.setHours(hours, minutes, 0, 0);
   return monday.getTime();
 }
 
 /**
- * Calculate the next 1st of month midnight timestamp
- * @returns {number} Timestamp of next 1st at midnight in milliseconds
+ * Calculate the next 1st of month reset timestamp
+ * US-075: Now supports custom reset time
+ * @param {string} resetTime - Time in HH:MM format (default: '00:00')
+ * @returns {number} Timestamp of next 1st at reset time in milliseconds
  */
-function getNextFirstOfMonth() {
+function getNextFirstOfMonthReset(resetTime = '00:00') {
+  const { hours, minutes } = parseTimeString(resetTime);
   const now = new Date();
   const firstOfMonth = new Date(now);
+
+  // Check if today is the 1st and reset time hasn't passed
+  if (now.getDate() === 1) {
+    const todayReset = new Date(now);
+    todayReset.setHours(hours, minutes, 0, 0);
+    if (now.getTime() < todayReset.getTime()) {
+      firstOfMonth.setHours(hours, minutes, 0, 0);
+      return firstOfMonth.getTime();
+    }
+  }
+
   // Move to first of next month
   firstOfMonth.setMonth(firstOfMonth.getMonth() + 1);
   firstOfMonth.setDate(1);
-  firstOfMonth.setHours(0, 0, 0, 0);
+  firstOfMonth.setHours(hours, minutes, 0, 0);
   return firstOfMonth.getTime();
 }
 
 /**
- * Calculate the next January 1st midnight timestamp
- * @returns {number} Timestamp of next January 1st at midnight in milliseconds
+ * Calculate the next January 1st reset timestamp
+ * US-075: Now supports custom reset time
+ * @param {string} resetTime - Time in HH:MM format (default: '00:00')
+ * @returns {number} Timestamp of next January 1st at reset time in milliseconds
  */
-function getNextJanuaryFirst() {
+function getNextJanuaryFirstReset(resetTime = '00:00') {
+  const { hours, minutes } = parseTimeString(resetTime);
   const now = new Date();
   const january = new Date(now);
+
+  // Check if today is January 1st and reset time hasn't passed
+  if (now.getMonth() === 0 && now.getDate() === 1) {
+    const todayReset = new Date(now);
+    todayReset.setHours(hours, minutes, 0, 0);
+    if (now.getTime() < todayReset.getTime()) {
+      january.setHours(hours, minutes, 0, 0);
+      return january.getTime();
+    }
+  }
+
   // Move to January 1st of next year
   january.setFullYear(january.getFullYear() + 1);
   january.setMonth(0);
   january.setDate(1);
-  january.setHours(0, 0, 0, 0);
+  january.setHours(hours, minutes, 0, 0);
   return january.getTime();
+}
+
+// Legacy functions for backward compatibility (still used internally)
+function getNextMidnight() {
+  return getNextDailyReset('00:00');
+}
+
+function getNextMondayMidnight() {
+  return getNextMondayReset('00:00');
+}
+
+function getNextFirstOfMonth() {
+  return getNextFirstOfMonthReset('00:00');
+}
+
+function getNextJanuaryFirst() {
+  return getNextJanuaryFirstReset('00:00');
+}
+
+/**
+ * US-075: Get the next scheduled reset times for all timeframes
+ * Used to display "Next reset at X" in the UI
+ * @returns {Promise<Object>} Object with next reset timestamps
+ */
+async function handleGetNextResetTimes() {
+  try {
+    const settings = await getSettings();
+
+    const nextResetTimes = {
+      daily: {
+        time: settings.dailyResetTime || '00:00',
+        nextReset: getNextDailyReset(settings.dailyResetTime || '00:00')
+      },
+      weekly: {
+        time: settings.weeklyResetTime || '00:00',
+        nextReset: getNextMondayReset(settings.weeklyResetTime || '00:00')
+      },
+      monthly: {
+        time: settings.monthlyResetTime || '00:00',
+        nextReset: getNextFirstOfMonthReset(settings.monthlyResetTime || '00:00')
+      },
+      yearly: {
+        time: settings.yearlyResetTime || '00:00',
+        nextReset: getNextJanuaryFirstReset(settings.yearlyResetTime || '00:00')
+      }
+    };
+
+    return { success: true, nextResetTimes };
+  } catch (error) {
+    console.error('[Service Worker] Error getting next reset times:', error);
+    return { success: false, error: error.message };
+  }
 }
 
 /**
  * Set up all reset alarms for automatic goal resets.
+ * US-075: Now uses custom reset times from settings.
  * Creates alarms for:
- * - Daily reset at midnight every day
- * - Weekly reset at midnight on Monday
- * - Monthly reset at midnight on the 1st
- * - Yearly reset at midnight on January 1st
+ * - Daily reset at configured time every day
+ * - Weekly reset at configured time on Monday
+ * - Monthly reset at configured time on the 1st
+ * - Yearly reset at configured time on January 1st
  *
  * Alarms persist across browser restarts (Chrome manages this).
  * @returns {Promise<void>}
@@ -724,6 +883,20 @@ async function setupResetAlarms() {
   console.log('[Service Worker] Setting up reset alarms...');
 
   try {
+    // US-075: Get custom reset times from settings
+    const settings = await getSettings();
+    const dailyResetTime = settings.dailyResetTime || '00:00';
+    const weeklyResetTime = settings.weeklyResetTime || '00:00';
+    const monthlyResetTime = settings.monthlyResetTime || '00:00';
+    const yearlyResetTime = settings.yearlyResetTime || '00:00';
+
+    console.log('[Service Worker] Using reset times:', {
+      daily: dailyResetTime,
+      weekly: weeklyResetTime,
+      monthly: monthlyResetTime,
+      yearly: yearlyResetTime
+    });
+
     // Clear any existing reset alarms first to avoid duplicates
     await chrome.alarms.clear(ALARM_NAMES.DAILY_RESET);
     await chrome.alarms.clear(ALARM_NAMES.WEEKLY_RESET);
@@ -732,34 +905,34 @@ async function setupResetAlarms() {
 
     const now = Date.now();
 
-    // Create daily alarm - fires at midnight, repeats every 24 hours (1440 minutes)
-    const nextMidnight = getNextMidnight();
+    // Create daily alarm - fires at configured time, repeats every 24 hours (1440 minutes)
+    const nextDaily = getNextDailyReset(dailyResetTime);
     await chrome.alarms.create(ALARM_NAMES.DAILY_RESET, {
-      when: nextMidnight,
+      when: nextDaily,
       periodInMinutes: 24 * 60 // 1440 minutes = 24 hours
     });
-    console.log(`[Service Worker] Daily reset alarm set for ${new Date(nextMidnight).toLocaleString()}`);
+    console.log(`[Service Worker] Daily reset alarm set for ${new Date(nextDaily).toLocaleString()}`);
 
-    // Create weekly alarm - fires at Monday midnight, repeats every 7 days (10080 minutes)
-    const nextMonday = getNextMondayMidnight();
+    // Create weekly alarm - fires at configured time on Monday, repeats every 7 days (10080 minutes)
+    const nextMonday = getNextMondayReset(weeklyResetTime);
     await chrome.alarms.create(ALARM_NAMES.WEEKLY_RESET, {
       when: nextMonday,
       periodInMinutes: 7 * 24 * 60 // 10080 minutes = 7 days
     });
     console.log(`[Service Worker] Weekly reset alarm set for ${new Date(nextMonday).toLocaleString()}`);
 
-    // Create monthly alarm - fires at 1st of month midnight
+    // Create monthly alarm - fires at configured time on 1st of month
     // Note: Month length varies, so we only set the first occurrence here
     // The alarm handler will reschedule for the next month when it fires
-    const nextFirst = getNextFirstOfMonth();
+    const nextFirst = getNextFirstOfMonthReset(monthlyResetTime);
     await chrome.alarms.create(ALARM_NAMES.MONTHLY_RESET, {
       when: nextFirst
       // No periodInMinutes - we'll reschedule when it fires since months vary
     });
     console.log(`[Service Worker] Monthly reset alarm set for ${new Date(nextFirst).toLocaleString()}`);
 
-    // Create yearly alarm - fires at January 1st midnight
-    const nextJanuary = getNextJanuaryFirst();
+    // Create yearly alarm - fires at configured time on January 1st
+    const nextJanuary = getNextJanuaryFirstReset(yearlyResetTime);
     await chrome.alarms.create(ALARM_NAMES.YEARLY_RESET, {
       when: nextJanuary
       // No periodInMinutes - we'll reschedule when it fires
@@ -782,11 +955,14 @@ async function setupResetAlarms() {
 /**
  * Reschedule the monthly alarm for the next month.
  * Called after the monthly alarm fires since months have varying lengths.
+ * US-075: Now uses custom reset time from settings.
  * @returns {Promise<void>}
  */
 async function rescheduleMonthlyAlarm() {
   try {
-    const nextFirst = getNextFirstOfMonth();
+    const settings = await getSettings();
+    const monthlyResetTime = settings.monthlyResetTime || '00:00';
+    const nextFirst = getNextFirstOfMonthReset(monthlyResetTime);
     await chrome.alarms.create(ALARM_NAMES.MONTHLY_RESET, {
       when: nextFirst
     });
@@ -799,11 +975,14 @@ async function rescheduleMonthlyAlarm() {
 /**
  * Reschedule the yearly alarm for next year.
  * Called after the yearly alarm fires.
+ * US-075: Now uses custom reset time from settings.
  * @returns {Promise<void>}
  */
 async function rescheduleYearlyAlarm() {
   try {
-    const nextJanuary = getNextJanuaryFirst();
+    const settings = await getSettings();
+    const yearlyResetTime = settings.yearlyResetTime || '00:00';
+    const nextJanuary = getNextJanuaryFirstReset(yearlyResetTime);
     await chrome.alarms.create(ALARM_NAMES.YEARLY_RESET, {
       when: nextJanuary
     });

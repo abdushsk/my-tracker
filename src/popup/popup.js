@@ -7545,6 +7545,62 @@ function renderSettingsScreen() {
           </div>
         </div>
 
+        <!-- US-075: Reset Times Section -->
+        <div class="settings-section">
+          <h2>Reset Times</h2>
+          <p class="settings-section-description">Configure when your goals reset for each timeframe</p>
+
+          <div class="reset-times-list">
+            <!-- Daily Reset Time -->
+            <div class="reset-time-item">
+              <div class="reset-time-info">
+                <span class="reset-time-label">Daily Goals</span>
+                <span class="reset-time-next" id="daily-next-reset">Loading...</span>
+              </div>
+              <input type="time" id="daily-reset-time" class="reset-time-input" value="${state.settings?.dailyResetTime || '00:00'}">
+            </div>
+
+            <!-- Weekly Reset Time -->
+            <div class="reset-time-item">
+              <div class="reset-time-info">
+                <span class="reset-time-label">Weekly Goals</span>
+                <span class="reset-time-description">(Resets on Monday)</span>
+                <span class="reset-time-next" id="weekly-next-reset">Loading...</span>
+              </div>
+              <input type="time" id="weekly-reset-time" class="reset-time-input" value="${state.settings?.weeklyResetTime || '00:00'}">
+            </div>
+
+            <!-- Monthly Reset Time -->
+            <div class="reset-time-item">
+              <div class="reset-time-info">
+                <span class="reset-time-label">Monthly Goals</span>
+                <span class="reset-time-description">(Resets on the 1st)</span>
+                <span class="reset-time-next" id="monthly-next-reset">Loading...</span>
+              </div>
+              <input type="time" id="monthly-reset-time" class="reset-time-input" value="${state.settings?.monthlyResetTime || '00:00'}">
+            </div>
+
+            <!-- Yearly Reset Time -->
+            <div class="reset-time-item">
+              <div class="reset-time-info">
+                <span class="reset-time-label">Yearly Goals</span>
+                <span class="reset-time-description">(Resets on January 1st)</span>
+                <span class="reset-time-next" id="yearly-next-reset">Loading...</span>
+              </div>
+              <input type="time" id="yearly-reset-time" class="reset-time-input" value="${state.settings?.yearlyResetTime || '00:00'}">
+            </div>
+          </div>
+
+          <p class="reset-times-note">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="14" height="14">
+              <circle cx="12" cy="12" r="10"/>
+              <line x1="12" y1="16" x2="12" y2="12"/>
+              <line x1="12" y1="8" x2="12.01" y2="8"/>
+            </svg>
+            Times are in your local timezone
+          </p>
+        </div>
+
         <!-- US-065: Categories Section -->
         <div class="settings-section">
           <h2>Categories</h2>
@@ -7695,11 +7751,17 @@ function renderSettingsScreen() {
     });
   }
 
+  // US-075: Attach reset times listeners
+  attachResetTimesListeners(screen);
+
   // US-065: Attach category management listeners
   attachCategoryManagementListeners(screen);
 
   // US-070: Attach data management listeners
   attachDataManagementListeners(screen);
+
+  // US-075: Load and display next reset times
+  loadNextResetTimes();
 }
 
 /**
@@ -7725,6 +7787,111 @@ function updateVolumeIcon(screen, volume, enabled) {
   }
 
   volumeIcon.innerHTML = iconSvg;
+}
+
+// ============================================
+// US-075: Reset Times Settings Functions
+// ============================================
+
+/**
+ * US-075: Attach reset times event listeners
+ * @param {HTMLElement} screen - The settings screen element
+ */
+function attachResetTimesListeners(screen) {
+  const timeInputs = [
+    { id: 'daily-reset-time', setting: 'dailyResetTime' },
+    { id: 'weekly-reset-time', setting: 'weeklyResetTime' },
+    { id: 'monthly-reset-time', setting: 'monthlyResetTime' },
+    { id: 'yearly-reset-time', setting: 'yearlyResetTime' }
+  ];
+
+  timeInputs.forEach(({ id, setting }) => {
+    const input = screen.querySelector(`#${id}`);
+    if (input) {
+      input.addEventListener('change', async (e) => {
+        const newTime = e.target.value;
+        console.log(`[Settings] ${setting} changed to ${newTime}`);
+
+        // Update state and save settings
+        state.settings = {
+          ...state.settings,
+          [setting]: newTime
+        };
+        await saveSettings(state.settings);
+
+        // Notify service worker to reschedule alarms
+        try {
+          await chrome.runtime.sendMessage({ type: 'RESET_TIMES_CHANGED' });
+          console.log('[Settings] Service worker notified of reset time change');
+        } catch (error) {
+          console.error('[Settings] Error notifying service worker:', error);
+        }
+
+        // Update next reset time display
+        loadNextResetTimes();
+
+        // Play feedback sound
+        playSound('click');
+      });
+    }
+  });
+}
+
+/**
+ * US-075: Load and display next reset times from service worker
+ */
+async function loadNextResetTimes() {
+  try {
+    const response = await chrome.runtime.sendMessage({ type: 'GET_NEXT_RESET_TIMES' });
+
+    if (response && response.success && response.nextResetTimes) {
+      const { daily, weekly, monthly, yearly } = response.nextResetTimes;
+
+      updateNextResetDisplay('daily-next-reset', daily.nextReset);
+      updateNextResetDisplay('weekly-next-reset', weekly.nextReset);
+      updateNextResetDisplay('monthly-next-reset', monthly.nextReset);
+      updateNextResetDisplay('yearly-next-reset', yearly.nextReset);
+    }
+  } catch (error) {
+    console.error('[Settings] Error loading next reset times:', error);
+    // Set fallback display
+    ['daily', 'weekly', 'monthly', 'yearly'].forEach(tf => {
+      const element = document.getElementById(`${tf}-next-reset`);
+      if (element) {
+        element.textContent = 'Unable to load';
+      }
+    });
+  }
+}
+
+/**
+ * US-075: Update next reset time display element
+ * @param {string} elementId - The element ID to update
+ * @param {number} timestamp - The next reset timestamp
+ */
+function updateNextResetDisplay(elementId, timestamp) {
+  const element = document.getElementById(elementId);
+  if (!element) return;
+
+  const nextReset = new Date(timestamp);
+  const now = new Date();
+
+  // Format the display
+  const isToday = nextReset.toDateString() === now.toDateString();
+  const isTomorrow = new Date(now.getTime() + 24 * 60 * 60 * 1000).toDateString() === nextReset.toDateString();
+
+  const timeStr = nextReset.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+
+  let dateStr;
+  if (isToday) {
+    dateStr = 'Today';
+  } else if (isTomorrow) {
+    dateStr = 'Tomorrow';
+  } else {
+    dateStr = nextReset.toLocaleDateString([], { weekday: 'short', month: 'short', day: 'numeric' });
+  }
+
+  element.textContent = `Next: ${dateStr} at ${timeStr}`;
 }
 
 /**

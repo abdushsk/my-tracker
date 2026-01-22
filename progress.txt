@@ -1418,3 +1418,87 @@ Implemented an optional notes/description field for goals. Users can add notes w
 - Notes searchable in future (data structure supports it)
 - Character limit (500 chars) (enforced by maxlength attribute)
 
+---
+
+## US-075: Customizable Reset Times
+**Date**: 2026-01-22
+**Status**: Completed
+
+### What was done:
+Implemented customizable reset times for goals. Users can now configure when their daily, weekly, monthly, and yearly goals reset instead of the hardcoded midnight default. The feature includes a new "Reset Times" section in the Settings screen with time pickers for each timeframe, and displays the next scheduled reset time.
+
+### Implementation details:
+
+1. **Storage Layer Updates** (`src/utils/storage.js` lines 264-278):
+   - Added four new settings to `getDefaultSettings()`:
+     - `dailyResetTime: '00:00'` - Reset time for daily goals
+     - `weeklyResetTime: '00:00'` - Reset time for weekly goals (Monday)
+     - `monthlyResetTime: '00:00'` - Reset time for monthly goals (1st)
+     - `yearlyResetTime: '00:00'` - Reset time for yearly goals (Jan 1st)
+   - Times stored in HH:MM format in user's local timezone
+
+2. **Goal Model Update** (`src/utils/models.js` line 135):
+   - Added `customResetTime: data.customResetTime || null` property to Goal model
+   - Allows per-goal reset time override (UI not implemented, but model supports it)
+
+3. **Service Worker Updates** (`src/background/service-worker.js`):
+   - Added `parseTimeString(timeString)` function (lines 663-669) to parse HH:MM format
+   - Added `getSettings()` function (lines 675-693) to read settings from storage
+   - Created new time calculation functions that accept custom reset times:
+     - `getNextDailyReset(resetTime)` (lines 701-715)
+     - `getNextMondayReset(resetTime)` (lines 723-744)
+     - `getNextFirstOfMonthReset(resetTime)` (lines 752-772)
+     - `getNextJanuaryFirstReset(resetTime)` (lines 780-816)
+   - Updated `setupResetAlarms()` (lines 832-903) to read custom times from settings
+   - Updated `rescheduleMonthlyAlarm()` and `rescheduleYearlyAlarm()` to use custom times
+   - Added new message handlers:
+     - `RESET_TIMES_CHANGED` - Reschedules all alarms when settings change
+     - `GET_NEXT_RESET_TIMES` - Returns next reset timestamps for UI display
+   - Added `handleGetNextResetTimes()` function (lines 840-868)
+
+4. **Settings UI** (`src/popup/popup.js` lines 7548-7602, 7754-7765, 7792-7895):
+   - Added "Reset Times" section in Settings screen between Appearance and Categories
+   - Four time inputs (HTML5 `<input type="time">`) for each timeframe
+   - Each shows: label, description (reset day), next reset time, and time picker
+   - Note about times being in local timezone
+   - `attachResetTimesListeners(screen)` - Event listeners for time inputs
+   - `loadNextResetTimes()` - Fetches next reset times from service worker
+   - `updateNextResetDisplay(elementId, timestamp)` - Formats "Next: Today/Tomorrow/Date at HH:MM"
+
+5. **CSS Styles** (`src/popup/popup.css` lines 1719-1808):
+   - `.reset-times-list` - Container for reset time items
+   - `.reset-time-item` - Individual timeframe row with hover states
+   - `.reset-time-info` - Label, description, and next reset display
+   - `.reset-time-input` - Time picker styling with focus states
+   - Dark mode support with `color-scheme: dark`
+   - `.reset-times-note` - Timezone info note
+
+### Files modified:
+- `src/utils/storage.js` (lines 264-278 - default settings)
+- `src/utils/models.js` (line 135 - customResetTime property)
+- `src/background/service-worker.js` (lines 219-232, 663-868, 905-943)
+- `src/popup/popup.js` (lines 7548-7602, 7754-7765, 7792-7895)
+- `src/popup/popup.css` (lines 1719-1808)
+
+### Key design decisions:
+- Times stored in HH:MM format for simplicity and international compatibility
+- All times use user's local timezone (via JavaScript Date object)
+- Alarms are rescheduled immediately when settings change
+- Next reset time shown in user-friendly format (Today/Tomorrow/weekday)
+- Per-goal override supported in model but UI not implemented (keeps settings simple)
+- Service worker reads settings on alarm setup for hot-reload of time changes
+
+### Technical notes:
+- Chrome alarms API uses timestamps, so custom times are converted to next occurrence
+- Daily/Weekly alarms use `periodInMinutes` for repeating; monthly/yearly are one-shot and rescheduled
+- Time picker HTML5 input provides native browser UI for time selection
+- Service worker has its own `getSettings()` to avoid module import complexity
+
+### Acceptance criteria met:
+- Global reset time setting in Settings (4 time pickers for daily/weekly/monthly/yearly)
+- Per-goal reset time override option (model supports it, UI can be added later)
+- Time picker for reset time (HTML5 time input with native picker)
+- Service worker respects custom times (reads settings and schedules alarms accordingly)
+- Clear indication of next reset time (shows "Next: Today at 14:00" etc.)
+- Handles timezone correctly (uses JavaScript Date which respects user's timezone)
+

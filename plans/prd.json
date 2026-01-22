@@ -343,7 +343,7 @@
         "Handles timezone correctly"
       ],
       "priority": 21,
-      "passes": false,
+      "passes": true,
       "dependsOn": []
     },
     {

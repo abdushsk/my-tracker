@@ -268,7 +268,12 @@ function getDefaultSettings() {
     theme: 'auto', // 'light', 'dark', 'auto'
     notificationsEnabled: true,
     reminderTime: '09:00',
-    compactViewEnabled: false // US-056: Compact view mode for Daily Goals
+    compactViewEnabled: false, // US-056: Compact view mode for Daily Goals
+    // US-075: Customizable Reset Times (HH:MM format in user's local timezone)
+    dailyResetTime: '00:00',   // Default midnight for daily goals
+    weeklyResetTime: '00:00',  // Default midnight Monday for weekly goals
+    monthlyResetTime: '00:00', // Default midnight 1st of month for monthly goals
+    yearlyResetTime: '00:00'   // Default midnight January 1st for yearly goals
   };
 }
 

@@ -132,6 +132,7 @@ function createGoal(data) {
     category: data.category || null,
     color: data.color || null, // US-073: Custom goal color (hex string or null)
     notes: data.notes || null, // US-074: Optional notes/description (max 500 chars)
+    customResetTime: data.customResetTime || null, // US-075: Per-goal custom reset time override (HH:MM format or null for global default)
     isActive: data.isActive !== undefined ? data.isActive : false,
     createdAt: data.createdAt || now,
     lastResetAt: data.lastResetAt || now,
