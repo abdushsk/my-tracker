@@ -212,7 +212,7 @@
         "Optional: keyboard shortcut to toggle"
       ],
       "priority": 13,
-      "passes": false,
+      "passes": true,
       "dependsOn": ["US-056"]
     },
     {

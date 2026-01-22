@@ -767,3 +767,92 @@ Implemented a comprehensive goal templates feature that allows users to quickly 
 - Delete custom templates (delete button on custom template cards)
 - Templates include title, type, target, timeframe, category (all properties preserved)
 
+---
+
+## US-067: Focus Mode
+**Date**: 2026-01-22
+**Status**: Completed
+
+### What was done:
+Implemented Focus Mode that allows users to concentrate on a single goal at a time. When activated, Focus Mode hides all other goals and shows a single goal with a large, prominent display and minimal UI distractions.
+
+### Implementation details:
+
+1. **State Management** (`src/popup/popup.js`):
+   - Added `focusedGoalId: null` to global state to track the currently focused goal
+   - Added `SCREENS.FOCUS_MODE` to the SCREENS enum
+   - Added `SCREEN_IDS[SCREENS.FOCUS_MODE]` mapping to 'screen-focus-mode'
+   - Added `renderFocusModeScreen` case to `renderCurrentScreen()` switch
+
+2. **Focus Button on Goal Cards** (`src/popup/popup.js`):
+   - Added a focus button with a target/crosshair icon to each goal card header
+   - Button wrapped in `.goal-header-actions` container alongside the badges
+   - Focus button click triggers `enterFocusMode(goalId)` function
+   - Event listener added in `attachGoalControlListeners()` for `[data-action="focus"]`
+
+3. **Focus Mode Screen** (`src/popup/popup.js` lines 2760-3200):
+   - `enterFocusMode(goalId)` - Sets focused goal ID and navigates to focus mode screen
+   - `exitFocusMode()` - Clears focused goal ID and returns to View Goals
+   - `renderFocusModeScreen()` - Renders the focus mode layout:
+     - Exit button (X) in top-right corner
+     - Goal info section (category badge, timeframe badge, type icon, title)
+     - Type-specific display (large timer/counter/checkbox)
+     - Progress bar with percentage
+     - Type-specific controls (play/pause, +/-, toggle)
+     - Completed message when goal is done
+   - `renderFocusModeDisplay(goal)` - Routes to type-specific display renderers
+   - `renderFocusTimerDisplay(goal)` - Large timer with current time, target, and remaining
+   - `renderFocusCounterDisplay(goal)` - Large counter with current/target and remaining
+   - `renderFocusCheckboxDisplay(goal)` - Large checkbox icon with status text
+   - `renderFocusModeControls(goal)` - Routes to type-specific control renderers
+   - `attachFocusModeListeners(container)` - Event handlers for all focus mode interactions
+
+4. **Timer Updates in Focus Mode**:
+   - Added `updateFocusModeTimerDisplay()` function to update timer display
+   - Function called from `updateTimerDisplays()` interval when in focus mode
+   - Updates timer value, remaining time, progress bar, and percentage in real-time
+
+5. **Keyboard Shortcut**:
+   - Escape key exits focus mode and returns to View Goals screen
+   - Handler registered in `attachFocusModeListeners()`
+
+6. **HTML Structure** (`src/popup/popup.html`):
+   - Added `<div id="screen-focus-mode" class="screen">` placeholder for focus mode screen
+
+7. **CSS Styles** (`src/popup/popup.css` lines 5198-5738):
+   - Focus button styles (`.focus-btn`) with hover/active states
+   - Compact view adjustments for smaller focus button
+   - Focus Mode screen layout (`.focus-mode-screen`)
+   - Exit button styles (`.focus-exit-btn`)
+   - Goal info section with badges and title
+   - Timer display (`.focus-timer-display`) with large 48px font, pulse animation when active
+   - Counter display (`.focus-counter-display`) with large 64px font
+   - Checkbox display (`.focus-checkbox-display`) with 80px icon container
+   - Progress bar container with gradient fill
+   - Control buttons (play/pause, increment/decrement, toggle)
+   - Completed message with animation
+   - Dark mode adjustments for all focus mode elements
+
+### Files modified:
+- `src/popup/popup.js` (lines 68-81, 91-112, 172-177, 514-526, 1087-1094, 1366-1377, 2760-3200)
+- `src/popup/popup.html` (lines 41-44)
+- `src/popup/popup.css` (lines 5198-5738)
+
+### Key design decisions:
+- Focus Mode is a full-screen experience, not an overlay - consistent with other screens
+- Large displays make progress highly visible (48px timer, 64px counter, 80px checkbox)
+- Minimal chrome - only exit button visible, no navigation footer
+- Timer displays show both elapsed time and remaining time
+- Counter displays show both progress and "to go" count
+- Escape key provides quick exit - discovered via trial that keyboard shortcuts help
+- Timer pulse animation indicates active state without being distracting
+- Completed state shows gradient background and success message
+
+### Acceptance criteria met:
+- Focus button on each goal card (target/crosshair icon in card header)
+- Focus mode shows single goal prominently (full-screen with large display)
+- Large timer/counter display in focus mode (48px/64px fonts)
+- Minimal UI distractions (only exit button and goal content visible)
+- Easy exit back to normal view (X button or Escape key)
+- Keyboard shortcut to toggle (Escape key to exit)
+
