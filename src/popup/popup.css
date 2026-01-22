@@ -3156,7 +3156,7 @@ select:focus {
 }
 
 .checkbox-toggle-btn.checked:hover {
-  background-color: #388E3C;
+  background-color: var(--accent-hover);
   box-shadow: var(--shadow);
 }
 
@@ -3259,7 +3259,7 @@ select:focus {
   left: 50%;
   width: 0;
   height: 0;
-  background: rgba(76, 175, 80, 0.2);
+  background: var(--accent-subtle);
   border-radius: 50%;
   transform: translate(-50%, -50%);
   transition: width 0.3s ease, height 0.3s ease, opacity 0.3s ease;
@@ -4278,25 +4278,25 @@ body.modal-open {
 .type-option[data-type="timer"].active,
 .type-option[data-type="timer"].active:hover,
 .type-option[data-type="timer"].active:focus {
-  background-color: rgba(33, 150, 243, 0.15);
+  background-color: var(--type-timer-subtle);
 }
 
 .type-option[data-type="counter"].active,
 .type-option[data-type="counter"].active:hover,
 .type-option[data-type="counter"].active:focus {
-  background-color: rgba(251, 140, 0, 0.15);
+  background-color: var(--type-counter-subtle);
 }
 
 .type-option[data-type="checkbox"].active,
 .type-option[data-type="checkbox"].active:hover,
 .type-option[data-type="checkbox"].active:focus {
-  background-color: rgba(76, 175, 80, 0.15);
+  background-color: var(--type-checkbox-subtle);
 }
 
 .type-option[data-type="avoidance"].active,
 .type-option[data-type="avoidance"].active:hover,
 .type-option[data-type="avoidance"].active:focus {
-  background-color: rgba(139, 92, 246, 0.15);
+  background-color: var(--type-avoidance-subtle);
 }
 
 
@@ -4508,7 +4508,7 @@ body.modal-open {
 .timeframe-option.active {
   border-color: var(--primary);
   background-color: var(--primary-light);
-  box-shadow: 0 0 0 2px rgba(76, 175, 80, 0.12);
+  box-shadow: 0 0 0 2px var(--accent-subtle);
 }
 
 .timeframe-option.active:hover {
@@ -4520,25 +4520,25 @@ body.modal-open {
 .timeframe-option[data-timeframe="daily"].active {
   border-color: var(--primary);
   background-color: var(--primary-light);
-  box-shadow: 0 0 0 2px rgba(76, 175, 80, 0.12);
+  box-shadow: 0 0 0 2px var(--accent-subtle);
 }
 
 .timeframe-option[data-timeframe="weekly"].active {
   border-color: var(--secondary);
   background-color: var(--secondary-light);
-  box-shadow: 0 0 0 2px rgba(33, 150, 243, 0.12);
+  box-shadow: 0 0 0 2px var(--info-subtle);
 }
 
 .timeframe-option[data-timeframe="monthly"].active {
   border-color: var(--counter-accent);
   background-color: var(--counter-light);
-  box-shadow: 0 0 0 2px rgba(251, 140, 0, 0.12);
+  box-shadow: 0 0 0 2px var(--warning-subtle);
 }
 
 .timeframe-option[data-timeframe="yearly"].active {
   border-color: var(--yearly-color);
   background-color: var(--yearly-light);
-  box-shadow: 0 0 0 2px rgba(123, 31, 162, 0.12);
+  box-shadow: 0 0 0 2px var(--type-avoidance-subtle);
 }
 
 /* Timeframe Option Icon */
@@ -6671,7 +6671,7 @@ body.modal-open {
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 4px 12px rgba(76, 175, 80, 0.4), 0 2px 4px rgba(0, 0, 0, 0.1);
+  box-shadow: var(--shadow-lg), 0 2px 4px rgba(0, 0, 0, 0.1);
   transition: all var(--transition-normal);
   position: relative;
   z-index: 101;
@@ -6679,7 +6679,7 @@ body.modal-open {
 
 .quick-add-fab:hover {
   transform: scale(1.08);
-  box-shadow: 0 6px 16px rgba(76, 175, 80, 0.5), 0 3px 6px rgba(0, 0, 0, 0.15);
+  box-shadow: var(--shadow-lg), var(--shadow-md);
 }
 
 .quick-add-fab:active {
@@ -6947,7 +6947,7 @@ body.modal-open {
 }
 
 [data-theme="dark"] .quick-add-type-btn.active {
-  background: rgba(76, 175, 80, 0.2);
+  background: var(--accent-subtle);
 }
 
 /* Responsive adjustments - ensure FAB doesn't obstruct goal cards */
@@ -9044,15 +9044,15 @@ body.modal-open {
 }
 
 [data-theme="dark"] .goal-card.keyboard-selected {
-  box-shadow: 0 0 0 4px rgba(76, 175, 80, 0.3);
+  box-shadow: 0 0 0 4px var(--accent-subtle);
 }
 
 [data-theme="dark"] .goal-card.keyboard-selected.goal-type-counter {
-  box-shadow: 0 0 0 4px rgba(230, 81, 0, 0.3);
+  box-shadow: 0 0 0 4px var(--type-counter-subtle);
 }
 
 [data-theme="dark"] .goal-card.keyboard-selected.goal-type-checkbox {
-  box-shadow: 0 0 0 4px rgba(76, 175, 80, 0.3);
+  box-shadow: 0 0 0 4px var(--type-checkbox-subtle);
 }
 
 /* ----------------------------------------
@@ -10260,10 +10260,10 @@ body.modal-open {
   transform: translate(-50%, -50%) scale(0.8);
   z-index: 10000;
   padding: 12px 20px;
-  background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%);
-  color: white;
+  background: linear-gradient(135deg, var(--accent) 0%, var(--accent-hover) 100%);
+  color: var(--text-inverse);
   border-radius: 12px;
-  box-shadow: 0 4px 20px rgba(76, 175, 80, 0.4);
+  box-shadow: var(--shadow-lg);
   opacity: 0;
   transition: opacity 0.2s ease, transform 0.2s ease;
   pointer-events: none;
@@ -10417,8 +10417,8 @@ body.modal-open {
 }
 
 [data-theme="dark"] .xp-toast {
-  background: linear-gradient(135deg, #388E3C 0%, #2E7D32 100%);
-  box-shadow: 0 4px 20px rgba(56, 142, 60, 0.4);
+  background: linear-gradient(135deg, var(--accent-hover) 0%, var(--accent-active) 100%);
+  box-shadow: var(--shadow-lg);
 }
 
 [data-theme="dark"] .level-up-notification {
@@ -10975,15 +10975,15 @@ body.modal-open {
 }
 
 .break-reminder-btn.btn-primary {
-  background: linear-gradient(135deg, #27ae60 0%, #2ecc71 100%);
-  color: white;
+  background: linear-gradient(135deg, var(--accent) 0%, var(--accent-hover) 100%);
+  color: var(--text-inverse);
   border: none;
 }
 
 .break-reminder-btn.btn-primary:hover {
-  background: linear-gradient(135deg, #219653 0%, #27ae60 100%);
+  background: linear-gradient(135deg, var(--accent-hover) 0%, var(--accent-active) 100%);
   transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(39, 174, 96, 0.3);
+  box-shadow: var(--shadow-md);
 }
 
 /* Snooze Button Group */

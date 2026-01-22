@@ -57,3 +57,52 @@
 - Progress path backgrounds should be at least `#2A2A2A` in dark mode for visibility
 - "Missed" progress bars need explicit lighter colors (#3A3A3A) rather than relying on too-dark variables
 
+## US-003: Fix Hover State Inconsistencies (Completed)
+**Date**: 2026-01-23
+
+### Changes Made
+1. **Checkbox toggle hover state** (popup.css:3159):
+   - Changed `.checkbox-toggle-btn.checked:hover` from hardcoded `#388E3C` to `var(--accent-hover)`
+
+2. **Type option active backgrounds** (popup.css:4277-4300):
+   - Timer: Changed from `rgba(33, 150, 243, 0.15)` to `var(--type-timer-subtle)`
+   - Counter: Changed from `rgba(251, 140, 0, 0.15)` to `var(--type-counter-subtle)`
+   - Checkbox: Changed from `rgba(76, 175, 80, 0.15)` to `var(--type-checkbox-subtle)`
+   - Avoidance: Changed from `rgba(139, 92, 246, 0.15)` to `var(--type-avoidance-subtle)`
+
+3. **Break reminder button** (popup.css:10977-10987):
+   - Changed gradients from hardcoded green colors (`#27ae60`, `#2ecc71`) to `var(--accent)` and `var(--accent-hover)`
+   - Changed text color from `white` to `var(--text-inverse)`
+   - Changed box-shadow from hardcoded rgba to `var(--shadow-md)`
+
+4. **Quick-add FAB shadows** (popup.css:6674, 6680-6682):
+   - Changed from hardcoded `rgba(76, 175, 80, 0.4)` shadow to `var(--shadow-lg)`
+
+5. **Checkbox ripple effect** (popup.css:3262):
+   - Changed from `rgba(76, 175, 80, 0.2)` to `var(--accent-subtle)`
+
+6. **Timeframe option focus shadows** (popup.css:4507-4542):
+   - Daily: Changed from `rgba(76, 175, 80, 0.12)` to `var(--accent-subtle)`
+   - Weekly: Changed from `rgba(33, 150, 243, 0.12)` to `var(--info-subtle)`
+   - Monthly: Changed from `rgba(251, 140, 0, 0.12)` to `var(--warning-subtle)`
+   - Yearly: Changed from `rgba(123, 31, 162, 0.12)` to `var(--type-avoidance-subtle)`
+
+7. **Quick-add type button dark mode** (popup.css:6950):
+   - Changed from `rgba(76, 175, 80, 0.2)` to `var(--accent-subtle)`
+
+8. **Keyboard-selected goal cards in dark mode** (popup.css:9046-9056):
+   - Default: Changed from `rgba(76, 175, 80, 0.3)` to `var(--accent-subtle)`
+   - Counter: Changed from `rgba(230, 81, 0, 0.3)` to `var(--type-counter-subtle)`
+   - Checkbox: Changed from `rgba(76, 175, 80, 0.3)` to `var(--type-checkbox-subtle)`
+
+9. **XP toast styling** (popup.css:10263-10266, 10419-10422):
+   - Changed from hardcoded green gradients to `var(--accent)` and `var(--accent-hover)`
+   - Changed from hardcoded box-shadow to `var(--shadow-lg)`
+
+### Key Learnings
+- All hover, active, and focus states should use CSS variables, not hardcoded colors
+- Use `--accent-*` variables for primary interactive elements
+- Use `--type-*-subtle` variables for goal type-specific backgrounds
+- Box shadows should use `var(--shadow-*)` for consistency across themes
+- Category-specific colors (work, health, learning, personal) are intentionally hardcoded as they don't change with themes
+
