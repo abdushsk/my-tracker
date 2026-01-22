@@ -803,7 +803,7 @@ function validateImportData(importData) {
       data.goals.forEach((goal, index) => {
         if (!goal.id) errors.push(`Goal at index ${index} is missing id`);
         if (!goal.title) errors.push(`Goal at index ${index} is missing title`);
-        if (!['timer', 'counter', 'checkbox'].includes(goal.type)) {
+        if (!['timer', 'counter', 'checkbox', 'avoidance'].includes(goal.type)) {
           errors.push(`Goal at index ${index} has invalid type: ${goal.type}`);
         }
       });

@@ -2903,6 +2903,208 @@ select:focus {
 }
 
 /* ========================================
+   US-087: Avoidance Goal Controls
+   ======================================== */
+
+/* Avoidance Controls Container */
+.goal-controls-avoidance {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-md);
+  justify-content: space-between;
+}
+
+/* Avoidance Streak Display */
+.avoidance-streak-display {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+  padding: var(--spacing-sm) var(--spacing-md);
+  background-color: var(--background-secondary);
+  border-radius: var(--radius-lg);
+  font-weight: var(--font-weight-semibold);
+}
+
+.avoidance-streak-display .streak-fire {
+  font-size: 1.25em;
+}
+
+.avoidance-streak-display .streak-count {
+  font-size: var(--font-size-xl);
+  color: var(--warning);
+  font-weight: var(--font-weight-bold);
+  min-width: 28px;
+  text-align: center;
+}
+
+.avoidance-streak-display .streak-label {
+  font-size: var(--font-size-sm);
+  color: var(--text-tertiary);
+}
+
+/* Avoidance Slip-Up Button */
+.avoidance-slip-btn {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+  padding: var(--spacing-sm) var(--spacing-md);
+  background-color: var(--background-secondary);
+  border-radius: var(--radius-lg);
+  color: var(--text-secondary);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  transition: all var(--transition);
+  cursor: pointer;
+}
+
+.avoidance-slip-btn svg {
+  width: 18px;
+  height: 18px;
+}
+
+.avoidance-slip-btn:hover {
+  background-color: var(--error-light);
+  color: var(--error);
+}
+
+.avoidance-slip-btn.has-forgiveness:hover {
+  background-color: var(--warning-light);
+  color: var(--warning);
+}
+
+/* Forgiveness Badge */
+.forgiveness-badge {
+  font-size: 1.2em;
+  cursor: help;
+}
+
+.forgiveness-badge.available {
+  animation: pulse 2s ease-in-out infinite;
+}
+
+.forgiveness-badge.used {
+  opacity: 0.6;
+}
+
+/* Avoidance Goal Card Styling */
+.goal-type-avoidance {
+  border-left: 4px solid var(--warning);
+}
+
+.goal-type-avoidance .goal-type-indicator {
+  background-color: var(--warning-light);
+}
+
+.goal-type-avoidance .goal-type-indicator .goal-type-icon {
+  color: var(--warning);
+}
+
+/* Avoidance Goal - Active Streak State */
+.goal-type-avoidance.goal-completed {
+  border-color: var(--warning);
+  background: linear-gradient(135deg, var(--background-card) 0%, var(--warning-light) 100%);
+}
+
+.goal-type-avoidance.goal-completed .goal-progress-fill {
+  background: linear-gradient(90deg, var(--warning) 0%, #F57C00 100%);
+}
+
+/* ========================================
+   US-087: Avoidance Form Settings
+   ======================================== */
+
+.avoidance-settings {
+  margin-bottom: var(--spacing-md);
+}
+
+.toggle-setting {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-md);
+  cursor: pointer;
+  padding: var(--spacing-sm) 0;
+}
+
+.toggle-setting input[type="checkbox"] {
+  appearance: none;
+  -webkit-appearance: none;
+  width: 48px;
+  height: 26px;
+  background-color: var(--background-tertiary);
+  border-radius: 13px;
+  position: relative;
+  cursor: pointer;
+  transition: all var(--transition);
+  flex-shrink: 0;
+}
+
+.toggle-setting input[type="checkbox"]::before {
+  content: '';
+  position: absolute;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  top: 2px;
+  left: 2px;
+  background-color: var(--background-card);
+  box-shadow: var(--shadow-sm);
+  transition: all var(--transition);
+}
+
+.toggle-setting input[type="checkbox"]:checked {
+  background-color: var(--success);
+}
+
+.toggle-setting input[type="checkbox"]:checked::before {
+  transform: translateX(22px);
+}
+
+.toggle-label {
+  font-size: var(--font-size-base);
+  color: var(--text-primary);
+}
+
+/* Avoidance Info Box */
+.avoidance-info-box {
+  display: flex;
+  gap: var(--spacing-md);
+  padding: var(--spacing-md);
+  background-color: var(--background-secondary);
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--border);
+}
+
+.avoidance-info-icon {
+  font-size: 1.5em;
+  flex-shrink: 0;
+}
+
+.avoidance-info-text {
+  font-size: var(--font-size-sm);
+  color: var(--text-secondary);
+  line-height: 1.5;
+}
+
+.avoidance-info-text strong {
+  color: var(--text-primary);
+  display: block;
+  margin-bottom: var(--spacing-xs);
+}
+
+.avoidance-info-text ul {
+  margin: 0;
+  padding-left: var(--spacing-md);
+}
+
+.avoidance-info-text li {
+  margin-bottom: var(--spacing-xs);
+}
+
+.avoidance-info-text li:last-child {
+  margin-bottom: 0;
+}
+
+/* ========================================
    US-019: Goal Card - Completion State
    ======================================== */
 

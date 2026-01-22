@@ -15,7 +15,8 @@
 const GOAL_TYPES = {
   TIMER: 'timer',
   COUNTER: 'counter',
-  CHECKBOX: 'checkbox'
+  CHECKBOX: 'checkbox',
+  AVOIDANCE: 'avoidance'  // US-087: Negative/avoidance goals - things to avoid
 };
 
 /**
@@ -42,7 +43,8 @@ const ACTIVITY_ACTIONS = {
   DECREMENT: 'decrement',
   TOGGLE: 'toggle',
   RESET: 'reset',
-  COMPLETE: 'complete'
+  COMPLETE: 'complete',
+  SLIP_UP: 'slip_up'  // US-087: When user breaks an avoidance streak
 };
 
 // =============================================================================
@@ -84,9 +86,9 @@ const CHAIN_STATUS = {
  * @typedef {Object} Goal
  * @property {string} id - Unique identifier (UUID)
  * @property {string} title - The goal title/name
- * @property {'timer'|'counter'|'checkbox'} type - The type of goal
- * @property {number} target - Target value (seconds for timer, count for counter, 1 for checkbox)
- * @property {number} progress - Current progress value
+ * @property {'timer'|'counter'|'checkbox'|'avoidance'} type - The type of goal
+ * @property {number} target - Target value (seconds for timer, count for counter, 1 for checkbox/avoidance)
+ * @property {number} progress - Current progress value (for avoidance: current streak in days)
  * @property {'daily'|'weekly'|'monthly'|'yearly'} timeframe - When the goal resets
  * @property {string|null} category - Optional category for organization
  * @property {boolean} isActive - Whether the goal is currently active (mainly for timers)
@@ -95,19 +97,24 @@ const CHAIN_STATUS = {
  * @property {number} order - Display order for sorting goals
  * @property {string|null} chainParentId - US-084: ID of the goal that must be completed to unlock this goal
  * @property {'unlocked'|'locked'} chainStatus - US-084: Whether this goal is unlocked or locked (based on chain parent completion)
+ * @property {boolean} forgivenessEnabled - US-087: Allow 1 slip-up per week without breaking streak
+ * @property {number} slipUpsThisWeek - US-087: Number of slip-ups this week (resets weekly)
+ * @property {number} longestAvoidanceStreak - US-087: Personal record for longest streak
+ * @property {number|null} lastStreakIncrementDate - US-087: Date string of last daily increment (YYYY-MM-DD)
  */
 
 /**
  * Create a new Goal object with default values
  * @param {Object} data - Goal data to create from
  * @param {string} data.title - The goal title (required)
- * @param {'timer'|'counter'|'checkbox'} [data.type='timer'] - The type of goal
+ * @param {'timer'|'counter'|'checkbox'|'avoidance'} [data.type='timer'] - The type of goal
  * @param {number} [data.target] - Target value (defaults based on type)
  * @param {number} [data.progress=0] - Initial progress value
  * @param {'daily'|'weekly'|'monthly'|'yearly'} [data.timeframe='daily'] - Reset timeframe
  * @param {string|null} [data.category=null] - Optional category
  * @param {boolean} [data.isActive=false] - Whether currently active
  * @param {number} [data.order=0] - Display order
+ * @param {boolean} [data.forgivenessEnabled=false] - US-087: Allow 1 slip-up per week
  * @returns {Goal} A new goal object with all required fields
  */
 function createGoal(data) {
@@ -130,17 +137,26 @@ function createGoal(data) {
     case GOAL_TYPES.CHECKBOX:
       defaultTarget = 1;
       break;
+    case GOAL_TYPES.AVOIDANCE:
+      defaultTarget = 1; // For avoidance, target is 1 (we track streak days in progress)
+      break;
     default:
       defaultTarget = 1;
   }
 
-  return {
+  // US-087: For avoidance goals, the timeframe should always be 'daily'
+  // since the streak increments daily automatically
+  const effectiveTimeframe = type === GOAL_TYPES.AVOIDANCE
+    ? TIMEFRAMES.DAILY
+    : (data.timeframe || TIMEFRAMES.DAILY);
+
+  const goal = {
     id: data.id || generateId(),
     title: data.title.trim(),
     type: type,
     target: data.target !== undefined ? data.target : defaultTarget,
     progress: data.progress !== undefined ? data.progress : 0,
-    timeframe: data.timeframe || TIMEFRAMES.DAILY,
+    timeframe: effectiveTimeframe,
     category: data.category || null,
     color: data.color || null, // US-073: Custom goal color (hex string or null)
     notes: data.notes || null, // US-074: Optional notes/description (max 500 chars)
@@ -152,6 +168,16 @@ function createGoal(data) {
     lastResetAt: data.lastResetAt || now,
     order: data.order !== undefined ? data.order : 0
   };
+
+  // US-087: Add avoidance-specific properties
+  if (type === GOAL_TYPES.AVOIDANCE) {
+    goal.forgivenessEnabled = data.forgivenessEnabled !== undefined ? data.forgivenessEnabled : false;
+    goal.slipUpsThisWeek = data.slipUpsThisWeek !== undefined ? data.slipUpsThisWeek : 0;
+    goal.longestAvoidanceStreak = data.longestAvoidanceStreak !== undefined ? data.longestAvoidanceStreak : 0;
+    goal.lastStreakIncrementDate = data.lastStreakIncrementDate || null;
+  }
+
+  return goal;
 }
 
 /**
@@ -1036,6 +1062,8 @@ const XP_CONFIG = {
   CHALLENGE_MEDIUM: 10,       // XP for completing medium daily challenge
   CHALLENGE_HARD: 15,         // XP for completing hard daily challenge
   FIRST_GOAL_BONUS: 50,       // One-time bonus for first goal completion
+  AVOIDANCE_BONUS: 5,         // US-087: Bonus XP for avoidance goals (discipline-intensive)
+  AVOIDANCE_STREAK_MILESTONE: 10, // US-087: Bonus XP for avoidance streak milestones (7, 30, 100 days)
 
   // Level calculation
   BASE_XP_PER_LEVEL: 100,     // XP needed for level 2
@@ -1056,7 +1084,9 @@ const XP_SOURCES = {
   STREAK_BONUS: 'streak_bonus',
   ACHIEVEMENT: 'achievement',
   CHALLENGE: 'challenge',
-  FIRST_GOAL: 'first_goal'
+  FIRST_GOAL: 'first_goal',
+  AVOIDANCE_BONUS: 'avoidance_bonus',  // US-087
+  AVOIDANCE_STREAK_MILESTONE: 'avoidance_streak_milestone'  // US-087
 };
 
 /**
@@ -1179,6 +1209,27 @@ function calculateGoalCompletionXP(goal, currentStreak = 0, isFirstGoal = false)
       amount: XP_CONFIG.COUNTER_BONUS,
       description: 'Counter goal bonus'
     });
+  } else if (goal.type === 'avoidance') {
+    // US-087: Avoidance goals get a discipline bonus
+    bonuses.push({
+      type: XP_SOURCES.AVOIDANCE_BONUS,
+      amount: XP_CONFIG.AVOIDANCE_BONUS,
+      description: 'Avoidance discipline bonus'
+    });
+
+    // US-087: Check for avoidance streak milestones (7, 30, 100 days)
+    const avoidanceStreak = goal.progress || 0;
+    const milestones = [7, 30, 100, 365];
+    for (const milestone of milestones) {
+      if (avoidanceStreak === milestone) {
+        bonuses.push({
+          type: XP_SOURCES.AVOIDANCE_STREAK_MILESTONE,
+          amount: XP_CONFIG.AVOIDANCE_STREAK_MILESTONE,
+          description: `${milestone} day avoidance milestone!`
+        });
+        break;
+      }
+    }
   }
 
   // Streak bonus

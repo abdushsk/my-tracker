@@ -526,10 +526,45 @@ async function performGoalReset(timeframe) {
     let archivedCount = 0;
 
     // Process each goal
+    const todayDateStr = new Date().toISOString().split('T')[0]; // YYYY-MM-DD
+
     const updatedGoals = goals.map(goal => {
       // Check if this goal's timeframe matches the reset being performed
       if (goal.timeframe !== timeframe) {
         return goal; // No change for goals with different timeframes
+      }
+
+      const now = Date.now();
+
+      // US-087: Avoidance goals get special handling - streak increments instead of reset
+      if (goal.type === 'avoidance') {
+        // Only increment if we haven't already incremented today
+        const lastIncrement = goal.lastStreakIncrementDate;
+        if (lastIncrement !== todayDateStr) {
+          const newProgress = (goal.progress || 0) + 1;
+          const newLongestStreak = Math.max(goal.longestAvoidanceStreak || 0, newProgress);
+
+          console.log(`[Service Worker] Avoidance goal "${goal.title}": streak increased to ${newProgress} days (record: ${newLongestStreak})`);
+
+          // Archive the successful day
+          const historyEntry = createHistoryEntry({
+            ...goal,
+            progress: 1,
+            target: 1
+          }, archiveDate);
+          historyEntry.completed = true;
+          history.push(historyEntry);
+          archivedCount++;
+
+          return {
+            ...goal,
+            progress: newProgress,
+            longestAvoidanceStreak: newLongestStreak,
+            lastStreakIncrementDate: todayDateStr,
+            lastResetAt: now
+          };
+        }
+        return goal; // Already incremented today
       }
 
       // Archive current progress to history (only if there's any progress or activity)
@@ -542,7 +577,6 @@ async function performGoalReset(timeframe) {
 
       // Reset the goal progress
       resetCount++;
-      const now = Date.now();
 
       // If this was an active timer, we need to stop it
       if (goal.isActive && goal.type === 'timer') {
@@ -606,6 +640,42 @@ async function performGoalReset(timeframe) {
   }
 }
 
+/**
+ * US-087: Reset weekly slip-up counters for avoidance goals
+ * Called on weekly reset to restore forgiveness for all avoidance goals
+ */
+async function resetAvoidanceSlipUpCounters() {
+  try {
+    const goals = await getGoals();
+
+    const avoidanceGoals = goals.filter(g => g.type === 'avoidance');
+    if (avoidanceGoals.length === 0) {
+      console.log('[Service Worker] No avoidance goals to reset slip-up counters');
+      return;
+    }
+
+    let resetCount = 0;
+    const updatedGoals = goals.map(goal => {
+      if (goal.type === 'avoidance' && goal.slipUpsThisWeek > 0) {
+        resetCount++;
+        console.log(`[Service Worker] Reset slip-up counter for avoidance goal "${goal.title}"`);
+        return {
+          ...goal,
+          slipUpsThisWeek: 0
+        };
+      }
+      return goal;
+    });
+
+    if (resetCount > 0) {
+      await saveGoals(updatedGoals);
+      console.log(`[Service Worker] Reset ${resetCount} avoidance goal slip-up counters`);
+    }
+  } catch (error) {
+    console.error('[Service Worker] Error resetting avoidance slip-up counters:', error);
+  }
+}
+
 // ============================================
 // Alarm Listener
 // ============================================
@@ -634,6 +704,8 @@ chrome.alarms.onAlarm.addListener(async (alarm) => {
       // US-041: Weekly check at Monday midnight - reset weekly goals
       console.log('[Service Worker] Weekly reset triggered');
       await performGoalReset('weekly');
+      // US-087: Reset avoidance slip-up counters weekly
+      await resetAvoidanceSlipUpCounters();
       // Note: This alarm repeats automatically via periodInMinutes
       break;
 

@@ -2523,3 +2523,87 @@ Added comprehensive styles for:
 - Could add break reminder history to Reports screen
 - May want to add browser notification when popup is closed
 - Consider adding break duration tracking (how long breaks actually last)
+
+---
+
+## US-087: Negative/Avoidance Goals
+**Date**: 2026-01-22
+**Status**: Completed
+
+### What was done:
+Implemented a new "Avoidance" goal type for tracking things users want to avoid (e.g., no social media, no junk food). The streak automatically increases each day and resets on slip-ups, with an optional forgiveness mode.
+
+### Implementation details:
+
+1. **Model Layer** (`src/utils/models.js`):
+   - Added `AVOIDANCE: 'avoidance'` to GOAL_TYPES enum
+   - Added `SLIP_UP: 'slip_up'` to ACTIVITY_ACTIONS enum
+   - Updated Goal typedef with avoidance-specific properties:
+     - `forgivenessEnabled`: boolean for weekly slip-up forgiveness
+     - `slipUpsThisWeek`: counter reset weekly
+     - `longestAvoidanceStreak`: personal record tracking
+     - `lastStreakIncrementDate`: prevents double-incrementing
+   - Updated `createGoal()` to initialize avoidance properties
+   - Updated XP calculation to award bonus XP for avoidance goals and streak milestones (7, 30, 100, 365 days)
+
+2. **UI Controls** (`src/popup/popup.js`):
+   - Added avoidance goal type icon (shield with slash)
+   - Added `formatProgressDisplay()` case showing "X day streak"
+   - Added `renderGoalControls()` case with:
+     - Streak display with fire/seedling emoji
+     - Slip-up button to mark failures
+     - Forgiveness badge showing availability
+   - Added `handleAvoidanceSlipUp()` function:
+     - Uses forgiveness if available (preserves streak)
+     - Resets streak to 0 without forgiveness
+     - Logs SLIP_UP activity
+     - Supports undo via `UNDO_ACTION_TYPES.AVOIDANCE_SLIP`
+
+3. **Goal Form** (`src/popup/popup.js`):
+   - Added avoidance type button to type selector
+   - Added avoidance settings section with forgiveness toggle
+   - Added info box explaining how avoidance goals work
+   - Hide timeframe selector for avoidance (always daily)
+   - Form submission handles forgiveness setting
+
+4. **Service Worker** (`src/background/service-worker.js`):
+   - Modified `performGoalReset()` to increment avoidance streaks instead of resetting
+   - Tracks `lastStreakIncrementDate` to prevent double-incrementing
+   - Updates `longestAvoidanceStreak` when new records are set
+   - Added `resetAvoidanceSlipUpCounters()` to reset weekly forgiveness
+   - Weekly reset now calls slip-up counter reset
+
+5. **Styling** (`src/popup/popup.css`):
+   - Added `.goal-controls-avoidance` for control layout
+   - Added `.avoidance-streak-display` with fire/count/label
+   - Added `.avoidance-slip-btn` with hover states
+   - Added `.forgiveness-badge` with pulse animation
+   - Added `.goal-type-avoidance` card styling (warning/orange theme)
+   - Added `.toggle-setting` checkbox toggle styles
+   - Added `.avoidance-info-box` for form explainer
+
+6. **Data Validation** (`src/utils/storage.js`):
+   - Added 'avoidance' to valid goal types for import validation
+
+### Files modified:
+- `src/utils/models.js` - Goal type, activity action, typedef, createGoal, XP calculation
+- `src/popup/popup.js` - UI controls, form, event handlers
+- `src/popup/popup.css` - Avoidance goal styling
+- `src/background/service-worker.js` - Auto-increment and weekly reset
+- `src/utils/storage.js` - Import validation
+- `plans/prd.json` - Marked US-087 as passes: true
+
+### Key learnings:
+- Avoidance goals require different handling than positive goals - progress increases automatically
+- Forgiveness mode adds complexity but significantly improves user experience
+- Weekly slip-up reset is separate from goal reset to allow forgiveness per week regardless of timeframe
+- Tracking `lastStreakIncrementDate` prevents double-counting during same-day app opens
+
+### Acceptance criteria met:
+- [x] New goal type: Avoidance
+- [x] Auto-increment daily streak (via daily reset alarm)
+- [x] Manual reset on slip-up (via Slipped button)
+- [x] Forgiveness mode (1 slip allowed per week)
+- [x] Different visual styling for avoidance goals (orange/warning theme)
+- [x] Streak milestone celebrations (via XP bonuses at 7, 30, 100, 365 days)
+- [x] Statistics for longest avoidance streak (longestAvoidanceStreak property)

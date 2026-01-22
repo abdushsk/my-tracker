@@ -547,7 +547,7 @@
         "Statistics for longest avoidance streak"
       ],
       "priority": 33,
-      "passes": false,
+      "passes": true,
       "dependsOn": ["US-058"]
     },
     {

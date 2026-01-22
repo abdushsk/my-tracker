@@ -602,6 +602,12 @@ function getGoalTypeIcon(type) {
         <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
         <polyline points="9 11 12 14 22 4"/>
       </svg>`;
+    case GOAL_TYPES.AVOIDANCE:
+      // US-087: Shield icon with slash for avoidance/negative goals
+      return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="goal-type-icon">
+        <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+        <line x1="4" y1="4" x2="20" y2="20"/>
+      </svg>`;
     default:
       return '';
   }
@@ -632,6 +638,12 @@ function formatProgressDisplay(goal) {
       return `${goal.progress} / ${goal.target}`;
     case GOAL_TYPES.CHECKBOX:
       return goal.progress >= goal.target ? 'Completed' : 'Not completed';
+    case GOAL_TYPES.AVOIDANCE:
+      // US-087: Show streak days for avoidance goals
+      const days = goal.progress || 0;
+      if (days === 0) return 'Starting today';
+      if (days === 1) return '1 day streak';
+      return `${days} day streak`;
     default:
       return `${goal.progress} / ${goal.target}`;
   }
@@ -931,6 +943,35 @@ function renderGoalControls(goal) {
             </span>
             <span class="checkbox-label">${isGoalCompleted(goal) ? 'Done!' : 'Mark as done'}</span>
           </button>
+        </div>
+      `;
+    case GOAL_TYPES.AVOIDANCE:
+      // US-087: Avoidance goal controls - slip-up button to reset streak
+      const streakDays = goal.progress || 0;
+      const hasForgiveness = goal.forgivenessEnabled && goal.slipUpsThisWeek === 0;
+      return `
+        <div class="goal-controls goal-controls-avoidance">
+          <div class="avoidance-streak-display">
+            <span class="streak-fire">${streakDays > 0 ? '🔥' : '🌱'}</span>
+            <span class="streak-count">${streakDays}</span>
+            <span class="streak-label">${streakDays === 1 ? 'day' : 'days'}</span>
+          </div>
+          <button class="goal-control-btn avoidance-slip-btn ${hasForgiveness ? 'has-forgiveness' : ''}"
+                  data-action="avoidance-slip"
+                  data-goal-id="${goal.id}"
+                  title="${hasForgiveness ? 'Mark slip-up (forgiveness available)' : 'Mark slip-up (resets streak)'}">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="12" r="10"/>
+              <line x1="15" y1="9" x2="9" y2="15"/>
+              <line x1="9" y1="9" x2="15" y2="15"/>
+            </svg>
+            <span class="slip-label">Slipped</span>
+          </button>
+          ${goal.forgivenessEnabled ? `
+            <span class="forgiveness-badge ${hasForgiveness ? 'available' : 'used'}" title="${hasForgiveness ? 'Forgiveness available this week' : 'Forgiveness used this week'}">
+              ${hasForgiveness ? '💚' : '💔'}
+            </span>
+          ` : ''}
         </div>
       `;
     default:
@@ -2588,6 +2629,86 @@ async function handleCheckboxToggle(goalId) {
   renderCurrentScreen();
 }
 
+// =============================================================================
+// US-087: Avoidance Goal Controls
+// =============================================================================
+
+/**
+ * Handle avoidance goal slip-up
+ * When user slips up, either use forgiveness (if available) or reset streak
+ * @param {string} goalId - The ID of the avoidance goal
+ */
+async function handleAvoidanceSlipUp(goalId) {
+  const goal = state.goals.find(g => g.id === goalId);
+  if (!goal || goal.type !== GOAL_TYPES.AVOIDANCE) {
+    console.error('Invalid goal for avoidance slip-up:', goalId);
+    return;
+  }
+
+  // Store previous state for undo
+  const previousProgress = goal.progress;
+  const previousSlipUps = goal.slipUpsThisWeek || 0;
+
+  // Check if forgiveness is available
+  const hasForgiveness = goal.forgivenessEnabled && previousSlipUps === 0;
+
+  let newProgress;
+  let newSlipUps;
+  let usedForgiveness = false;
+
+  if (hasForgiveness) {
+    // Use forgiveness - don't reset streak, just increment slip count
+    newProgress = previousProgress;
+    newSlipUps = 1;
+    usedForgiveness = true;
+    console.log(`[Avoidance] Goal ${goalId}: Used forgiveness, streak preserved at ${newProgress} days`);
+  } else {
+    // No forgiveness available - reset streak to 0
+    newProgress = 0;
+    newSlipUps = previousSlipUps + 1;
+    console.log(`[Avoidance] Goal ${goalId}: Streak reset to 0 (slip-up)`);
+  }
+
+  // Update goal in state
+  goal.progress = newProgress;
+  goal.slipUpsThisWeek = newSlipUps;
+
+  // Save to storage
+  await updateGoal(goalId, {
+    progress: newProgress,
+    slipUpsThisWeek: newSlipUps
+  });
+
+  // Log the slip-up activity
+  const activityLog = createActivityLog({
+    goalId: goalId,
+    action: ACTIVITY_ACTIONS.SLIP_UP,
+    value: usedForgiveness ? previousProgress : 0 // Log what the streak was when slip-up occurred
+  });
+  await addActivityLogEntry(activityLog);
+
+  // US-039: Play sound based on whether forgiveness was used
+  if (usedForgiveness) {
+    playSound(SOUNDS.TICK); // Softer sound for forgiveness
+  } else {
+    playSound(SOUNDS.TICK); // Could use different sound for streak reset
+  }
+
+  // US-079: Push undo action for avoidance slip-up
+  pushUndoAction({
+    type: UNDO_ACTION_TYPES.AVOIDANCE_SLIP,
+    goalId: goalId,
+    goalTitle: goal.title,
+    previousValue: previousProgress,
+    newValue: newProgress,
+    previousSlipUps: previousSlipUps,
+    newSlipUps: newSlipUps
+  });
+
+  // Re-render to update UI
+  renderCurrentScreen();
+}
+
 /**
  * Attach goal control event listeners to the current screen
  * @param {HTMLElement} container - The container element
@@ -2641,6 +2762,19 @@ function attachGoalControlListeners(container) {
       const goalId = btn.getAttribute('data-goal-id');
       if (goalId) {
         handleCheckboxToggle(goalId);
+      }
+    });
+  });
+
+  // US-087: Avoidance slip-up buttons
+  const avoidanceSlipBtns = container.querySelectorAll('[data-action="avoidance-slip"]');
+  avoidanceSlipBtns.forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      const goalId = btn.getAttribute('data-goal-id');
+      if (goalId) {
+        handleAvoidanceSlipUp(goalId);
       }
     });
   });
@@ -3432,7 +3566,8 @@ const UNDO_ACTION_TYPES = {
   COUNTER_DECREMENT: 'counterDecrement',
   CHECKBOX_TOGGLE: 'checkboxToggle',
   TIMER_START: 'timerStart',
-  TIMER_STOP: 'timerStop'
+  TIMER_STOP: 'timerStop',
+  AVOIDANCE_SLIP: 'avoidanceSlip'  // US-087: Avoidance goal slip-up
 };
 
 /**
@@ -4088,6 +4223,15 @@ function renderGoalFormScreen() {
                 </span>
                 <span class="type-option-label">Checkbox</span>
               </button>
+              <button type="button" class="type-option" data-type="avoidance" role="radio" aria-checked="false" title="Avoidance - Track days without doing something">
+                <span class="type-option-icon">
+                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+                    <line x1="4" y1="4" x2="20" y2="20"/>
+                  </svg>
+                </span>
+                <span class="type-option-label">Avoidance</span>
+              </button>
             </div>
             <input type="hidden" id="goal-form-type" name="type" value="timer">
           </div>
@@ -4145,6 +4289,30 @@ function renderGoalFormScreen() {
             >
             <span class="form-error" id="goal-form-counter-error" role="alert" aria-live="polite"></span>
             <p class="form-hint">Set the target count you want to reach (minimum 1)</p>
+          </div>
+
+          <!-- US-087: Avoidance Settings -->
+          <div class="form-group target-input-group hidden" id="goal-form-avoidance-settings-group">
+            <label class="form-label">Avoidance Settings</label>
+            <div class="avoidance-settings">
+              <label class="toggle-setting">
+                <input type="checkbox" id="goal-form-forgiveness" name="forgiveness">
+                <span class="toggle-slider"></span>
+                <span class="toggle-label">Enable forgiveness mode</span>
+              </label>
+              <p class="form-hint">With forgiveness mode, one slip-up per week won't reset your streak.</p>
+            </div>
+            <div class="avoidance-info-box">
+              <div class="avoidance-info-icon">🛡️</div>
+              <div class="avoidance-info-text">
+                <strong>How avoidance goals work:</strong>
+                <ul>
+                  <li>Your streak automatically increases each day</li>
+                  <li>Mark "Slipped" when you break your goal</li>
+                  <li>Without forgiveness, slip-ups reset to day 0</li>
+                </ul>
+              </div>
+            </div>
           </div>
 
           <!-- Timeframe Selector -->
@@ -4547,18 +4715,37 @@ function setGoalFormScreenType(screen, type) {
   // Show/hide target input groups
   const timerGroup = screen.querySelector('#goal-form-timer-target-group');
   const counterGroup = screen.querySelector('#goal-form-counter-target-group');
+  const avoidanceGroup = screen.querySelector('#goal-form-avoidance-settings-group');
 
   if (timerGroup && counterGroup) {
     if (type === GOAL_TYPES.TIMER) {
       timerGroup.classList.remove('hidden');
       counterGroup.classList.add('hidden');
+      if (avoidanceGroup) avoidanceGroup.classList.add('hidden');
     } else if (type === GOAL_TYPES.COUNTER) {
       timerGroup.classList.add('hidden');
       counterGroup.classList.remove('hidden');
-    } else {
-      // Checkbox - hide both
+      if (avoidanceGroup) avoidanceGroup.classList.add('hidden');
+    } else if (type === GOAL_TYPES.AVOIDANCE) {
+      // US-087: Avoidance - hide timer/counter, show avoidance settings
       timerGroup.classList.add('hidden');
       counterGroup.classList.add('hidden');
+      if (avoidanceGroup) avoidanceGroup.classList.remove('hidden');
+    } else {
+      // Checkbox - hide all
+      timerGroup.classList.add('hidden');
+      counterGroup.classList.add('hidden');
+      if (avoidanceGroup) avoidanceGroup.classList.add('hidden');
+    }
+  }
+
+  // US-087: Hide timeframe selector for avoidance goals (always daily)
+  const timeframeGroup = screen.querySelector('.timeframe-selector')?.closest('.form-group');
+  if (timeframeGroup) {
+    if (type === GOAL_TYPES.AVOIDANCE) {
+      timeframeGroup.style.display = 'none';
+    } else {
+      timeframeGroup.style.display = '';
     }
   }
 }
@@ -4725,6 +4912,14 @@ function prefillGoalFormScreen(goal) {
     }
   }
 
+  // US-087: Set avoidance settings (if avoidance type)
+  if (goal.type === GOAL_TYPES.AVOIDANCE) {
+    const forgivenessCheckbox = screen.querySelector('#goal-form-forgiveness');
+    if (forgivenessCheckbox) {
+      forgivenessCheckbox.checked = goal.forgivenessEnabled || false;
+    }
+  }
+
   // US-065: Set category
   const categoryValue = goal.category || 'none';
   setGoalFormScreenCategory(screen, categoryValue);
@@ -4861,14 +5056,21 @@ async function handleGoalFormScreenSubmit(e) {
     }
 
     target = count;
+  } else if (type === GOAL_TYPES.AVOIDANCE) {
+    // US-087: Avoidance goal - target is 1 (we track streak in progress)
+    target = 1;
   } else {
     // Checkbox
     target = 1;
   }
 
-  // Get timeframe
+  // Get timeframe (avoidance always uses daily)
   const timeframeInput = screen.querySelector('#goal-form-timeframe');
-  const timeframe = timeframeInput?.value || TIMEFRAMES.DAILY;
+  const timeframe = type === GOAL_TYPES.AVOIDANCE ? TIMEFRAMES.DAILY : (timeframeInput?.value || TIMEFRAMES.DAILY);
+
+  // US-087: Get forgiveness setting for avoidance goals
+  const forgivenessCheckbox = screen.querySelector('#goal-form-forgiveness');
+  const forgivenessEnabled = type === GOAL_TYPES.AVOIDANCE ? (forgivenessCheckbox?.checked || false) : false;
 
   // US-065: Get category (null if 'none' or empty)
   const categoryInput = screen.querySelector('#goal-form-category');
@@ -4886,7 +5088,7 @@ async function handleGoalFormScreenSubmit(e) {
   const chainParentSelect = screen.querySelector('#goal-form-chain-parent');
   const chainParentId = chainParentSelect?.value || null;
 
-  console.log(`[GoalForm] Submitting in ${isEditMode ? 'edit' : 'add'} mode:`, { title, type, target, timeframe, category, color, notes, chainParentId });
+  console.log(`[GoalForm] Submitting in ${isEditMode ? 'edit' : 'add'} mode:`, { title, type, target, timeframe, category, color, notes, chainParentId, forgivenessEnabled });
 
   try {
     if (isEditMode && goalId) {
@@ -4899,7 +5101,8 @@ async function handleGoalFormScreenSubmit(e) {
         chainStatus = (parentGoal && isGoalCompleted(parentGoal)) ? CHAIN_STATUS.UNLOCKED : CHAIN_STATUS.LOCKED;
       }
 
-      const success = await updateGoal(goalId, {
+      // US-087: Include avoidance-specific properties in update
+      const updateData = {
         title,
         type,
         target,
@@ -4909,7 +5112,20 @@ async function handleGoalFormScreenSubmit(e) {
         notes,
         chainParentId,
         chainStatus
-      });
+      };
+
+      // Add avoidance-specific fields if changing to avoidance type
+      if (type === GOAL_TYPES.AVOIDANCE) {
+        updateData.forgivenessEnabled = forgivenessEnabled;
+        // Preserve existing avoidance data if already avoidance type
+        if (existingGoal?.type !== GOAL_TYPES.AVOIDANCE) {
+          updateData.slipUpsThisWeek = 0;
+          updateData.longestAvoidanceStreak = 0;
+          updateData.lastStreakIncrementDate = null;
+        }
+      }
+
+      const success = await updateGoal(goalId, updateData);
 
       if (success) {
         // Update the goal in local state
@@ -4917,15 +5133,7 @@ async function handleGoalFormScreenSubmit(e) {
         if (goalIndex !== -1) {
           state.goals[goalIndex] = {
             ...state.goals[goalIndex],
-            title,
-            type,
-            target,
-            timeframe,
-            category,
-            color,
-            notes,
-            chainParentId,
-            chainStatus
+            ...updateData
           };
         }
         console.log(`[GoalForm] Goal ${goalId} updated successfully`);
@@ -4946,6 +5154,7 @@ async function handleGoalFormScreenSubmit(e) {
         color,
         notes,
         chainParentId, // US-084: Add chain parent
+        forgivenessEnabled, // US-087: Avoidance forgiveness setting
         order: state.goals.length
       });
 
@@ -13248,6 +13457,8 @@ export {
   handleCounterDecrement,
   // US-018 Checkbox functions
   handleCheckboxToggle,
+  // US-087 Avoidance functions
+  handleAvoidanceSlipUp,
   // US-019 Completion celebration
   triggerCompletionCelebration,
   // US-022 Modal functions
