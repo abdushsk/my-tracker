@@ -1513,6 +1513,35 @@ function clearFormError() {
   }
 }
 
+/**
+ * Show error state for an input field
+ * @param {HTMLInputElement} input - The input element
+ * @param {HTMLElement} errorElement - The error message element
+ * @param {string} message - The error message to display
+ */
+function showInputError(input, errorElement, message) {
+  input.classList.add('has-error');
+  input.classList.remove('is-valid');
+  input.setAttribute('aria-invalid', 'true');
+  input.setAttribute('aria-describedby', errorElement.id);
+
+  errorElement.textContent = message;
+  errorElement.classList.add('visible');
+}
+
+/**
+ * Clear error state for an input field
+ * @param {HTMLInputElement} input - The input element
+ * @param {HTMLElement} errorElement - The error message element
+ */
+function clearInputError(input, errorElement) {
+  input.classList.remove('has-error');
+  input.setAttribute('aria-invalid', 'false');
+
+  errorElement.textContent = '';
+  errorElement.classList.remove('visible');
+}
+
 // renderManageGoalItem is now in ./screens/manageGoals.js
 
 // US-080: Achievement functions are now imported from ./features/achievements.js
