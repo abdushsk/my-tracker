@@ -1677,3 +1677,93 @@ Implemented a motivational quotes feature that displays curated productivity quo
 - Toggle in Settings to disable (in Appearance section)
 - Quotes appropriate for productivity context (all quotes focus on discipline, progress, goals)
 
+---
+
+## US-078: Keyboard Shortcuts
+**Date**: 2026-01-22
+**Status**: Completed
+
+### What was done:
+Implemented comprehensive keyboard shortcuts for the Daily Goals Tracker. Users can now navigate between goals using arrow keys, perform actions (play/pause, increment/decrement, toggle) with Space and +/- keys, create new goals with N, edit selected goals with E, and view a help overlay with ?. All shortcuts work when the popup is focused and are disabled while typing in input fields.
+
+### Implementation details:
+
+1. **State Management** (`src/popup/popup.js` lines 98-99):
+   - Added `keyboardSelectedGoalIndex: -1` to track currently selected goal
+   - Added `keyboardShortcutsHelpVisible: false` to track help overlay visibility
+
+2. **Navigation Functions** (`src/popup/popup.js` lines 1871-1978):
+   - `getVisibleGoals()` - Returns sorted and filtered list of goals matching current view
+   - `updateKeyboardSelectionVisual()` - Updates CSS class on selected goal card
+   - `selectGoalByIndex(index)` - Selects a goal by index with wrapping
+   - `selectPreviousGoal()` / `selectNextGoal()` - Navigate up/down through goals
+   - `getSelectedGoal()` - Returns the currently selected goal object
+
+3. **Action Functions** (`src/popup/popup.js` lines 1987-2030):
+   - `performPrimaryActionOnSelectedGoal()` - Space key: timer toggle, checkbox toggle, or counter increment
+   - `incrementSelectedGoal()` / `decrementSelectedGoal()` - +/- keys for counters
+   - `editSelectedGoal()` - E key: opens goal form in edit mode
+
+4. **Help Overlay** (`src/popup/popup.js` lines 2036-2141):
+   - `renderKeyboardShortcutsHelp()` - Generates modal HTML with all shortcuts
+   - `showKeyboardShortcutsHelp()` / `hideKeyboardShortcutsHelp()` - Toggle overlay visibility
+   - Modal organized into sections: Navigation, Goal Actions, Quick Actions, General
+
+5. **Global Keyboard Handler** (`src/popup/popup.js` lines 2159-2238):
+   - `isInputFocused()` - Checks if user is typing in an input/textarea
+   - `handleGlobalKeyboardShortcut(e)` - Main keyboard event handler
+   - Handles: ArrowUp, ArrowDown, Space, +, =, -, N, E, ?, Escape
+   - Only processes shortcuts on View Goals screen (except ? and Escape)
+
+6. **Initialization and Cleanup** (`src/popup/popup.js` lines 2240-2250):
+   - `initKeyboardShortcuts()` - Called in initApp() to set up global listener
+   - `resetKeyboardSelection()` - Clears selection when navigating away from View Goals
+
+7. **Screen Navigation Update** (`src/popup/popup.js` lines 155-158):
+   - Added call to `resetKeyboardSelection()` when leaving View Goals screen
+
+8. **CSS Styles** (`src/popup/popup.css` lines 8311-8536):
+   - `.goal-card.keyboard-selected` - Visual indicator with outline and shadow
+   - Type-specific colors (timer=green, counter=orange, checkbox=green)
+   - Compact view adjustments
+   - Help overlay modal with sections and kbd styling
+   - Dark mode support
+   - Reduced motion support
+
+### Files modified:
+- `src/popup/popup.js` (lines 98-99, 155-158, 1867-2250, 9401-9402)
+- `src/popup/popup.css` (lines 8311-8536)
+
+### Key design decisions:
+- Arrow key navigation wraps around (last goal → first goal and vice versa)
+- Space performs the "primary" action: toggle for timers/checkboxes, increment for counters
+- = key is an alias for + (no shift required)
+- Help overlay can be toggled with ? from any screen
+- Shortcuts are disabled when typing in input fields to prevent interference
+- Selection is cleared when navigating away from View Goals
+- Visual selection uses outline + shadow for high visibility without obscuring content
+- Compact view uses slightly smaller selection indicator
+
+### Keyboard shortcuts implemented:
+| Key | Action |
+|-----|--------|
+| ↑ | Select previous goal |
+| ↓ | Select next goal |
+| Space | Toggle timer/checkbox, increment counter |
+| + / = | Increment selected counter |
+| - | Decrement selected counter |
+| N | Create new goal |
+| E | Edit selected goal |
+| ? | Show keyboard shortcuts help |
+| Escape | Close help overlay / modals |
+
+### Acceptance criteria met:
+- Space: toggle active timer or checkbox (also increments counter for consistency)
+- +/-: increment/decrement selected counter
+- N: open new goal form (navigates to goal form screen)
+- E: edit selected goal (opens form in edit mode)
+- Arrow keys: navigate between goals (with wrapping)
+- ?: show keyboard shortcuts help (modal overlay with all shortcuts)
+- Escape: close modals/screens (help overlay, integrates with existing focus mode escape)
+- Shortcuts work when popup is focused (global keydown listener, disabled in inputs)
+

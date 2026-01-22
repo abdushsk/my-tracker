@@ -8307,3 +8307,230 @@ body.modal-open {
     animation: none;
   }
 }
+
+/* =============================================================================
+   US-078: Keyboard Shortcuts Styles
+   ============================================================================= */
+
+/* ----------------------------------------
+   Keyboard Selection on Goal Cards
+   ---------------------------------------- */
+.goal-card.keyboard-selected {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
+  box-shadow: 0 0 0 4px var(--primary-light);
+}
+
+.goal-card.keyboard-selected.goal-type-counter {
+  outline-color: var(--counter-color);
+  box-shadow: 0 0 0 4px var(--counter-light);
+}
+
+.goal-card.keyboard-selected.goal-type-checkbox {
+  outline-color: var(--success);
+  box-shadow: 0 0 0 4px var(--success-light);
+}
+
+/* Keyboard selection in compact view */
+.goal-card.compact.keyboard-selected {
+  outline-width: 2px;
+  outline-offset: 1px;
+  box-shadow: 0 0 0 3px var(--primary-light);
+}
+
+/* ----------------------------------------
+   Keyboard Shortcuts Help Overlay
+   ---------------------------------------- */
+.keyboard-shortcuts-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: var(--spacing-md);
+  animation: fadeIn 150ms ease-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.keyboard-shortcuts-modal {
+  background: var(--background);
+  border-radius: var(--radius-lg);
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.25);
+  max-width: 340px;
+  width: 100%;
+  max-height: 90vh;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  animation: slideUp 200ms ease-out;
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.keyboard-shortcuts-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--spacing-md);
+  border-bottom: 1px solid var(--border);
+}
+
+.keyboard-shortcuts-title {
+  font-size: var(--font-size-lg);
+  font-weight: 600;
+  color: var(--text-primary);
+  margin: 0;
+}
+
+.keyboard-shortcuts-close {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  background: transparent;
+  border: none;
+  border-radius: var(--radius-md);
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: background-color 150ms ease, color 150ms ease;
+}
+
+.keyboard-shortcuts-close:hover {
+  background: var(--background-secondary);
+  color: var(--text-primary);
+}
+
+.keyboard-shortcuts-close:active {
+  background: var(--border);
+}
+
+.keyboard-shortcuts-content {
+  padding: var(--spacing-md);
+  overflow-y: auto;
+}
+
+.shortcut-section {
+  margin-bottom: var(--spacing-md);
+}
+
+.shortcut-section:last-child {
+  margin-bottom: 0;
+}
+
+.shortcut-section-title {
+  font-size: var(--font-size-sm);
+  font-weight: 600;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin: 0 0 var(--spacing-sm) 0;
+}
+
+.shortcut-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--spacing-xs) 0;
+  gap: var(--spacing-sm);
+}
+
+.shortcut-keys {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+  flex-shrink: 0;
+}
+
+.shortcut-keys kbd {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 24px;
+  height: 24px;
+  padding: 0 6px;
+  background: var(--background-secondary);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  font-family: inherit;
+  font-size: var(--font-size-xs);
+  font-weight: 500;
+  color: var(--text-primary);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+}
+
+.shortcut-description {
+  font-size: var(--font-size-sm);
+  color: var(--text-secondary);
+  text-align: right;
+  flex: 1;
+}
+
+/* ----------------------------------------
+   Dark Mode - Keyboard Shortcuts
+   ---------------------------------------- */
+[data-theme="dark"] .keyboard-shortcuts-overlay {
+  background: rgba(0, 0, 0, 0.7);
+}
+
+[data-theme="dark"] .keyboard-shortcuts-modal {
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.5);
+}
+
+[data-theme="dark"] .shortcut-keys kbd {
+  background: var(--bg-tertiary);
+  border-color: var(--border);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+}
+
+[data-theme="dark"] .goal-card.keyboard-selected {
+  box-shadow: 0 0 0 4px rgba(76, 175, 80, 0.3);
+}
+
+[data-theme="dark"] .goal-card.keyboard-selected.goal-type-counter {
+  box-shadow: 0 0 0 4px rgba(230, 81, 0, 0.3);
+}
+
+[data-theme="dark"] .goal-card.keyboard-selected.goal-type-checkbox {
+  box-shadow: 0 0 0 4px rgba(76, 175, 80, 0.3);
+}
+
+/* ----------------------------------------
+   Reduced Motion Support for Keyboard Shortcuts
+   ---------------------------------------- */
+@media (prefers-reduced-motion: reduce) {
+  .keyboard-shortcuts-overlay {
+    animation: none;
+  }
+
+  .keyboard-shortcuts-modal {
+    animation: none;
+  }
+
+  .goal-card.keyboard-selected {
+    transition: none;
+  }
+}

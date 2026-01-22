@@ -394,7 +394,7 @@
         "Shortcuts work when popup is focused"
       ],
       "priority": 24,
-      "passes": false,
+      "passes": true,
       "dependsOn": []
     },
     {
