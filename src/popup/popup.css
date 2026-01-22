@@ -8128,3 +8128,182 @@ body.modal-open {
     transition: none;
   }
 }
+
+/* ============================================
+   US-077: Motivational Quotes Styles
+   ============================================ */
+
+/* ----------------------------------------
+   Base Quote Styles (shared)
+   ---------------------------------------- */
+.motivational-quote {
+  text-align: center;
+  padding: var(--spacing-md);
+  margin: var(--spacing-md) 0;
+}
+
+.quote-text {
+  font-size: var(--font-size-sm);
+  font-style: italic;
+  color: var(--text-secondary);
+  line-height: 1.5;
+  margin: 0 0 var(--spacing-xs) 0;
+}
+
+.quote-author {
+  font-size: var(--font-size-xs);
+  color: var(--text-muted);
+  display: block;
+}
+
+/* ----------------------------------------
+   Empty State Quote
+   ---------------------------------------- */
+.empty-state-quote {
+  background: var(--bg-secondary);
+  border-radius: var(--radius-md);
+  margin: var(--spacing-lg) auto;
+  max-width: 300px;
+  border-left: 3px solid var(--primary);
+  text-align: left;
+  padding: var(--spacing-sm) var(--spacing-md);
+}
+
+.empty-state-quote .quote-text {
+  font-size: 13px;
+}
+
+/* ----------------------------------------
+   Completion Quote Toast
+   ---------------------------------------- */
+.completion-quote-toast {
+  position: fixed;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%) translateY(100%);
+  z-index: 10000;
+  width: calc(100% - 32px);
+  max-width: 340px;
+  opacity: 0;
+  transition: transform 0.3s ease-out, opacity 0.3s ease-out;
+  pointer-events: none;
+}
+
+.completion-quote-toast.show {
+  transform: translateX(-50%) translateY(0);
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.completion-quote-toast.hide {
+  transform: translateX(-50%) translateY(100%);
+  opacity: 0;
+}
+
+.completion-quote-content {
+  background: linear-gradient(135deg, var(--success) 0%, #34a853 100%);
+  color: white;
+  border-radius: var(--radius-lg);
+  padding: var(--spacing-md);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.25);
+  text-align: center;
+}
+
+.completion-quote-icon {
+  font-size: 28px;
+  margin-bottom: var(--spacing-xs);
+  animation: bounce-in 0.5s ease-out;
+}
+
+.completion-quote-text {
+  font-size: var(--font-size-sm);
+  font-style: italic;
+  line-height: 1.5;
+  margin: 0 0 var(--spacing-xs) 0;
+  color: white;
+}
+
+.completion-quote-author {
+  font-size: var(--font-size-xs);
+  opacity: 0.9;
+  display: block;
+}
+
+@keyframes bounce-in {
+  0% {
+    transform: scale(0);
+  }
+  50% {
+    transform: scale(1.2);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+/* ----------------------------------------
+   Weekly Review Quote
+   ---------------------------------------- */
+.quote-section {
+  margin-top: var(--spacing-md);
+}
+
+.weekly-review-quote {
+  background: linear-gradient(135deg, var(--bg-secondary) 0%, var(--bg) 100%);
+  border-radius: var(--radius-md);
+  padding: var(--spacing-md);
+  text-align: center;
+  border: 1px solid var(--border);
+}
+
+.weekly-review-quote-icon {
+  font-size: 24px;
+  margin-bottom: var(--spacing-xs);
+}
+
+.weekly-review-quote-text {
+  font-size: var(--font-size-sm);
+  font-style: italic;
+  color: var(--text-secondary);
+  line-height: 1.5;
+  margin: 0 0 var(--spacing-xs) 0;
+}
+
+.weekly-review-quote-author {
+  font-size: var(--font-size-xs);
+  color: var(--text-muted);
+  display: block;
+}
+
+/* ----------------------------------------
+   Dark Mode Adjustments for Quotes
+   ---------------------------------------- */
+[data-theme="dark"] .empty-state-quote {
+  background: var(--bg-secondary);
+  border-left-color: var(--primary-light);
+}
+
+[data-theme="dark"] .completion-quote-content {
+  background: linear-gradient(135deg, #2e7d32 0%, #388e3c 100%);
+}
+
+[data-theme="dark"] .weekly-review-quote {
+  background: linear-gradient(135deg, var(--bg-secondary) 0%, var(--bg-tertiary) 100%);
+}
+
+/* ----------------------------------------
+   Reduced Motion Support for Quotes
+   ---------------------------------------- */
+@media (prefers-reduced-motion: reduce) {
+  .completion-quote-toast {
+    transition: none;
+  }
+
+  .completion-quote-toast.show {
+    transform: translateX(-50%) translateY(0);
+  }
+
+  .completion-quote-icon {
+    animation: none;
+  }
+}

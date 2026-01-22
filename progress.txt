@@ -1596,3 +1596,84 @@ Implemented browser notifications for goal reminders using Chrome's notification
 - Snooze/dismiss options (Snooze 1hr button on notification)
 - Respect quiet hours setting (notifications suppressed during quiet hours)
 
+---
+
+## US-077: Motivational Quotes
+**Date**: 2026-01-22
+**Status**: Completed
+
+### What was done:
+Implemented a motivational quotes feature that displays curated productivity quotes throughout the app. Quotes appear in the empty state, on goal completion (as a toast), and in the weekly review. Users can toggle quotes on/off in Settings.
+
+### Implementation details:
+
+1. **Quotes Module** (`src/utils/quotes.js`):
+   - Created new module with collection of 60 motivational quotes
+   - Quotes cover: discipline, consistency, progress, growth, motivation, mindset, goals, achievement, time, persistence, celebration
+   - Each quote has `text` and optional `author` fields
+   - Functions: `getRandomQuote()`, `getDailyQuote(seed)` (seeded for consistent daily quote), `renderQuoteHTML()`, `getAllQuotes()`, `getQuoteCount()`
+   - `getDailyQuote()` uses a hash function to ensure the same quote is shown throughout the day
+
+2. **Settings Storage** (`src/utils/storage.js` line 285):
+   - Added `quotesEnabled: true` to default settings (enabled by default)
+
+3. **Empty State Quote** (`src/popup/popup.js` lines 370-394):
+   - Updated `renderEmptyState()` to check `quotesEnabled` setting
+   - Shows daily quote below the "No goals yet" message
+   - Uses `getDailyQuote()` for consistent daily quote
+
+4. **Completion Quote Toast** (`src/popup/popup.js` lines 996-1053):
+   - Updated `triggerCompletionCelebration()` to check `quotesEnabled` setting
+   - Added `showCompletionQuote()` function that creates a toast notification
+   - Toast shows trophy icon, random quote, and author
+   - Smooth slide-up animation with auto-dismiss after 4 seconds
+   - Uses `getRandomQuote()` for variety on each completion
+
+5. **Weekly Review Quote** (`src/popup/popup.js` lines 4149-4182):
+   - Added `renderWeeklyReviewQuote()` function
+   - Shows quote at the bottom of the Weekly Review screen
+   - Uses lightbulb icon and `getDailyQuote()` for consistent daily quote
+   - Styled as a card with gradient background
+
+6. **Settings Toggle** (`src/popup/popup.js` lines 7690-7700, 7912-7928):
+   - Added "Motivational Quotes" toggle in Appearance section
+   - Toggle labeled "Show quotes on empty state and completion"
+   - Event listener saves `quotesEnabled` setting to storage
+
+7. **CSS Styles** (`src/popup/popup.css` lines 8132-8309):
+   - Base quote styles (`.motivational-quote`, `.quote-text`, `.quote-author`)
+   - Empty state quote with left border accent
+   - Completion toast with green gradient, slide-up animation
+   - Weekly review quote with subtle card styling
+   - Dark mode adjustments for all quote styles
+   - Reduced motion support (disables animations)
+
+### Files created:
+- `src/utils/quotes.js` (~160 lines)
+
+### Files modified:
+- `src/utils/storage.js` (line 285 - added quotesEnabled setting)
+- `src/popup/popup.js` (lines 69-73 import, 370-394 empty state, 996-1053 completion toast, 4149-4182 weekly review quote, 7690-7700 settings toggle, 7912-7928 settings listener)
+- `src/popup/popup.css` (lines 8132-8309 - ~178 lines of quote styles)
+
+### Key design decisions:
+- Quotes are enabled by default for positive user experience
+- `getDailyQuote()` uses date as seed for consistent daily quote (doesn't change on refresh)
+- `getRandomQuote()` used for completion toast to provide variety
+- Completion toast dismisses automatically to not obstruct the UI
+- Quote display respects `prefers-reduced-motion` accessibility setting
+- Quotes are appropriate for productivity context (no generic inspirational quotes)
+
+### Quote sources:
+- Famous productivity/success quotes with attribution
+- Anonymous quotes appropriate for goal tracking context
+- Mix of historical figures and contemporary productivity experts
+
+### Acceptance criteria met:
+- Collection of 50+ motivational quotes (60 quotes implemented)
+- Random quote on empty state (daily seeded quote for consistency)
+- Quote shown on goal completion (toast notification with random quote)
+- Quote in weekly review (card at bottom of screen)
+- Toggle in Settings to disable (in Appearance section)
+- Quotes appropriate for productivity context (all quotes focus on discipline, progress, goals)
+

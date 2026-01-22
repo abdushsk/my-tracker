@@ -376,7 +376,7 @@
         "Quotes appropriate for productivity context"
       ],
       "priority": 23,
-      "passes": false,
+      "passes": true,
       "dependsOn": []
     },
     {

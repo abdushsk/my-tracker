@@ -66,6 +66,11 @@ import {
   setMuted,
   SOUNDS
 } from '../utils/sounds.js';
+import {
+  getRandomQuote,
+  getDailyQuote,
+  renderQuoteHTML
+} from '../utils/quotes.js';
 
 // =============================================================================
 // Application State
@@ -362,6 +367,10 @@ function renderCategoryFilterBar() {
  * @returns {string} HTML string for empty state
  */
 function renderEmptyState() {
+  // US-077: Show motivational quote if enabled
+  const quotesEnabled = state.settings?.quotesEnabled !== false;
+  const quote = quotesEnabled ? getDailyQuote() : null;
+
   return `
     <div class="empty-state">
       <div class="empty-illustration">
@@ -382,6 +391,7 @@ function renderEmptyState() {
       </div>
       <h2 class="empty-message">No goals yet</h2>
       <p class="empty-submessage">Set your first goal and start building better habits today!</p>
+      ${quote ? renderQuoteHTML(quote, 'empty-state-quote') : ''}
       <button class="btn btn-primary btn-lg add-first-goal" data-screen="${SCREENS.MANAGE_GOALS}">
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="btn-icon">
           <line x1="12" y1="5" x2="12" y2="19"/>
@@ -983,6 +993,12 @@ function triggerCompletionCelebration(goalId, options = {}) {
     duration: intensity === 'high' ? 2500 : 2000
   });
 
+  // US-077: Show motivational quote on completion if enabled
+  const quotesEnabled = state.settings?.quotesEnabled !== false;
+  if (quotesEnabled) {
+    showCompletionQuote();
+  }
+
   // Schedule removal of the just-completed state after animation
   setTimeout(() => {
     state.justCompletedGoals.delete(goalId);
@@ -995,6 +1011,45 @@ function triggerCompletionCelebration(goalId, options = {}) {
   }, 2000); // Extended duration to match enhanced animation
 
   console.log(`[Celebration] Triggered completion celebration for goal ${goalId} with ${intensity} intensity`);
+}
+
+/**
+ * US-077: Show a motivational quote toast on goal completion
+ */
+function showCompletionQuote() {
+  // Remove any existing quote toast
+  const existingToast = document.querySelector('.completion-quote-toast');
+  if (existingToast) {
+    existingToast.remove();
+  }
+
+  const quote = getRandomQuote();
+
+  const toast = document.createElement('div');
+  toast.className = 'completion-quote-toast';
+  toast.innerHTML = `
+    <div class="completion-quote-content">
+      <div class="completion-quote-icon">&#127942;</div>
+      <p class="completion-quote-text">"${quote.text}"</p>
+      ${quote.author ? `<span class="completion-quote-author">— ${quote.author}</span>` : ''}
+    </div>
+  `;
+
+  document.body.appendChild(toast);
+
+  // Trigger animation
+  requestAnimationFrame(() => {
+    toast.classList.add('show');
+  });
+
+  // Auto-dismiss after 4 seconds
+  setTimeout(() => {
+    toast.classList.remove('show');
+    toast.classList.add('hide');
+    setTimeout(() => {
+      toast.remove();
+    }, 300);
+  }, 4000);
 }
 
 // =============================================================================
@@ -4090,6 +4145,9 @@ function renderWeeklyReviewScreen() {
             <!-- Week-over-week comparison will be populated dynamically -->
           </div>
         </section>
+
+        <!-- US-077: Motivational Quote Section -->
+        ${renderWeeklyReviewQuote()}
       </main>
     </div>
   `;
@@ -4099,6 +4157,28 @@ function renderWeeklyReviewScreen() {
 
   // Update with calculated data
   updateWeeklyReviewStats();
+}
+
+/**
+ * US-077: Render motivational quote section for weekly review
+ * @returns {string} HTML string for the quote section, or empty string if disabled
+ */
+function renderWeeklyReviewQuote() {
+  const quotesEnabled = state.settings?.quotesEnabled !== false;
+  if (!quotesEnabled) {
+    return '';
+  }
+
+  const quote = getDailyQuote();
+  return `
+    <section class="weekly-review-section quote-section">
+      <div class="weekly-review-quote">
+        <div class="weekly-review-quote-icon">&#128161;</div>
+        <p class="weekly-review-quote-text">"${quote.text}"</p>
+        ${quote.author ? `<span class="weekly-review-quote-author">— ${quote.author}</span>` : ''}
+      </div>
+    </section>
+  `;
 }
 
 /**
@@ -7606,6 +7686,18 @@ function renderSettingsScreen() {
               </span>
             </div>
           </div>
+
+          <!-- US-077: Motivational Quotes Toggle -->
+          <div class="setting-item setting-item-row" id="quotes-toggle-row">
+            <div class="setting-info">
+              <span class="setting-label">Motivational Quotes</span>
+              <span class="setting-description">Show quotes on empty state and completion</span>
+            </div>
+            <label class="toggle-switch" aria-label="Toggle motivational quotes">
+              <input type="checkbox" id="quotes-toggle" ${state.settings?.quotesEnabled !== false ? 'checked' : ''}>
+              <span class="toggle-slider"></span>
+            </label>
+          </div>
         </div>
 
         <!-- US-075: Reset Times Section -->
@@ -7814,6 +7906,25 @@ function renderSettingsScreen() {
         await toggleTheme();
         renderSettingsScreen();
       }
+    });
+  }
+
+  // US-077: Attach quotes toggle listener
+  const quotesToggle = screen.querySelector('#quotes-toggle');
+  if (quotesToggle) {
+    quotesToggle.addEventListener('change', async (e) => {
+      const enabled = e.target.checked;
+
+      // Update state
+      state.settings = {
+        ...state.settings,
+        quotesEnabled: enabled
+      };
+
+      // Save to storage
+      await saveSettings(state.settings);
+
+      console.log(`[Settings] Motivational quotes: ${enabled ? 'enabled' : 'disabled'}`);
     });
   }
 

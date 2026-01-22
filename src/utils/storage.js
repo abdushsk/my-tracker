@@ -280,7 +280,9 @@ function getDefaultSettings() {
     goalReminderEnabled: false,      // Enable per-goal reminders
     quietHoursEnabled: false,        // Enable quiet hours
     quietHoursStart: '22:00',        // Start of quiet hours (HH:MM format)
-    quietHoursEnd: '07:00'           // End of quiet hours (HH:MM format)
+    quietHoursEnd: '07:00',          // End of quiet hours (HH:MM format)
+    // US-077: Motivational Quotes
+    quotesEnabled: true              // Show motivational quotes in empty state, completion, and weekly review
   };
 }
 
