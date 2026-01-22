@@ -24,3 +24,36 @@
 - All hover states should use semantic color variables (`--accent-subtle`, `--danger-subtle`) for consistency
 - Type-specific colors should always use `--type-*` variables for consistent theming across color themes
 
+## US-002: Enhance Dark Mode Visibility (Completed)
+**Date**: 2026-01-23
+
+### Changes Made
+1. **Heatmap visibility in dark mode** (popup.css):
+   - `--heatmap-level-0`: Changed from `#1A1A1A` to `#2A2A2A` for better contrast
+   - `--heatmap-level-1`: Changed from `#064E3B` to `#0A5D47` for better visibility
+
+2. **Progress bar missed state visibility** (popup.css):
+   - `.progress-bar.bar-missed` dark mode: Changed from `var(--bg-tertiary)` (#1A1A1A) to `#3A3A3A`
+   - `.legend-color.missed` dark mode: Same change for consistency
+
+3. **Focus mode progress bar** (popup.css):
+   - `.focus-progress-bar` dark mode: Changed from `var(--background-card)` to `#2A2A2A`
+
+4. **Accent and subtle color opacity increases** (popup.css):
+   - `--accent-subtle`: Increased from 15% to 25% opacity
+   - `--danger-subtle`, `--warning-subtle`, `--info-subtle`: Increased from 15% to 20% opacity
+   - All `--type-*-subtle` variables: Increased from 15% to 20% opacity
+
+5. **Theme-specific dark mode updates** (theme-config.js):
+   - All 5 themes (default, ocean, forest, sunset, lavender) updated with:
+     - Increased `accentSubtle` opacity from 15% to 25%
+     - Increased all `*Subtle` color opacities to 25%
+     - Lightened `heatmap1` and `heatmap2` colors for better visibility
+
+### Key Learnings
+- 15% opacity on dark backgrounds makes elements nearly invisible
+- 25% opacity provides good balance between subtlety and visibility
+- Heatmap level-0 and level-1 need to be distinctly lighter than the background
+- Progress path backgrounds should be at least `#2A2A2A` in dark mode for visibility
+- "Missed" progress bars need explicit lighter colors (#3A3A3A) rather than relying on too-dark variables
+

@@ -17,7 +17,7 @@
       "title": "Enhance dark mode visibility",
       "description": "Improve the visibility of progress paths in dark mode by using lighter shades. Ensure that all elements are easily distinguishable and maintain a consistent color scheme across the extension.",
       "priority": 2,
-      "passes": false
+      "passes": true
     },
     {
       "id": "US-003",
@@ -81,6 +81,13 @@
       "description": "",
       "priority": 11,
       "passes": false
-    } 
+    } ,
+    {
+      "id": "US-012",
+      "title": "Ensure consistent hover and active colors",
+      "description": "Review all interactive elements, such as buttons and icons, to ensure that the hover and active (after press) colors are consistent. Address any discrepancies to enhance the overall user experience and maintain visual coherence throughout the extension.",
+      "priority": 12,
+      "passes": false
+    }
   ]
 }
