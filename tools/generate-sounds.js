@@ -1,5 +1,5 @@
 /**
- * Sound Effect Generator for Daily Goals Tracker
+ * Sound Effect Generator for My Tracker
  *
  * This script generates simple WAV sound effects for the Chrome extension.
  * No external dependencies required - uses pure Node.js.

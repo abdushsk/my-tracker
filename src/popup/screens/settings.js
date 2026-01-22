@@ -493,7 +493,7 @@ export function renderSettingsScreen() {
         <!-- About Section -->
         <div class="settings-section about">
           <h2>About</h2>
-          <p class="app-version">Daily Goals Tracker v1.0.0</p>
+          <p class="app-version">My Tracker v1.0.0</p>
           <p class="app-description">Track your daily goals with timers, counters, and checkboxes. Build discipline through consistent progress.</p>
         </div>
       </main>

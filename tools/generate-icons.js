@@ -1,5 +1,5 @@
 /**
- * Simple PNG Icon Generator for Daily Goals Tracker
+ * Simple PNG Icon Generator for My Tracker
  * Creates basic colored circle icons with checkmarks
  *
  * This script generates PNG icons without external dependencies.

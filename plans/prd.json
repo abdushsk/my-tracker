@@ -100,7 +100,7 @@
       "title": "Update app name to 'My Tracker'",
       "description": "Change the application name from 'Daily Goals Tracker' to 'My Tracker' across all instances in the extension, including the manifest file, UI elements, and documentation. Ensure that the new name is consistently applied throughout the user interface and related materials.",
       "priority": 14,
-      "passes": false
+      "passes": true
     },
     {
       "id": "US-015",

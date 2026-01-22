@@ -1,6 +1,6 @@
 /**
  * Data Models Module
- * Defines data structures and factory functions for the Daily Goals Tracker
+ * Defines data structures and factory functions for the My Tracker
  */
 
 // =============================================================================

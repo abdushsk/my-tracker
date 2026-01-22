@@ -1,6 +1,6 @@
 /**
  * Shared Application State
- * Central state management for the Daily Goals Tracker popup
+ * Central state management for the My Tracker popup
  */
 
 // =============================================================================

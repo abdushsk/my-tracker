@@ -1,6 +1,6 @@
 /**
  * Popup JavaScript Entry Point
- * Main entry point for the Daily Goals Tracker Chrome extension popup
+ * Main entry point for the My Tracker Chrome extension popup
  */
 
 // =============================================================================
@@ -1694,7 +1694,7 @@ function registerFeatureModuleCallbacks() {
  * Initialize the popup application
  */
 async function initApp() {
-  console.log('Daily Goals Tracker popup initializing...');
+  console.log('My Tracker popup initializing...');
 
   // Register callbacks for feature modules
   registerFeatureModuleCallbacks();
@@ -1734,7 +1734,7 @@ async function initApp() {
     showScreen(SCREENS.VIEW_GOALS);
   }
 
-  console.log('Daily Goals Tracker popup initialized successfully');
+  console.log('My Tracker popup initialized successfully');
 }
 
 // =============================================================================

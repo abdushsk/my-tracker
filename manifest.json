@@ -1,6 +1,6 @@
 {
   "manifest_version": 3,
-  "name": "Daily Goals Tracker",
+  "name": "My Tracker",
   "version": "1.0.0",
   "description": "Track daily goals with timers, counters, and checkboxes. Monitor your discipline through detailed reports and analytics.",
   "permissions": [
@@ -15,7 +15,7 @@
       "48": "src/assets/icons/icon-48.png",
       "128": "src/assets/icons/icon-128.png"
     },
-    "default_title": "Daily Goals Tracker"
+    "default_title": "My Tracker"
   },
   "icons": {
     "16": "src/assets/icons/icon-16.png",

@@ -1,5 +1,5 @@
 /**
- * Daily Goals Tracker - Service Worker
+ * My Tracker - Service Worker
  *
  * Background service worker for Chrome extension (Manifest V3).
  * Handles:
@@ -1538,7 +1538,7 @@ function handleNotificationMessage(message, sendResponse) {
       showNotification(
         'test-notification',
         'Test Notification',
-        'This is a test notification from Daily Goals Tracker!',
+        'This is a test notification from My Tracker!',
         { requireInteraction: false }
       )
         .then(() => sendResponse({ success: true }))
@@ -1586,7 +1586,7 @@ async function initializeNotificationAlarms() {
 }
 
 // Log that service worker has loaded
-console.log('[Service Worker] Daily Goals Tracker service worker loaded');
+console.log('[Service Worker] My Tracker service worker loaded');
 
 // US-053: Initial badge update when service worker loads
 updateBadge();

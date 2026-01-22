@@ -476,3 +476,76 @@
 - The shimmer animation on active timer progress bars still works with the new accent color gradient
 - Active state borders should also use accent colors for full visual consistency
 
+## US-014: Update App Name to 'My Tracker' (Completed)
+**Date**: 2026-01-23
+
+### Changes Made
+
+1. **Updated manifest.json**:
+   - Changed `name` from "Daily Goals Tracker" to "My Tracker"
+   - Changed `default_title` from "Daily Goals Tracker" to "My Tracker"
+
+2. **Updated popup.html**:
+   - Changed `<title>` from "Daily Goals Tracker" to "My Tracker"
+
+3. **Updated settings.js** (line 496):
+   - Changed app version display from "Daily Goals Tracker v1.0.0" to "My Tracker v1.0.0"
+
+4. **Updated shareTemplates.js** (5 occurrences):
+   - Line 75: Minimal template header branding
+   - Line 133: Minimal template footer branding
+   - Line 157: Gradient template header branding
+   - Line 205: Gradient template footer branding
+   - Line 294: Dark template footer branding
+
+5. **Updated service-worker.js** (3 occurrences):
+   - Line 2: Module comment header
+   - Line 1541: Test notification message
+   - Line 1589: Console log message
+
+6. **Updated popup.js** (3 occurrences):
+   - Line 3: Module comment header
+   - Line 1697: Console log (initializing message)
+   - Line 1737: Console log (initialized successfully message)
+
+7. **Updated models.js**:
+   - Line 3: Module comment header
+
+8. **Updated state.js**:
+   - Line 3: Module comment header
+
+9. **Updated popup.css**:
+   - Line 2: CSS comment header
+
+10. **Updated tools/generate-icons.js**:
+    - Line 2: Module comment header
+
+11. **Updated tools/generate-sounds.js**:
+    - Line 2: Module comment header
+
+### Files Modified
+- `manifest.json` (2 changes)
+- `src/popup/popup.html` (1 change)
+- `src/popup/screens/settings.js` (1 change)
+- `src/popup/features/shareTemplates.js` (5 changes)
+- `src/background/service-worker.js` (3 changes)
+- `src/popup/popup.js` (3 changes)
+- `src/utils/models.js` (1 change)
+- `src/popup/state.js` (1 change)
+- `src/popup/popup.css` (1 change)
+- `tools/generate-icons.js` (1 change)
+- `tools/generate-sounds.js` (1 change)
+
+### Documentation Files NOT Changed (intentional)
+- `plans/FEATURES.md` - Project documentation that describes the original project
+- `plans/DESIGN.md` - Design documentation
+- `docs/DESIGN_SYSTEM.md` - Design system documentation
+- `tools/generate-icons.html` - Developer tool documentation
+
+### Key Learnings
+- When rebranding an app, the manifest.json `name` and `default_title` are the most critical user-facing changes (Chrome uses these for the extension listing and tooltip)
+- Share templates that generate images for social sharing also need branding updates
+- Service worker notifications and console logs should reflect the new brand name for consistency
+- Code comments don't necessarily need to change for a rebrand, but updating them maintains consistency and helps future developers
+- Documentation files describing the project (like FEATURES.md) may be left unchanged to preserve project history
+

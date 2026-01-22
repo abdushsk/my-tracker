@@ -72,7 +72,7 @@ export function drawMinimalTemplate(ctx, canvas, template, stats, isDark) {
   ctx.fillStyle = '#FFFFFF';
   ctx.font = 'bold 20px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
   ctx.textAlign = 'center';
-  ctx.fillText('Daily Goals Tracker', width / 2, 45);
+  ctx.fillText('My Tracker', width / 2, 45);
 
   // Discipline Score
   ctx.fillStyle = textColor;
@@ -130,7 +130,7 @@ export function drawMinimalTemplate(ctx, canvas, template, stats, isDark) {
   ctx.fillStyle = textSecondary;
   ctx.font = '12px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
   ctx.textAlign = 'center';
-  ctx.fillText('Generated with Daily Goals Tracker', width / 2, height - 20);
+  ctx.fillText('Generated with My Tracker', width / 2, height - 20);
 }
 
 /**
@@ -154,7 +154,7 @@ export function drawGradientTemplate(ctx, canvas, template, stats) {
   ctx.fillStyle = '#FFFFFF';
   ctx.font = 'bold 22px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
   ctx.textAlign = 'center';
-  ctx.fillText('Daily Goals Tracker', width / 2, 50);
+  ctx.fillText('My Tracker', width / 2, 50);
 
   // Discipline Score - Large circle
   const centerX = width / 2;
@@ -202,7 +202,7 @@ export function drawGradientTemplate(ctx, canvas, template, stats) {
   // Footer
   ctx.fillStyle = 'rgba(255, 255, 255, 0.7)';
   ctx.font = '12px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
-  ctx.fillText('Generated with Daily Goals Tracker', width / 2, height - 20);
+  ctx.fillText('Generated with My Tracker', width / 2, height - 20);
 }
 
 /**
@@ -291,7 +291,7 @@ export function drawDarkTemplate(ctx, canvas, template, stats) {
   // Footer
   ctx.fillStyle = 'rgba(255, 255, 255, 0.4)';
   ctx.font = '11px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
-  ctx.fillText('Generated with Daily Goals Tracker', width / 2, height - 20);
+  ctx.fillText('Generated with My Tracker', width / 2, height - 20);
 }
 
 // =============================================================================
