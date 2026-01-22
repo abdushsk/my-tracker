@@ -2046,3 +2046,77 @@ Implemented the Daily Challenges feature for extra motivation. System generates 
 - Challenge streak tracks consecutive days of completing challenges
 - Best streak is preserved in storage
 - Recent challenges (7 days) are avoided in selection to ensure variety
+
+## US-082: Share Progress as Image - COMPLETED
+Date: 2026-01-22
+
+### Task Description
+Allow users to export their progress as a beautiful shareable image. Generate card showing: goals completed, streak, discipline score. Styled for social media sharing. Copy to clipboard or download.
+
+### Implementation Details
+
+1. **Share Button in Reports Header (src/popup/popup.js)**
+   - Added share icon button in the reports header
+   - Replaced `header-spacer` with functional share button
+   - Click opens the share modal
+
+2. **Share Modal System (src/popup/popup.js)**
+   - `openShareModal()` - Creates and displays the share modal
+   - `closeShareModal()` - Closes modal with animation
+   - `attachShareModalListeners()` - Handles all modal interactions
+   - Modal includes: preview canvas, template selector, copy/download buttons
+   - Escape key closes modal
+
+3. **Card Templates (3 styles)**
+   - **Minimal**: Clean design, adapts to light/dark theme, app branding header
+   - **Gradient**: Vibrant purple-to-purple gradient, glass-morphism cards, emojis
+   - **Dark Pro**: Professional dark theme, subtle grid pattern, cyan accent
+   - All templates show: Discipline Score, Current Streak, Best Streak, Today's progress, Week's progress
+   - All include subtle app branding footer
+
+4. **Canvas-Based Image Generation (src/popup/popup.js)**
+   - `generateShareImage(templateId)` - Main generation function
+   - `drawMinimalTemplate()` - Draws minimal style (theme-aware)
+   - `drawGradientTemplate()` - Draws gradient style with glass cards
+   - `drawDarkTemplate()` - Draws dark pro style with grid pattern
+   - Helper functions: `drawStatBox()`, `drawGlassCard()`, `drawDarkStat()`, `roundRect()`
+   - Canvas size: 400x500 pixels
+   - Uses native Canvas API - no external dependencies
+
+5. **Export Options**
+   - `handleCopyShareImage()` - Copies canvas as PNG to clipboard using Clipboard API
+   - `handleDownloadShareImage()` - Downloads canvas as PNG file
+   - Filename format: `daily-goals-progress-YYYY-MM-DD.png`
+   - Success/error feedback with `showShareFeedback()`
+
+6. **CSS Styling (src/popup/popup.css)**
+   - Share button in reports header
+   - Modal overlay with smooth fade animation
+   - Modal container with scale/translate animation
+   - Template selector buttons with active states
+   - Action buttons (copy/download) with proper styling
+   - Feedback toasts for success/error
+   - Full dark mode support
+   - Reduced motion support
+
+### Files Modified
+- `src/popup/popup.js` - Share functionality (~700 lines added)
+- `src/popup/popup.css` - Share modal styles (~330 lines added)
+
+### Acceptance Criteria Met
+- [x] Share button in Reports screen (icon button in header)
+- [x] Generate image with progress stats (discipline score, streaks, completions)
+- [x] Multiple card templates/styles (3 templates: Minimal, Gradient, Dark Pro)
+- [x] Include app branding subtly (footer text: "Generated with Daily Goals Tracker")
+- [x] Copy image to clipboard (using Clipboard API with ClipboardItem)
+- [x] Download as PNG option (using canvas.toDataURL and download link)
+- [x] Works with current theme (Minimal template adapts to light/dark mode)
+
+### Technical Notes
+- Canvas-based rendering ensures consistent output across browsers
+- Uses native Canvas 2D API with no external dependencies
+- System fonts used for best compatibility
+- Image resolution optimized for social media sharing (400x500)
+- Clipboard API may not work in all contexts (falls back with error message)
+- All templates include proper text alignment and visual hierarchy
+

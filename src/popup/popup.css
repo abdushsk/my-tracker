@@ -9469,3 +9469,336 @@ body.modal-open {
 [data-theme="dark"] .challenge-history-item {
   background: rgba(255, 255, 255, 0.05);
 }
+
+/* ========================================
+   US-082: Share Progress as Image
+   ======================================== */
+
+/* Share Button in Reports Header */
+.share-reports-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  padding: 0;
+  border: none;
+  background: transparent;
+  color: var(--text-secondary);
+  border-radius: var(--radius);
+  cursor: pointer;
+  transition: color var(--transition), background-color var(--transition);
+}
+
+.share-reports-btn:hover {
+  color: var(--primary);
+  background-color: var(--primary-light);
+}
+
+.share-reports-btn:active {
+  transform: scale(0.95);
+}
+
+.share-reports-btn svg {
+  width: 20px;
+  height: 20px;
+}
+
+/* Share Modal Overlay */
+.share-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1100;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+
+.share-modal-overlay.visible {
+  opacity: 1;
+}
+
+/* Share Modal */
+.share-modal {
+  background-color: var(--background);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-lg), 0 8px 32px rgba(0, 0, 0, 0.2);
+  width: 90%;
+  max-width: 380px;
+  max-height: 90vh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  transform: scale(0.95) translateY(10px);
+  transition: transform 0.2s ease;
+}
+
+.share-modal-overlay.visible .share-modal {
+  transform: scale(1) translateY(0);
+}
+
+/* Share Modal Header */
+.share-modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: var(--spacing-md);
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+}
+
+.share-modal-header h3 {
+  margin: 0;
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-semibold);
+  color: var(--text);
+}
+
+.share-modal-close {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  border: none;
+  background: transparent;
+  color: var(--text-secondary);
+  border-radius: var(--radius);
+  cursor: pointer;
+  transition: color var(--transition), background-color var(--transition);
+}
+
+.share-modal-close:hover {
+  color: var(--text);
+  background-color: var(--background-secondary);
+}
+
+.share-modal-close svg {
+  width: 18px;
+  height: 18px;
+}
+
+/* Share Modal Content */
+.share-modal-content {
+  padding: var(--spacing-md);
+  overflow-y: auto;
+  flex: 1;
+}
+
+/* Share Preview Container */
+.share-preview-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: var(--background-secondary);
+  border-radius: var(--radius);
+  padding: var(--spacing-sm);
+  margin-bottom: var(--spacing-md);
+}
+
+.share-preview-container canvas {
+  max-width: 100%;
+  height: auto;
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+}
+
+/* Share Templates */
+.share-templates {
+  margin-bottom: var(--spacing-sm);
+}
+
+.share-templates-label {
+  display: block;
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  color: var(--text-secondary);
+  margin-bottom: var(--spacing-sm);
+}
+
+.share-template-options {
+  display: flex;
+  gap: var(--spacing-sm);
+}
+
+.share-template-btn {
+  flex: 1;
+  padding: var(--spacing-sm) var(--spacing-md);
+  border: 2px solid var(--border);
+  background-color: var(--background);
+  border-radius: var(--radius);
+  cursor: pointer;
+  transition: all var(--transition);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  color: var(--text-secondary);
+}
+
+.share-template-btn:hover {
+  border-color: var(--primary);
+  color: var(--primary);
+}
+
+.share-template-btn.active {
+  border-color: var(--primary);
+  background-color: var(--primary-light);
+  color: var(--primary);
+}
+
+/* Share Modal Actions */
+.share-modal-actions {
+  display: flex;
+  gap: var(--spacing-sm);
+  padding: var(--spacing-md);
+  border-top: 1px solid var(--border);
+  background-color: var(--background);
+  flex-shrink: 0;
+}
+
+.share-action-btn {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--spacing-xs);
+  padding: var(--spacing-sm) var(--spacing-md);
+  border: none;
+  border-radius: var(--radius);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  cursor: pointer;
+  transition: all var(--transition);
+}
+
+.share-action-btn svg {
+  width: 16px;
+  height: 16px;
+}
+
+.share-action-btn.copy-btn {
+  background-color: var(--primary);
+  color: white;
+}
+
+.share-action-btn.copy-btn:hover {
+  background-color: var(--primary-hover);
+}
+
+.share-action-btn.download-btn {
+  background-color: var(--background-secondary);
+  color: var(--text);
+  border: 1px solid var(--border);
+}
+
+.share-action-btn.download-btn:hover {
+  background-color: var(--border);
+}
+
+/* Share Feedback */
+.share-feedback {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  padding: var(--spacing-sm) var(--spacing-md);
+  border-radius: var(--radius);
+  margin-bottom: var(--spacing-md);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  animation: slideIn 0.2s ease;
+}
+
+.share-feedback.fade-out {
+  animation: fadeOut 0.3s ease forwards;
+}
+
+.share-feedback-success {
+  background-color: var(--success-light, #ecfdf5);
+  color: var(--success, #10b981);
+}
+
+.share-feedback-error {
+  background-color: var(--error-light, #fef2f2);
+  color: var(--error, #ef4444);
+}
+
+.share-feedback-icon svg {
+  width: 16px;
+  height: 16px;
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeOut {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
+
+/* Dark Mode for Share Modal */
+[data-theme="dark"] .share-modal {
+  background-color: var(--background);
+  border: 1px solid var(--border);
+}
+
+[data-theme="dark"] .share-modal-overlay {
+  background-color: rgba(0, 0, 0, 0.75);
+}
+
+[data-theme="dark"] .share-preview-container {
+  background-color: #2a2a2a;
+}
+
+[data-theme="dark"] .share-template-btn {
+  background-color: var(--background-secondary);
+  border-color: var(--border);
+}
+
+[data-theme="dark"] .share-template-btn.active {
+  background-color: var(--primary-light);
+}
+
+[data-theme="dark"] .share-action-btn.download-btn {
+  background-color: var(--background-secondary);
+  border-color: var(--border);
+}
+
+[data-theme="dark"] .share-action-btn.download-btn:hover {
+  background-color: var(--border);
+}
+
+[data-theme="dark"] .share-feedback-success {
+  background-color: rgba(16, 185, 129, 0.15);
+}
+
+[data-theme="dark"] .share-feedback-error {
+  background-color: rgba(239, 68, 68, 0.15);
+}
+
+/* Reduced Motion */
+@media (prefers-reduced-motion: reduce) {
+  .share-modal-overlay,
+  .share-modal,
+  .share-feedback {
+    transition: none;
+    animation: none;
+  }
+}

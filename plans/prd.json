@@ -462,7 +462,7 @@
         "Works with current theme (light/dark)"
       ],
       "priority": 28,
-      "passes": false,
+      "passes": true,
       "dependsOn": []
     },
     {
