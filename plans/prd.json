@@ -128,7 +128,15 @@
       "title": "Improve no-progress box visibility in dark/light mode",
       "description": "Enhance the visibility of the no-progress boxes in the activity timeline within the report section when in dark/light mode. Use a lighter grey shade to ensure that these boxes are easily distinguishable against the dark/white background, improving overall user experience. or select whichever looks fine",
       "priority": 18,
-      "passes": false
+      "passes": true
+    },
+    // when i click on goal card, play, pause, etc, all the icons does the inital animation again, fix it so that only first time it plays the animation
+    {
+      "id": "US-019",
+      "title": "Optimize icon animation behavior",
+      "description": "In the goals screen, Modify the icon animation behavior so that animations only play the first time an icon is interacted with (e.g., when clicking on a goal card, play, pause, etc.). Prevent the animations from replaying on subsequent interactions to enhance user experience and reduce visual distraction.",
+      "priority": 19,
+      "passes": true
     }
   ]
 }

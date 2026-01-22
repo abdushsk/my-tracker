@@ -681,3 +681,37 @@
 - Using explicit boolean variables (`isStartDate`, `isEndDate`, `isEveryFifth`) makes the label display logic more readable and maintainable
 - The label count changed from variable (depending on which day "today" falls on) to consistent (always 7 labels)
 
+## US-018: Improve No-Progress Box Visibility in Dark/Light Mode (Completed)
+**Date**: 2026-01-23
+
+### Changes Made
+
+1. **Updated base heatmap-level-0 for light mode** (popup.css:176):
+   - Changed from `#F0F0F0` to `#E5E5E5`
+   - Previous: ~6.7% brightness difference from white background (`#FFFFFF`)
+   - New: ~10% brightness difference, making no-progress cells more distinguishable
+
+2. **Updated base heatmap-level-0 for dark mode** (popup.css:298):
+   - Changed from `#3A3A3A` to `#444444`
+   - Previous: ~17% brightness difference from dark background (`#0F0F0F`)
+   - New: ~21% brightness difference, improving visibility further
+
+3. **Updated theme-specific heatmap0 values** (theme-config.js):
+   - **Ocean light**: `#E8F6F9` → `#D0E8EE` (darker, more visible)
+   - **Ocean dark**: `#2A3A4A` → `#354555` (lighter, better contrast)
+   - **Forest light**: `#F0F5EB` → `#E0EAD8` (darker, more visible)
+   - **Forest dark**: `#2A3A2A` → `#354535` (lighter, better contrast)
+   - **Sunset light**: `#FFF5EB` → `#F5E5D8` (darker, more visible)
+   - **Sunset dark**: `#3A2A2A` → `#453535` (lighter, better contrast)
+   - **Lavender light**: `#F5F3FF` → `#E8E5F5` (darker, more visible)
+   - **Lavender dark**: `#2A2A3A` → `#353545` (lighter, better contrast)
+
+### Key Learnings
+- In light mode, the no-progress cells (`#F0F0F0`) were too close to the white background (`#FFFFFF`), creating only ~6.7% brightness difference
+- A minimum of ~10% brightness difference is needed for comfortable visibility
+- For dark mode, increasing from `#3A3A3A` to `#444444` provides better contrast while maintaining the dark aesthetic
+- Theme-specific colors should maintain their tint while improving contrast:
+  - Light mode: darken the hue by reducing lightness
+  - Dark mode: lighten the hue by increasing lightness
+- All theme heatmap0 colors were adjusted by approximately 8-12% in the appropriate direction
+

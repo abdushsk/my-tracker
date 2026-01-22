@@ -172,8 +172,8 @@
   --challenge-complete-hover: #38ef7d;
   --challenge-complete-gradient: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
 
-  /* Heatmap colors */
-  --heatmap-level-0: #F0F0F0;
+  /* Heatmap colors - US-018: Improved no-progress visibility */
+  --heatmap-level-0: #E5E5E5;
   --heatmap-level-1: #D1FAE5;
   --heatmap-level-2: #6EE7B7;
   --heatmap-level-3: #34D399;
@@ -294,8 +294,8 @@
   --challenge-complete-hover: #059669;
   --challenge-complete-gradient: linear-gradient(135deg, #0f766e 0%, #059669 100%);
 
-  /* Heatmap colors - US-002/US-006: Enhanced visibility for dark mode */
-  --heatmap-level-0: #3A3A3A;
+  /* Heatmap colors - US-002/US-006/US-018: Enhanced visibility for dark mode */
+  --heatmap-level-0: #444444;
   --heatmap-level-1: #0A5D47;
   --heatmap-level-2: #059669;
   --heatmap-level-3: #10B981;
