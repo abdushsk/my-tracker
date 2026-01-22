@@ -6,809 +6,752 @@
 
   "userStories": [
     {
-      "id": "US-001",
-      "title": "Project Initialization",
-      "description": "Create the basic project folder structure for a Chrome extension. Create folders: src/, src/popup/, src/background/, src/styles/, src/utils/, src/assets/, src/assets/icons/, src/assets/sounds/. This sets up the foundation for all subsequent development.",
+      "id": "US-055",
+      "title": "Fix Footer Position When Few Goals",
+      "description": "In the Daily Goals screen, when there are few or no goals, the bottom navigation buttons (Manage Goals, Reports) should remain at the bottom of the popup. Currently they float up when there's not enough content. Use flexbox with flex-grow on the content area or min-height to ensure footer stays at bottom.",
       "acceptanceCriteria": [
-        "All folders created",
-        "Basic .gitignore for node_modules, dist, etc."
+        "Footer buttons stay at bottom regardless of goal count",
+        "Works with 0 goals (empty state)",
+        "Works with 1-2 goals",
+        "Content area scrolls when many goals",
+        "Layout remains consistent across all scenarios"
       ],
       "priority": 1,
-      "passes": true,
+      "passes": false,
       "dependsOn": []
     },
     {
-      "id": "US-002",
-      "title": "Chrome Extension Manifest",
-      "description": "Create manifest.json for Chrome Extension Manifest V3. Configure: name, version, description, permissions (storage, alarms, notifications), action (popup), service_worker, and icons. Reference FEATURES.md for required permissions.",
+      "id": "US-056",
+      "title": "Compact View Mode for Daily Goals",
+      "description": "Add a compact view option for the Daily Goals screen. Currently shows expanded goal cards. Create a toggle (icon button) to switch between expanded and compact views. Compact view: smaller cards, less padding, title + progress only, inline controls. Store preference in settings.",
       "acceptanceCriteria": [
-        "manifest.json created with Manifest V3 format",
-        "Permissions: storage, alarms, notifications",
-        "Action pointing to popup.html",
-        "Service worker registered",
-        "Icon placeholders defined (16, 48, 128px)"
-      ],
-      "priority": 1,
-      "passes": true,
-      "dependsOn": ["US-001"]
-    },
-    {
-      "id": "US-003",
-      "title": "Extension Icons",
-      "description": "Create simple extension icons in 16x16, 48x48, and 128x128 pixel sizes. Use a simple design - a checkmark or goal/target icon. Can use SVG converted to PNG or simple canvas-generated icons. Place in src/assets/icons/.",
-      "acceptanceCriteria": [
-        "icon-16.png created",
-        "icon-48.png created",
-        "icon-128.png created",
-        "Icons are visually clear and represent goal tracking"
-      ],
-      "priority": 1,
-      "passes": true,
-      "dependsOn": ["US-001"]
-    },
-    {
-      "id": "US-004",
-      "title": "Popup HTML Structure",
-      "description": "Create src/popup/popup.html with the basic HTML structure. Include: doctype, head with meta charset and viewport, link to popup.css, container div for app, script tag for popup.js. Set up semantic structure for a single-page app with multiple screens.",
-      "acceptanceCriteria": [
-        "popup.html created with proper HTML5 structure",
-        "Links to popup.css and popup.js",
-        "Main container div with id='app'",
-        "Viewport meta tag for proper scaling"
-      ],
-      "priority": 1,
-      "passes": true,
-      "dependsOn": ["US-002"]
-    },
-    {
-      "id": "US-005",
-      "title": "Base CSS Styles",
-      "description": "Create src/popup/popup.css with base styles. Define: CSS reset, CSS variables for colors (--primary, --secondary, --background, --text, --success, --danger), base typography, popup dimensions (380px width, 500px height). Reference FEATURES.md UI Specifications.",
-      "acceptanceCriteria": [
-        "CSS reset applied",
-        "CSS variables for theming defined",
-        "Popup dimensions set (380x500px)",
-        "Base font family and sizes defined",
-        "Box-sizing border-box applied globally"
-      ],
-      "priority": 1,
-      "passes": true,
-      "dependsOn": ["US-004"]
-    },
-    {
-      "id": "US-006",
-      "title": "Service Worker Setup",
-      "description": "Create src/background/service-worker.js with basic Chrome extension service worker. Set up: chrome.runtime.onInstalled listener, placeholder for alarm listeners, placeholder for message listeners. This will handle background tasks like timers and resets.",
-      "acceptanceCriteria": [
-        "service-worker.js created",
-        "onInstalled listener logs installation",
-        "Basic structure for onMessage listener",
-        "Basic structure for onAlarm listener"
-      ],
-      "priority": 1,
-      "passes": true,
-      "dependsOn": ["US-002"]
-    },
-    {
-      "id": "US-007",
-      "title": "Storage Utility Module",
-      "description": "Create src/utils/storage.js with helper functions for Chrome storage API. Implement: getGoals(), saveGoals(goals), getActivityLog(), saveActivityLog(log), getSettings(), saveSettings(settings). Use chrome.storage.local. All functions should be async and handle errors gracefully.",
-      "acceptanceCriteria": [
-        "storage.js created with all CRUD helpers",
-        "All functions are async/await",
-        "Error handling with try/catch",
-        "Functions exported for use in other modules"
-      ],
-      "priority": 1,
-      "passes": true,
-      "dependsOn": ["US-006"]
-    },
-    {
-      "id": "US-008",
-      "title": "Goal Data Model",
-      "description": "Create src/utils/models.js defining the Goal data structure and factory function. Goal has: id (uuid), title (string), type (timer|counter|checkbox), target (number), progress (number), timeframe (daily|weekly|monthly|yearly), category (string|null), isActive (boolean), createdAt (timestamp), lastResetAt (timestamp), order (number). Include createGoal() factory function.",
-      "acceptanceCriteria": [
-        "models.js created",
-        "Goal structure documented with JSDoc",
-        "createGoal(data) factory function",
-        "generateId() helper using crypto.randomUUID()",
-        "Default values for optional fields"
-      ],
-      "priority": 1,
-      "passes": true,
-      "dependsOn": ["US-007"]
-    },
-    {
-      "id": "US-009",
-      "title": "Activity Log Data Model",
-      "description": "Create ActivityLog data structure in src/utils/models.js. ActivityLog has: id (uuid), goalId (uuid), timestamp (number), action (start|pause|increment|decrement|toggle|reset|complete), value (number|null). Include createActivityLog() factory function.",
-      "acceptanceCriteria": [
-        "ActivityLog structure added to models.js",
-        "createActivityLog(data) factory function",
-        "Action types as constants/enum"
-      ],
-      "priority": 1,
-      "passes": true,
-      "dependsOn": ["US-008"]
-    },
-    {
-      "id": "US-010",
-      "title": "Popup JavaScript Entry Point",
-      "description": "Create src/popup/popup.js as the main entry point. Set up: DOMContentLoaded listener, import storage utilities, initialize app state, create basic router for screens (viewGoals, manageGoals, reports, settings). Start with viewGoals as default screen.",
-      "acceptanceCriteria": [
-        "popup.js created",
-        "DOMContentLoaded handler",
-        "Basic state object initialized",
-        "Screen navigation function (showScreen)",
-        "Loads and displays viewGoals by default"
+        "Toggle button to switch views (expand/collapse icon)",
+        "Compact view shows: title, type icon, progress bar, essential controls",
+        "Expanded view remains as current (default)",
+        "View preference saved to settings",
+        "Smooth transition between views",
+        "Both views remain functional for all goal types"
       ],
       "priority": 2,
-      "passes": true,
-      "dependsOn": ["US-005", "US-007", "US-008"]
+      "passes": false,
+      "dependsOn": ["US-055"]
     },
     {
-      "id": "US-011",
-      "title": "View Goals Screen - Header",
-      "description": "Create the header section for View Goals screen. Display: App title 'Daily Goals', quick stats showing 'X/Y completed today' and current streak 'N day streak'. Style with flexbox, make it visually prominent. Stats should update from stored data.",
+      "id": "US-057",
+      "title": "Dynamic Goal Form Fields Based on Type",
+      "description": "In the Add/Edit goal form, show only relevant fields based on selected goal type. Timer: show hours/minutes inputs. Counter: show target count input. Checkbox: hide target inputs (target is always 1). Currently all fields show regardless of type selection.",
       "acceptanceCriteria": [
-        "Header with app title",
-        "Completed goals counter (X/Y format)",
-        "Streak counter display",
-        "Clean, modern styling",
-        "Stats load from storage on init"
-      ],
-      "priority": 2,
-      "passes": true,
-      "dependsOn": ["US-010"]
-    },
-    {
-      "id": "US-012",
-      "title": "View Goals Screen - Empty State",
-      "description": "Create empty state for when no goals exist. Show: friendly message 'No goals yet', icon or illustration, prominent button 'Add Your First Goal' that navigates to Manage Goals screen. Center vertically in the goals list area.",
-      "acceptanceCriteria": [
-        "Empty state container",
-        "Friendly message text",
-        "Visual icon/illustration",
-        "CTA button to Manage Goals",
-        "Only shows when goals array is empty"
-      ],
-      "priority": 2,
-      "passes": true,
-      "dependsOn": ["US-011"]
-    },
-    {
-      "id": "US-013",
-      "title": "View Goals Screen - Navigation Footer",
-      "description": "Create bottom navigation for View Goals screen. Two buttons: 'Manage Goals' (gear/edit icon) and 'Reports' (chart icon). Fixed at bottom of popup. Clicking navigates to respective screens.",
-      "acceptanceCriteria": [
-        "Fixed footer navigation",
-        "Manage Goals button with icon",
-        "Reports button with icon",
-        "Click handlers navigate screens",
-        "Visual feedback on hover/active"
-      ],
-      "priority": 2,
-      "passes": true,
-      "dependsOn": ["US-011"]
-    },
-    {
-      "id": "US-014",
-      "title": "View Goals Screen - Goals List Container",
-      "description": "Create scrollable goals list container for View Goals screen. Should sit between header and footer, scroll independently, have subtle styling. Prepare for rendering goal cards.",
-      "acceptanceCriteria": [
-        "Scrollable container div",
-        "Proper flex layout between header/footer",
-        "Overflow-y auto for scrolling",
-        "Subtle background or border styling",
-        "Padding for goal cards"
-      ],
-      "priority": 2,
-      "passes": true,
-      "dependsOn": ["US-013"]
-    },
-    {
-      "id": "US-015",
-      "title": "Goal Card - Base Component",
-      "description": "Create reusable goal card component function renderGoalCard(goal). Base structure: card container, title, timeframe badge (daily/weekly/monthly/yearly with colors), progress bar. Style cards with shadow, rounded corners, proper spacing.",
-      "acceptanceCriteria": [
-        "renderGoalCard(goal) function",
-        "Card with title display",
-        "Timeframe badge with color coding",
-        "Progress bar (0-100%)",
-        "Card styling (shadow, radius, padding)"
-      ],
-      "priority": 2,
-      "passes": true,
-      "dependsOn": ["US-014"]
-    },
-    {
-      "id": "US-016",
-      "title": "Goal Card - Timer Type Controls",
-      "description": "Extend goal card for timer type goals. Add: Play/Pause toggle button (icon changes based on isActive), time display in HH:MM:SS format, progress bar showing progress/target. Play starts timer, Pause pauses it.",
-      "acceptanceCriteria": [
-        "Play button (when paused)",
-        "Pause button (when active)",
-        "Time display HH:MM:SS",
-        "Progress bar reflects progress/target",
-        "Click handlers toggle isActive"
-      ],
-      "priority": 2,
-      "passes": true,
-      "dependsOn": ["US-015"]
-    },
-    {
-      "id": "US-017",
-      "title": "Goal Card - Counter Type Controls",
-      "description": "Extend goal card for counter type goals. Add: Decrement button (-), current count display, Increment button (+), target display (e.g., '5 / 10'). Decrement minimum is 0. Show progress as current/target.",
-      "acceptanceCriteria": [
-        "Minus button for decrement",
-        "Plus button for increment",
-        "Current/target display",
-        "Progress bar reflects current/target",
-        "Min 0 validation on decrement"
-      ],
-      "priority": 2,
-      "passes": true,
-      "dependsOn": ["US-015"]
-    },
-    {
-      "id": "US-018",
-      "title": "Goal Card - Checkbox Type Controls",
-      "description": "Extend goal card for checkbox type goals. Add: Large clickable checkbox, completion state styling (strike-through title, green checkmark). Toggle on click.",
-      "acceptanceCriteria": [
-        "Clickable checkbox element",
-        "Checked state: checkmark, strike-through title",
-        "Unchecked state: empty box",
-        "Click toggles progress (0 or 1)",
-        "Visual feedback on state change"
-      ],
-      "priority": 2,
-      "passes": true,
-      "dependsOn": ["US-015"]
-    },
-    {
-      "id": "US-019",
-      "title": "Goal Card - Completion State",
-      "description": "Add visual completion state to all goal cards. When progress >= target: show green border/glow, show checkmark icon, optional confetti animation. Make it feel rewarding!",
-      "acceptanceCriteria": [
-        "Green border when completed",
-        "Checkmark overlay or icon",
-        "Subtle glow or highlight effect",
-        "Applies to all goal types",
-        "Updates immediately when goal completes"
-      ],
-      "priority": 2,
-      "passes": true,
-      "dependsOn": ["US-016", "US-017", "US-018"]
-    },
-    {
-      "id": "US-020",
-      "title": "Manage Goals Screen - Layout",
-      "description": "Create Manage Goals screen layout. Include: Back button (arrow) to return to View Goals, 'Manage Goals' title, 'Add Goal' button (prominent, primary color), scrollable list of existing goals.",
-      "acceptanceCriteria": [
-        "Back button navigates to View Goals",
-        "Screen title 'Manage Goals'",
-        "Add Goal button (prominent styling)",
-        "Goals list container",
-        "Screen hidden by default"
+        "Timer selected: show hours/minutes inputs only",
+        "Counter selected: show target count input only",
+        "Checkbox selected: hide all target inputs",
+        "Fields animate in/out smoothly",
+        "Form validates only visible fields",
+        "Edit mode pre-selects type and shows correct fields"
       ],
       "priority": 3,
-      "passes": true,
-      "dependsOn": ["US-014"]
+      "passes": false,
+      "dependsOn": []
     },
     {
-      "id": "US-021",
-      "title": "Manage Goals - Goal List Item",
-      "description": "Create goal list item for Manage Goals screen. Different from View Goals - shows: goal title, type icon, timeframe badge, Edit button, Delete button. No progress controls here.",
+      "id": "US-058",
+      "title": "Full-Page Add/Edit Goal Screen",
+      "description": "Replace the modal/popup for Add/Edit goal with a dedicated full-page screen. Better UX, more space for form fields, consistent with app navigation pattern. Add to SCREENS enum, create render function, update navigation from Manage Goals screen.",
       "acceptanceCriteria": [
-        "Goal title display",
-        "Type icon (clock/counter/checkbox)",
-        "Timeframe badge",
-        "Edit button (pencil icon)",
-        "Delete button (trash icon, red)"
-      ],
-      "priority": 3,
-      "passes": true,
-      "dependsOn": ["US-020"]
-    },
-    {
-      "id": "US-022",
-      "title": "Add Goal Form - Modal",
-      "description": "Create Add Goal form as a modal/overlay. Include: Close button (X), form title 'Add New Goal', form fields container, Save and Cancel buttons at bottom. Overlay darkens background.",
-      "acceptanceCriteria": [
-        "Modal overlay with dark background",
-        "Close button (X) in corner",
-        "Form title 'Add New Goal'",
-        "Save button (primary)",
-        "Cancel button (secondary)",
-        "Clicking overlay background closes modal"
-      ],
-      "priority": 3,
-      "passes": true,
-      "dependsOn": ["US-021"]
-    },
-    {
-      "id": "US-023",
-      "title": "Add Goal Form - Title Input",
-      "description": "Add title input field to goal form. Label: 'Goal Title', placeholder: 'e.g., Study for exam', required field with validation. Show error message if empty on submit.",
-      "acceptanceCriteria": [
-        "Text input for title",
-        "Label 'Goal Title'",
-        "Placeholder text",
-        "Required validation",
-        "Error message display"
-      ],
-      "priority": 3,
-      "passes": true,
-      "dependsOn": ["US-022"]
-    },
-    {
-      "id": "US-024",
-      "title": "Add Goal Form - Type Selector",
-      "description": "Add goal type selector to form. Three options as button group or radio: Timer (clock icon), Counter (number icon), Checkbox (check icon). Default to Timer. Selection changes which target input shows.",
-      "acceptanceCriteria": [
-        "Three type options",
-        "Visual icons for each",
-        "Default selection: Timer",
-        "Clear active state styling",
-        "Updates target input when changed"
-      ],
-      "priority": 3,
-      "passes": true,
-      "dependsOn": ["US-023"]
-    },
-    {
-      "id": "US-025",
-      "title": "Add Goal Form - Target Input (Timer)",
-      "description": "Add target input for Timer type. Show when Timer is selected. Label: 'Target Time'. Input for hours and minutes (two number inputs or single with HH:MM format). Convert to seconds for storage.",
-      "acceptanceCriteria": [
-        "Shows only when Timer type selected",
-        "Hours input (0-23)",
-        "Minutes input (0-59)",
-        "Converts to seconds for storage",
-        "Validation for numeric values"
-      ],
-      "priority": 3,
-      "passes": true,
-      "dependsOn": ["US-024"]
-    },
-    {
-      "id": "US-026",
-      "title": "Add Goal Form - Target Input (Counter)",
-      "description": "Add target input for Counter type. Show when Counter is selected. Label: 'Target Count'. Number input with min 1. Placeholder: 'e.g., 10'.",
-      "acceptanceCriteria": [
-        "Shows only when Counter type selected",
-        "Number input",
-        "Minimum value 1",
-        "Placeholder text",
-        "Validation for positive integer"
-      ],
-      "priority": 3,
-      "passes": true,
-      "dependsOn": ["US-024"]
-    },
-    {
-      "id": "US-027",
-      "title": "Add Goal Form - Timeframe Selector",
-      "description": "Add timeframe selector to form. Dropdown or button group with options: Daily, Weekly, Monthly, Yearly. Default to Daily. Label: 'Reset Schedule'.",
-      "acceptanceCriteria": [
-        "Four timeframe options",
-        "Default: Daily",
-        "Clear visual selection",
-        "Label 'Reset Schedule'",
-        "Tooltip or helper text explaining each"
-      ],
-      "priority": 3,
-      "passes": true,
-      "dependsOn": ["US-023"]
-    },
-    {
-      "id": "US-028",
-      "title": "Add Goal Form - Save Logic",
-      "description": "Implement Save button logic. Validate all required fields, create goal object using createGoal(), save to storage using saveGoals(), close modal, refresh goals list. Show success feedback.",
-      "acceptanceCriteria": [
-        "Validates required fields",
-        "Creates goal with correct data",
-        "Saves to Chrome storage",
-        "Closes modal on success",
-        "Refreshes goals list",
-        "Shows error if validation fails"
-      ],
-      "priority": 3,
-      "passes": true,
-      "dependsOn": ["US-025", "US-026", "US-027"]
-    },
-    {
-      "id": "US-029",
-      "title": "Edit Goal - Pre-fill Form",
-      "description": "Implement Edit functionality. When Edit button clicked, open the same form modal but: title says 'Edit Goal', form pre-filled with existing goal data, Save updates existing goal instead of creating new.",
-      "acceptanceCriteria": [
-        "Edit button opens form modal",
-        "Modal title shows 'Edit Goal'",
-        "All fields pre-filled",
-        "Save updates existing goal",
-        "Goal ID preserved"
-      ],
-      "priority": 3,
-      "passes": true,
-      "dependsOn": ["US-028"]
-    },
-    {
-      "id": "US-030",
-      "title": "Delete Goal - Confirmation",
-      "description": "Implement Delete functionality with confirmation. When Delete clicked, show confirmation dialog: 'Delete this goal? This cannot be undone.' with Cancel and Delete buttons. On confirm, remove from storage and refresh list.",
-      "acceptanceCriteria": [
-        "Confirmation dialog appears",
-        "Warning message displayed",
-        "Cancel button closes dialog",
-        "Delete button removes goal",
-        "Storage updated",
-        "List refreshed"
-      ],
-      "priority": 3,
-      "passes": true,
-      "dependsOn": ["US-021"]
-    },
-    {
-      "id": "US-031",
-      "title": "Timer - Background Tracking",
-      "description": "Implement persistent timer in service worker. When timer starts: store startTime and goalId in storage, set up interval or use alarms. When popup opens: calculate elapsed time from startTime. Timer must continue when popup is closed.",
-      "acceptanceCriteria": [
-        "Timer continues when popup closed",
-        "startTime stored in storage",
-        "Elapsed time calculated correctly",
-        "Progress updates on popup open",
-        "Multiple timers can exist (one active)"
+        "New SCREENS.GOAL_FORM screen added",
+        "Full-page layout with header (back button, title)",
+        "All form fields from current modal",
+        "Save/Cancel buttons at bottom",
+        "Back navigation returns to Manage Goals",
+        "Remove old modal code"
       ],
       "priority": 4,
-      "passes": true,
-      "dependsOn": ["US-016", "US-006"]
+      "passes": false,
+      "dependsOn": ["US-057"]
     },
     {
-      "id": "US-032",
-      "title": "Timer - Play/Pause Logic",
-      "description": "Implement Play/Pause toggle for timer goals. Play: set isActive=true, store startTime, send message to service worker. Pause: set isActive=false, calculate elapsed, add to progress, clear startTime. Log activity.",
+      "id": "US-059",
+      "title": "Drag-to-Reorder Daily Goals",
+      "description": "Allow users to reorder goals in the Daily Goals screen by dragging. Use HTML5 drag and drop API. Update goal.order property and persist to storage. Visual feedback during drag.",
       "acceptanceCriteria": [
-        "Play sets isActive true",
-        "Pause calculates and saves progress",
-        "Service worker notified",
-        "Activity logged (start/pause action)",
-        "UI updates immediately"
-      ],
-      "priority": 4,
-      "passes": true,
-      "dependsOn": ["US-031"]
-    },
-    {
-      "id": "US-033",
-      "title": "Timer - Live Display Update",
-      "description": "Update timer display in real-time while popup is open. Use setInterval (1 second) to update HH:MM:SS display for active timers. Clear interval when popup closes or timer pauses.",
-      "acceptanceCriteria": [
-        "Display updates every second",
-        "HH:MM:SS format maintained",
-        "Only active timers update",
-        "Interval cleared on popup close",
-        "Progress bar updates too"
-      ],
-      "priority": 4,
-      "passes": true,
-      "dependsOn": ["US-032"]
-    },
-    {
-      "id": "US-034",
-      "title": "Counter - Increment Logic",
-      "description": "Implement increment for counter goals. Click +: increase progress by 1, save to storage, log activity with timestamp, update UI, check if goal completed.",
-      "acceptanceCriteria": [
-        "Progress increases by 1",
-        "Saved to storage immediately",
-        "Activity logged (increment action)",
-        "UI updates instantly",
-        "Completion check triggered"
-      ],
-      "priority": 4,
-      "passes": true,
-      "dependsOn": ["US-017", "US-009"]
-    },
-    {
-      "id": "US-035",
-      "title": "Counter - Decrement Logic",
-      "description": "Implement decrement for counter goals. Click -: decrease progress by 1 (minimum 0), save to storage, log activity with timestamp, update UI.",
-      "acceptanceCriteria": [
-        "Progress decreases by 1",
-        "Cannot go below 0",
-        "Saved to storage immediately",
-        "Activity logged (decrement action)",
-        "UI updates instantly"
-      ],
-      "priority": 4,
-      "passes": true,
-      "dependsOn": ["US-034"]
-    },
-    {
-      "id": "US-036",
-      "title": "Checkbox - Toggle Logic",
-      "description": "Implement toggle for checkbox goals. Click: toggle progress between 0 and 1 (target is always 1), save to storage, log activity with timestamp, update UI, check completion.",
-      "acceptanceCriteria": [
-        "Progress toggles 0/1",
-        "Saved to storage immediately",
-        "Activity logged (toggle action)",
-        "UI updates with visual feedback",
-        "Completion check triggered"
-      ],
-      "priority": 4,
-      "passes": true,
-      "dependsOn": ["US-018", "US-009"]
-    },
-    {
-      "id": "US-037",
-      "title": "Sound - Audio Utility",
-      "description": "Create src/utils/sounds.js with sound playing utility. Use Web Audio API or HTMLAudioElement. Functions: playSound(soundName), setVolume(level), setMuted(bool). Load sounds from src/assets/sounds/.",
-      "acceptanceCriteria": [
-        "sounds.js created",
-        "playSound function works",
-        "Volume control (0-1)",
-        "Mute toggle",
-        "Graceful fallback if sound fails"
-      ],
-      "priority": 4,
-      "passes": true,
-      "dependsOn": ["US-001"]
-    },
-    {
-      "id": "US-038",
-      "title": "Sound - Effect Files",
-      "description": "Add sound effect files to src/assets/sounds/. Need: complete.mp3 (goal complete chime), tick.mp3 (counter/checkbox), start.mp3 (timer start), pause.mp3 (timer pause). Use short, satisfying sounds (can generate or use free sounds).",
-      "acceptanceCriteria": [
-        "complete.mp3 - celebration chime",
-        "tick.mp3 - soft tick sound",
-        "start.mp3 - start tone",
-        "pause.mp3 - pause sound",
-        "All files under 50KB each"
-      ],
-      "priority": 4,
-      "passes": true,
-      "dependsOn": ["US-037"]
-    },
-    {
-      "id": "US-039",
-      "title": "Sound - Integration",
-      "description": "Integrate sounds into goal interactions. Play: complete.mp3 when goal reaches target, tick.mp3 on counter increment/decrement and checkbox toggle, start.mp3 on timer play, pause.mp3 on timer pause.",
-      "acceptanceCriteria": [
-        "Completion sound plays at 100%",
-        "Tick on counter changes",
-        "Tick on checkbox toggle",
-        "Start sound on timer play",
-        "Pause sound on timer pause"
-      ],
-      "priority": 4,
-      "passes": true,
-      "dependsOn": ["US-038", "US-032", "US-034", "US-036"]
-    },
-    {
-      "id": "US-040",
-      "title": "Auto Reset - Alarm Setup",
-      "description": "Set up Chrome alarms for automatic goal resets. On extension install/update: create alarms for midnight (daily check), Monday midnight (weekly check), 1st midnight (monthly check), Jan 1 midnight (yearly check).",
-      "acceptanceCriteria": [
-        "Alarms created on install",
-        "Daily alarm at midnight",
-        "Weekly/monthly/yearly alarms",
-        "Alarms persist across browser restart",
-        "Service worker handles alarms"
+        "Drag handle visible on goal cards",
+        "Drag and drop works smoothly",
+        "Visual feedback (ghost, placeholder) during drag",
+        "Order persisted to storage",
+        "Order maintained after refresh",
+        "Works in both expanded and compact views"
       ],
       "priority": 5,
-      "passes": true,
-      "dependsOn": ["US-006"]
+      "passes": false,
+      "dependsOn": ["US-056"]
     },
     {
-      "id": "US-041",
-      "title": "Auto Reset - Reset Logic",
-      "description": "Implement goal reset logic in service worker. When alarm fires: check each goal's timeframe, if reset is due: archive current progress to history, reset progress to 0, update lastResetAt, save goals.",
+      "id": "US-060",
+      "title": "UI Design Document",
+      "description": "Create a comprehensive UI design document (plans/DESIGN.md) defining consistent patterns: spacing system, typography scale, color usage, button styles, form patterns, card layouts, icons, animations. Document current inconsistencies and propose fixes.",
       "acceptanceCriteria": [
-        "Checks goal timeframes",
-        "Archives progress before reset",
-        "Resets progress to 0",
-        "Updates lastResetAt timestamp",
-        "Handles all timeframe types"
-      ],
-      "priority": 5,
-      "passes": true,
-      "dependsOn": ["US-040", "US-012"]
-    },
-    {
-      "id": "US-042",
-      "title": "History Storage Model",
-      "description": "Create history data model in models.js. HistoryEntry: id, goalId, date, progress, target, completed (bool). Create getHistory(), saveHistory() in storage.js. History stores past completion data for reports.",
-      "acceptanceCriteria": [
-        "HistoryEntry model defined",
-        "getHistory() function",
-        "saveHistory() function",
-        "History organized by date",
-        "Accessible for reports"
-      ],
-      "priority": 5,
-      "passes": true,
-      "dependsOn": ["US-009"]
-    },
-    {
-      "id": "US-043",
-      "title": "Reports Screen - Layout",
-      "description": "Create Reports screen layout. Include: Back button, 'Reports' title, discipline score section (large number display), streak section, stats cards area, placeholder for charts.",
-      "acceptanceCriteria": [
-        "Back button to View Goals",
-        "Screen title 'Reports'",
-        "Discipline score area (prominent)",
-        "Streak display area",
-        "Stats cards container",
-        "Charts placeholder"
-      ],
-      "priority": 5,
-      "passes": true,
-      "dependsOn": ["US-013"]
-    },
-    {
-      "id": "US-044",
-      "title": "Reports - Discipline Score",
-      "description": "Calculate and display discipline score. Formula: (completed goals / total goals) * 100 averaged over last 7 days. Display as large number with label 'Discipline Score' and color coding (green >80, yellow >50, red <50).",
-      "acceptanceCriteria": [
-        "Score calculated from history",
-        "Displayed as 0-100 number",
-        "Color coded by range",
-        "Shows 'Discipline Score' label",
-        "Updates on screen open"
-      ],
-      "priority": 5,
-      "passes": true,
-      "dependsOn": ["US-043", "US-042"]
-    },
-    {
-      "id": "US-045",
-      "title": "Reports - Streak Counter",
-      "description": "Calculate and display current streak. Streak = consecutive days where ALL daily goals were completed. Show: current streak number, flame icon, 'day streak' label. Also show best streak ever.",
-      "acceptanceCriteria": [
-        "Current streak calculated",
-        "Flame icon displayed",
-        "'X day streak' format",
-        "Best streak shown below",
-        "Streak breaks if any goal missed"
-      ],
-      "priority": 5,
-      "passes": true,
-      "dependsOn": ["US-044"]
-    },
-    {
-      "id": "US-046",
-      "title": "Reports - Completion Stats Cards",
-      "description": "Display stat cards: 'Today' (X/Y), 'This Week' (X/Y), 'This Month' (X/Y). Each shows completed/total goals. Style as cards with icons.",
-      "acceptanceCriteria": [
-        "Today's completion card",
-        "This week's completion card",
-        "This month's completion card",
-        "X/Y format with percentages",
-        "Visual icons for each"
-      ],
-      "priority": 5,
-      "passes": true,
-      "dependsOn": ["US-044"]
-    },
-    {
-      "id": "US-047",
-      "title": "Reports - Weekly Chart",
-      "description": "Add simple bar chart showing last 7 days completion rate. X-axis: days (Mon-Sun), Y-axis: completion % (0-100). Use CSS or simple canvas drawing (no external library needed for basic chart).",
-      "acceptanceCriteria": [
-        "7 bars for 7 days",
-        "Height represents completion %",
-        "Day labels below bars",
-        "Color coding for bars",
-        "Responsive sizing"
+        "Spacing system (4px/8px base unit)",
+        "Typography scale (headings, body, labels)",
+        "Color palette usage guide",
+        "Button variants and states",
+        "Form field patterns",
+        "Card component patterns",
+        "Icon usage guidelines",
+        "Animation/transition standards",
+        "List of current inconsistencies"
       ],
       "priority": 6,
-      "passes": true,
-      "dependsOn": ["US-046"]
+      "passes": false,
+      "dependsOn": []
     },
     {
-      "id": "US-048",
-      "title": "Activity Timeline - Data Structure",
-      "description": "Prepare activity log data for timeline visualization. Create function getActivityByHour(goalId, date) that groups activity by hour. Returns array of 24 values for hours 0-23.",
+      "id": "US-061",
+      "title": "Refactor UI to Match Design Document",
+      "description": "Apply the design document standards consistently across all screens. Fix spacing inconsistencies, standardize button styles, ensure consistent typography, align elements properly. This is a comprehensive UI polish pass.",
       "acceptanceCriteria": [
-        "getActivityByHour function",
-        "Groups by hour (0-23)",
+        "All spacing uses design system values",
+        "Buttons consistent across screens",
+        "Typography matches design doc",
+        "Colors used consistently",
+        "Cards have uniform styling",
+        "Forms follow standard patterns",
+        "No visual regressions"
+      ],
+      "priority": 7,
+      "passes": false,
+      "dependsOn": ["US-060"]
+    },
+    {
+      "id": "US-062",
+      "title": "Fix Stats Group Alignment in Daily Goals",
+      "description": "In the Daily Goals screen header, the stats group (completed count, streak) are misaligned. Fix alignment using proper flexbox, ensure consistent spacing, vertical alignment of icons and text.",
+      "acceptanceCriteria": [
+        "Stats items vertically centered",
+        "Consistent spacing between stats",
+        "Icons aligned with text",
+        "Responsive on different content lengths",
+        "Matches overall design system"
+      ],
+      "priority": 8,
+      "passes": false,
+      "dependsOn": ["US-061"]
+    },
+    {
+      "id": "US-063",
+      "title": "Fix Completion Checkmark Overlay Position",
+      "description": "When a goal is completed, a checkmark/tick appears on the card. Currently it overlays and covers other content/data on the card. Reposition the checkmark to not obscure important information - consider corner placement, smaller size, or semi-transparent background.",
+      "acceptanceCriteria": [
+        "Checkmark doesn't cover goal title",
+        "Checkmark doesn't cover progress info",
+        "Checkmark doesn't cover controls",
+        "Clear visual indication of completion",
         "Works for all goal types",
-        "Can filter by date range",
-        "Returns array of counts/durations"
+        "Works in both view modes"
       ],
-      "priority": 6,
-      "passes": true,
-      "dependsOn": ["US-042"]
+      "priority": 9,
+      "passes": false,
+      "dependsOn": ["US-056"]
     },
     {
-      "id": "US-049",
-      "title": "Activity Timeline - Heatmap",
-      "description": "Display activity heatmap in Reports. Show grid: rows = days, columns = hours (0-23). Cell color intensity = activity level. Focus on timer goals showing when user worked.",
+      "id": "US-064",
+      "title": "Enhanced Completion Confetti",
+      "description": "Improve the confetti animation when a goal is completed. Make it more celebratory and satisfying. Consider: more particles, better colors, longer duration, or use canvas-confetti library pattern.",
       "acceptanceCriteria": [
-        "Grid of day x hour",
-        "Color intensity for activity",
-        "Last 7 days shown",
-        "Hover shows details",
-        "Legend for colors"
+        "Confetti is visually impressive",
+        "Colors match app theme",
+        "Animation is smooth (60fps)",
+        "Duration is satisfying but not too long",
+        "Works for all goal completions",
+        "Optional: different intensity for different achievements"
       ],
-      "priority": 6,
-      "passes": true,
-      "dependsOn": ["US-048"]
+      "priority": 10,
+      "passes": false,
+      "dependsOn": ["US-063"]
     },
     {
-      "id": "US-050",
-      "title": "Dark Mode - CSS Variables",
-      "description": "Add dark mode CSS variables. Create :root (light) and [data-theme='dark'] (dark) variable sets. Dark: dark background, light text, adjusted colors for contrast. Keep same variable names.",
+      "id": "US-065",
+      "title": "Goal Categories with Color Coding",
+      "description": "Allow users to assign categories to goals (work, health, learning, personal, etc.). Each category has a color. Goals display category color as a side stripe or badge. Add category filter in View Goals screen. Category management in Settings.",
       "acceptanceCriteria": [
-        "Light mode variables in :root",
-        "Dark mode in [data-theme='dark']",
-        "Background, text, accent colors",
-        "Card and border colors",
-        "Smooth transition"
+        "Predefined categories with colors (work=blue, health=green, learning=purple, personal=orange)",
+        "Custom category creation with color picker",
+        "Category selector in goal form",
+        "Visual category indicator on goal cards",
+        "Filter goals by category in View Goals",
+        "Category management in Settings screen"
       ],
-      "priority": 6,
-      "passes": true,
-      "dependsOn": ["US-005"]
+      "priority": 11,
+      "passes": false,
+      "dependsOn": ["US-058"]
     },
     {
-      "id": "US-051",
-      "title": "Dark Mode - Toggle",
-      "description": "Add dark mode toggle. Store preference in settings. On load: check system preference (prefers-color-scheme), then user preference. Add toggle in settings screen. Apply by setting data-theme attribute on html.",
+      "id": "US-066",
+      "title": "Goal Templates",
+      "description": "Provide pre-made goal templates for common goals. Templates include: 30min reading, 10k steps, 8 glasses water, 1hr exercise, meditation, etc. Quick-add from template gallery. Users can save their own goals as templates.",
       "acceptanceCriteria": [
-        "Toggle button/switch",
-        "Preference stored",
-        "Respects system preference initially",
-        "User can override",
-        "Persists across sessions"
+        "Template gallery screen/modal accessible from Add Goal",
+        "At least 10 built-in templates across categories",
+        "One-tap to create goal from template",
+        "Save existing goal as template option",
+        "Delete custom templates",
+        "Templates include title, type, target, timeframe, category"
       ],
-      "priority": 6,
-      "passes": true,
-      "dependsOn": ["US-050"]
+      "priority": 12,
+      "passes": false,
+      "dependsOn": ["US-065"]
     },
     {
-      "id": "US-052",
-      "title": "Settings Screen",
-      "description": "Create Settings screen. Include: Back button, 'Settings' title, Sound toggle (on/off), Volume slider, Dark mode toggle, About section with version. Accessible from View Goals via gear icon.",
+      "id": "US-067",
+      "title": "Focus Mode",
+      "description": "Add Focus Mode that hides all goals except one selected goal. Helps users concentrate on a single task. Toggle from goal card or header. Shows timer prominently. Exit returns to normal view.",
       "acceptanceCriteria": [
-        "Settings screen layout",
-        "Sound on/off toggle",
-        "Volume slider (0-100)",
-        "Dark mode toggle",
-        "About section with version"
+        "Focus button on each goal card",
+        "Focus mode shows single goal prominently",
+        "Large timer/counter display in focus mode",
+        "Minimal UI distractions",
+        "Easy exit back to normal view",
+        "Optional: keyboard shortcut to toggle"
       ],
-      "priority": 6,
-      "passes": true,
-      "dependsOn": ["US-051", "US-037"]
+      "priority": 13,
+      "passes": false,
+      "dependsOn": ["US-056"]
     },
     {
-      "id": "US-053",
-      "title": "Browser Badge - Goal Count",
-      "description": "Show incomplete goals count on extension badge. Update badge when: goals change, goal completed, reset occurs. Use chrome.action.setBadgeText() and setBadgeBackgroundColor().",
+      "id": "US-068",
+      "title": "Quick Add Floating Button",
+      "description": "Add a floating action button (FAB) for quick goal creation. Available on View Goals screen. Opens a minimal quick-add form with just title and type. Full form accessible via 'More options' link.",
       "acceptanceCriteria": [
-        "Badge shows incomplete count",
-        "Updates on goal changes",
-        "Green background when all done",
-        "Red/orange when incomplete",
-        "Clears when no goals"
+        "Floating + button in bottom-right corner",
+        "Opens minimal quick-add form",
+        "Quick form: title, type selector, save button",
+        "More options link to full form",
+        "Smooth animation on open/close",
+        "Doesn't obstruct goal cards"
       ],
-      "priority": 6,
-      "passes": true,
-      "dependsOn": ["US-006", "US-019"]
+      "priority": 14,
+      "passes": false,
+      "dependsOn": ["US-058"]
     },
     {
-      "id": "US-054",
-      "title": "Extension Load Test",
-      "description": "Manually test extension loads in Chrome. Load unpacked extension, verify: popup opens, no console errors, storage works, all screens accessible. Fix any issues found.",
+      "id": "US-069",
+      "title": "Goal Archive System",
+      "description": "Allow users to archive goals instead of deleting. Archived goals hidden from main view but preserved. Archive screen to view/restore archived goals. Useful for seasonal or completed long-term goals.",
       "acceptanceCriteria": [
-        "Extension loads without errors",
-        "Popup displays correctly",
-        "All screens navigate properly",
-        "Storage read/write works",
-        "No console errors"
+        "Archive option in goal menu (alongside edit/delete)",
+        "Archived goals removed from View Goals",
+        "Archive screen accessible from Manage Goals",
+        "Restore archived goal to active",
+        "Permanently delete from archive",
+        "Archive preserves goal history/progress"
       ],
-      "priority": 1,
-      "passes": true,
-      "dependsOn": ["US-010"]
+      "priority": 15,
+      "passes": false,
+      "dependsOn": ["US-058"]
+    },
+    {
+      "id": "US-070",
+      "title": "Export/Import Data",
+      "description": "Allow users to export all data (goals, history, settings) as JSON file. Import to restore from backup or transfer to new device. Accessible from Settings screen.",
+      "acceptanceCriteria": [
+        "Export button in Settings",
+        "Downloads JSON file with all data",
+        "Import button in Settings",
+        "File picker for JSON import",
+        "Validation of import data",
+        "Merge or replace options on import",
+        "Success/error feedback"
+      ],
+      "priority": 16,
+      "passes": false,
+      "dependsOn": []
+    },
+    {
+      "id": "US-071",
+      "title": "Individual Goal Statistics",
+      "description": "Add detailed statistics view for each individual goal. Shows: completion rate over time, best streak, total time/count, average daily progress, chart of progress history. Accessible from goal card menu.",
+      "acceptanceCriteria": [
+        "Stats button/link on goal card",
+        "Goal stats screen/modal",
+        "Completion rate percentage",
+        "Best streak for this goal",
+        "Total accumulated (time/count)",
+        "Progress chart (last 30 days)",
+        "Comparison to average"
+      ],
+      "priority": 17,
+      "passes": false,
+      "dependsOn": []
+    },
+    {
+      "id": "US-072",
+      "title": "Weekly Review Screen",
+      "description": "Add a weekly review screen summarizing accomplishments. Shows: goals completed, total time tracked, streaks maintained, highlights and achievements. Accessible from Reports or as weekly prompt.",
+      "acceptanceCriteria": [
+        "Weekly Review screen in Reports section",
+        "Summary of week's completions",
+        "Total time tracked across all timers",
+        "Goals with best/worst completion rates",
+        "Achievements unlocked this week",
+        "Comparison to previous week",
+        "Optional: weekly notification prompt"
+      ],
+      "priority": 18,
+      "passes": false,
+      "dependsOn": []
+    },
+    {
+      "id": "US-073",
+      "title": "Custom Goal Colors",
+      "description": "Allow users to assign custom colors to individual goals (independent of category). Color picker in goal form. Goal card displays with chosen accent color. Helps visual organization.",
+      "acceptanceCriteria": [
+        "Color picker in goal form",
+        "Preset color palette (8-12 colors)",
+        "Custom hex color input option",
+        "Goal card shows color accent",
+        "Color persisted with goal",
+        "Works with both light and dark modes"
+      ],
+      "priority": 19,
+      "passes": false,
+      "dependsOn": ["US-058"]
+    },
+    {
+      "id": "US-074",
+      "title": "Goal Notes and Description",
+      "description": "Add optional notes/description field to goals. Useful for context, instructions, or motivation. Displayed on goal card (collapsed by default), expandable. Editable from goal form.",
+      "acceptanceCriteria": [
+        "Notes textarea in goal form",
+        "Notes displayed on goal card (truncated)",
+        "Expand to see full notes",
+        "Markdown support (basic: bold, links)",
+        "Notes searchable in future",
+        "Character limit (500 chars)"
+      ],
+      "priority": 20,
+      "passes": false,
+      "dependsOn": ["US-058"]
+    },
+    {
+      "id": "US-075",
+      "title": "Customizable Reset Times",
+      "description": "Allow users to customize when daily/weekly/monthly goals reset. Default midnight, but configurable. Useful for night owls or different time zones. Setting per goal or global default.",
+      "acceptanceCriteria": [
+        "Global reset time setting in Settings",
+        "Per-goal reset time override option",
+        "Time picker for reset time",
+        "Service worker respects custom times",
+        "Clear indication of next reset time",
+        "Handles timezone correctly"
+      ],
+      "priority": 21,
+      "passes": false,
+      "dependsOn": []
+    },
+    {
+      "id": "US-076",
+      "title": "Browser Notifications for Reminders",
+      "description": "Add optional browser notifications to remind users about goals. Configurable reminder times per goal or global schedule. Uses Chrome notifications API. Can be enabled/disabled in settings.",
+      "acceptanceCriteria": [
+        "Notification permission request",
+        "Global reminder schedule in Settings",
+        "Per-goal reminder time option",
+        "Notification shows goal title and progress",
+        "Click notification opens popup",
+        "Snooze/dismiss options",
+        "Respect quiet hours setting"
+      ],
+      "priority": 22,
+      "passes": false,
+      "dependsOn": []
+    },
+    {
+      "id": "US-077",
+      "title": "Motivational Quotes",
+      "description": "Display motivational quotes in the app. Show on: empty state, goal completion, weekly review. Curated collection of productivity/motivation quotes. Optional setting to disable.",
+      "acceptanceCriteria": [
+        "Collection of 50+ motivational quotes",
+        "Random quote on empty state",
+        "Quote shown on goal completion",
+        "Quote in weekly review",
+        "Toggle in Settings to disable",
+        "Quotes appropriate for productivity context"
+      ],
+      "priority": 23,
+      "passes": false,
+      "dependsOn": []
+    },
+    {
+      "id": "US-078",
+      "title": "Keyboard Shortcuts",
+      "description": "Add keyboard shortcuts for common actions. Space to start/stop timer, +/- for counters, N for new goal, arrow keys to navigate goals. Help overlay shows available shortcuts.",
+      "acceptanceCriteria": [
+        "Space: toggle active timer or checkbox",
+        "+/-: increment/decrement selected counter",
+        "N: open new goal form",
+        "E: edit selected goal",
+        "Arrow keys: navigate between goals",
+        "?: show keyboard shortcuts help",
+        "Escape: close modals/screens",
+        "Shortcuts work when popup is focused"
+      ],
+      "priority": 24,
+      "passes": false,
+      "dependsOn": []
+    },
+    {
+      "id": "US-079",
+      "title": "Undo/Redo Actions",
+      "description": "Add undo/redo functionality for goal actions. Useful for accidental counter changes or timer stops. Toast notification with Undo button after actions. Redo available via Ctrl+Y or button.",
+      "acceptanceCriteria": [
+        "Undo toast appears after actions",
+        "Undo reverts: increment, decrement, toggle, timer start/stop",
+        "5-second window to undo",
+        "Ctrl+Z triggers undo",
+        "Redo available after undo",
+        "Undo stack (last 5 actions)",
+        "Clear visual feedback"
+      ],
+      "priority": 25,
+      "passes": false,
+      "dependsOn": []
+    },
+    {
+      "id": "US-080",
+      "title": "Achievements and Badges System",
+      "description": "Implement a gamification system with achievements and badges. Users unlock badges for milestones: first goal, 7-day streak, 30-day streak, 100 goals completed, etc. Display badges in profile/achievements screen. Show unlock animation.",
+      "acceptanceCriteria": [
+        "At least 20 different achievements",
+        "Categories: streaks, completions, milestones, special",
+        "Achievements screen to view all (locked and unlocked)",
+        "Unlock animation/notification when earned",
+        "Badge icons for each achievement",
+        "Progress indicator for partially complete achievements",
+        "Share achievement option"
+      ],
+      "priority": 26,
+      "passes": false,
+      "dependsOn": []
+    },
+    {
+      "id": "US-081",
+      "title": "Daily Challenges",
+      "description": "Add optional daily challenges for extra motivation. System generates random challenges: complete all goals before noon, maintain 2hr focus session, etc. Bonus XP/recognition for completing challenges.",
+      "acceptanceCriteria": [
+        "Daily challenge displayed on View Goals screen",
+        "Challenge pool of 20+ different challenges",
+        "Challenge difficulty varies (easy, medium, hard)",
+        "Completion tracking and reward",
+        "Skip/refresh challenge option (limited)",
+        "Challenge history in Reports",
+        "Toggle to disable in Settings"
+      ],
+      "priority": 27,
+      "passes": false,
+      "dependsOn": ["US-080"]
+    },
+    {
+      "id": "US-082",
+      "title": "Share Progress as Image",
+      "description": "Allow users to export their progress as a beautiful shareable image. Generate card showing: goals completed, streak, discipline score. Styled for social media sharing. Copy to clipboard or download.",
+      "acceptanceCriteria": [
+        "Share button in Reports screen",
+        "Generate image with progress stats",
+        "Multiple card templates/styles",
+        "Include app branding subtly",
+        "Copy image to clipboard",
+        "Download as PNG option",
+        "Works with current theme (light/dark)"
+      ],
+      "priority": 28,
+      "passes": false,
+      "dependsOn": []
+    },
+    {
+      "id": "US-083",
+      "title": "Level and XP System",
+      "description": "Add experience points (XP) and leveling system. Earn XP for completing goals, maintaining streaks, achievements. Level up with milestones. Display level badge prominently. Unlock features or themes at higher levels.",
+      "acceptanceCriteria": [
+        "XP earned for goal completions",
+        "Bonus XP for streaks and achievements",
+        "Level calculation formula (progressive)",
+        "Level displayed in header/profile",
+        "Level-up celebration animation",
+        "XP history and breakdown",
+        "Optional: unlock themes/features at levels"
+      ],
+      "priority": 29,
+      "passes": false,
+      "dependsOn": ["US-080"]
+    },
+    {
+      "id": "US-084",
+      "title": "Habit Chains - Linked Goals",
+      "description": "Allow users to link goals in chains. Completing goal A enables/unlocks goal B. Useful for routines: wake up -> exercise -> meditate. Visual chain display. Chain completion bonus.",
+      "acceptanceCriteria": [
+        "Link goals in sequence in goal form",
+        "Locked goal visual state",
+        "Goal unlocks when predecessor completes",
+        "Chain visualization in View Goals",
+        "Chain completion celebration",
+        "Break chain to edit individual goals",
+        "Optional time delays between chain links"
+      ],
+      "priority": 30,
+      "passes": false,
+      "dependsOn": ["US-058"]
+    },
+    {
+      "id": "US-085",
+      "title": "Pomodoro Timer Mode",
+      "description": "Add built-in Pomodoro technique support for timer goals. 25min work + 5min break cycles. Visual indicator of current phase. Auto-transition between work and break. Configurable durations.",
+      "acceptanceCriteria": [
+        "Pomodoro mode toggle for timer goals",
+        "Default 25min work / 5min break / 15min long break",
+        "Customizable durations in Settings",
+        "Visual phase indicator (work/break)",
+        "Auto-start break after work (optional)",
+        "Pomodoro count tracking",
+        "Sound notification on phase change"
+      ],
+      "priority": 31,
+      "passes": false,
+      "dependsOn": []
+    },
+    {
+      "id": "US-086",
+      "title": "Break Reminders",
+      "description": "Add break reminders for long timer sessions. Configurable interval (e.g., every 45min). Gentle notification to stretch, rest eyes, hydrate. Can be snoozed or disabled per session.",
+      "acceptanceCriteria": [
+        "Break reminder interval setting (default 45min)",
+        "Notification/overlay when break due",
+        "Suggested break activities (stretch, water, eyes)",
+        "Snooze option (5/10/15 min)",
+        "Skip break option",
+        "Break taken logging",
+        "Disable per-session or globally"
+      ],
+      "priority": 32,
+      "passes": false,
+      "dependsOn": ["US-076"]
+    },
+    {
+      "id": "US-087",
+      "title": "Negative/Avoidance Goals",
+      "description": "Add support for negative goals - things to avoid. Track days without doing something (no social media, no junk food). Counter increases automatically each day. Resets on slip-up with forgiveness option.",
+      "acceptanceCriteria": [
+        "New goal type: Avoidance",
+        "Auto-increment daily streak",
+        "Manual reset on slip-up",
+        "Forgiveness mode (1 slip allowed per week)",
+        "Different visual styling for avoidance goals",
+        "Streak milestone celebrations",
+        "Statistics for longest avoidance streak"
+      ],
+      "priority": 33,
+      "passes": false,
+      "dependsOn": ["US-058"]
+    },
+    {
+      "id": "US-088",
+      "title": "Productivity Insights",
+      "description": "Analyze user patterns and provide actionable insights. Identify: most productive hours, best days, goal correlations. Display insights in Reports with recommendations.",
+      "acceptanceCriteria": [
+        "Insights section in Reports",
+        "Most productive time of day analysis",
+        "Best performing day of week",
+        "Goal completion patterns",
+        "Personalized recommendations",
+        "Trend analysis (improving/declining)",
+        "Insight refresh weekly"
+      ],
+      "priority": 34,
+      "passes": false,
+      "dependsOn": ["US-072"]
+    },
+    {
+      "id": "US-089",
+      "title": "Goal Correlation Analysis",
+      "description": "Analyze which goals are often completed together. Show correlations in Reports. Help users understand habit stacking. Suggest goal pairings based on data.",
+      "acceptanceCriteria": [
+        "Correlation matrix/visualization",
+        "Identify positively correlated goals",
+        "Identify negatively correlated goals",
+        "Suggest habit stacking opportunities",
+        "Minimum data threshold for accuracy",
+        "Update weekly with new data"
+      ],
+      "priority": 35,
+      "passes": false,
+      "dependsOn": ["US-088"]
+    },
+    {
+      "id": "US-090",
+      "title": "Monthly and Yearly Reports",
+      "description": "Extend Reports with monthly and yearly summaries. Show long-term trends, total accomplishments, year-over-year comparison. Exportable annual review.",
+      "acceptanceCriteria": [
+        "Monthly summary tab in Reports",
+        "Yearly summary tab in Reports",
+        "Total goals completed in period",
+        "Average daily completion rate",
+        "Best and worst months comparison",
+        "Year-over-year growth metrics",
+        "Export report as PDF/image"
+      ],
+      "priority": 36,
+      "passes": false,
+      "dependsOn": ["US-072"]
+    },
+    {
+      "id": "US-091",
+      "title": "Streak Milestone Celebrations",
+      "description": "Add special celebrations for streak milestones. Celebrate at 7, 14, 30, 60, 100, 365 days. Unique animations, badges, and messages for each milestone. Share milestone achievement.",
+      "acceptanceCriteria": [
+        "Milestone detection (7, 14, 30, 60, 100, 200, 365 days)",
+        "Unique celebration animation per milestone",
+        "Milestone badge unlocked",
+        "Congratulatory message",
+        "Share milestone option",
+        "Milestone history in achievements",
+        "Sound effect for milestones"
+      ],
+      "priority": 37,
+      "passes": false,
+      "dependsOn": ["US-080", "US-064"]
+    },
+    {
+      "id": "US-092",
+      "title": "Multiple Color Themes",
+      "description": "Add multiple color themes beyond light/dark. Include: Ocean, Forest, Sunset, Midnight, Rose, Lavender. Theme selector in Settings with preview. Themes affect all UI colors.",
+      "acceptanceCriteria": [
+        "At least 6 additional themes",
+        "Theme preview in Settings",
+        "Smooth theme transition",
+        "Themes work with all components",
+        "Theme preference persisted",
+        "Optional: unlock themes via levels",
+        "Custom theme creator (advanced)"
+      ],
+      "priority": 38,
+      "passes": false,
+      "dependsOn": []
+    },
+    {
+      "id": "US-093",
+      "title": "Custom Sound Packs",
+      "description": "Add multiple sound effect packs. Include: Default, Minimal, Retro, Nature, Sci-Fi. Sound pack selector in Settings with preview. Each pack has complete set of sounds.",
+      "acceptanceCriteria": [
+        "At least 4 sound packs",
+        "Sound pack preview in Settings",
+        "Complete sound set per pack",
+        "Pack preference persisted",
+        "Individual sound customization option",
+        "Volume per sound type",
+        "Mute individual sounds"
+      ],
+      "priority": 39,
+      "passes": false,
+      "dependsOn": []
+    },
+    {
+      "id": "US-094",
+      "title": "Mini Widget Mode",
+      "description": "Add ultra-compact mini mode for quick goal updates. Shows only active goals with minimal controls. Toggle from header. Useful for frequent check-ins without full UI.",
+      "acceptanceCriteria": [
+        "Mini mode toggle in header",
+        "Compact single-line goal display",
+        "Essential controls only (play/pause, +/-)",
+        "Fits more goals on screen",
+        "Quick expand to full view",
+        "Remember mini mode preference",
+        "Keyboard shortcut to toggle"
+      ],
+      "priority": 40,
+      "passes": false,
+      "dependsOn": ["US-056"]
+    },
+    {
+      "id": "US-095",
+      "title": "Onboarding Tutorial",
+      "description": "Add first-time user onboarding flow. Guide through: creating first goal, understanding goal types, using timer/counter, viewing reports. Skip option for experienced users.",
+      "acceptanceCriteria": [
+        "Detect first-time user",
+        "Step-by-step tutorial overlay",
+        "Highlight UI elements being explained",
+        "Create sample goal during tutorial",
+        "Skip tutorial option",
+        "Restart tutorial from Settings",
+        "Tutorial completion tracking"
+      ],
+      "priority": 41,
+      "passes": false,
+      "dependsOn": []
+    },
+    {
+      "id": "US-096",
+      "title": "High Contrast Mode",
+      "description": "Add high contrast mode for visually impaired users. Increased contrast ratios, bolder borders, larger touch targets. Toggle in Settings under Accessibility.",
+      "acceptanceCriteria": [
+        "High contrast color scheme",
+        "Meets WCAG AAA contrast ratios",
+        "Bolder borders and outlines",
+        "Larger touch targets",
+        "Toggle in Accessibility settings",
+        "Works with all themes",
+        "Focus indicators enhanced"
+      ],
+      "priority": 42,
+      "passes": false,
+      "dependsOn": []
+    },
+    {
+      "id": "US-097",
+      "title": "Adjustable Font Sizes",
+      "description": "Allow users to adjust text size globally. Options: Small, Medium (default), Large, Extra Large. Affects all text in the app. Setting in Accessibility.",
+      "acceptanceCriteria": [
+        "Four font size options",
+        "Proportional scaling of all text",
+        "Layout adapts to larger text",
+        "Setting persisted",
+        "Preview in Settings",
+        "No text truncation at large sizes",
+        "Icons scale proportionally"
+      ],
+      "priority": 43,
+      "passes": false,
+      "dependsOn": []
+    },
+    {
+      "id": "US-098",
+      "title": "Reduced Motion Mode",
+      "description": "Add reduced motion option for motion-sensitive users. Disables: confetti, transitions, hover animations. Respects prefers-reduced-motion system setting. Toggle in Accessibility.",
+      "acceptanceCriteria": [
+        "Reduced motion toggle in Settings",
+        "Respects system prefers-reduced-motion",
+        "Disables confetti animations",
+        "Disables transition animations",
+        "Disables hover effects",
+        "Instant state changes instead",
+        "Essential feedback preserved (color changes)"
+      ],
+      "priority": 44,
+      "passes": false,
+      "dependsOn": []
+    },
+    {
+      "id": "US-099",
+      "title": "Screen Reader Improvements",
+      "description": "Enhance accessibility for screen reader users. Add comprehensive ARIA labels, roles, and live regions. Announce goal completions, timer updates. Test with popular screen readers.",
+      "acceptanceCriteria": [
+        "ARIA labels on all interactive elements",
+        "ARIA roles properly assigned",
+        "Live regions for dynamic updates",
+        "Goal completion announcements",
+        "Timer progress announcements (configurable)",
+        "Logical focus order",
+        "Skip navigation links"
+      ],
+      "priority": 45,
+      "passes": false,
+      "dependsOn": []
     }
   ]
 }
