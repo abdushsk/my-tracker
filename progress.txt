@@ -89,3 +89,55 @@ Added a compact view mode toggle for the Daily Goals screen. Users can switch be
 - View preference saved to settings
 - Smooth transition between views
 - Both views remain functional for all goal types
+
+---
+
+## US-057: Dynamic Goal Form Fields Based on Type
+**Date**: 2026-01-22
+**Status**: Completed (Already Implemented)
+
+### What was done:
+Verified that the dynamic goal form fields feature was already implemented in the codebase. The Add/Edit goal form shows only relevant fields based on the selected goal type.
+
+### Implementation details (pre-existing):
+
+1. **HTML Structure** (`src/popup/popup.html`):
+   - `#timer-target-group` (lines 118-153): Contains hours/minutes inputs for timer goals
+   - `#counter-target-group` (lines 156-170): Contains target count input for counter goals
+   - Both groups have the `target-input-group` class for shared styling
+   - Counter group starts with `hidden` class (timer is default type)
+
+2. **JavaScript Logic** (`src/popup/popup.js`):
+   - `updateTargetInputVisibility(type)` (lines 1914-1937): Toggles visibility based on type
+   - `setFormType(type)` (lines 1871-1897): Sets form type and calls updateTargetInputVisibility
+   - `handleTypeSelection(type)` (lines 1903-1906): Handles type button clicks
+   - `handleGoalFormSubmit()` (lines 1605-1724): Validates only relevant fields based on type
+   - `openGoalModal('edit', goal)` (lines 1458-1521): Pre-fills form and shows correct fields in edit mode
+
+3. **CSS Styles** (`src/popup/popup.css`):
+   - `.target-input-group` (lines 3108-3111): Base styles with smooth transitions
+   - `.target-input-group.hidden` (lines 3114-3119): Hidden state with opacity: 0, max-height: 0
+   - Transition: `opacity 200ms ease, max-height 200ms ease, margin 200ms ease`
+
+### How it works:
+- **Timer type**: Shows `#timer-target-group` (hours/minutes inputs), hides `#counter-target-group`
+- **Counter type**: Shows `#counter-target-group` (target count input), hides `#timer-target-group`
+- **Checkbox type**: Hides both target groups (target is always 1)
+
+### Files involved:
+- `src/popup/popup.html` (lines 118-170)
+- `src/popup/popup.js` (lines 1605-1937)
+- `src/popup/popup.css` (lines 3108-3119)
+
+### Key learnings:
+- The feature was implemented as part of earlier user stories (US-025, US-026)
+- Good practice to check if functionality already exists before implementing
+- The hidden class approach with CSS transitions provides smooth animations
+
+### Acceptance criteria met:
+- Timer selected: show hours/minutes inputs only
+- Counter selected: show target count input only
+- Checkbox selected: hide all target inputs
+- Fields animate in/out smoothly (200ms CSS transitions)
+- Form validates only visible fields (conditional validation in handleGoalFormSubmit)
+- Edit mode pre-selects type and shows correct fields (setFormType called in openGoalModal)
