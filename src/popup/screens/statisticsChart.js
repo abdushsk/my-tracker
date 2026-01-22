@@ -102,10 +102,13 @@ export function renderGoal30DayChart(goalHistory, goal) {
     `;
   }).join('');
 
-  // Render labels (show every 5th day and today)
+  // Render labels (show start, end, and every 5th date in between)
   labelsContainer.innerHTML = chartData.map((day, index) => {
-    // Show label for: first day, every 7th day, and today
-    const showLabel = index === 0 || (index + 1) % 7 === 0 || day.isToday;
+    // Show label for: starting date (0), ending date (29), and every 5th date (5, 10, 15, 20, 25)
+    const isStartDate = index === 0;
+    const isEndDate = index === 29;
+    const isEveryFifth = index > 0 && index < 29 && index % 5 === 0;
+    const showLabel = isStartDate || isEndDate || isEveryFifth;
 
     return `<span class="progress-chart-label ${showLabel ? '' : 'hidden'} ${day.isToday ? 'label-today' : ''}">${day.dayOfMonth}</span>`;
   }).join('');

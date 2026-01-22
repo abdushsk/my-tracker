@@ -663,3 +663,21 @@
 - Using `--accent` colors instead of `--success` ensures consistency with theme selection
 - Hover/active feedback (scale, background) makes the checkbox feel interactive and responsive
 
+## US-017: Refine Last 30 Days Stats Chart (Completed)
+**Date**: 2026-01-23
+
+### Changes Made
+
+1. **Updated x-axis label display logic** (statisticsChart.js:105-114):
+   - Changed from showing "first day, every 7th day, and today" to "starting date, ending date, and every 5th date in between"
+   - Previous logic: `index === 0 || (index + 1) % 7 === 0 || day.isToday`
+   - New logic: `isStartDate (index 0) || isEndDate (index 29) || isEveryFifth (indices 5, 10, 15, 20, 25)`
+   - This shows labels at indices: 0, 5, 10, 15, 20, 25, 29 (7 labels total)
+   - Previous logic showed labels at indices: 0, 6, 13, 20, 27, 29 (6 labels for today's position)
+
+### Key Learnings
+- For a 30-day chart (indices 0-29), showing labels at fixed intervals (every 5th) provides more consistent spacing
+- The ending date (index 29) is always "today" in this chart, so the `isToday` check becomes redundant with `isEndDate`
+- Using explicit boolean variables (`isStartDate`, `isEndDate`, `isEveryFifth`) makes the label display logic more readable and maintainable
+- The label count changed from variable (depending on which day "today" falls on) to consistent (always 7 labels)
+

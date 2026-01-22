@@ -121,7 +121,7 @@
       "title": "Refine last 30 days stats chart",
       "description": "Enhance the readability of the last 30 days stats chart by adjusting the x-axis labels. Display only the starting date, ending date, and every 5th date in between to reduce clutter and improve clarity.",
       "priority": 17,
-      "passes": false
+      "passes": true
     },
     {
       "id": "US-018",
