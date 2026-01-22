@@ -81,7 +81,7 @@
         "Works in both expanded and compact views"
       ],
       "priority": 5,
-      "passes": false,
+      "passes": true,
       "dependsOn": ["US-056"]
     },
     {

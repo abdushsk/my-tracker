@@ -2702,6 +2702,117 @@ select:focus {
 }
 
 /* ========================================
+   US-059: Drag-to-Reorder Daily Goals
+   ======================================== */
+
+/* Drag handle - grip icon */
+.drag-handle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 24px;
+  margin-right: var(--spacing-xs);
+  color: var(--text-muted);
+  cursor: grab;
+  opacity: 0.5;
+  transition: opacity var(--transition), color var(--transition);
+  flex-shrink: 0;
+}
+
+.drag-handle:hover {
+  opacity: 1;
+  color: var(--text-secondary);
+}
+
+.drag-handle:active {
+  cursor: grabbing;
+}
+
+.drag-handle svg {
+  width: 14px;
+  height: 14px;
+}
+
+/* Compact mode drag handle - smaller */
+.goal-card.compact .drag-handle {
+  width: 16px;
+  height: 20px;
+  margin-right: var(--spacing-xs);
+}
+
+.goal-card.compact .drag-handle svg {
+  width: 12px;
+  height: 12px;
+}
+
+/* Goal card dragging state */
+.goal-card.dragging {
+  opacity: 0.5;
+  transform: scale(0.98);
+  box-shadow: none;
+}
+
+/* Goal card being dragged over */
+.goal-card.drag-over {
+  border-color: var(--primary);
+}
+
+/* Visual indicator for drop position - top */
+.goal-card.drag-over-top {
+  position: relative;
+}
+
+.goal-card.drag-over-top::before {
+  content: '';
+  position: absolute;
+  top: -6px;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background-color: var(--primary);
+  border-radius: var(--radius-full);
+  z-index: 10;
+}
+
+/* Visual indicator for drop position - bottom */
+.goal-card.drag-over-bottom {
+  position: relative;
+}
+
+.goal-card.drag-over-bottom::after {
+  content: '';
+  position: absolute;
+  bottom: -6px;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background-color: var(--primary);
+  border-radius: var(--radius-full);
+  z-index: 10;
+}
+
+/* Drag placeholder - shows where item will be dropped */
+.drag-placeholder {
+  background-color: var(--primary-light);
+  border: 2px dashed var(--primary);
+  border-radius: var(--radius);
+  margin: var(--spacing-sm) 0;
+  transition: height var(--transition-fast);
+}
+
+/* Goals list styling during drag */
+.goals-list {
+  position: relative;
+}
+
+/* Prevent text selection during drag */
+.goal-card[draggable="true"] {
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+/* ========================================
    US-022: Add Goal Form - Modal
    ======================================== */
 

@@ -210,3 +210,68 @@ Replaced the modal/popup for Add/Edit goal with a dedicated full-page screen. Th
 - Save/Cancel buttons at bottom
 - Back navigation returns to Manage Goals
 - Old modal code removed from HTML
+
+---
+
+## US-059: Drag-to-Reorder Daily Goals
+**Date**: 2026-01-22
+**Status**: Completed
+
+### What was done:
+Implemented drag-to-reorder functionality for goals in the Daily Goals screen using the HTML5 Drag and Drop API. Users can now drag goals by their grip handle to reorder them, with visual feedback during the drag operation.
+
+### Implementation details:
+
+1. **Drag Handle Added to Goal Cards** (`src/popup/popup.js`):
+   - Added `draggable="true"` attribute to goal cards
+   - Added a grip icon (6-dot pattern) as a drag handle before the title row
+   - Handle is visible on all goal cards and styled for both expanded and compact views
+
+2. **Drag and Drop Event Handlers** (`src/popup/popup.js` lines 1043-1280):
+   - `attachDragDropListeners()` - Attaches all drag/drop event listeners to goal cards
+   - `handleDragStart()` - Initiates drag, stores dragged goal ID, adds visual feedback
+   - `handleDragEnd()` - Cleans up drag state and removes visual classes
+   - `handleDragOver()` - Determines if dropping above or below target card
+   - `handleDragEnter()` - Adds drag-over visual feedback
+   - `handleDragLeave()` - Removes drag-over feedback when leaving card
+   - `handleDrop()` - Processes the drop and triggers reorder
+   - `handleGoalsListDragOver/Drop()` - Handles drops at the end of the list
+
+3. **Reorder Logic** (`src/popup/popup.js` lines 1244-1280):
+   - `reorderGoals(draggedId, targetId, dropAbove)` - Core reordering function
+   - Removes dragged goal from array, inserts at new position
+   - Updates `order` property for all goals (sequential index)
+   - Persists to storage via `saveGoals()`
+   - Re-renders the screen to reflect new order
+
+4. **CSS Styles** (`src/popup/popup.css` lines 2704-2813):
+   - `.drag-handle` - Grip icon styling with hover effects
+   - `.goal-card.dragging` - Semi-transparent, scaled-down state
+   - `.drag-over-top/.drag-over-bottom` - Drop position indicators (colored bars)
+   - `.drag-placeholder` - Dashed border placeholder element
+   - Compact mode adjustments for smaller drag handle
+
+### Key design decisions:
+- Drag handle positioned at the start of the card header for easy access
+- Visual feedback uses border indicators above/below target cards
+- The entire card is draggable, but the handle provides a clear affordance
+- Order is persisted immediately on drop (no undo for now)
+- Works seamlessly in both expanded and compact view modes
+
+### Files modified:
+- `src/popup/popup.js` (lines 421-432, 1039-1280)
+- `src/popup/popup.css` (lines 2704-2813)
+
+### Key learnings:
+- HTML5 DnD requires careful handling of dragover/dragleave for child elements
+- Using `closest()` helps handle events bubbling from child elements
+- Updating order property for all goals ensures consistent sorting
+- The existing `order` property in the Goal model was already designed for this feature
+
+### Acceptance criteria met:
+- Drag handle visible on goal cards (6-dot grip icon)
+- Drag and drop works smoothly (HTML5 DnD API)
+- Visual feedback (ghost, placeholder) during drag (opacity, drop indicators)
+- Order persisted to storage (saveGoals called after reorder)
+- Order maintained after refresh (goals sorted by order property)
+- Works in both expanded and compact views (responsive CSS styles)
