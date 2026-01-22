@@ -500,3 +500,44 @@ Fixed the alignment issues in the Daily Goals screen header stats group (complet
 - Responsive on different content lengths (flex-shrink: 0 prevents shrinking)
 - Matches overall design system (uses CSS variables, follows spacing patterns)
 
+---
+
+## US-063: Fix Completion Checkmark Overlay Position
+**Date**: 2026-01-22
+**Status**: Completed
+
+### What was done:
+Fixed the completion checkmark overlay position so it no longer obscures the goal card content. The checkmark was repositioned from the top-right corner to the bottom-right corner of the goal card.
+
+### Implementation details:
+
+1. **Main Completed Indicator** (`src/popup/popup.css` lines 2323-2339):
+   - Changed `top: var(--spacing-sm)` to `bottom: var(--spacing-sm)`
+   - Added `z-index: 2` to ensure it stays above other card elements
+   - Added comment documenting the US-063 change
+
+2. **Compact View Indicator** (`src/popup/popup.css` lines 2703-2710):
+   - Changed `top: var(--spacing-xs)` to `bottom: var(--spacing-xs)`
+   - Updated comment to document the change
+
+### Files modified:
+- `src/popup/popup.css` (lines 2323-2339, 2703-2710)
+
+### Key design decisions:
+- Bottom-right positioning was chosen because:
+  - The top-right area contains the timeframe badge which was being covered
+  - The title and type indicator are in the top-left area
+  - Controls are centered in the card body
+  - Bottom-right provides a clear, unobstructed location
+- The checkmark maintains its green success color and circular badge design
+- Animation remains intact (completion-badge-appear keyframes)
+- Both expanded and compact views use consistent bottom-right positioning
+
+### Acceptance criteria met:
+- Checkmark doesn't cover goal title (moved to bottom corner)
+- Checkmark doesn't cover progress info (positioned in bottom-right, away from progress bar)
+- Checkmark doesn't cover controls (controls are centered, checkmark is in corner)
+- Clear visual indication of completion (green badge with white checkmark, same visibility)
+- Works for all goal types (CSS applies to all .goal-completed-indicator elements)
+- Works in both view modes (updated both expanded and compact view styles)
+

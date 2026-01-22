@@ -2321,9 +2321,10 @@ select:focus {
 }
 
 /* Completed Indicator - Enhanced with animation */
+/* US-063: Repositioned to bottom-right to not obscure header content */
 .goal-completed-indicator {
   position: absolute;
-  top: var(--spacing-sm);
+  bottom: var(--spacing-sm);
   right: var(--spacing-sm);
   display: flex;
   align-items: center;
@@ -2334,6 +2335,7 @@ select:focus {
   border-radius: var(--radius-full);
   box-shadow: 0 2px 8px rgba(76, 175, 80, 0.4);
   animation: completion-badge-appear 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+  z-index: 2;
 }
 
 @keyframes completion-badge-appear {
@@ -2699,10 +2701,11 @@ select:focus {
 }
 
 /* Compact completed indicator - smaller and adjusted position */
+/* US-063: Using bottom position to match expanded view */
 .goal-card.compact .goal-completed-indicator {
   width: 20px;
   height: 20px;
-  top: var(--spacing-xs);
+  bottom: var(--spacing-xs);
   right: var(--spacing-xs);
 }
 

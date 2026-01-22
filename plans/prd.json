@@ -148,7 +148,7 @@
         "Works in both view modes"
       ],
       "priority": 9,
-      "passes": false,
+      "passes": true,
       "dependsOn": ["US-056"]
     },
     {
