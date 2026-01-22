@@ -178,6 +178,12 @@
   --heatmap-level-3: #34D399;
   --heatmap-level-4: #10B981;
 
+  /* Chart bar colors - US-008: Theme-aware weekly overview bars */
+  --chart-bar-excellent: var(--accent);
+  --chart-bar-good: var(--accent-hover);
+  --chart-bar-moderate: var(--accent-active);
+  --chart-bar-low: var(--border);
+
   /* Shadows */
   --shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.03);
   --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.04);
@@ -292,6 +298,12 @@
   --heatmap-level-2: #059669;
   --heatmap-level-3: #10B981;
   --heatmap-level-4: #34D399;
+
+  /* Chart bar colors - US-008: Theme-aware weekly overview bars (dark mode) */
+  --chart-bar-excellent: var(--accent);
+  --chart-bar-good: var(--accent-hover);
+  --chart-bar-moderate: var(--accent-active);
+  --chart-bar-low: var(--border);
 
   /* Shadows */
   --shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.2);
@@ -5678,22 +5690,22 @@ body.modal-open {
   position: relative;
 }
 
-/* Bar color classes - matching discipline score colors */
+/* Bar color classes - US-008: Theme-aware chart bars */
 .chart-bar-empty {
-  background-color: var(--border);
+  background-color: var(--chart-bar-low);
   min-height: 4px;
 }
 
 .chart-bar-excellent {
-  background-color: var(--success);
+  background-color: var(--chart-bar-excellent);
 }
 
 .chart-bar-moderate {
-  background-color: var(--warning);
+  background-color: var(--chart-bar-good);
 }
 
 .chart-bar-low {
-  background-color: var(--danger);
+  background-color: var(--chart-bar-moderate);
 }
 
 /* Hover effect for bars */
@@ -7593,21 +7605,21 @@ body.modal-open {
   color: var(--text-secondary);
 }
 
-/* Completion rate color coding */
+/* Completion rate color coding - US-008: Theme-aware colors */
 .goal-stat-value.rate-excellent {
-  color: var(--success);
+  color: var(--chart-bar-excellent);
 }
 
 .goal-stat-value.rate-good {
-  color: var(--secondary);
+  color: var(--chart-bar-good);
 }
 
 .goal-stat-value.rate-moderate {
-  color: var(--warning);
+  color: var(--chart-bar-moderate);
 }
 
 .goal-stat-value.rate-low {
-  color: var(--danger);
+  color: var(--text-muted);
 }
 
 /* Comparison Card */
@@ -7996,20 +8008,21 @@ body.modal-open {
   color: var(--text-secondary);
 }
 
+/* US-008: Theme-aware completion rate colors */
 .completions-rate.rate-excellent {
-  color: var(--success);
+  color: var(--chart-bar-excellent);
 }
 
 .completions-rate.rate-good {
-  color: var(--primary);
+  color: var(--chart-bar-good);
 }
 
 .completions-rate.rate-moderate {
-  color: var(--warning);
+  color: var(--chart-bar-moderate);
 }
 
 .completions-rate.rate-low {
-  color: var(--danger);
+  color: var(--text-muted);
 }
 
 /* Time Card */
@@ -8219,20 +8232,21 @@ body.modal-open {
   transition: height var(--transition-normal);
 }
 
+/* US-008: Theme-aware breakdown bars */
 .breakdown-bar.bar-excellent {
-  background: linear-gradient(to top, var(--success), var(--success-light));
+  background: linear-gradient(to top, var(--chart-bar-excellent), var(--accent-subtle));
 }
 
 .breakdown-bar.bar-good {
-  background: linear-gradient(to top, var(--primary), var(--primary-light));
+  background: linear-gradient(to top, var(--chart-bar-good), var(--accent-subtle));
 }
 
 .breakdown-bar.bar-low {
-  background: linear-gradient(to top, var(--warning), var(--warning-light));
+  background: linear-gradient(to top, var(--chart-bar-moderate), var(--accent-subtle));
 }
 
 .breakdown-bar.bar-empty {
-  background-color: var(--border);
+  background-color: var(--chart-bar-low);
   min-height: 2px;
 }
 
@@ -8275,12 +8289,13 @@ body.modal-open {
   font-weight: var(--font-weight-semibold);
 }
 
+/* US-008: Theme-aware comparison colors */
 .comparison-diff.improved {
-  color: var(--success);
+  color: var(--chart-bar-excellent);
 }
 
 .comparison-diff.declined {
-  color: var(--danger);
+  color: var(--chart-bar-moderate);
 }
 
 .comparison-diff.same {

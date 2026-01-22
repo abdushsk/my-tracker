@@ -256,3 +256,48 @@
 - Confetti animations should be less intense for small toast notifications to avoid visual overload
 - 3 seconds is a good duration for achievement toasts - long enough to read, short enough not to be annoying
 
+## US-008: Weekly Overview Bars Color (Completed)
+**Date**: 2026-01-23
+
+### Changes Made
+
+1. **Added new chart bar CSS variables** (popup.css:181-185, 302-306):
+   - Created `--chart-bar-excellent`, `--chart-bar-good`, `--chart-bar-moderate`, `--chart-bar-low` variables
+   - Light mode: Uses accent color progression (accent → accent-hover → accent-active → border)
+   - Dark mode: Same pattern for consistency across themes
+   - All chart bars now adapt to the selected color theme
+
+2. **Updated Weekly Chart bar colors** (popup.css:5693-5709):
+   - `.chart-bar-empty`: Changed from `var(--border)` to `var(--chart-bar-low)`
+   - `.chart-bar-excellent`: Changed from `var(--success)` to `var(--chart-bar-excellent)`
+   - `.chart-bar-moderate`: Changed from `var(--warning)` to `var(--chart-bar-good)`
+   - `.chart-bar-low`: Changed from `var(--danger)` to `var(--chart-bar-moderate)`
+
+3. **Updated Daily Breakdown bar gradients** (popup.css:8234-8248):
+   - `.breakdown-bar.bar-excellent`: Uses gradient with `var(--chart-bar-excellent)` and `var(--accent-subtle)`
+   - `.breakdown-bar.bar-good`: Uses gradient with `var(--chart-bar-good)` and `var(--accent-subtle)`
+   - `.breakdown-bar.bar-low`: Uses gradient with `var(--chart-bar-moderate)` and `var(--accent-subtle)`
+   - `.breakdown-bar.bar-empty`: Uses `var(--chart-bar-low)`
+
+4. **Updated completion rate text colors** (popup.css:7608-7623, 8011-8026):
+   - `.goal-stat-value.rate-*` classes now use `--chart-bar-*` variables
+   - `.completions-rate.rate-*` classes now use `--chart-bar-*` variables
+   - Low rate uses `--text-muted` for subtlety
+
+5. **Updated comparison card colors** (popup.css:8292-8299):
+   - `.comparison-diff.improved`: Uses `var(--chart-bar-excellent)`
+   - `.comparison-diff.declined`: Uses `var(--chart-bar-moderate)`
+
+6. **Updated theme-config.js** (lines 290-294):
+   - Added automatic generation of chart bar CSS variables in `generateThemeCSS()`
+   - All themes now derive chart bar colors from their accent colors
+   - Ensures consistent theming across all color themes (default, ocean, forest, sunset, lavender)
+
+### Key Learnings
+- Weekly overview bars previously used `--success`, `--warning`, `--danger` which were not theme-aware
+- The `--success` variable was aliased to `--accent` (which is themed), but `--warning` and `--danger` were fixed colors
+- Using a single color family with intensity variations (accent → accent-hover → accent-active → border) creates a cohesive monochromatic look that adapts to any theme
+- For charts showing progress levels, using the same hue with different intensities is more visually coherent than using traffic light colors (red/yellow/green)
+- Adding CSS variables in both `:root` and `[data-theme='dark']` blocks ensures proper defaults before theme-specific overrides are applied
+- The theme-config.js `generateThemeCSS()` function should generate chart bar variables for all themes to ensure consistency
+

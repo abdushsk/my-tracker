@@ -287,6 +287,12 @@ function generateThemeCSS(id, colors, isDark) {
   if (colors.bodyGradient) vars.push(`--body-gradient: ${colors.bodyGradient}`);
   if (colors.headerGradient) vars.push(`--header-gradient: ${colors.headerGradient}`);
 
+  // US-008: Chart bar colors - always derive from accent for theme consistency
+  vars.push(`--chart-bar-excellent: var(--accent)`);
+  vars.push(`--chart-bar-good: var(--accent-hover)`);
+  vars.push(`--chart-bar-moderate: var(--accent-active)`);
+  vars.push(`--chart-bar-low: var(--border)`);
+
   // Legacy aliases
   vars.push(`--primary: var(--accent)`);
   vars.push(`--primary-hover: var(--accent-hover)`);

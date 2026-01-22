@@ -59,7 +59,7 @@
       "title": "Weekly Overview bars color",
       "description": "Weekly overviews are not using correct colors according to the theme",
       "priority": 8,
-      "passes": false
+      "passes": true
     },
     {
       "id": "US-009",
