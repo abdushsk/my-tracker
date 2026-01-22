@@ -479,7 +479,7 @@
         "Optional: unlock themes/features at levels"
       ],
       "priority": 29,
-      "passes": false,
+      "passes": true,
       "dependsOn": ["US-080"]
     },
     {

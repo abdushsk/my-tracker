@@ -16,7 +16,8 @@ const STORAGE_KEYS = {
   TEMPLATES: 'templates', // US-066: Goal templates
   ARCHIVED_GOALS: 'archivedGoals', // US-069: Archived goals
   ACHIEVEMENTS: 'achievements', // US-080: Achievement progress data
-  DAILY_CHALLENGES: 'dailyChallenges' // US-081: Daily challenges data
+  DAILY_CHALLENGES: 'dailyChallenges', // US-081: Daily challenges data
+  XP_DATA: 'xpData' // US-083: Level and XP system data
 };
 
 /**
@@ -1340,6 +1341,272 @@ async function getChallengeStats() {
   }
 }
 
+// =============================================================================
+// US-083: Level and XP System Storage
+// =============================================================================
+
+/**
+ * Default XP data structure
+ * @returns {Object} Default XP data
+ */
+function getDefaultXPData() {
+  return {
+    totalXP: 0,
+    currentLevel: 1,
+    levelUpHistory: [],
+    xpHistory: [],
+    lastUpdated: Date.now(),
+    firstGoalBonusAwarded: false
+  };
+}
+
+/**
+ * Get XP data from storage
+ * @returns {Promise<Object>} XP data object
+ */
+async function getXPData() {
+  try {
+    const result = await chrome.storage.local.get(STORAGE_KEYS.XP_DATA);
+    return result[STORAGE_KEYS.XP_DATA] || null;
+  } catch (error) {
+    console.error('Error getting XP data:', error);
+    return null;
+  }
+}
+
+/**
+ * Save XP data to storage
+ * @param {Object} xpData - XP data object to save
+ * @returns {Promise<boolean>} Success status
+ */
+async function saveXPData(xpData) {
+  try {
+    await chrome.storage.local.set({ [STORAGE_KEYS.XP_DATA]: xpData });
+    return true;
+  } catch (error) {
+    console.error('Error saving XP data:', error);
+    return false;
+  }
+}
+
+/**
+ * Add XP to user's total and update history
+ * Handles level-up detection
+ * @param {number} amount - XP amount to add
+ * @param {string} source - XP source type
+ * @param {string} description - Description of XP gain
+ * @param {Object|null} context - Additional context
+ * @returns {Promise<{success: boolean, leveledUp: boolean, newLevel: number|null, oldLevel: number, totalXP: number}>}
+ */
+async function addXP(amount, source, description, context = null) {
+  try {
+    let xpData = await getXPData();
+    if (!xpData) {
+      xpData = getDefaultXPData();
+    }
+
+    const oldLevel = xpData.currentLevel;
+    const oldTotalXP = xpData.totalXP;
+
+    // Add XP
+    xpData.totalXP += amount;
+    xpData.lastUpdated = Date.now();
+
+    // Create history entry
+    const historyEntry = {
+      id: `xp-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+      source,
+      amount,
+      timestamp: Date.now(),
+      description,
+      context
+    };
+
+    // Add to history (keep last 50 entries)
+    xpData.xpHistory.unshift(historyEntry);
+    if (xpData.xpHistory.length > 50) {
+      xpData.xpHistory = xpData.xpHistory.slice(0, 50);
+    }
+
+    // Calculate new level using progressive formula
+    // Level N requires: sum of (BASE_XP * 1.15^(i-2)) for i from 2 to N
+    const BASE_XP = 100;
+    const MULTIPLIER = 1.15;
+    const MAX_LEVEL = 50;
+
+    let newLevel = 1;
+    let xpForNextLevel = 0;
+    while (newLevel < MAX_LEVEL) {
+      xpForNextLevel = 0;
+      for (let i = 2; i <= newLevel + 1; i++) {
+        xpForNextLevel += Math.floor(BASE_XP * Math.pow(MULTIPLIER, i - 2));
+      }
+      if (xpData.totalXP >= xpForNextLevel) {
+        newLevel++;
+      } else {
+        break;
+      }
+    }
+
+    const leveledUp = newLevel > oldLevel;
+
+    // Update level
+    xpData.currentLevel = newLevel;
+
+    // Record level-ups
+    if (leveledUp) {
+      for (let lvl = oldLevel + 1; lvl <= newLevel; lvl++) {
+        xpData.levelUpHistory.push({
+          level: lvl,
+          timestamp: Date.now(),
+          trigger: source
+        });
+      }
+    }
+
+    // Save updated data
+    await saveXPData(xpData);
+
+    return {
+      success: true,
+      leveledUp,
+      newLevel: leveledUp ? newLevel : null,
+      oldLevel,
+      totalXP: xpData.totalXP
+    };
+  } catch (error) {
+    console.error('Error adding XP:', error);
+    return {
+      success: false,
+      leveledUp: false,
+      newLevel: null,
+      oldLevel: 0,
+      totalXP: 0
+    };
+  }
+}
+
+/**
+ * Mark first goal bonus as awarded
+ * @returns {Promise<boolean>} Success status
+ */
+async function markFirstGoalBonusAwarded() {
+  try {
+    let xpData = await getXPData();
+    if (!xpData) {
+      xpData = getDefaultXPData();
+    }
+    xpData.firstGoalBonusAwarded = true;
+    return await saveXPData(xpData);
+  } catch (error) {
+    console.error('Error marking first goal bonus:', error);
+    return false;
+  }
+}
+
+/**
+ * Get XP statistics for display
+ * @returns {Promise<Object>} XP stats object
+ */
+async function getXPStats() {
+  try {
+    const xpData = await getXPData();
+    if (!xpData) {
+      return {
+        totalXP: 0,
+        currentLevel: 1,
+        xpProgress: 0,
+        xpForNextLevel: 100,
+        levelUpsThisWeek: 0,
+        xpEarnedToday: 0,
+        xpEarnedThisWeek: 0
+      };
+    }
+
+    // Calculate progress within current level
+    const BASE_XP = 100;
+    const MULTIPLIER = 1.15;
+    const MAX_LEVEL = 50;
+
+    let xpForCurrentLevel = 0;
+    let xpForNextLevel = 0;
+
+    for (let i = 2; i <= xpData.currentLevel; i++) {
+      xpForCurrentLevel += Math.floor(BASE_XP * Math.pow(MULTIPLIER, i - 2));
+    }
+    for (let i = 2; i <= xpData.currentLevel + 1; i++) {
+      xpForNextLevel += Math.floor(BASE_XP * Math.pow(MULTIPLIER, i - 2));
+    }
+
+    const xpProgress = xpData.totalXP - xpForCurrentLevel;
+    const xpNeeded = xpForNextLevel - xpForCurrentLevel;
+
+    // Calculate XP earned today and this week
+    const now = Date.now();
+    const todayStart = new Date().setHours(0, 0, 0, 0);
+    const weekStart = new Date();
+    weekStart.setDate(weekStart.getDate() - 7);
+    const weekStartTime = weekStart.getTime();
+
+    let xpEarnedToday = 0;
+    let xpEarnedThisWeek = 0;
+    let levelUpsThisWeek = 0;
+
+    for (const entry of xpData.xpHistory) {
+      if (entry.timestamp >= todayStart) {
+        xpEarnedToday += entry.amount;
+      }
+      if (entry.timestamp >= weekStartTime) {
+        xpEarnedThisWeek += entry.amount;
+      }
+    }
+
+    for (const levelUp of xpData.levelUpHistory) {
+      if (levelUp.timestamp >= weekStartTime) {
+        levelUpsThisWeek++;
+      }
+    }
+
+    return {
+      totalXP: xpData.totalXP,
+      currentLevel: xpData.currentLevel,
+      xpProgress,
+      xpForNextLevel: xpNeeded,
+      levelUpsThisWeek,
+      xpEarnedToday,
+      xpEarnedThisWeek,
+      isMaxLevel: xpData.currentLevel >= MAX_LEVEL
+    };
+  } catch (error) {
+    console.error('Error getting XP stats:', error);
+    return {
+      totalXP: 0,
+      currentLevel: 1,
+      xpProgress: 0,
+      xpForNextLevel: 100,
+      levelUpsThisWeek: 0,
+      xpEarnedToday: 0,
+      xpEarnedThisWeek: 0
+    };
+  }
+}
+
+/**
+ * Get recent XP history entries
+ * @param {number} limit - Number of entries to return
+ * @returns {Promise<Array>} Recent XP history
+ */
+async function getRecentXPHistory(limit = 10) {
+  try {
+    const xpData = await getXPData();
+    if (!xpData || !xpData.xpHistory) return [];
+    return xpData.xpHistory.slice(0, limit);
+  } catch (error) {
+    console.error('Error getting XP history:', error);
+    return [];
+  }
+}
+
 // Export functions for use in other modules
 export {
   STORAGE_KEYS,
@@ -1403,5 +1670,12 @@ export {
   completeCurrentChallenge,
   skipCurrentChallenge,
   getChallengeHistory,
-  getChallengeStats
+  getChallengeStats,
+  // US-083: Level and XP System functions
+  getXPData,
+  saveXPData,
+  addXP,
+  markFirstGoalBonusAwarded,
+  getXPStats,
+  getRecentXPHistory
 };

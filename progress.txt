@@ -2120,3 +2120,88 @@ Allow users to export their progress as a beautiful shareable image. Generate ca
 - Clipboard API may not work in all contexts (falls back with error message)
 - All templates include proper text alignment and visual hierarchy
 
+
+================================================================================
+US-083: Level and XP System - COMPLETED
+Date: 2026-01-22
+================================================================================
+
+## Task Summary
+Implemented a comprehensive Level and XP gamification system for the Daily Goals Tracker Chrome extension.
+
+## Implementation Details
+
+### 1. Data Models (src/utils/models.js)
+- Added XP_CONFIG constants with XP values for different actions:
+  - Goal completion: 10 XP base
+  - Timer bonus: +5 XP
+  - Counter bonus: +3 XP
+  - Perfect day: 25 XP
+  - Streak bonus: 2 XP per day of current streak
+  - Achievement unlock: 15 XP
+  - Daily challenge: 5-15 XP based on difficulty
+  - First goal bonus: 50 XP (one-time)
+- Added XP_SOURCES enum for tracking XP sources
+- Implemented progressive level calculation formula: Level N requires sum of (BASE_XP * 1.15^(i-2)) for i from 2 to N
+- Maximum level cap: 50
+- Added level titles with icons: Beginner -> Apprentice -> Committed -> Dedicated -> Skilled -> Veteran -> Pro -> Champion -> Expert -> Master -> Legend
+
+### 2. Storage Functions (src/utils/storage.js)
+- Added STORAGE_KEYS.XP_DATA for persistent storage
+- getXPData() / saveXPData() - Basic CRUD operations
+- addXP() - Handles XP addition, level-up detection, history tracking
+- markFirstGoalBonusAwarded() - Track first goal bonus
+- getXPStats() - Get formatted stats for display
+- getRecentXPHistory() - Get recent XP earning history (last 50 entries)
+
+### 3. UI Implementation (src/popup/popup.js)
+- Added state.xpData and state.pendingLevelUp to application state
+- Modified loadData() to initialize XP data on app start
+- Added level badge display to header with:
+  - Level icon (based on title)
+  - Level number (Lv.X)
+  - Mini progress bar showing progress to next level
+  - Tooltip with detailed XP info
+- Created XP awarding functions:
+  - awardGoalCompletionXP() - Called on goal completion
+  - awardPerfectDayXP() - Called when all goals completed
+  - awardAchievementXP() - Called when achievement unlocked
+  - awardChallengeXP() - Called when daily challenge completed
+- Created notification functions:
+  - showXPToast() - Shows XP gain popup
+  - showLevelUpNotification() - Shows level-up celebration
+  - triggerLevelUpConfetti() - Confetti animation for level-ups
+- Integrated XP awarding into:
+  - Timer completion (handleTimerCompletion)
+  - Counter completion (handleCounterIncrement)
+  - Checkbox completion (handleCheckboxToggle)
+  - Daily challenge completion (handleChallengeCompletion)
+
+### 4. Styling (src/popup/popup.css)
+- Level badge in header with gold gradient
+- XP toast notification (green gradient, centered popup)
+- Level-up notification (gold gradient with icon, title, and level)
+- Level-up confetti animation
+- Dark mode variants for all XP/level elements
+- Reduced motion support for accessibility
+
+## Acceptance Criteria Met
+✅ XP earned for goal completions (10 XP base + type bonuses)
+✅ Bonus XP for streaks (2 XP per streak day) and achievements (15 XP)
+✅ Level calculation formula (progressive 1.15x multiplier)
+✅ Level displayed in header/profile (badge with icon and progress bar)
+✅ Level-up celebration animation (notification + confetti)
+✅ XP history and breakdown (stored in xpHistory array, last 50 entries)
+✅ Unlock themes/features at levels (framework in place - getLevelTitle returns different titles/icons)
+
+## Files Modified
+- src/utils/models.js - Added XP/Level model functions and exports
+- src/utils/storage.js - Added XP storage functions and exports
+- src/popup/popup.js - Added XP awarding logic and UI
+- src/popup/popup.css - Added XP/Level styling
+- plans/prd.json - Marked US-083 as passes: true
+
+## Notes for Next Iteration
+- The framework is extensible for theme unlocks at higher levels
+- XP history provides data for future "XP Breakdown" screen if needed
+- Level titles provide gamification milestones for user engagement

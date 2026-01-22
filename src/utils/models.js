@@ -832,6 +832,269 @@ function getAchievementProgressPercentage(achievementId, currentProgress) {
 }
 
 // =============================================================================
+// US-083: Level and XP System Model
+// =============================================================================
+
+/**
+ * XP configuration constants
+ * @type {Object}
+ */
+const XP_CONFIG = {
+  // Base XP rewards
+  GOAL_COMPLETION: 10,        // Base XP for completing any goal
+  TIMER_COMPLETION_BONUS: 5,  // Additional XP for timer goals (focus-intensive)
+  COUNTER_COMPLETION_BONUS: 3, // Additional XP for counter goals
+
+  // Bonus XP
+  PERFECT_DAY: 25,            // Bonus XP for completing ALL goals in a day
+  STREAK_BONUS_PER_DAY: 2,    // Additional XP per day of current streak
+  ACHIEVEMENT_UNLOCK: 15,     // XP for unlocking any achievement
+  CHALLENGE_EASY: 5,          // XP for completing easy daily challenge
+  CHALLENGE_MEDIUM: 10,       // XP for completing medium daily challenge
+  CHALLENGE_HARD: 15,         // XP for completing hard daily challenge
+  FIRST_GOAL_BONUS: 50,       // One-time bonus for first goal completion
+
+  // Level calculation
+  BASE_XP_PER_LEVEL: 100,     // XP needed for level 2
+  XP_MULTIPLIER: 1.15,        // Each level needs 15% more XP than previous
+  MAX_LEVEL: 50               // Maximum level cap
+};
+
+/**
+ * XP source types for history tracking
+ * @readonly
+ * @enum {string}
+ */
+const XP_SOURCES = {
+  GOAL_COMPLETION: 'goal_completion',
+  TIMER_BONUS: 'timer_bonus',
+  COUNTER_BONUS: 'counter_bonus',
+  PERFECT_DAY: 'perfect_day',
+  STREAK_BONUS: 'streak_bonus',
+  ACHIEVEMENT: 'achievement',
+  CHALLENGE: 'challenge',
+  FIRST_GOAL: 'first_goal'
+};
+
+/**
+ * @typedef {Object} XPHistoryEntry
+ * @property {string} id - Unique identifier
+ * @property {string} source - XP source type (from XP_SOURCES)
+ * @property {number} amount - XP amount earned
+ * @property {number} timestamp - When XP was earned
+ * @property {string|null} description - Human-readable description
+ * @property {Object|null} context - Additional context (goalId, achievementId, etc.)
+ */
+
+/**
+ * @typedef {Object} XPData
+ * @property {number} totalXP - Total XP earned lifetime
+ * @property {number} currentLevel - Current level (1-50)
+ * @property {Array<{level: number, timestamp: number, trigger: string}>} levelUpHistory - History of level-ups
+ * @property {Array<XPHistoryEntry>} xpHistory - Recent XP earning history (last 50 entries)
+ * @property {number} lastUpdated - Timestamp of last XP change
+ * @property {boolean} firstGoalBonusAwarded - Whether first goal bonus was given
+ */
+
+/**
+ * Get default XP data structure
+ * @returns {XPData} Default XP data
+ */
+function getDefaultXPData() {
+  return {
+    totalXP: 0,
+    currentLevel: 1,
+    levelUpHistory: [],
+    xpHistory: [],
+    lastUpdated: Date.now(),
+    firstGoalBonusAwarded: false
+  };
+}
+
+/**
+ * Calculate XP required to reach a specific level
+ * Uses progressive formula: Level N requires BASE * MULTIPLIER^(N-2) XP from previous level
+ * @param {number} level - Target level (1-50)
+ * @returns {number} Total XP required to reach that level
+ */
+function getXPForLevel(level) {
+  if (level <= 1) return 0;
+  if (level > XP_CONFIG.MAX_LEVEL) level = XP_CONFIG.MAX_LEVEL;
+
+  let totalXP = 0;
+  for (let i = 2; i <= level; i++) {
+    const xpForThisLevel = Math.floor(
+      XP_CONFIG.BASE_XP_PER_LEVEL * Math.pow(XP_CONFIG.XP_MULTIPLIER, i - 2)
+    );
+    totalXP += xpForThisLevel;
+  }
+  return totalXP;
+}
+
+/**
+ * Calculate current level from total XP
+ * @param {number} totalXP - Total XP earned
+ * @returns {number} Current level
+ */
+function getLevelFromXP(totalXP) {
+  let level = 1;
+  while (level < XP_CONFIG.MAX_LEVEL && getXPForLevel(level + 1) <= totalXP) {
+    level++;
+  }
+  return level;
+}
+
+/**
+ * Get XP progress within current level
+ * @param {number} totalXP - Total XP earned
+ * @returns {{currentLevelXP: number, xpForNextLevel: number, percentage: number}} Progress info
+ */
+function getLevelProgress(totalXP) {
+  const currentLevel = getLevelFromXP(totalXP);
+
+  if (currentLevel >= XP_CONFIG.MAX_LEVEL) {
+    return {
+      currentLevelXP: totalXP - getXPForLevel(XP_CONFIG.MAX_LEVEL),
+      xpForNextLevel: 0,
+      percentage: 100
+    };
+  }
+
+  const xpForCurrentLevel = getXPForLevel(currentLevel);
+  const xpForNextLevel = getXPForLevel(currentLevel + 1);
+  const xpWithinLevel = totalXP - xpForCurrentLevel;
+  const xpNeededForLevel = xpForNextLevel - xpForCurrentLevel;
+
+  return {
+    currentLevelXP: xpWithinLevel,
+    xpForNextLevel: xpNeededForLevel,
+    percentage: Math.floor((xpWithinLevel / xpNeededForLevel) * 100)
+  };
+}
+
+/**
+ * Calculate XP to award for a goal completion
+ * @param {Object} goal - The completed goal
+ * @param {number} currentStreak - Current streak days
+ * @param {boolean} isFirstGoal - Whether this is the user's first ever goal completion
+ * @returns {{baseXP: number, bonuses: Array<{type: string, amount: number, description: string}>, totalXP: number}}
+ */
+function calculateGoalCompletionXP(goal, currentStreak = 0, isFirstGoal = false) {
+  const bonuses = [];
+  let baseXP = XP_CONFIG.GOAL_COMPLETION;
+
+  // Type-specific bonuses
+  if (goal.type === 'timer') {
+    bonuses.push({
+      type: XP_SOURCES.TIMER_BONUS,
+      amount: XP_CONFIG.TIMER_COMPLETION_BONUS,
+      description: 'Timer goal bonus'
+    });
+  } else if (goal.type === 'counter') {
+    bonuses.push({
+      type: XP_SOURCES.COUNTER_BONUS,
+      amount: XP_CONFIG.COUNTER_BONUS,
+      description: 'Counter goal bonus'
+    });
+  }
+
+  // Streak bonus
+  if (currentStreak > 0) {
+    const streakBonus = currentStreak * XP_CONFIG.STREAK_BONUS_PER_DAY;
+    bonuses.push({
+      type: XP_SOURCES.STREAK_BONUS,
+      amount: streakBonus,
+      description: `${currentStreak} day streak bonus`
+    });
+  }
+
+  // First goal bonus
+  if (isFirstGoal) {
+    bonuses.push({
+      type: XP_SOURCES.FIRST_GOAL,
+      amount: XP_CONFIG.FIRST_GOAL_BONUS,
+      description: 'First goal bonus!'
+    });
+  }
+
+  const totalBonusXP = bonuses.reduce((sum, b) => sum + b.amount, 0);
+
+  return {
+    baseXP,
+    bonuses,
+    totalXP: baseXP + totalBonusXP
+  };
+}
+
+/**
+ * Calculate XP for a perfect day (all goals completed)
+ * @returns {number} XP for perfect day
+ */
+function getPerfectDayXP() {
+  return XP_CONFIG.PERFECT_DAY;
+}
+
+/**
+ * Calculate XP for achievement unlock
+ * @returns {number} XP for achievement
+ */
+function getAchievementXP() {
+  return XP_CONFIG.ACHIEVEMENT_UNLOCK;
+}
+
+/**
+ * Calculate XP for completing a daily challenge
+ * @param {string} difficulty - Challenge difficulty (easy, medium, hard)
+ * @returns {number} XP for challenge
+ */
+function getChallengeXP(difficulty) {
+  switch (difficulty) {
+    case 'easy': return XP_CONFIG.CHALLENGE_EASY;
+    case 'medium': return XP_CONFIG.CHALLENGE_MEDIUM;
+    case 'hard': return XP_CONFIG.CHALLENGE_HARD;
+    default: return XP_CONFIG.CHALLENGE_EASY;
+  }
+}
+
+/**
+ * Create an XP history entry
+ * @param {string} source - XP source type
+ * @param {number} amount - XP amount
+ * @param {string} description - Description
+ * @param {Object|null} context - Additional context
+ * @returns {XPHistoryEntry} XP history entry
+ */
+function createXPHistoryEntry(source, amount, description, context = null) {
+  return {
+    id: generateId(),
+    source,
+    amount,
+    timestamp: Date.now(),
+    description,
+    context
+  };
+}
+
+/**
+ * Get level title/badge name based on level
+ * @param {number} level - Current level
+ * @returns {{title: string, icon: string}} Level title and icon
+ */
+function getLevelTitle(level) {
+  if (level >= 50) return { title: 'Legend', icon: '👑' };
+  if (level >= 45) return { title: 'Master', icon: '🏆' };
+  if (level >= 40) return { title: 'Expert', icon: '💎' };
+  if (level >= 35) return { title: 'Champion', icon: '🌟' };
+  if (level >= 30) return { title: 'Pro', icon: '⭐' };
+  if (level >= 25) return { title: 'Veteran', icon: '🎯' };
+  if (level >= 20) return { title: 'Skilled', icon: '💪' };
+  if (level >= 15) return { title: 'Dedicated', icon: '🔥' };
+  if (level >= 10) return { title: 'Committed', icon: '✨' };
+  if (level >= 5) return { title: 'Apprentice', icon: '🌱' };
+  return { title: 'Beginner', icon: '🎈' };
+}
+
+// =============================================================================
 // US-081: Daily Challenges Model
 // =============================================================================
 
@@ -1258,5 +1521,18 @@ export {
   selectDailyChallenge,
   createDailyChallengeState,
   isChallengeCompleted,
-  getChallengeProgressPercentage
+  getChallengeProgressPercentage,
+  // US-083: Level and XP System functions
+  XP_CONFIG,
+  XP_SOURCES,
+  getDefaultXPData,
+  getXPForLevel,
+  getLevelFromXP,
+  getLevelProgress,
+  calculateGoalCompletionXP,
+  getPerfectDayXP,
+  getAchievementXP,
+  getChallengeXP,
+  createXPHistoryEntry,
+  getLevelTitle
 };
