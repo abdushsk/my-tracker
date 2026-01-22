@@ -573,6 +573,265 @@ function getMostProductiveHours(hourlyData, topN = 3, sortBy = 'count') {
 }
 
 // =============================================================================
+// US-080: Achievement Model
+// =============================================================================
+
+/**
+ * Achievement categories
+ * @readonly
+ * @enum {string}
+ */
+const ACHIEVEMENT_CATEGORIES = {
+  STREAKS: 'streaks',
+  COMPLETIONS: 'completions',
+  MILESTONES: 'milestones',
+  SPECIAL: 'special'
+};
+
+/**
+ * Achievement definitions
+ * At least 20 different achievements as per US-080 requirements
+ * @type {Array<Object>}
+ */
+const ACHIEVEMENT_DEFINITIONS = [
+  // Milestones category
+  {
+    id: 'first-step',
+    title: 'First Step',
+    description: 'Complete your first goal',
+    icon: '👣',
+    category: ACHIEVEMENT_CATEGORIES.MILESTONES,
+    condition: { type: 'total_completions', target: 1 }
+  },
+  {
+    id: 'first-goal-created',
+    title: 'Goal Setter',
+    description: 'Create your first goal',
+    icon: '🎯',
+    category: ACHIEVEMENT_CATEGORIES.MILESTONES,
+    condition: { type: 'total_goals_created', target: 1 }
+  },
+  {
+    id: 'five-goals',
+    title: 'Getting Organized',
+    description: 'Create 5 goals',
+    icon: '📋',
+    category: ACHIEVEMENT_CATEGORIES.MILESTONES,
+    condition: { type: 'total_goals_created', target: 5 }
+  },
+  {
+    id: 'ten-goals',
+    title: 'Planner',
+    description: 'Create 10 goals',
+    icon: '📝',
+    category: ACHIEVEMENT_CATEGORIES.MILESTONES,
+    condition: { type: 'total_goals_created', target: 10 }
+  },
+
+  // Streaks category
+  {
+    id: 'streak-3',
+    title: 'Getting Started',
+    description: 'Maintain a 3-day streak',
+    icon: '🔥',
+    category: ACHIEVEMENT_CATEGORIES.STREAKS,
+    condition: { type: 'streak', target: 3 }
+  },
+  {
+    id: 'streak-7',
+    title: 'Consistent',
+    description: 'Maintain a 7-day streak',
+    icon: '🔥',
+    category: ACHIEVEMENT_CATEGORIES.STREAKS,
+    condition: { type: 'streak', target: 7 }
+  },
+  {
+    id: 'streak-14',
+    title: 'Committed',
+    description: 'Maintain a 14-day streak',
+    icon: '💪',
+    category: ACHIEVEMENT_CATEGORIES.STREAKS,
+    condition: { type: 'streak', target: 14 }
+  },
+  {
+    id: 'streak-30',
+    title: 'Dedicated',
+    description: 'Maintain a 30-day streak',
+    icon: '⚡',
+    category: ACHIEVEMENT_CATEGORIES.STREAKS,
+    condition: { type: 'streak', target: 30 }
+  },
+  {
+    id: 'streak-60',
+    title: 'Determined',
+    description: 'Maintain a 60-day streak',
+    icon: '🌟',
+    category: ACHIEVEMENT_CATEGORIES.STREAKS,
+    condition: { type: 'streak', target: 60 }
+  },
+  {
+    id: 'streak-100',
+    title: 'Unstoppable',
+    description: 'Maintain a 100-day streak',
+    icon: '🏆',
+    category: ACHIEVEMENT_CATEGORIES.STREAKS,
+    condition: { type: 'streak', target: 100 }
+  },
+
+  // Completions category
+  {
+    id: 'completions-10',
+    title: 'Making Progress',
+    description: 'Complete 10 goals total',
+    icon: '✅',
+    category: ACHIEVEMENT_CATEGORIES.COMPLETIONS,
+    condition: { type: 'total_completions', target: 10 }
+  },
+  {
+    id: 'completions-50',
+    title: 'Achiever',
+    description: 'Complete 50 goals total',
+    icon: '🎖️',
+    category: ACHIEVEMENT_CATEGORIES.COMPLETIONS,
+    condition: { type: 'total_completions', target: 50 }
+  },
+  {
+    id: 'completions-100',
+    title: 'Centurion',
+    description: 'Complete 100 goals total',
+    icon: '💯',
+    category: ACHIEVEMENT_CATEGORIES.COMPLETIONS,
+    condition: { type: 'total_completions', target: 100 }
+  },
+  {
+    id: 'completions-500',
+    title: 'Goal Master',
+    description: 'Complete 500 goals total',
+    icon: '👑',
+    category: ACHIEVEMENT_CATEGORIES.COMPLETIONS,
+    condition: { type: 'total_completions', target: 500 }
+  },
+  {
+    id: 'perfectionist',
+    title: 'Perfectionist',
+    description: 'Complete all goals in a single day',
+    icon: '💎',
+    category: ACHIEVEMENT_CATEGORIES.COMPLETIONS,
+    condition: { type: 'all_goals_completed_day', target: 1 }
+  },
+  {
+    id: 'perfect-week',
+    title: 'Perfect Week',
+    description: 'Complete all goals every day for a week',
+    icon: '🌈',
+    category: ACHIEVEMENT_CATEGORIES.COMPLETIONS,
+    condition: { type: 'perfect_days', target: 7 }
+  },
+
+  // Special category
+  {
+    id: 'early-bird',
+    title: 'Early Bird',
+    description: 'Complete a goal before 8 AM',
+    icon: '🌅',
+    category: ACHIEVEMENT_CATEGORIES.SPECIAL,
+    condition: { type: 'complete_before_hour', target: 8 }
+  },
+  {
+    id: 'night-owl',
+    title: 'Night Owl',
+    description: 'Complete a goal after 10 PM',
+    icon: '🦉',
+    category: ACHIEVEMENT_CATEGORIES.SPECIAL,
+    condition: { type: 'complete_after_hour', target: 22 }
+  },
+  {
+    id: 'marathon',
+    title: 'Marathon',
+    description: 'Log 10 hours on a single timer goal',
+    icon: '⏱️',
+    category: ACHIEVEMENT_CATEGORIES.SPECIAL,
+    condition: { type: 'timer_hours', target: 10 }
+  },
+  {
+    id: 'counter-100',
+    title: 'Counter Champion',
+    description: 'Reach 100 on a counter goal',
+    icon: '🔢',
+    category: ACHIEVEMENT_CATEGORIES.SPECIAL,
+    condition: { type: 'counter_target', target: 100 }
+  },
+  {
+    id: 'variety',
+    title: 'Variety',
+    description: 'Complete all three goal types in one day',
+    icon: '🎨',
+    category: ACHIEVEMENT_CATEGORIES.SPECIAL,
+    condition: { type: 'all_types_completed_day', target: 1 }
+  },
+  {
+    id: 'category-explorer',
+    title: 'Category Explorer',
+    description: 'Complete goals in 4 different categories',
+    icon: '🗂️',
+    category: ACHIEVEMENT_CATEGORIES.SPECIAL,
+    condition: { type: 'categories_used', target: 4 }
+  }
+];
+
+/**
+ * @typedef {Object} AchievementProgress
+ * @property {string} id - Achievement ID
+ * @property {number} progress - Current progress towards achievement
+ * @property {number|null} unlockedAt - Timestamp when unlocked, null if not unlocked
+ */
+
+/**
+ * Create default achievement progress for all defined achievements
+ * @returns {Array<AchievementProgress>} Array of achievement progress objects
+ */
+function createDefaultAchievementProgress() {
+  return ACHIEVEMENT_DEFINITIONS.map(achievement => ({
+    id: achievement.id,
+    progress: 0,
+    unlockedAt: null
+  }));
+}
+
+/**
+ * Get achievement definition by ID
+ * @param {string} achievementId - The achievement ID
+ * @returns {Object|null} Achievement definition or null if not found
+ */
+function getAchievementDefinition(achievementId) {
+  return ACHIEVEMENT_DEFINITIONS.find(a => a.id === achievementId) || null;
+}
+
+/**
+ * Check if an achievement is unlocked
+ * @param {AchievementProgress} achievementProgress - The achievement progress object
+ * @returns {boolean} True if unlocked
+ */
+function isAchievementUnlocked(achievementProgress) {
+  return achievementProgress.unlockedAt !== null;
+}
+
+/**
+ * Get achievement progress percentage
+ * @param {string} achievementId - The achievement ID
+ * @param {number} currentProgress - Current progress value
+ * @returns {number} Progress percentage (0-100)
+ */
+function getAchievementProgressPercentage(achievementId, currentProgress) {
+  const definition = getAchievementDefinition(achievementId);
+  if (!definition || !definition.condition || !definition.condition.target) {
+    return 0;
+  }
+  const percentage = (currentProgress / definition.condition.target) * 100;
+  return Math.min(100, Math.max(0, percentage));
+}
+
+// =============================================================================
 // Exports
 // =============================================================================
 
@@ -608,5 +867,12 @@ export {
   getActivityByHour,
   getActivityByHourForDateRange,
   getAggregatedActivityByHour,
-  getMostProductiveHours
+  getMostProductiveHours,
+  // US-080: Achievement functions
+  ACHIEVEMENT_CATEGORIES,
+  ACHIEVEMENT_DEFINITIONS,
+  createDefaultAchievementProgress,
+  getAchievementDefinition,
+  isAchievementUnlocked,
+  getAchievementProgressPercentage
 };

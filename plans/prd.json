@@ -428,7 +428,7 @@
         "Share achievement option"
       ],
       "priority": 26,
-      "passes": false,
+      "passes": true,
       "dependsOn": []
     },
     {

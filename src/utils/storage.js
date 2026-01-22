@@ -14,7 +14,8 @@ const STORAGE_KEYS = {
   STREAK_DATA: 'streakData',
   CATEGORIES: 'categories',
   TEMPLATES: 'templates', // US-066: Goal templates
-  ARCHIVED_GOALS: 'archivedGoals' // US-069: Archived goals
+  ARCHIVED_GOALS: 'archivedGoals', // US-069: Archived goals
+  ACHIEVEMENTS: 'achievements' // US-080: Achievement progress data
 };
 
 /**
@@ -722,7 +723,8 @@ async function exportAllData() {
       archivedGoals,
       activityLog,
       history,
-      streakData
+      streakData,
+      achievements
     ] = await Promise.all([
       getGoals(),
       getSettings(),
@@ -731,7 +733,8 @@ async function exportAllData() {
       getArchivedGoals(),
       getActivityLog(),
       getHistory(),
-      getStreakData()
+      getStreakData(),
+      getAchievements()
     ]);
 
     return {
@@ -745,7 +748,8 @@ async function exportAllData() {
         archivedGoals,
         activityLog,
         history,
-        streakData
+        streakData,
+        achievements
       }
     };
   } catch (error) {
@@ -837,6 +841,11 @@ function validateImportData(importData) {
     errors.push('streakData must be an object');
   }
 
+  // Validate achievements array
+  if (data.achievements !== undefined && !Array.isArray(data.achievements)) {
+    errors.push('achievements must be an array');
+  }
+
   return { valid: errors.length === 0, errors };
 }
 
@@ -885,6 +894,9 @@ async function importAllData(importData, mode = 'merge') {
       }
       if (data.streakData) {
         await saveStreakData(data.streakData);
+      }
+      if (data.achievements) {
+        await saveAchievements(data.achievements);
       }
     } else {
       // Merge mode - add new items, skip duplicates
@@ -972,6 +984,26 @@ async function importAllData(importData, mode = 'merge') {
         };
         await saveStreakData(mergedStreak);
       }
+
+      // For achievements, keep the one that has more unlocks
+      if (data.achievements && data.achievements.length > 0) {
+        const existingAchievements = await getAchievements();
+        if (!existingAchievements) {
+          await saveAchievements(data.achievements);
+        } else {
+          // Merge by keeping unlocked status from either source
+          const mergedAchievements = existingAchievements.map(existing => {
+            const imported = data.achievements.find(a => a.id === existing.id);
+            if (!imported) return existing;
+            // Keep the one that's unlocked, or keep better progress
+            if (existing.unlockedAt && !imported.unlockedAt) return existing;
+            if (!existing.unlockedAt && imported.unlockedAt) return imported;
+            // Both unlocked or both not - keep the one with better progress
+            return (imported.progress || 0) > (existing.progress || 0) ? imported : existing;
+          });
+          await saveAchievements(mergedAchievements);
+        }
+      }
     }
 
     return {
@@ -986,6 +1018,115 @@ async function importAllData(importData, mode = 'merge') {
       message: `Import failed: ${error.message}`,
       stats: {}
     };
+  }
+}
+
+// =============================================================================
+// US-080: Achievements and Badges System
+// =============================================================================
+
+/**
+ * Get achievement progress from storage
+ * @returns {Promise<Array>} Array of achievement progress objects
+ */
+async function getAchievements() {
+  try {
+    const result = await chrome.storage.local.get(STORAGE_KEYS.ACHIEVEMENTS);
+    return result[STORAGE_KEYS.ACHIEVEMENTS] || null;
+  } catch (error) {
+    console.error('Error getting achievements:', error);
+    return null;
+  }
+}
+
+/**
+ * Save achievement progress to storage
+ * @param {Array} achievements - Array of achievement progress objects
+ * @returns {Promise<boolean>} Success status
+ */
+async function saveAchievements(achievements) {
+  try {
+    await chrome.storage.local.set({ [STORAGE_KEYS.ACHIEVEMENTS]: achievements });
+    return true;
+  } catch (error) {
+    console.error('Error saving achievements:', error);
+    return false;
+  }
+}
+
+/**
+ * Update a single achievement's progress
+ * @param {string} achievementId - The achievement ID to update
+ * @param {Object} updates - Object with properties to update (progress, unlockedAt)
+ * @returns {Promise<boolean>} Success status
+ */
+async function updateAchievement(achievementId, updates) {
+  try {
+    const achievements = await getAchievements();
+    if (!achievements) return false;
+
+    const index = achievements.findIndex(a => a.id === achievementId);
+    if (index === -1) {
+      console.error('Achievement not found:', achievementId);
+      return false;
+    }
+
+    achievements[index] = { ...achievements[index], ...updates };
+    return await saveAchievements(achievements);
+  } catch (error) {
+    console.error('Error updating achievement:', error);
+    return false;
+  }
+}
+
+/**
+ * Get a single achievement by ID
+ * @param {string} achievementId - The achievement ID to find
+ * @returns {Promise<Object|null>} The achievement progress object or null
+ */
+async function getAchievementById(achievementId) {
+  try {
+    const achievements = await getAchievements();
+    if (!achievements) return null;
+    return achievements.find(a => a.id === achievementId) || null;
+  } catch (error) {
+    console.error('Error getting achievement by ID:', error);
+    return null;
+  }
+}
+
+/**
+ * Unlock an achievement
+ * @param {string} achievementId - The achievement ID to unlock
+ * @returns {Promise<boolean>} Success status
+ */
+async function unlockAchievement(achievementId) {
+  try {
+    const achievement = await getAchievementById(achievementId);
+    if (!achievement) return false;
+    if (achievement.unlockedAt !== null) return true; // Already unlocked
+
+    return await updateAchievement(achievementId, {
+      unlockedAt: Date.now()
+    });
+  } catch (error) {
+    console.error('Error unlocking achievement:', error);
+    return false;
+  }
+}
+
+/**
+ * Get count of unlocked achievements
+ * @returns {Promise<number>} Number of unlocked achievements
+ */
+async function getUnlockedAchievementsCount() {
+  try {
+    const achievements = await getAchievements();
+    if (!achievements) return 0;
+    return achievements.filter(a => a.unlockedAt !== null).length;
+  } catch (error) {
+    console.error('Error counting unlocked achievements:', error);
+    return 0;
   }
 }
 
@@ -1037,5 +1178,12 @@ export {
   // US-070: Export/Import functions
   exportAllData,
   validateImportData,
-  importAllData
+  importAllData,
+  // US-080: Achievement functions
+  getAchievements,
+  saveAchievements,
+  updateAchievement,
+  getAchievementById,
+  unlockAchievement,
+  getUnlockedAchievementsCount
 };

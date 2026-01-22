@@ -39,7 +39,13 @@ import {
   // US-070: Export/Import imports
   exportAllData,
   validateImportData,
-  importAllData
+  importAllData,
+  // US-080: Achievement imports
+  getAchievements,
+  saveAchievements,
+  updateAchievement,
+  unlockAchievement,
+  getUnlockedAchievementsCount
 } from '../utils/storage.js';
 import {
   GOAL_TYPES,
@@ -56,7 +62,14 @@ import {
   filterHistoryByDateRange,
   filterHistoryByGoalId, // US-071: For individual goal statistics
   groupHistoryByDate,
-  getActivityByHourForDateRange
+  getActivityByHourForDateRange,
+  // US-080: Achievement imports
+  ACHIEVEMENT_CATEGORIES,
+  ACHIEVEMENT_DEFINITIONS,
+  createDefaultAchievementProgress,
+  getAchievementDefinition,
+  isAchievementUnlocked,
+  getAchievementProgressPercentage
 } from '../utils/models.js';
 import {
   initSounds,
@@ -91,6 +104,8 @@ const state = {
   focusedGoalId: null, // US-067: Currently focused goal ID for Focus Mode
   archivedGoals: [], // US-069: Archived goals
   statisticsGoalId: null, // US-071: Goal ID for viewing statistics
+  achievements: [], // US-080: Achievement progress data
+  pendingAchievementUnlock: null, // US-080: Achievement waiting to be shown
   currentScreen: 'viewGoals',
   isLoading: true,
   timerIntervalId: null, // Interval ID for updating timer display
@@ -121,6 +136,7 @@ const SCREENS = {
   ARCHIVE: 'archive', // US-069: Archive screen
   GOAL_STATISTICS: 'goalStatistics', // US-071: Individual Goal Statistics screen
   WEEKLY_REVIEW: 'weeklyReview', // US-072: Weekly Review screen
+  ACHIEVEMENTS: 'achievements', // US-080: Achievements and Badges screen
   REPORTS: 'reports',
   SETTINGS: 'settings'
 };
@@ -137,6 +153,7 @@ const SCREEN_IDS = {
   [SCREENS.ARCHIVE]: 'screen-archive', // US-069
   [SCREENS.GOAL_STATISTICS]: 'screen-goal-statistics', // US-071
   [SCREENS.WEEKLY_REVIEW]: 'screen-weekly-review', // US-072
+  [SCREENS.ACHIEVEMENTS]: 'screen-achievements', // US-080
   [SCREENS.REPORTS]: 'screen-reports',
   [SCREENS.SETTINGS]: 'screen-settings'
 };
@@ -217,6 +234,9 @@ function renderCurrentScreen() {
       break;
     case SCREENS.WEEKLY_REVIEW:
       renderWeeklyReviewScreen(); // US-072
+      break;
+    case SCREENS.ACHIEVEMENTS:
+      renderAchievementsScreen(); // US-080
       break;
     case SCREENS.REPORTS:
       renderReportsScreen();
@@ -1363,6 +1383,9 @@ async function handleTimerCompletion(goalId) {
   // US-019: Trigger completion celebration animation
   triggerCompletionCelebration(goalId);
 
+  // US-080: Check achievements on goal completion
+  checkAchievements('goal_complete', { goal });
+
   // Re-render to show completion state
   renderCurrentScreen();
 }
@@ -1422,9 +1445,15 @@ async function handleCounterIncrement(goalId) {
 
     // US-019: Trigger completion celebration animation
     triggerCompletionCelebration(goalId);
+
+    // US-080: Check achievements on goal completion
+    checkAchievements('goal_complete', { goal });
   } else {
     // US-039: Play tick sound for regular increment
     playSound(SOUNDS.TICK);
+
+    // US-080: Check counter-related achievements (like counter-100)
+    checkAchievements('counter_update', { goal });
   }
 
   // US-079: Push undo action for counter increment
@@ -1550,6 +1579,9 @@ async function handleCheckboxToggle(goalId) {
 
     // US-019: Trigger completion celebration animation
     triggerCompletionCelebration(goalId);
+
+    // US-080: Check achievements on goal completion
+    checkAchievements('goal_complete', { goal });
   } else {
     // US-039: Play tick sound for regular toggle
     playSound(SOUNDS.TICK);
@@ -6811,6 +6843,9 @@ async function handleGoalFormSubmit(e) {
         state.goals = updatedGoals;
         console.log(`[Form] New goal created:`, newGoal);
         showSuccessFeedback('Goal created successfully!');
+
+        // US-080: Check achievements for goal creation
+        checkAchievements('goal_create', { goal: newGoal });
       } else {
         console.error('[Form] Failed to save new goal');
         showFormError('Failed to save goal. Please try again.');
@@ -7596,6 +7631,354 @@ function renderManageGoalItem(goal) {
   `;
 }
 
+// =============================================================================
+// US-080: Achievements and Badges Screen
+// =============================================================================
+
+/**
+ * Render the Achievements screen
+ * Shows all achievements (locked and unlocked) with progress indicators
+ */
+function renderAchievementsScreen() {
+  const screen = document.getElementById(SCREEN_IDS[SCREENS.ACHIEVEMENTS]);
+  if (!screen) return;
+
+  // Group achievements by category
+  const achievementsByCategory = {};
+  for (const category of Object.values(ACHIEVEMENT_CATEGORIES)) {
+    achievementsByCategory[category] = ACHIEVEMENT_DEFINITIONS.filter(a => a.category === category);
+  }
+
+  // Get unlocked count
+  const unlockedCount = state.achievements.filter(a => a.unlockedAt !== null).length;
+  const totalCount = ACHIEVEMENT_DEFINITIONS.length;
+
+  // Category labels for display
+  const categoryLabels = {
+    [ACHIEVEMENT_CATEGORIES.STREAKS]: 'Streaks',
+    [ACHIEVEMENT_CATEGORIES.COMPLETIONS]: 'Completions',
+    [ACHIEVEMENT_CATEGORIES.MILESTONES]: 'Milestones',
+    [ACHIEVEMENT_CATEGORIES.SPECIAL]: 'Special'
+  };
+
+  screen.innerHTML = `
+    <div class="achievements-screen">
+      <header class="screen-header achievements-header">
+        <button class="back-btn" data-screen="${SCREENS.REPORTS}">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="back-icon">
+            <polyline points="15 18 9 12 15 6"/>
+          </svg>
+          <span class="back-label">Back</span>
+        </button>
+        <h1 class="achievements-title">Achievements</h1>
+        <div class="header-spacer"></div>
+      </header>
+      <main class="achievements-content">
+        <!-- Summary Card -->
+        <section class="achievements-section summary-section">
+          <div class="achievements-summary-card">
+            <div class="achievements-summary-icon">🏆</div>
+            <div class="achievements-summary-info">
+              <span class="achievements-summary-value">${unlockedCount} / ${totalCount}</span>
+              <span class="achievements-summary-label">Achievements Unlocked</span>
+            </div>
+            <div class="achievements-summary-progress">
+              <div class="achievements-summary-bar">
+                <div class="achievements-summary-fill" style="width: ${(unlockedCount / totalCount) * 100}%"></div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- Achievement Categories -->
+        ${Object.entries(achievementsByCategory).map(([category, achievements]) => `
+          <section class="achievements-section category-section">
+            <h2 class="section-title">${categoryLabels[category]}</h2>
+            <div class="achievements-grid">
+              ${achievements.map(achievement => renderAchievementBadge(achievement)).join('')}
+            </div>
+          </section>
+        `).join('')}
+      </main>
+    </div>
+  `;
+
+  // Attach navigation event listeners
+  attachNavigationListeners(screen);
+}
+
+/**
+ * Render a single achievement badge
+ * @param {Object} definition - Achievement definition object
+ * @returns {string} HTML string for the badge
+ */
+function renderAchievementBadge(definition) {
+  const progress = state.achievements.find(a => a.id === definition.id) || { progress: 0, unlockedAt: null };
+  const isUnlocked = progress.unlockedAt !== null;
+  const progressPercent = getAchievementProgressPercentage(definition.id, progress.progress);
+  const target = definition.condition?.target || 1;
+
+  // Format unlock date if unlocked
+  let unlockDateStr = '';
+  if (isUnlocked && progress.unlockedAt) {
+    const date = new Date(progress.unlockedAt);
+    unlockDateStr = date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+  }
+
+  return `
+    <div class="achievement-badge ${isUnlocked ? 'unlocked' : 'locked'}" data-achievement-id="${definition.id}">
+      <div class="achievement-icon ${isUnlocked ? '' : 'grayscale'}">${definition.icon}</div>
+      <div class="achievement-info">
+        <span class="achievement-title">${definition.title}</span>
+        <span class="achievement-description">${definition.description}</span>
+        ${isUnlocked ? `
+          <span class="achievement-unlock-date">Unlocked ${unlockDateStr}</span>
+        ` : `
+          <div class="achievement-progress">
+            <div class="achievement-progress-bar">
+              <div class="achievement-progress-fill" style="width: ${progressPercent}%"></div>
+            </div>
+            <span class="achievement-progress-text">${progress.progress} / ${target}</span>
+          </div>
+        `}
+      </div>
+      ${isUnlocked ? '<div class="achievement-check">✓</div>' : ''}
+    </div>
+  `;
+}
+
+/**
+ * Check and unlock achievements based on current state and trigger
+ * Called after goal completions, goal creation, etc.
+ * @param {string} trigger - What triggered the check (e.g., 'goal_complete', 'goal_create')
+ * @param {Object} context - Additional context about the trigger
+ */
+async function checkAchievements(trigger, context = {}) {
+  const history = await getHistory();
+  const activityLog = await getActivityLog();
+  let achievementUnlocked = false;
+
+  for (const achievement of state.achievements) {
+    if (achievement.unlockedAt !== null) continue; // Already unlocked
+
+    const definition = getAchievementDefinition(achievement.id);
+    if (!definition) continue;
+
+    const condition = definition.condition;
+    let newProgress = achievement.progress;
+    let shouldUnlock = false;
+
+    switch (condition.type) {
+      case 'total_completions':
+        // Count total completions from history
+        newProgress = history.filter(h => h.completed).length;
+        shouldUnlock = newProgress >= condition.target;
+        break;
+
+      case 'total_goals_created':
+        // Count total goals ever created (active + archived)
+        newProgress = state.goals.length + state.archivedGoals.length;
+        shouldUnlock = newProgress >= condition.target;
+        break;
+
+      case 'streak':
+        // Check current or best streak
+        const maxStreak = Math.max(
+          state.streakData?.currentStreak || 0,
+          state.streakData?.bestStreak || 0
+        );
+        newProgress = maxStreak;
+        shouldUnlock = maxStreak >= condition.target;
+        break;
+
+      case 'all_goals_completed_day':
+        // Check if all goals were completed today
+        if (trigger === 'goal_complete' && state.goals.length > 0) {
+          const allCompleted = state.goals.every(g => isGoalCompleted(g));
+          if (allCompleted) {
+            newProgress = 1;
+            shouldUnlock = true;
+          }
+        }
+        break;
+
+      case 'perfect_days':
+        // Count consecutive perfect days
+        newProgress = countPerfectDays(history, state.goals);
+        shouldUnlock = newProgress >= condition.target;
+        break;
+
+      case 'complete_before_hour':
+        // Check if a goal was completed before specified hour
+        if (trigger === 'goal_complete') {
+          const hour = new Date().getHours();
+          if (hour < condition.target) {
+            newProgress = 1;
+            shouldUnlock = true;
+          }
+        }
+        break;
+
+      case 'complete_after_hour':
+        // Check if a goal was completed after specified hour
+        if (trigger === 'goal_complete') {
+          const hour = new Date().getHours();
+          if (hour >= condition.target) {
+            newProgress = 1;
+            shouldUnlock = true;
+          }
+        }
+        break;
+
+      case 'timer_hours':
+        // Check accumulated timer hours for context goal
+        if (trigger === 'goal_complete' && context.goal?.type === GOAL_TYPES.TIMER) {
+          const timerHours = context.goal.progress / 3600;
+          newProgress = Math.floor(timerHours);
+          shouldUnlock = timerHours >= condition.target;
+        }
+        break;
+
+      case 'counter_target':
+        // Check if a counter goal reached target
+        if (context.goal?.type === GOAL_TYPES.COUNTER) {
+          newProgress = Math.max(newProgress, context.goal.progress);
+          shouldUnlock = context.goal.progress >= condition.target;
+        }
+        break;
+
+      case 'all_types_completed_day':
+        // Check if user completed all three goal types today
+        if (trigger === 'goal_complete') {
+          const completedTypes = new Set();
+          for (const goal of state.goals) {
+            if (isGoalCompleted(goal)) {
+              completedTypes.add(goal.type);
+            }
+          }
+          if (completedTypes.size >= 3) {
+            newProgress = 1;
+            shouldUnlock = true;
+          }
+        }
+        break;
+
+      case 'categories_used':
+        // Count distinct categories used in completed goals
+        const categoriesUsed = new Set();
+        for (const h of history) {
+          if (h.completed) {
+            const goal = state.goals.find(g => g.id === h.goalId) ||
+                         state.archivedGoals.find(g => g.id === h.goalId);
+            if (goal?.category) {
+              categoriesUsed.add(goal.category);
+            }
+          }
+        }
+        newProgress = categoriesUsed.size;
+        shouldUnlock = categoriesUsed.size >= condition.target;
+        break;
+    }
+
+    // Update progress
+    if (newProgress !== achievement.progress) {
+      achievement.progress = newProgress;
+      await updateAchievement(achievement.id, { progress: newProgress });
+    }
+
+    // Unlock if condition met
+    if (shouldUnlock) {
+      achievement.unlockedAt = Date.now();
+      await unlockAchievement(achievement.id);
+      achievementUnlocked = true;
+
+      // Show unlock notification
+      showAchievementUnlockNotification(definition);
+    }
+  }
+
+  return achievementUnlocked;
+}
+
+/**
+ * Count consecutive days where all goals were completed
+ * @param {Array} history - History entries
+ * @param {Array} goals - Current goals
+ * @returns {number} Number of consecutive perfect days
+ */
+function countPerfectDays(history, goals) {
+  if (goals.length === 0) return 0;
+
+  const historyByDate = groupHistoryByDate(history);
+  let perfectDays = 0;
+  let currentDate = new Date();
+
+  // Check backwards from today
+  for (let i = 0; i < 30; i++) { // Check up to 30 days back
+    const dateStr = currentDate.toISOString().split('T')[0];
+    const dayHistory = historyByDate[dateStr] || [];
+
+    // Check if all goals were completed on this day
+    const allCompleted = dayHistory.length > 0 && dayHistory.every(h => h.completed);
+
+    if (allCompleted) {
+      perfectDays++;
+      currentDate.setDate(currentDate.getDate() - 1);
+    } else {
+      break;
+    }
+  }
+
+  return perfectDays;
+}
+
+/**
+ * Show achievement unlock notification
+ * @param {Object} definition - Achievement definition
+ */
+function showAchievementUnlockNotification(definition) {
+  // Create toast notification
+  const existingToast = document.querySelector('.achievement-toast');
+  if (existingToast) {
+    existingToast.remove();
+  }
+
+  const toast = document.createElement('div');
+  toast.className = 'achievement-toast';
+  toast.innerHTML = `
+    <div class="achievement-toast-content">
+      <div class="achievement-toast-icon">${definition.icon}</div>
+      <div class="achievement-toast-info">
+        <span class="achievement-toast-label">Achievement Unlocked!</span>
+        <span class="achievement-toast-title">${definition.title}</span>
+      </div>
+    </div>
+  `;
+
+  document.getElementById('app').appendChild(toast);
+
+  // Play sound
+  if (state.settings?.soundEnabled) {
+    playSound(SOUNDS.COMPLETE);
+  }
+
+  // Trigger confetti
+  launchConfetti({ intensity: 'high', duration: 2500 });
+
+  // Animate in
+  setTimeout(() => {
+    toast.classList.add('show');
+  }, 10);
+
+  // Remove after delay
+  setTimeout(() => {
+    toast.classList.remove('show');
+    setTimeout(() => {
+      toast.remove();
+    }, 300);
+  }, 4000);
+}
+
 /**
  * Render the Reports screen
  * US-043: Reports Screen Layout
@@ -7777,6 +8160,22 @@ function renderReportsScreen() {
               <span class="weekly-review-nav-desc">See your weekly summary and achievements</span>
             </div>
             <div class="weekly-review-nav-arrow">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="9 18 15 12 9 6"/>
+              </svg>
+            </div>
+          </button>
+        </section>
+
+        <!-- US-080: Achievements Navigation -->
+        <section class="reports-section achievements-nav-section">
+          <button class="achievements-nav-btn" data-screen="${SCREENS.ACHIEVEMENTS}">
+            <div class="achievements-nav-icon">🏆</div>
+            <div class="achievements-nav-content">
+              <span class="achievements-nav-title">Achievements</span>
+              <span class="achievements-nav-desc">View all badges and milestones</span>
+            </div>
+            <div class="achievements-nav-arrow">
               <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                 <polyline points="9 18 15 12 9 6"/>
               </svg>
@@ -8268,6 +8667,9 @@ async function updateStreakDisplay() {
     };
     state.streakData = newStreakData;
     await saveStreakData(newStreakData);
+
+    // US-080: Check streak-related achievements when streak is updated
+    checkAchievements('streak_update', { streak: currentStreak, bestStreak });
   }
 }
 
@@ -9574,15 +9976,16 @@ async function loadData() {
   try {
     state.isLoading = true;
 
-    // Load goals, settings, active timers, streak data, categories, templates, and archived goals in parallel
-    const [goals, settings, activeTimers, streakData, categories, templates, archivedGoals] = await Promise.all([
+    // Load goals, settings, active timers, streak data, categories, templates, archived goals, and achievements in parallel
+    const [goals, settings, activeTimers, streakData, categories, templates, archivedGoals, achievements] = await Promise.all([
       getGoals(),
       getSettings(),
       getActiveTimers(),
       getStreakData(),
       getCategories(),
       getTemplates(), // US-066: Load templates
-      getArchivedGoals() // US-069: Load archived goals
+      getArchivedGoals(), // US-069: Load archived goals
+      getAchievements() // US-080: Load achievements
     ]);
 
     // Update state
@@ -9594,6 +9997,14 @@ async function loadData() {
     state.templates = templates; // US-066
     state.archivedGoals = archivedGoals; // US-069
 
+    // US-080: Initialize achievements if not present
+    if (!achievements || achievements.length === 0) {
+      state.achievements = createDefaultAchievementProgress();
+      await saveAchievements(state.achievements);
+    } else {
+      state.achievements = achievements;
+    }
+
     console.log('Data loaded:', {
       goalsCount: goals.length,
       settings: settings,
@@ -9601,7 +10012,8 @@ async function loadData() {
       streakData: streakData,
       categoriesCount: categories.length,
       templatesCount: templates.length,
-      archivedGoalsCount: archivedGoals.length
+      archivedGoalsCount: archivedGoals.length,
+      achievementsCount: state.achievements.length
     });
 
     // US-039: Initialize sound system with user settings
