@@ -4,10 +4,9 @@
  */
 
 import { state, SCREENS, SCREEN_IDS } from '../state.js';
-import { isGoalCompleted } from '../../utils/models.js';
+import { isGoalCompleted, getLevelTitle, getLevelProgress } from '../../utils/models.js';
 import { saveSettings } from '../../utils/storage.js';
 import { getDailyQuote, renderQuoteHTML } from '../../utils/quotes.js';
-import { getLevelTitle, getLevelProgress } from '../features/xpLevels.js';
 import { renderDailyChallengeCard, attachDailyChallengeListeners } from '../features/dailyChallenges.js';
 import { renderQuickAddFAB, attachQuickAddFABListeners } from './quickAdd.js';
 import { renderGoalCard } from '../components/goalCard.js';

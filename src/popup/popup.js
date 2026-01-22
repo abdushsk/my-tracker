@@ -1667,17 +1667,12 @@ export {
   showSuccessFeedback,
   showFormError,
   clearFormError,
-  // US-029 Edit goal functions
-  handleEditGoal,
-  attachManageGoalsListeners,
+  // US-029 Edit goal functions (handleEditGoal, attachManageGoalsListeners are internal to manageGoals.js)
   // US-058 Full-page Goal Form Screen functions (re-exported from ./screens/goalForm.js)
   openGoalFormScreen,
   renderGoalFormScreen,
   setGoalFormScreenType,
-  // US-030 Delete goal confirmation functions
-  openDeleteConfirmModal,
-  closeDeleteConfirmModal,
-  handleConfirmDelete,
+  // US-030 Delete goal confirmation functions (internal to manageGoals.js)
   // US-031 Background timer sync functions
   syncActiveTimersWithGoals,
   sendToServiceWorker,
