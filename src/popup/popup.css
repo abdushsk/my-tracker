@@ -142,6 +142,35 @@
   --timeframe-yearly: var(--type-avoidance);
   --timeframe-yearly-subtle: var(--type-avoidance-subtle);
 
+  /* Category colors (fixed across themes) */
+  --category-work: #2196F3;
+  --category-work-subtle: #E3F2FD;
+  --category-work-text: #1976D2;
+  --category-health: #4CAF50;
+  --category-health-subtle: #E8F5E9;
+  --category-health-text: #388E3C;
+  --category-learning: #9C27B0;
+  --category-learning-subtle: #F3E5F5;
+  --category-learning-text: #7B1FA2;
+  --category-personal: #FF9800;
+  --category-personal-subtle: #FFF3E0;
+  --category-personal-text: #F57C00;
+
+  /* Reward/Achievement colors (gold theme) */
+  --reward: #FFD700;
+  --reward-hover: #FFA500;
+  --reward-subtle: #FFF8E1;
+  --reward-text: #5D4E00;
+  --reward-gradient: linear-gradient(135deg, #FFD700 0%, #FFA500 100%);
+
+  /* Challenge colors */
+  --challenge: #667eea;
+  --challenge-hover: #764ba2;
+  --challenge-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  --challenge-complete: #11998e;
+  --challenge-complete-hover: #38ef7d;
+  --challenge-complete-gradient: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+
   /* Heatmap colors */
   --heatmap-level-0: #F0F0F0;
   --heatmap-level-1: #D1FAE5;
@@ -231,6 +260,31 @@
   --type-checkbox-subtle: rgba(52, 211, 153, 0.2);
   --type-avoidance: #A78BFA;
   --type-avoidance-subtle: rgba(167, 139, 250, 0.2);
+
+  /* Category colors - dark mode (lighter backgrounds for visibility) */
+  --category-work-subtle: #1A2A3A;
+  --category-work-text: #64B5F6;
+  --category-health-subtle: #1B3A1E;
+  --category-health-text: #81C784;
+  --category-learning-subtle: #2A1A3A;
+  --category-learning-text: #CE93D8;
+  --category-personal-subtle: #3A2A1A;
+  --category-personal-text: #FFB74D;
+
+  /* Reward/Achievement colors - dark mode (darker gold) */
+  --reward: #B8860B;
+  --reward-hover: #DAA520;
+  --reward-subtle: rgba(184, 134, 11, 0.2);
+  --reward-text: #FFF8DC;
+  --reward-gradient: linear-gradient(135deg, #B8860B 0%, #DAA520 100%);
+
+  /* Challenge colors - dark mode */
+  --challenge: #4a5568;
+  --challenge-hover: #2d3748;
+  --challenge-gradient: linear-gradient(135deg, #4a5568 0%, #2d3748 100%);
+  --challenge-complete: #0f766e;
+  --challenge-complete-hover: #059669;
+  --challenge-complete-gradient: linear-gradient(135deg, #0f766e 0%, #059669 100%);
 
   /* Heatmap colors - US-002: Enhanced visibility for dark mode */
   --heatmap-level-0: #2A2A2A;
@@ -4689,26 +4743,26 @@ body.modal-open {
 
 /* Category-specific active colors */
 .category-option[data-category="work"].active {
-  border-color: #2196F3;
-  background-color: #E3F2FD;
+  border-color: var(--category-work);
+  background-color: var(--category-work-subtle);
   box-shadow: 0 0 0 2px rgba(33, 150, 243, 0.12);
 }
 
 .category-option[data-category="health"].active {
-  border-color: #4CAF50;
-  background-color: #E8F5E9;
+  border-color: var(--category-health);
+  background-color: var(--category-health-subtle);
   box-shadow: 0 0 0 2px rgba(76, 175, 80, 0.12);
 }
 
 .category-option[data-category="learning"].active {
-  border-color: #9C27B0;
-  background-color: #F3E5F5;
+  border-color: var(--category-learning);
+  background-color: var(--category-learning-subtle);
   box-shadow: 0 0 0 2px rgba(156, 39, 176, 0.12);
 }
 
 .category-option[data-category="personal"].active {
-  border-color: #FF9800;
-  background-color: #FFF3E0;
+  border-color: var(--category-personal);
+  background-color: var(--category-personal-subtle);
   box-shadow: 0 0 0 2px rgba(255, 152, 0, 0.12);
 }
 
@@ -4729,19 +4783,19 @@ body.modal-open {
 
 /* Category-specific icon colors */
 .category-option[data-category="work"] .category-option-icon {
-  background-color: #2196F3;
+  background-color: var(--category-work);
 }
 
 .category-option[data-category="health"] .category-option-icon {
-  background-color: #4CAF50;
+  background-color: var(--category-health);
 }
 
 .category-option[data-category="learning"] .category-option-icon {
-  background-color: #9C27B0;
+  background-color: var(--category-learning);
 }
 
 .category-option[data-category="personal"] .category-option-icon {
-  background-color: #FF9800;
+  background-color: var(--category-personal);
 }
 
 /* Category option label */
@@ -4843,65 +4897,30 @@ body.modal-open {
 }
 
 .category-filter-chip[data-category="work"].active {
-  border-color: #2196F3;
-  background-color: #E3F2FD;
-  color: #1976D2;
+  border-color: var(--category-work);
+  background-color: var(--category-work-subtle);
+  color: var(--category-work-text);
 }
 
 .category-filter-chip[data-category="health"].active {
-  border-color: #4CAF50;
-  background-color: #E8F5E9;
-  color: #388E3C;
+  border-color: var(--category-health);
+  background-color: var(--category-health-subtle);
+  color: var(--category-health-text);
 }
 
 .category-filter-chip[data-category="learning"].active {
-  border-color: #9C27B0;
-  background-color: #F3E5F5;
-  color: #7B1FA2;
+  border-color: var(--category-learning);
+  background-color: var(--category-learning-subtle);
+  color: var(--category-learning-text);
 }
 
 .category-filter-chip[data-category="personal"].active {
-  border-color: #FF9800;
-  background-color: #FFF3E0;
-  color: #F57C00;
+  border-color: var(--category-personal);
+  background-color: var(--category-personal-subtle);
+  color: var(--category-personal-text);
 }
 
-/* Dark mode adjustments for categories */
-[data-theme='dark'] .category-option[data-category="work"].active {
-  background-color: #1A2A3A;
-}
-
-[data-theme='dark'] .category-option[data-category="health"].active {
-  background-color: #1B3A1E;
-}
-
-[data-theme='dark'] .category-option[data-category="learning"].active {
-  background-color: #2A1A3A;
-}
-
-[data-theme='dark'] .category-option[data-category="personal"].active {
-  background-color: #3A2A1A;
-}
-
-[data-theme='dark'] .category-filter-chip[data-category="work"].active {
-  background-color: #1A2A3A;
-  color: #64B5F6;
-}
-
-[data-theme='dark'] .category-filter-chip[data-category="health"].active {
-  background-color: #1B3A1E;
-  color: #81C784;
-}
-
-[data-theme='dark'] .category-filter-chip[data-category="learning"].active {
-  background-color: #2A1A3A;
-  color: #CE93D8;
-}
-
-[data-theme='dark'] .category-filter-chip[data-category="personal"].active {
-  background-color: #3A2A1A;
-  color: #FFB74D;
-}
+/* Dark mode adjustments for categories now handled by CSS variables */
 
 /* ========================================
    US-028: Add Goal Form - Save Logic
@@ -8063,8 +8082,8 @@ body.modal-open {
 }
 
 .streak-card-mini.best {
-  background: linear-gradient(135deg, var(--background) 0%, #FFF8E1 100%);
-  border-color: var(--gold);
+  background: linear-gradient(135deg, var(--background) 0%, var(--reward-subtle) 100%);
+  border-color: var(--reward);
 }
 
 .streak-card-mini .streak-icon {
@@ -8297,11 +8316,11 @@ body.modal-open {
    Dark Mode Support for Weekly Review
    ---------------------------------------- */
 [data-theme="dark"] .weekly-review-nav-btn {
-  background: linear-gradient(135deg, var(--card-bg) 0%, rgba(76, 175, 80, 0.1) 100%);
+  background: linear-gradient(135deg, var(--card-bg) 0%, var(--accent-subtle) 100%);
 }
 
 [data-theme="dark"] .completions-card {
-  background: linear-gradient(135deg, var(--card-bg) 0%, rgba(76, 175, 80, 0.1) 100%);
+  background: linear-gradient(135deg, var(--card-bg) 0%, var(--accent-subtle) 100%);
 }
 
 [data-theme="dark"] .time-card,
@@ -8315,19 +8334,19 @@ body.modal-open {
 }
 
 [data-theme="dark"] .streak-card-mini.active {
-  background: linear-gradient(135deg, var(--card-bg) 0%, rgba(255, 152, 0, 0.15) 100%);
+  background: linear-gradient(135deg, var(--card-bg) 0%, var(--warning-subtle) 100%);
 }
 
 [data-theme="dark"] .streak-card-mini.best {
-  background: linear-gradient(135deg, var(--card-bg) 0%, rgba(255, 193, 7, 0.15) 100%);
+  background: linear-gradient(135deg, var(--card-bg) 0%, var(--reward-subtle) 100%);
 }
 
 [data-theme="dark"] .performance-card.best-performer {
-  background: linear-gradient(135deg, var(--card-bg) 0%, rgba(76, 175, 80, 0.15) 100%);
+  background: linear-gradient(135deg, var(--card-bg) 0%, var(--accent-subtle) 100%);
 }
 
 [data-theme="dark"] .performance-card.needs-work {
-  background: linear-gradient(135deg, var(--card-bg) 0%, rgba(255, 152, 0, 0.15) 100%);
+  background: linear-gradient(135deg, var(--card-bg) 0%, var(--warning-subtle) 100%);
 }
 
 [data-theme="dark"] .breakdown-bar-wrapper {
@@ -8738,11 +8757,11 @@ body.modal-open {
 }
 
 .completion-quote-content {
-  background: linear-gradient(135deg, var(--success) 0%, #34a853 100%);
-  color: white;
+  background: linear-gradient(135deg, var(--accent) 0%, var(--accent-hover) 100%);
+  color: var(--text-inverse);
   border-radius: var(--radius-lg);
   padding: var(--spacing-md);
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.25);
+  box-shadow: var(--shadow-lg);
   text-align: center;
 }
 
@@ -8757,7 +8776,7 @@ body.modal-open {
   font-style: italic;
   line-height: 1.5;
   margin: 0 0 var(--spacing-xs) 0;
-  color: white;
+  color: var(--text-inverse);
 }
 
 .completion-quote-author {
@@ -8820,9 +8839,7 @@ body.modal-open {
   border-left-color: var(--primary-light);
 }
 
-[data-theme="dark"] .completion-quote-content {
-  background: linear-gradient(135deg, #2e7d32 0%, #388e3c 100%);
-}
+/* Dark mode completion quote - handled by accent variables */
 
 [data-theme="dark"] .weekly-review-quote {
   background: linear-gradient(135deg, var(--bg-secondary) 0%, var(--bg-tertiary) 100%);
@@ -9142,9 +9159,9 @@ body.modal-open {
   align-items: center;
   gap: var(--spacing-md);
   padding: var(--spacing-md);
-  background: linear-gradient(135deg, #FFD700 0%, #FFA500 100%);
+  background: var(--reward-gradient);
   border-radius: var(--radius-lg);
-  color: #333;
+  color: var(--reward-text);
 }
 
 .achievements-summary-icon {
@@ -9182,7 +9199,7 @@ body.modal-open {
 
 .achievements-summary-fill {
   height: 100%;
-  background: #333;
+  background: var(--reward-text);
   border-radius: 4px;
   transition: width 0.3s ease;
 }
@@ -9210,8 +9227,8 @@ body.modal-open {
 }
 
 .achievement-badge.unlocked {
-  background: linear-gradient(135deg, rgba(255, 215, 0, 0.15) 0%, rgba(255, 165, 0, 0.1) 100%);
-  border-color: #FFD700;
+  background: linear-gradient(135deg, var(--reward-subtle) 0%, rgba(255, 165, 0, 0.1) 100%);
+  border-color: var(--reward);
 }
 
 .achievement-badge.locked {
@@ -9249,7 +9266,7 @@ body.modal-open {
 
 .achievement-unlock-date {
   font-size: var(--font-xs);
-  color: #FFB300;
+  color: var(--reward);
   margin-top: var(--spacing-xs);
 }
 
@@ -9259,8 +9276,8 @@ body.modal-open {
   right: var(--spacing-xs);
   width: 20px;
   height: 20px;
-  background: #4CAF50;
-  color: white;
+  background: var(--accent);
+  color: var(--text-inverse);
   border-radius: 50%;
   display: flex;
   align-items: center;
@@ -9319,7 +9336,7 @@ body.modal-open {
 
 .achievements-nav-btn:hover {
   background: var(--bg-tertiary);
-  border-color: #FFD700;
+  border-color: var(--reward);
 }
 
 .achievements-nav-icon {
@@ -9456,27 +9473,27 @@ body.modal-open {
 
 /* Daily Challenge Card */
 .daily-challenge-card {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: var(--challenge-gradient);
   border-radius: 12px;
   padding: 16px;
   margin-bottom: 16px;
   color: white;
-  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+  box-shadow: var(--shadow-md);
   transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 
 .daily-challenge-card:hover {
   transform: translateY(-2px);
-  box-shadow: 0 6px 16px rgba(102, 126, 234, 0.4);
+  box-shadow: var(--shadow-lg);
 }
 
 .daily-challenge-card.completed {
-  background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
-  box-shadow: 0 4px 12px rgba(17, 153, 142, 0.3);
+  background: var(--challenge-complete-gradient);
+  box-shadow: var(--shadow-md);
 }
 
 .daily-challenge-card.completed:hover {
-  box-shadow: 0 6px 16px rgba(17, 153, 142, 0.4);
+  box-shadow: var(--shadow-lg);
 }
 
 /* Challenge Header */
@@ -9619,11 +9636,11 @@ body.modal-open {
   bottom: 80px;
   left: 50%;
   transform: translateX(-50%) translateY(100px);
-  background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+  background: var(--challenge-complete-gradient);
   color: white;
   border-radius: 12px;
   padding: 16px 20px;
-  box-shadow: 0 8px 32px rgba(17, 153, 142, 0.4);
+  box-shadow: var(--shadow-lg);
   z-index: 1100;
   opacity: 0;
   transition: transform 0.3s ease, opacity 0.3s ease;
@@ -9675,11 +9692,11 @@ body.modal-open {
   bottom: 80px;
   left: 50%;
   transform: translateX(-50%) translateY(50px);
-  background: var(--card-bg, #ffffff);
-  color: var(--text-color, #1a1a2e);
+  background: var(--card-bg);
+  color: var(--text);
   border-radius: 8px;
   padding: 12px 20px;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+  box-shadow: var(--shadow-lg);
   z-index: 1100;
   opacity: 0;
   transition: transform 0.3s ease, opacity 0.3s ease;
@@ -9692,30 +9709,7 @@ body.modal-open {
   opacity: 1;
 }
 
-/* Dark Mode Adjustments */
-[data-theme="dark"] .daily-challenge-card {
-  background: linear-gradient(135deg, #4a5568 0%, #2d3748 100%);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
-}
-
-[data-theme="dark"] .daily-challenge-card:hover {
-  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.4);
-}
-
-[data-theme="dark"] .daily-challenge-card.completed {
-  background: linear-gradient(135deg, #0f766e 0%, #059669 100%);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
-}
-
-[data-theme="dark"] .challenge-toast {
-  background: linear-gradient(135deg, #0f766e 0%, #059669 100%);
-}
-
-[data-theme="dark"] .simple-toast {
-  background: var(--card-bg, #1e1e2e);
-  color: var(--text-color, #ffffff);
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
-}
+/* Dark Mode Adjustments - Now handled by CSS variables */
 
 /* Reduced Motion */
 @media (prefers-reduced-motion: reduce) {
@@ -10217,10 +10211,10 @@ body.modal-open {
   align-items: center;
   gap: 6px;
   padding: 4px 10px;
-  background: linear-gradient(135deg, #FFD700 0%, #FFA500 100%);
+  background: var(--reward-gradient);
   border-radius: 20px;
   cursor: default;
-  box-shadow: 0 2px 6px rgba(255, 215, 0, 0.3);
+  box-shadow: var(--shadow-md);
   margin-left: auto;
   margin-right: 8px;
 }
@@ -10233,7 +10227,7 @@ body.modal-open {
 .level-number {
   font-size: 12px;
   font-weight: 700;
-  color: #5D4E00;
+  color: var(--reward-text);
   letter-spacing: -0.3px;
 }
 
@@ -10308,9 +10302,9 @@ body.modal-open {
   transform: translate(-50%, -50%) scale(0.7);
   z-index: 10001;
   padding: 24px 40px;
-  background: linear-gradient(135deg, #FFD700 0%, #FFA500 100%);
+  background: var(--reward-gradient);
   border-radius: 16px;
-  box-shadow: 0 8px 32px rgba(255, 215, 0, 0.5);
+  box-shadow: var(--shadow-lg);
   opacity: 0;
   transition: opacity 0.3s ease, transform 0.3s ease;
   text-align: center;
@@ -10346,21 +10340,21 @@ body.modal-open {
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 1px;
-  color: #5D4E00;
+  color: var(--reward-text);
   opacity: 0.8;
 }
 
 .level-up-level {
   font-size: 28px;
   font-weight: 800;
-  color: #5D4E00;
+  color: var(--reward-text);
   letter-spacing: -0.5px;
 }
 
 .level-up-title {
   font-size: 14px;
   font-weight: 600;
-  color: #5D4E00;
+  color: var(--reward-text);
   opacity: 0.9;
 }
 
@@ -10402,16 +10396,7 @@ body.modal-open {
   }
 }
 
-/* Dark Mode - Level and XP */
-[data-theme="dark"] .level-badge {
-  background: linear-gradient(135deg, #B8860B 0%, #DAA520 100%);
-  box-shadow: 0 2px 6px rgba(184, 134, 11, 0.3);
-}
-
-[data-theme="dark"] .level-number {
-  color: #FFF8DC;
-}
-
+/* Dark Mode - Level and XP (now handled by CSS variables) */
 [data-theme="dark"] .level-progress-mini {
   background: rgba(255, 255, 255, 0.15);
 }
@@ -10419,17 +10404,6 @@ body.modal-open {
 [data-theme="dark"] .xp-toast {
   background: linear-gradient(135deg, var(--accent-hover) 0%, var(--accent-active) 100%);
   box-shadow: var(--shadow-lg);
-}
-
-[data-theme="dark"] .level-up-notification {
-  background: linear-gradient(135deg, #B8860B 0%, #DAA520 100%);
-  box-shadow: 0 8px 32px rgba(184, 134, 11, 0.5);
-}
-
-[data-theme="dark"] .level-up-label,
-[data-theme="dark"] .level-up-level,
-[data-theme="dark"] .level-up-title {
-  color: #FFF8DC;
 }
 
 /* Reduced Motion - Level and XP */

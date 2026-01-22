@@ -31,7 +31,7 @@
       "title": "Conduct comprehensive UI review",
       "description": "Perform a thorough review of the entire user interface to identify and address any additional inconsistencies or issues. Ensure that the overall design is cohesive and user-friendly.",
       "priority": 4,
-      "passes": false
+      "passes": true
     },
     {
       "id": "US-005",
@@ -101,6 +101,27 @@
       "title": "Update app name to 'My Tracker'",
       "description": "Change the application name from 'Daily Goals Tracker' to 'My Tracker' across all instances in the extension, including the manifest file, UI elements, and documentation. Ensure that the new name is consistently applied throughout the user interface and related materials.",
       "priority": 14,
+      "passes": false
+    },
+    {
+      "id": "US-015",
+      "title": "Improve checkbox goal card UI",
+      "description": "Redesign the checkbox goal card to make it more compact and visually appealing. Focus on enhancing the layout, typography, and overall aesthetics to improve user engagement and satisfaction.",
+      "priority": 15,
+      "passes": false
+    },
+    {
+      "id": "US-016",
+      "title": "Optimize checkbox goal focus mode",
+      "description": "In the focus mode for checkbox goals, streamline the interface by displaying only the checkbox itself. Remove additional elements such as the 'mark as done' text button and the progress bar to create a cleaner and more focused user experience.",
+      "priority": 16,
+      "passes": false
+    },
+    {
+      "id": "US-017",
+      "title": "Refine last 30 days stats chart",
+      "description": "Enhance the readability of the last 30 days stats chart by adjusting the x-axis labels. Display only the starting date, ending date, and every 5th date in between to reduce clutter and improve clarity.",
+      "priority": 17,
       "passes": false
     }
   ]

@@ -106,3 +106,58 @@
 - Box shadows should use `var(--shadow-*)` for consistency across themes
 - Category-specific colors (work, health, learning, personal) are intentionally hardcoded as they don't change with themes
 
+## US-004: Comprehensive UI Review (Completed)
+**Date**: 2026-01-23
+
+### Changes Made
+
+1. **Added new CSS variable groups** (popup.css):
+   - **Category colors**: `--category-work`, `--category-health`, `--category-learning`, `--category-personal` with subtle and text variants
+   - **Reward/Achievement colors**: `--reward`, `--reward-hover`, `--reward-subtle`, `--reward-text`, `--reward-gradient`
+   - **Challenge colors**: `--challenge`, `--challenge-gradient`, `--challenge-complete`, `--challenge-complete-gradient`
+   - All variables have both light and dark mode definitions
+
+2. **Category styling refactored** to use CSS variables:
+   - `.category-option[data-category="*"].active` now uses `var(--category-*)`
+   - `.category-option-icon` backgrounds use `var(--category-*)`
+   - `.category-filter-chip[data-category="*"].active` uses `var(--category-*-subtle)` and `var(--category-*-text)`
+   - Removed redundant dark mode overrides (now handled by CSS variables)
+
+3. **Achievement/Reward system colors consolidated**:
+   - `.achievements-summary-card`: Uses `var(--reward-gradient)` and `var(--reward-text)`
+   - `.achievement-badge.unlocked`: Uses `var(--reward-subtle)` and `var(--reward)`
+   - `.achievement-unlock-date`: Uses `var(--reward)`
+   - `.achievement-check`: Uses `var(--accent)` and `var(--text-inverse)`
+   - `.achievements-nav-btn:hover`: Uses `var(--reward)` for border
+
+4. **Level/XP system colors consolidated**:
+   - `.level-badge`: Uses `var(--reward-gradient)` and `var(--shadow-md)`
+   - `.level-number`: Uses `var(--reward-text)`
+   - `.level-up-notification`: Uses `var(--reward-gradient)` and `var(--shadow-lg)`
+   - `.level-up-label`, `.level-up-level`, `.level-up-title`: Use `var(--reward-text)`
+   - Removed redundant dark mode overrides
+
+5. **Daily Challenge colors consolidated**:
+   - `.daily-challenge-card`: Uses `var(--challenge-gradient)` and `var(--shadow-md)`
+   - `.daily-challenge-card.completed`: Uses `var(--challenge-complete-gradient)`
+   - `.challenge-toast`: Uses `var(--challenge-complete-gradient)`
+   - `.simple-toast`: Uses `var(--card-bg)`, `var(--text)`, `var(--shadow-lg)`
+   - Removed redundant dark mode overrides
+
+6. **Completion quote styling**:
+   - `.completion-quote-content`: Uses `var(--accent)`, `var(--accent-hover)`, `var(--text-inverse)`
+   - `.completion-quote-text`: Uses `var(--text-inverse)`
+   - Removed redundant dark mode override
+
+7. **Streak and performance cards** (weekly review):
+   - `.streak-card-mini.best`: Uses `var(--reward-subtle)` and `var(--reward)`
+   - Dark mode overrides now use semantic variables (`var(--accent-subtle)`, `var(--warning-subtle)`, `var(--reward-subtle)`)
+
+### Key Learnings
+- Creating semantic color variable groups (category, reward, challenge) makes code more maintainable
+- Gradients can be stored as CSS variables for consistent theming
+- Dark mode should primarily be handled by CSS variable definitions in `:root` and `[data-theme='dark']`
+- Redundant dark mode overrides can be removed when CSS variables handle theme switching
+- Category colors are fixed across themes (intentional - they represent distinct categories)
+- Reward/gold colors need darker shades in dark mode for better contrast
+
