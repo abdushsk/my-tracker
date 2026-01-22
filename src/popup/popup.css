@@ -1731,6 +1731,12 @@ select:focus {
   font-weight: var(--font-weight-semibold);
   color: var(--text);
   margin: 0;
+  text-align: center;
+}
+
+/* Spacer for goal form header - matches back button width for centered title */
+.goal-form-header .header-spacer {
+  min-width: 36px;
 }
 
 /* Goal Form Content - Scrollable area */

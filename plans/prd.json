@@ -79,7 +79,7 @@
       "title": "Add new goal screen title is not in center, fix it",
       "description": "",
       "priority": 11,
-      "passes": false
+      "passes": true
     },
     {
       "id": "US-012",

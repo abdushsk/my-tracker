@@ -375,3 +375,22 @@
 - Adding `cursor: pointer` provides visual feedback that the bar area is interactive
 - Placing the percentage inside the bar wrapper (instead of below the day label) keeps the hover interaction localized to the relevant visual element
 
+## US-011: Fix Add New Goal Screen Title Centering (Completed)
+**Date**: 2026-01-23
+
+### Changes Made
+
+1. **Fixed header spacer width mismatch** (popup.css:1737-1739):
+   - The `.goal-form-header` uses `justify-content: space-between` with three elements: back button (36px), title, and spacer
+   - The generic `.header-spacer` had `min-width: 70px` while the back button had `min-width: 36px`
+   - Added `.goal-form-header .header-spacer { min-width: 36px; }` to match the back button width
+   - This ensures the title is perfectly centered between the two equal-width elements
+
+2. **Added text-align center to title** (popup.css:1734):
+   - Added `text-align: center` to `.goal-form-title` for explicit centering within its flex space
+
+### Key Learnings
+- When using `justify-content: space-between` with a centered title flanked by two elements, both flanking elements must have equal widths for the title to be truly centered
+- The generic `.header-spacer` class is used across multiple screens; screen-specific overrides should be scoped to avoid breaking other screens (e.g., `.goal-form-header .header-spacer`)
+- Using `text-align: center` on the title provides an additional safeguard for centering within its allocated flex space
+
