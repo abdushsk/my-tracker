@@ -496,7 +496,7 @@
         "Optional time delays between chain links"
       ],
       "priority": 30,
-      "passes": false,
+      "passes": true,
       "dependsOn": ["US-058"]
     },
     {

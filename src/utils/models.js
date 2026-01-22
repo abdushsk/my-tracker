@@ -71,6 +71,16 @@ function generateId() {
 // =============================================================================
 
 /**
+ * Chain status for linked goals (US-084)
+ * @readonly
+ * @enum {string}
+ */
+const CHAIN_STATUS = {
+  UNLOCKED: 'unlocked',
+  LOCKED: 'locked'
+};
+
+/**
  * @typedef {Object} Goal
  * @property {string} id - Unique identifier (UUID)
  * @property {string} title - The goal title/name
@@ -83,6 +93,8 @@ function generateId() {
  * @property {number} createdAt - Timestamp when the goal was created
  * @property {number} lastResetAt - Timestamp of the last reset
  * @property {number} order - Display order for sorting goals
+ * @property {string|null} chainParentId - US-084: ID of the goal that must be completed to unlock this goal
+ * @property {'unlocked'|'locked'} chainStatus - US-084: Whether this goal is unlocked or locked (based on chain parent completion)
  */
 
 /**
@@ -133,6 +145,8 @@ function createGoal(data) {
     color: data.color || null, // US-073: Custom goal color (hex string or null)
     notes: data.notes || null, // US-074: Optional notes/description (max 500 chars)
     customResetTime: data.customResetTime || null, // US-075: Per-goal custom reset time override (HH:MM format or null for global default)
+    chainParentId: data.chainParentId || null, // US-084: ID of goal that must be completed to unlock this goal
+    chainStatus: data.chainParentId ? CHAIN_STATUS.LOCKED : CHAIN_STATUS.UNLOCKED, // US-084: Locked by default if has parent
     isActive: data.isActive !== undefined ? data.isActive : false,
     createdAt: data.createdAt || now,
     lastResetAt: data.lastResetAt || now,
@@ -172,6 +186,175 @@ function resetGoalProgress(goal) {
     isActive: false,
     lastResetAt: Date.now()
   };
+}
+
+// =============================================================================
+// US-084: Habit Chain Functions
+// =============================================================================
+
+/**
+ * Check if a goal is part of a chain (has a parent or has children)
+ * @param {Goal} goal - The goal to check
+ * @param {Goal[]} allGoals - All goals array
+ * @returns {boolean} True if the goal is part of a chain
+ */
+function isGoalInChain(goal, allGoals) {
+  // Has a parent
+  if (goal.chainParentId) return true;
+  // Has children (other goals depend on this one)
+  return allGoals.some(g => g.chainParentId === goal.id);
+}
+
+/**
+ * Get the parent goal of a chain link
+ * @param {Goal} goal - The child goal
+ * @param {Goal[]} allGoals - All goals array
+ * @returns {Goal|null} The parent goal or null if no parent
+ */
+function getChainParent(goal, allGoals) {
+  if (!goal.chainParentId) return null;
+  return allGoals.find(g => g.id === goal.chainParentId) || null;
+}
+
+/**
+ * Get all child goals that depend on a given goal
+ * @param {Goal} goal - The parent goal
+ * @param {Goal[]} allGoals - All goals array
+ * @returns {Goal[]} Array of child goals
+ */
+function getChainChildren(goal, allGoals) {
+  return allGoals.filter(g => g.chainParentId === goal.id);
+}
+
+/**
+ * Get the entire chain for a goal (all linked goals in order)
+ * @param {Goal} goal - Any goal in the chain
+ * @param {Goal[]} allGoals - All goals array
+ * @returns {Goal[]} Array of goals in the chain, ordered from root to leaves
+ */
+function getFullChain(goal, allGoals) {
+  // First, find the root of the chain
+  let root = goal;
+  while (root.chainParentId) {
+    const parent = allGoals.find(g => g.id === root.chainParentId);
+    if (!parent) break;
+    root = parent;
+  }
+
+  // Build the chain from root
+  const chain = [root];
+  const visited = new Set([root.id]);
+
+  // BFS to get all children in order
+  let queue = [root];
+  while (queue.length > 0) {
+    const current = queue.shift();
+    const children = allGoals.filter(g => g.chainParentId === current.id && !visited.has(g.id));
+    for (const child of children) {
+      chain.push(child);
+      visited.add(child.id);
+      queue.push(child);
+    }
+  }
+
+  return chain;
+}
+
+/**
+ * Check if a goal is locked (chain parent not completed)
+ * @param {Goal} goal - The goal to check
+ * @param {Goal[]} allGoals - All goals array
+ * @returns {boolean} True if the goal is locked
+ */
+function isGoalLocked(goal, allGoals) {
+  if (!goal.chainParentId) return false;
+  if (goal.chainStatus === CHAIN_STATUS.UNLOCKED) return false;
+
+  const parent = allGoals.find(g => g.id === goal.chainParentId);
+  if (!parent) return false; // Parent not found, treat as unlocked
+
+  return !isGoalCompleted(parent);
+}
+
+/**
+ * Get goals that should be unlocked when a goal is completed
+ * @param {Goal} completedGoal - The goal that was just completed
+ * @param {Goal[]} allGoals - All goals array
+ * @returns {Goal[]} Array of goals to unlock
+ */
+function getGoalsToUnlock(completedGoal, allGoals) {
+  return allGoals.filter(g =>
+    g.chainParentId === completedGoal.id &&
+    g.chainStatus === CHAIN_STATUS.LOCKED
+  );
+}
+
+/**
+ * Check if an entire chain is completed
+ * @param {Goal} anyGoalInChain - Any goal in the chain
+ * @param {Goal[]} allGoals - All goals array
+ * @returns {boolean} True if all goals in the chain are completed
+ */
+function isChainCompleted(anyGoalInChain, allGoals) {
+  const chain = getFullChain(anyGoalInChain, allGoals);
+  return chain.every(g => isGoalCompleted(g));
+}
+
+/**
+ * Get chain completion progress (how many goals completed / total in chain)
+ * @param {Goal} anyGoalInChain - Any goal in the chain
+ * @param {Goal[]} allGoals - All goals array
+ * @returns {{ completed: number, total: number, percentage: number }}
+ */
+function getChainProgress(anyGoalInChain, allGoals) {
+  const chain = getFullChain(anyGoalInChain, allGoals);
+  const completed = chain.filter(g => isGoalCompleted(g)).length;
+  const total = chain.length;
+  return {
+    completed,
+    total,
+    percentage: total > 0 ? Math.round((completed / total) * 100) : 0
+  };
+}
+
+/**
+ * Check if a goal can be set as a chain parent (prevent circular chains)
+ * @param {Goal} potentialChild - The goal that wants to set a parent
+ * @param {Goal} potentialParent - The goal being considered as parent
+ * @param {Goal[]} allGoals - All goals array
+ * @returns {boolean} True if it's safe to create this chain link
+ */
+function canSetChainParent(potentialChild, potentialParent, allGoals) {
+  // Can't chain to self
+  if (potentialChild.id === potentialParent.id) return false;
+
+  // Check if setting this parent would create a cycle
+  // Walk up from potentialParent and check if we hit potentialChild
+  let current = potentialParent;
+  const visited = new Set();
+
+  while (current && !visited.has(current.id)) {
+    visited.add(current.id);
+    if (current.chainParentId === potentialChild.id) {
+      return false; // Would create a cycle
+    }
+    current = allGoals.find(g => g.id === current.chainParentId);
+  }
+
+  // Also check descendants of potentialChild - parent can't be one of its descendants
+  const descendants = [];
+  const queue = [potentialChild];
+  while (queue.length > 0) {
+    const curr = queue.shift();
+    const children = allGoals.filter(g => g.chainParentId === curr.id);
+    for (const child of children) {
+      if (child.id === potentialParent.id) return false; // Would create cycle
+      descendants.push(child);
+      queue.push(child);
+    }
+  }
+
+  return true;
 }
 
 // =============================================================================
@@ -1491,6 +1674,17 @@ export {
   isGoalCompleted,
   getGoalCompletionPercentage,
   resetGoalProgress,
+  // US-084: Habit Chain functions
+  CHAIN_STATUS,
+  isGoalInChain,
+  getChainParent,
+  getChainChildren,
+  getFullChain,
+  isGoalLocked,
+  getGoalsToUnlock,
+  isChainCompleted,
+  getChainProgress,
+  canSetChainParent,
   // History Entry functions
   createHistoryEntry,
   createHistoryEntryFromGoal,

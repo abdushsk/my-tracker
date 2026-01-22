@@ -104,7 +104,18 @@ import {
   getAchievementXP,
   getChallengeXP,
   createXPHistoryEntry,
-  getLevelTitle
+  getLevelTitle,
+  // US-084: Habit Chain imports
+  CHAIN_STATUS,
+  isGoalInChain,
+  getChainParent,
+  getChainChildren,
+  getFullChain,
+  isGoalLocked,
+  getGoalsToUnlock,
+  isChainCompleted,
+  getChainProgress,
+  canSetChainParent
 } from '../utils/models.js';
 import {
   initSounds,
@@ -599,6 +610,9 @@ function renderGoalCard(goal) {
   const typeIcon = getGoalTypeIcon(goal.type);
   const progressDisplay = formatProgressDisplay(goal);
 
+  // US-084: Check if goal is locked (chain parent not completed)
+  const goalLocked = isGoalLocked(goal, state.goals);
+
   // Build CSS classes for the card
   // US-019: Check if goal just completed for celebration animation
   const justCompleted = state.justCompletedGoals.has(goal.id);
@@ -613,7 +627,11 @@ function renderGoalCard(goal) {
     // US-019: Add just-completed class for celebration animation
     justCompleted ? 'just-completed' : '',
     // US-056: Add compact class for compact view mode
-    isCompactView ? 'compact' : ''
+    isCompactView ? 'compact' : '',
+    // US-084: Add locked class for chained goals
+    goalLocked ? 'goal-locked' : '',
+    // US-084: Add chain class if goal is part of a chain
+    isGoalInChain(goal, state.goals) ? 'goal-in-chain' : ''
   ].filter(Boolean).join(' ');
 
   // US-065: Get category info for badge display
@@ -664,6 +682,7 @@ function renderGoalCard(goal) {
       </div>
       <div class="goal-card-body">
         ${goal.notes ? renderGoalNotes(goal) : ''}
+        ${renderChainIndicator(goal, goalLocked)}
         <div class="goal-progress-section">
           <div class="goal-progress-info">
             <span class="goal-progress-text">${progressDisplay}</span>
@@ -673,9 +692,63 @@ function renderGoalCard(goal) {
             <div class="goal-progress-fill" style="width: ${progressPercent}%"></div>
           </div>
         </div>
-        ${renderGoalControls(goal)}
+        ${goalLocked ? renderLockedOverlay(goal) : renderGoalControls(goal)}
       </div>
       ${isCompleted ? '<div class="goal-completed-indicator"><span class="completed-checkmark">&#10003;</span></div>' : ''}
+    </div>
+  `;
+}
+
+/**
+ * US-084: Render chain indicator showing the chain relationship
+ * @param {Object} goal - The goal object
+ * @param {boolean} isLocked - Whether the goal is currently locked
+ * @returns {string} HTML string for chain indicator
+ */
+function renderChainIndicator(goal, isLocked) {
+  if (!goal.chainParentId) return '';
+
+  const parentGoal = state.goals.find(g => g.id === goal.chainParentId);
+  if (!parentGoal) return '';
+
+  const parentCompleted = isGoalCompleted(parentGoal);
+  const statusClass = parentCompleted ? 'chain-unlocked' : 'chain-locked';
+  const statusIcon = parentCompleted ? '\u2713' : '\u{1F512}';
+  const statusText = parentCompleted ? 'Unlocked' : 'Locked';
+
+  return `
+    <div class="chain-indicator ${statusClass}">
+      <span class="chain-icon">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="14" height="14">
+          <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/>
+          <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/>
+        </svg>
+      </span>
+      <span class="chain-status">${statusIcon}</span>
+      <span class="chain-parent-name">After: ${escapeHtml(parentGoal.title.length > 20 ? parentGoal.title.substring(0, 20) + '...' : parentGoal.title)}</span>
+    </div>
+  `;
+}
+
+/**
+ * US-084: Render locked overlay for goals waiting on chain parent
+ * @param {Object} goal - The goal object
+ * @returns {string} HTML string for locked overlay
+ */
+function renderLockedOverlay(goal) {
+  const parentGoal = state.goals.find(g => g.id === goal.chainParentId);
+  const parentTitle = parentGoal ? parentGoal.title : 'another goal';
+  const truncatedTitle = parentTitle.length > 25 ? parentTitle.substring(0, 25) + '...' : parentTitle;
+
+  return `
+    <div class="goal-locked-overlay">
+      <div class="locked-icon">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="32" height="32">
+          <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
+          <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+        </svg>
+      </div>
+      <p class="locked-message">Complete "<strong>${escapeHtml(truncatedTitle)}</strong>" to unlock</p>
     </div>
   `;
 }
@@ -1138,6 +1211,158 @@ function showCompletionQuote() {
 }
 
 // =============================================================================
+// US-084: Habit Chain Functions
+// =============================================================================
+
+/**
+ * US-084: Unlock chained goals when a parent goal is completed
+ * @param {Object} completedGoal - The goal that was just completed
+ */
+async function unlockChainedGoals(completedGoal) {
+  const goalsToUnlock = getGoalsToUnlock(completedGoal, state.goals);
+
+  if (goalsToUnlock.length === 0) {
+    return;
+  }
+
+  console.log(`[Chains] Unlocking ${goalsToUnlock.length} chained goal(s) after completing "${completedGoal.title}"`);
+
+  // Update each chained goal's status
+  for (const goal of goalsToUnlock) {
+    goal.chainStatus = CHAIN_STATUS.UNLOCKED;
+    await updateGoal(goal.id, { chainStatus: CHAIN_STATUS.UNLOCKED });
+
+    // Show unlock notification
+    showChainUnlockNotification(goal, completedGoal);
+  }
+
+  // Check if the entire chain is now completed
+  if (isGoalInChain(completedGoal, state.goals)) {
+    const chainCompleted = isChainCompleted(completedGoal, state.goals);
+    if (chainCompleted) {
+      const chainProgress = getChainProgress(completedGoal, state.goals);
+      triggerChainCompletionCelebration(completedGoal, chainProgress.total);
+    }
+  }
+}
+
+/**
+ * US-084: Show notification when a chained goal is unlocked
+ * @param {Object} unlockedGoal - The goal that was unlocked
+ * @param {Object} completedGoal - The parent goal that was completed
+ */
+function showChainUnlockNotification(unlockedGoal, completedGoal) {
+  // Remove any existing unlock notification
+  const existingNotification = document.querySelector('.chain-unlock-notification');
+  if (existingNotification) {
+    existingNotification.remove();
+  }
+
+  const notification = document.createElement('div');
+  notification.className = 'chain-unlock-notification';
+  notification.innerHTML = `
+    <div class="chain-unlock-content">
+      <div class="chain-unlock-icon">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="24" height="24">
+          <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
+          <path d="M7 11V7a5 5 0 0 1 9.9-1"/>
+        </svg>
+      </div>
+      <div class="chain-unlock-text">
+        <span class="chain-unlock-title">Goal Unlocked!</span>
+        <span class="chain-unlock-goal">${escapeHtml(unlockedGoal.title)}</span>
+      </div>
+    </div>
+  `;
+
+  document.body.appendChild(notification);
+
+  // Trigger animation
+  requestAnimationFrame(() => {
+    notification.classList.add('show');
+  });
+
+  // Play unlock sound
+  playSound(SOUNDS.ACHIEVEMENT);
+
+  // Auto-dismiss after 3 seconds
+  setTimeout(() => {
+    notification.classList.remove('show');
+    notification.classList.add('hide');
+    setTimeout(() => {
+      notification.remove();
+    }, 300);
+  }, 3000);
+}
+
+/**
+ * US-084: Trigger celebration when an entire chain is completed
+ * @param {Object} anyGoalInChain - Any goal in the completed chain
+ * @param {number} chainLength - Number of goals in the chain
+ */
+function triggerChainCompletionCelebration(anyGoalInChain, chainLength) {
+  console.log(`[Chains] Full chain completed! ${chainLength} goals in chain.`);
+
+  // Enhanced confetti for chain completion
+  launchConfetti({
+    intensity: 'high',
+    duration: 3000
+  });
+
+  // Show chain completion notification
+  showChainCompletionNotification(chainLength);
+}
+
+/**
+ * US-084: Show notification when an entire chain is completed
+ * @param {number} chainLength - Number of goals in the chain
+ */
+function showChainCompletionNotification(chainLength) {
+  // Remove any existing notification
+  const existingNotification = document.querySelector('.chain-complete-notification');
+  if (existingNotification) {
+    existingNotification.remove();
+  }
+
+  const notification = document.createElement('div');
+  notification.className = 'chain-complete-notification';
+  notification.innerHTML = `
+    <div class="chain-complete-content">
+      <div class="chain-complete-icon">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="32" height="32">
+          <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/>
+          <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/>
+          <polyline points="9 11 12 14 22 4"/>
+        </svg>
+      </div>
+      <div class="chain-complete-text">
+        <span class="chain-complete-title">Chain Complete!</span>
+        <span class="chain-complete-count">${chainLength} linked goals completed</span>
+      </div>
+    </div>
+  `;
+
+  document.body.appendChild(notification);
+
+  // Trigger animation
+  requestAnimationFrame(() => {
+    notification.classList.add('show');
+  });
+
+  // Play achievement sound
+  playSound(SOUNDS.ACHIEVEMENT);
+
+  // Auto-dismiss after 4 seconds
+  setTimeout(() => {
+    notification.classList.remove('show');
+    notification.classList.add('hide');
+    setTimeout(() => {
+      notification.remove();
+    }, 300);
+  }, 4000);
+}
+
+// =============================================================================
 // US-016: Timer Type Controls
 // =============================================================================
 
@@ -1451,6 +1676,9 @@ async function handleTimerCompletion(goalId) {
   // US-081: Update daily challenge progress
   updateChallengeProgress('goal_complete', { goal, goalType: goal.type });
 
+  // US-084: Unlock any chained goals waiting on this one
+  await unlockChainedGoals(goal);
+
   // Re-render to show completion state
   renderCurrentScreen();
 }
@@ -1524,6 +1752,9 @@ async function handleCounterIncrement(goalId) {
 
     // US-081: Update daily challenge progress for goal completion
     updateChallengeProgress('goal_complete', { goal, goalType: goal.type });
+
+    // US-084: Unlock any chained goals waiting on this one
+    await unlockChainedGoals(goal);
   } else {
     // US-039: Play tick sound for regular increment
     playSound(SOUNDS.TICK);
@@ -1672,6 +1903,9 @@ async function handleCheckboxToggle(goalId) {
 
     // US-081: Update daily challenge progress for goal completion
     updateChallengeProgress('goal_complete', { goal, goalType: goal.type });
+
+    // US-084: Unlock any chained goals waiting on this one
+    await unlockChainedGoals(goal);
   } else {
     // US-039: Play tick sound for regular toggle
     playSound(SOUNDS.TICK);
@@ -3032,6 +3266,31 @@ function openGoalFormScreen(mode = 'add', goal = null) {
 }
 
 /**
+ * US-084: Render chain parent options for the dropdown
+ * @param {Object|null} editingGoal - The goal being edited (null for add mode)
+ * @returns {string} HTML string of option elements
+ */
+function renderChainParentOptions(editingGoal) {
+  const availableParents = state.goals.filter(g => {
+    // Can't chain to self
+    if (editingGoal && g.id === editingGoal.id) return false;
+    // Check for cycle prevention (only in edit mode)
+    if (editingGoal && !canSetChainParent(editingGoal, g, state.goals)) return false;
+    return true;
+  });
+
+  if (availableParents.length === 0) {
+    return '';
+  }
+
+  return availableParents.map(g => {
+    const typeIcon = g.type === GOAL_TYPES.TIMER ? '\u23F1' : g.type === GOAL_TYPES.COUNTER ? '#' : '\u2713';
+    const truncatedTitle = g.title.length > 30 ? g.title.substring(0, 30) + '...' : g.title;
+    return `<option value="${g.id}">${typeIcon} ${truncatedTitle}</option>`;
+  }).join('');
+}
+
+/**
  * Render the Goal Form screen (full-page add/edit)
  * US-058: Full-page layout with header, form, and footer
  */
@@ -3334,6 +3593,33 @@ function renderGoalFormScreen() {
             </div>
             <p class="form-hint">Notes will appear on your goal card. Supports **bold** and [links](url).</p>
           </div>
+
+          <!-- US-084: Habit Chain Linking -->
+          <div class="form-group">
+            <label class="form-label">Chain After <span class="optional-indicator">(optional)</span></label>
+            <div class="chain-selector">
+              <select id="goal-form-chain-parent" name="chain-parent" class="form-input form-select">
+                <option value="">None - This goal is independent</option>
+                ${renderChainParentOptions(editingGoal)}
+              </select>
+              <div class="chain-link-icon">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/>
+                  <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/>
+                </svg>
+              </div>
+            </div>
+            <p class="form-hint chain-hint">
+              Link this goal to complete after another goal. The goal will be <strong>locked</strong> until the parent goal is completed.
+            </p>
+            <div class="chain-info" id="goal-form-chain-info" style="display: none;">
+              <div class="chain-visualization">
+                <span class="chain-parent-name" id="chain-parent-display"></span>
+                <span class="chain-arrow">→</span>
+                <span class="chain-current-name">This Goal</span>
+              </div>
+            </div>
+          </div>
         </form>
       </main>
       <footer class="goal-form-footer">
@@ -3497,6 +3783,26 @@ function attachGoalFormScreenListeners(screen, editingGoal) {
         notesCount.parentElement.classList.add('near-limit');
       } else {
         notesCount.parentElement.classList.remove('near-limit');
+      }
+    });
+  }
+
+  // US-084: Chain parent selector
+  const chainParentSelect = screen.querySelector('#goal-form-chain-parent');
+  const chainInfo = screen.querySelector('#goal-form-chain-info');
+  const chainParentDisplay = screen.querySelector('#chain-parent-display');
+
+  if (chainParentSelect) {
+    chainParentSelect.addEventListener('change', () => {
+      const selectedParentId = chainParentSelect.value;
+      if (selectedParentId && chainInfo && chainParentDisplay) {
+        const parentGoal = state.goals.find(g => g.id === selectedParentId);
+        if (parentGoal) {
+          chainParentDisplay.textContent = parentGoal.title;
+          chainInfo.style.display = 'block';
+        }
+      } else if (chainInfo) {
+        chainInfo.style.display = 'none';
       }
     });
   }
@@ -3745,6 +4051,24 @@ function prefillGoalFormScreen(goal) {
       notesCount.textContent = (goal.notes || '').length;
     }
   }
+
+  // US-084: Set chain parent
+  const chainParentSelect = screen.querySelector('#goal-form-chain-parent');
+  const chainInfo = screen.querySelector('#goal-form-chain-info');
+  const chainParentDisplay = screen.querySelector('#chain-parent-display');
+
+  if (chainParentSelect && goal.chainParentId) {
+    chainParentSelect.value = goal.chainParentId;
+
+    // Show chain info visualization
+    if (chainInfo && chainParentDisplay) {
+      const parentGoal = state.goals.find(g => g.id === goal.chainParentId);
+      if (parentGoal) {
+        chainParentDisplay.textContent = parentGoal.title;
+        chainInfo.style.display = 'block';
+      }
+    }
+  }
 }
 
 /**
@@ -3842,11 +4166,23 @@ async function handleGoalFormScreenSubmit(e) {
   const notesTextarea = screen.querySelector('#goal-form-notes');
   const notes = notesTextarea?.value?.trim() || null;
 
-  console.log(`[GoalForm] Submitting in ${isEditMode ? 'edit' : 'add'} mode:`, { title, type, target, timeframe, category, color, notes });
+  // US-084: Get chain parent (null if 'none' or empty)
+  const chainParentSelect = screen.querySelector('#goal-form-chain-parent');
+  const chainParentId = chainParentSelect?.value || null;
+
+  console.log(`[GoalForm] Submitting in ${isEditMode ? 'edit' : 'add'} mode:`, { title, type, target, timeframe, category, color, notes, chainParentId });
 
   try {
     if (isEditMode && goalId) {
       // Edit mode: update existing goal
+      // US-084: Determine chain status based on chain parent
+      const existingGoal = state.goals.find(g => g.id === goalId);
+      let chainStatus = CHAIN_STATUS.UNLOCKED;
+      if (chainParentId) {
+        const parentGoal = state.goals.find(g => g.id === chainParentId);
+        chainStatus = (parentGoal && isGoalCompleted(parentGoal)) ? CHAIN_STATUS.UNLOCKED : CHAIN_STATUS.LOCKED;
+      }
+
       const success = await updateGoal(goalId, {
         title,
         type,
@@ -3854,7 +4190,9 @@ async function handleGoalFormScreenSubmit(e) {
         timeframe,
         category,
         color,
-        notes
+        notes,
+        chainParentId,
+        chainStatus
       });
 
       if (success) {
@@ -3869,7 +4207,9 @@ async function handleGoalFormScreenSubmit(e) {
             timeframe,
             category,
             color,
-            notes
+            notes,
+            chainParentId,
+            chainStatus
           };
         }
         console.log(`[GoalForm] Goal ${goalId} updated successfully`);
@@ -3889,6 +4229,7 @@ async function handleGoalFormScreenSubmit(e) {
         category,
         color,
         notes,
+        chainParentId, // US-084: Add chain parent
         order: state.goals.length
       });
 

@@ -2205,3 +2205,101 @@ Implemented a comprehensive Level and XP gamification system for the Daily Goals
 - The framework is extensible for theme unlocks at higher levels
 - XP history provides data for future "XP Breakdown" screen if needed
 - Level titles provide gamification milestones for user engagement
+
+
+================================================================================
+US-084: Habit Chains - Linked Goals - COMPLETED
+Date: 2026-01-22
+================================================================================
+
+## Task Summary
+Implemented a Habit Chains feature that allows users to link goals in sequences. When a parent goal is completed, its child goals become unlocked. This supports building routines like "wake up -> exercise -> meditate".
+
+## Implementation Details
+
+### 1. Data Model Updates (src/utils/models.js)
+- Added `CHAIN_STATUS` enum with `UNLOCKED` and `LOCKED` values
+- Extended Goal typedef to include:
+  - `chainParentId: string|null` - ID of the goal that must be completed first
+  - `chainStatus: 'unlocked'|'locked'` - Current lock state based on parent completion
+- Updated `createGoal()` to include chain fields with proper defaults
+- Added chain helper functions:
+  - `isGoalInChain(goal, allGoals)` - Check if goal is part of a chain
+  - `getChainParent(goal, allGoals)` - Get the parent goal
+  - `getChainChildren(goal, allGoals)` - Get all child goals
+  - `getFullChain(goal, allGoals)` - Get entire chain ordered from root
+  - `isGoalLocked(goal, allGoals)` - Check if goal is locked
+  - `getGoalsToUnlock(completedGoal, allGoals)` - Get goals to unlock after completion
+  - `isChainCompleted(anyGoalInChain, allGoals)` - Check if chain is fully completed
+  - `getChainProgress(anyGoalInChain, allGoals)` - Get chain completion stats
+  - `canSetChainParent(potentialChild, potentialParent, allGoals)` - Prevent circular chains
+
+### 2. Goal Form Updates (src/popup/popup.js)
+- Added `renderChainParentOptions()` function to generate dropdown options
+- Added "Chain After" dropdown selector in goal form screen
+- Implemented chain visualization showing "Parent Goal -> This Goal" relationship
+- Pre-fill chain parent in edit mode via `prefillGoalFormScreen()`
+- Capture and save `chainParentId` in `handleGoalFormScreenSubmit()`
+- Calculate correct `chainStatus` when saving (locked if parent not completed)
+
+### 3. Goal Card Visualization (src/popup/popup.js)
+- Added `renderChainIndicator()` function showing chain relationship on cards
+- Added `renderLockedOverlay()` function for locked goals
+- Added CSS classes: `goal-locked`, `goal-in-chain`
+- Locked goals show overlay with lock icon and parent goal name
+- Chain indicator shows link icon, status (locked/unlocked), and parent name
+
+### 4. Chain Unlock Logic (src/popup/popup.js)
+- Added `unlockChainedGoals()` async function
+- Called after goal completion in:
+  - `handleTimerCompletion()`
+  - `handleCounterIncrement()`
+  - `handleCheckboxToggle()`
+- Updates child goals' chainStatus to UNLOCKED
+- Triggers unlock notification for each unlocked goal
+
+### 5. Celebrations and Notifications (src/popup/popup.js)
+- `showChainUnlockNotification()` - Shows green notification when goal unlocks
+- `triggerChainCompletionCelebration()` - Enhanced confetti for full chain completion
+- `showChainCompletionNotification()` - Purple notification for chain completion
+- Both notifications use smooth animations and auto-dismiss
+
+### 6. CSS Styling (src/popup/popup.css, ~370 lines added)
+- Chain selector styling in goal form
+- Chain info visualization box
+- Chain indicator badge on goal cards (locked/unlocked states)
+- Locked goal overlay with dashed border
+- Lock icon and message styling
+- Chain unlock notification (green gradient)
+- Chain complete notification (purple gradient)
+- Goal-in-chain left border accent
+- Dark mode variants
+- Compact view adjustments
+- Reduced motion support
+
+## Acceptance Criteria Met
+- [x] Link goals in sequence in goal form (dropdown selector)
+- [x] Locked goal visual state (grayed out with lock overlay)
+- [x] Goal unlocks when predecessor completes (automatic unlock on completion)
+- [x] Chain visualization in View Goals (chain indicator badge)
+- [x] Chain completion celebration (enhanced confetti + notification)
+- [x] Break chain to edit individual goals (can change/remove chainParentId in edit mode)
+- [ ] Optional time delays between chain links (not implemented - considered optional/future enhancement)
+
+## Files Modified
+- src/utils/models.js - Added CHAIN_STATUS enum and chain helper functions
+- src/popup/popup.js - Added chain UI, unlock logic, and notifications
+- src/popup/popup.css - Added chain-related styling
+- plans/prd.json - Marked US-084 as passes: true
+
+## Technical Notes
+- Chain relationships are stored per-goal (chainParentId), not as a separate data structure
+- Circular chain prevention implemented via `canSetChainParent()` function
+- Chain status is calculated dynamically in UI but stored persistently after unlock
+- Goals can only have one parent but can have multiple children (tree structure)
+- Chain completion is checked after each goal completion to trigger celebration
+
+## Notes for Next Iteration
+- Time delays between chain links could be added as a future enhancement
+- Consider adding chain visualization in Reports screen for routine analysis
+- Consider adding bulk chain creation UI for common routines

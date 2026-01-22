@@ -10050,3 +10050,370 @@ body.modal-open {
     opacity: 0;
   }
 }
+
+/* =============================================================================
+   US-084: Habit Chains - Linked Goals
+   ============================================================================= */
+
+/* Chain Selector in Goal Form */
+.chain-selector {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.chain-selector .form-select {
+  flex: 1;
+  padding-right: 32px;
+}
+
+.chain-link-icon {
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--text-tertiary);
+  pointer-events: none;
+}
+
+.chain-link-icon svg {
+  width: 16px;
+  height: 16px;
+}
+
+.chain-hint {
+  margin-top: 6px;
+  font-size: 12px;
+  color: var(--text-secondary);
+  line-height: 1.4;
+}
+
+.chain-hint strong {
+  color: var(--warning-color, #f39c12);
+}
+
+/* Chain Info Visualization */
+.chain-info {
+  margin-top: 12px;
+  padding: 10px 12px;
+  background: var(--bg-secondary);
+  border-radius: 6px;
+  border: 1px solid var(--border-color);
+}
+
+.chain-visualization {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+}
+
+.chain-visualization .chain-parent-name {
+  padding: 4px 8px;
+  background: var(--bg-tertiary);
+  border-radius: 4px;
+  font-weight: 500;
+  color: var(--text-primary);
+}
+
+.chain-arrow {
+  color: var(--text-tertiary);
+  font-size: 16px;
+}
+
+.chain-current-name {
+  padding: 4px 8px;
+  background: var(--primary-color);
+  color: white;
+  border-radius: 4px;
+  font-weight: 500;
+}
+
+/* Chain Indicator on Goal Card */
+.chain-indicator {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 10px;
+  margin-bottom: 8px;
+  border-radius: 6px;
+  font-size: 12px;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+}
+
+.chain-indicator.chain-locked {
+  background: rgba(231, 76, 60, 0.1);
+  border-color: rgba(231, 76, 60, 0.3);
+  color: #e74c3c;
+}
+
+.chain-indicator.chain-unlocked {
+  background: rgba(39, 174, 96, 0.1);
+  border-color: rgba(39, 174, 96, 0.3);
+  color: #27ae60;
+}
+
+.chain-icon svg {
+  width: 14px;
+  height: 14px;
+}
+
+.chain-status {
+  font-size: 14px;
+}
+
+.chain-indicator .chain-parent-name {
+  font-weight: 500;
+  flex: 1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Locked Goal State */
+.goal-card.goal-locked {
+  opacity: 0.7;
+  position: relative;
+}
+
+.goal-card.goal-locked .goal-card-header,
+.goal-card.goal-locked .goal-progress-section {
+  filter: grayscale(0.3);
+}
+
+.goal-card.goal-locked::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.03);
+  border-radius: inherit;
+  pointer-events: none;
+  z-index: 1;
+}
+
+/* Locked Overlay */
+.goal-locked-overlay {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  background: var(--bg-secondary);
+  border-radius: 8px;
+  border: 2px dashed var(--border-color);
+  text-align: center;
+  margin-top: 8px;
+}
+
+.locked-icon {
+  color: var(--text-tertiary);
+  margin-bottom: 8px;
+}
+
+.locked-icon svg {
+  width: 32px;
+  height: 32px;
+  opacity: 0.5;
+}
+
+.locked-message {
+  font-size: 13px;
+  color: var(--text-secondary);
+  margin: 0;
+  line-height: 1.4;
+}
+
+.locked-message strong {
+  color: var(--text-primary);
+}
+
+/* Chain Unlock Notification */
+.chain-unlock-notification {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%) scale(0.8);
+  background: linear-gradient(135deg, #27ae60 0%, #2ecc71 100%);
+  color: white;
+  padding: 16px 24px;
+  border-radius: 12px;
+  box-shadow: 0 8px 32px rgba(39, 174, 96, 0.4);
+  z-index: 10003;
+  opacity: 0;
+  transition: all 0.3s ease;
+  pointer-events: none;
+}
+
+.chain-unlock-notification.show {
+  opacity: 1;
+  transform: translate(-50%, -50%) scale(1);
+}
+
+.chain-unlock-notification.hide {
+  opacity: 0;
+  transform: translate(-50%, -50%) scale(0.8);
+}
+
+.chain-unlock-content {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.chain-unlock-icon svg {
+  width: 24px;
+  height: 24px;
+}
+
+.chain-unlock-text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.chain-unlock-title {
+  font-weight: 600;
+  font-size: 14px;
+}
+
+.chain-unlock-goal {
+  font-size: 13px;
+  opacity: 0.9;
+}
+
+/* Chain Complete Notification */
+.chain-complete-notification {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%) scale(0.8);
+  background: linear-gradient(135deg, #9b59b6 0%, #8e44ad 100%);
+  color: white;
+  padding: 20px 28px;
+  border-radius: 16px;
+  box-shadow: 0 8px 32px rgba(155, 89, 182, 0.5);
+  z-index: 10003;
+  opacity: 0;
+  transition: all 0.3s ease;
+  pointer-events: none;
+}
+
+.chain-complete-notification.show {
+  opacity: 1;
+  transform: translate(-50%, -50%) scale(1);
+}
+
+.chain-complete-notification.hide {
+  opacity: 0;
+  transform: translate(-50%, -50%) scale(0.8);
+}
+
+.chain-complete-content {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.chain-complete-icon svg {
+  width: 32px;
+  height: 32px;
+}
+
+.chain-complete-text {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.chain-complete-title {
+  font-weight: 700;
+  font-size: 18px;
+}
+
+.chain-complete-count {
+  font-size: 14px;
+  opacity: 0.9;
+}
+
+/* Goal in Chain Styling */
+.goal-card.goal-in-chain {
+  border-left: 3px solid var(--primary-color);
+}
+
+.goal-card.goal-in-chain.goal-locked {
+  border-left-color: var(--warning-color, #f39c12);
+}
+
+/* Dark Mode - Habit Chains */
+[data-theme="dark"] .chain-indicator {
+  background: var(--bg-tertiary);
+}
+
+[data-theme="dark"] .chain-indicator.chain-locked {
+  background: rgba(231, 76, 60, 0.15);
+}
+
+[data-theme="dark"] .chain-indicator.chain-unlocked {
+  background: rgba(39, 174, 96, 0.15);
+}
+
+[data-theme="dark"] .goal-locked-overlay {
+  background: var(--bg-tertiary);
+  border-color: var(--border-color);
+}
+
+[data-theme="dark"] .chain-unlock-notification {
+  background: linear-gradient(135deg, #2ecc71 0%, #27ae60 100%);
+}
+
+[data-theme="dark"] .chain-complete-notification {
+  background: linear-gradient(135deg, #8e44ad 0%, #9b59b6 100%);
+}
+
+[data-theme="dark"] .goal-card.goal-locked::before {
+  background: rgba(0, 0, 0, 0.1);
+}
+
+/* Compact View - Chain Indicator */
+.goal-card.compact .chain-indicator {
+  padding: 4px 8px;
+  font-size: 11px;
+  margin-bottom: 6px;
+}
+
+.goal-card.compact .chain-indicator .chain-icon svg {
+  width: 12px;
+  height: 12px;
+}
+
+.goal-card.compact .goal-locked-overlay {
+  padding: 12px;
+}
+
+.goal-card.compact .locked-icon svg {
+  width: 24px;
+  height: 24px;
+}
+
+.goal-card.compact .locked-message {
+  font-size: 11px;
+}
+
+/* Reduced Motion - Chain Notifications */
+@media (prefers-reduced-motion: reduce) {
+  .chain-unlock-notification,
+  .chain-complete-notification {
+    transition: opacity 0.1s ease;
+    transform: translate(-50%, -50%);
+  }
+
+  .chain-unlock-notification.show,
+  .chain-complete-notification.show {
+    transform: translate(-50%, -50%);
+  }
+}
