@@ -3,7 +3,6 @@
   "type": "Chrome Extension",
   "description": "A Chrome extension for tracking daily goals with timers, counters, and checkboxes. See FEATURES.md for full specifications.",
   "featuresFile": "plans/FEATURES.md",
-
   "userStories": [
     {
       "id": "US-001",
@@ -36,21 +35,21 @@
     {
       "id": "US-005",
       "title": "Fix activity timeline in report",
-      "description": "Now its 1am, and still i dont see today in the timeline, some utc issue?, use local time to add new day in timeline. also make the chart also almost full width, and in Y, just give starting 2 initals of the day, eg Mo, Tu, We, Th, Fr, Sa, Su in caps" ,
+      "description": "Now its 1am, and still i dont see today in the timeline, some utc issue?, use local time to add new day in timeline. also make the chart also almost full width, and in Y, just give starting 2 initals of the day, eg Mo, Tu, We, Th, Fr, Sa, Su in caps",
       "priority": 5,
       "passes": true
     },
     {
       "id": "US-006",
       "title": "Improve timeline and chart display",
-      "description": "Ensure that the activity timeline correctly reflects the current day by addressing any potential UTC issues. Adjust the chart to utilize nearly the full width of the display and modify the Y-axis labels to show only the first two initials of each day (e.g., Mo, Tu, We, Th, Fr, Sa, Su) in uppercase for better readability. Plus in case of dark mode, the no progress boxes is not visible, make it lighter shade" ,
+      "description": "Ensure that the activity timeline correctly reflects the current day by addressing any potential UTC issues. Adjust the chart to utilize nearly the full width of the display and modify the Y-axis labels to show only the first two initials of each day (e.g., Mo, Tu, We, Th, Fr, Sa, Su) in uppercase for better readability. Plus in case of dark mode, the no progress boxes is not visible, make it lighter shade",
       "priority": 6,
       "passes": true
     },
     {
       "id": "US-007",
       "title": "New Achievements unlock",
-      "description": "I dont like the achivement announcement popup, its too intrusive, instead add a small toast notification at the bottom left corner that says 'Achievement Unlocked: <achievement name>' and disappears after 3 seconds with some nice confetti animation." ,
+      "description": "I dont like the achivement announcement popup, its too intrusive, instead add a small toast notification at the bottom left corner that says 'Achievement Unlocked: <achievement name>' and disappears after 3 seconds with some nice confetti animation.",
       "priority": 7,
       "passes": true
     },
@@ -66,7 +65,7 @@
       "title": "Enhance weekly review goal performance section",
       "description": "Improve the goal performance section in the weekly review by providing clearer insights and visualizations. Ensure that the data presented is easy to understand and helps users track their progress effectively.",
       "priority": 9,
-      "passes": false
+      "passes": true
     },
     {
       "id": "US-010",
@@ -81,7 +80,7 @@
       "description": "",
       "priority": 11,
       "passes": false
-    } ,
+    },
     {
       "id": "US-012",
       "title": "Ensure consistent hover and active colors",
@@ -122,6 +121,13 @@
       "title": "Refine last 30 days stats chart",
       "description": "Enhance the readability of the last 30 days stats chart by adjusting the x-axis labels. Display only the starting date, ending date, and every 5th date in between to reduce clutter and improve clarity.",
       "priority": 17,
+      "passes": false
+    },
+    {
+      "id": "US-018",
+      "title": "Improve no-progress box visibility in dark/light mode",
+      "description": "Enhance the visibility of the no-progress boxes in the activity timeline within the report section when in dark/light mode. Use a lighter grey shade to ensure that these boxes are easily distinguishable against the dark/white background, improving overall user experience. or select whichever looks fine",
+      "priority": 18,
       "passes": false
     }
   ]

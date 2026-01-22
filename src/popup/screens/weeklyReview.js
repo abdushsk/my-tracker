@@ -352,7 +352,34 @@ function updateWeeklyTimeTracked(activityLog) {
 }
 
 /**
- * Update the goal performance section with best and worst performing goals
+ * Get the icon for a goal type
+ * @param {string} type - Goal type (timer, counter, checkbox, avoidance)
+ * @returns {string} SVG icon HTML
+ */
+function getGoalTypeIcon(type) {
+  const icons = {
+    [GOAL_TYPES.TIMER]: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>`,
+    [GOAL_TYPES.COUNTER]: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>`,
+    [GOAL_TYPES.CHECKBOX]: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>`,
+    [GOAL_TYPES.AVOIDANCE]: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"/></svg>`
+  };
+  return icons[type] || icons[GOAL_TYPES.CHECKBOX];
+}
+
+/**
+ * Get performance level class based on completion rate
+ * @param {number} rate - Completion rate (0-100)
+ * @returns {string} CSS class name
+ */
+function getPerformanceLevel(rate) {
+  if (rate >= 80) return 'excellent';
+  if (rate >= 60) return 'good';
+  if (rate >= 40) return 'moderate';
+  return 'low';
+}
+
+/**
+ * Update the goal performance section with all goals and their performance metrics
  * @param {Array} history - History entries
  */
 async function updateGoalPerformance(history) {
@@ -389,7 +416,7 @@ async function updateGoalPerformance(history) {
     }
   });
 
-  // Calculate rates and find best/worst
+  // Calculate rates for all goals
   const goalRates = [];
   Object.keys(goalPerformance).forEach(goalId => {
     const perf = goalPerformance[goalId];
@@ -405,44 +432,72 @@ async function updateGoalPerformance(history) {
     }
   });
 
-  // Sort by rate
+  // Sort by rate (descending)
   goalRates.sort((a, b) => b.rate - a.rate);
 
-  // Get best and worst performers
-  const bestGoal = goalRates[0];
-  const worstGoal = goalRates.length > 1 ? goalRates[goalRates.length - 1] : null;
+  // Calculate overall average for comparison
+  const overallAverage = goalRates.length > 0
+    ? goalRates.reduce((sum, g) => sum + g.rate, 0) / goalRates.length
+    : 0;
 
-  // Render performance cards
+  // Identify best and worst performers
+  const bestGoalId = goalRates.length > 0 ? goalRates[0].goal.id : null;
+  const worstGoalId = goalRates.length > 1 && goalRates[goalRates.length - 1].rate < goalRates[0].rate
+    ? goalRates[goalRates.length - 1].goal.id
+    : null;
+
+  // Render all performance cards
   let html = '';
 
-  if (bestGoal) {
-    html += `
-      <div class="performance-card best-performer">
-        <div class="performance-header">
-          <span class="performance-badge best">🏆 Best</span>
-        </div>
-        <div class="performance-goal-title">${escapeHtml(bestGoal.goal.title)}</div>
-        <div class="performance-rate">${Math.round(bestGoal.rate)}% completion</div>
-        <div class="performance-detail">${bestGoal.completed}/${bestGoal.total} completed</div>
-      </div>
-    `;
-  }
-
-  if (worstGoal && worstGoal.rate < bestGoal.rate) {
-    html += `
-      <div class="performance-card needs-work">
-        <div class="performance-header">
-          <span class="performance-badge needs">📈 Needs Focus</span>
-        </div>
-        <div class="performance-goal-title">${escapeHtml(worstGoal.goal.title)}</div>
-        <div class="performance-rate">${Math.round(worstGoal.rate)}% completion</div>
-        <div class="performance-detail">${worstGoal.completed}/${worstGoal.total} completed</div>
-      </div>
-    `;
-  }
-
-  if (!html) {
+  if (goalRates.length === 0) {
     html = '<div class="no-performance-data">Not enough data for this week</div>';
+  } else {
+    html = '<div class="performance-list">';
+
+    goalRates.forEach(({ goal, rate, completed, total }) => {
+      const isBest = goal.id === bestGoalId;
+      const isWorst = goal.id === worstGoalId;
+      const performanceLevel = getPerformanceLevel(rate);
+      const trendDiff = rate - overallAverage;
+      const trendClass = trendDiff >= 5 ? 'above-average' : trendDiff <= -5 ? 'below-average' : 'average';
+
+      // Determine badge
+      let badge = '';
+      if (isBest) {
+        badge = '<span class="performance-badge best">🏆 Best</span>';
+      } else if (isWorst) {
+        badge = '<span class="performance-badge needs">📈 Focus</span>';
+      }
+
+      html += `
+        <div class="performance-item ${isBest ? 'best-performer' : ''} ${isWorst ? 'needs-work' : ''}">
+          <div class="performance-item-header">
+            <div class="performance-goal-info">
+              <span class="performance-type-icon type-${goal.type}">${getGoalTypeIcon(goal.type)}</span>
+              <span class="performance-goal-title">${escapeHtml(goal.title)}</span>
+            </div>
+            ${badge}
+          </div>
+          <div class="performance-item-stats">
+            <div class="performance-progress-container">
+              <div class="performance-progress-bar">
+                <div class="performance-progress-fill level-${performanceLevel}" style="width: ${rate}%"></div>
+              </div>
+              <span class="performance-rate-value level-${performanceLevel}">${Math.round(rate)}%</span>
+            </div>
+            <div class="performance-details-row">
+              <span class="performance-detail">${completed}/${total} days</span>
+              <span class="performance-trend ${trendClass}">
+                ${trendDiff >= 5 ? '↑' : trendDiff <= -5 ? '↓' : '→'}
+                ${trendDiff >= 0 ? '+' : ''}${Math.round(trendDiff)}% vs avg
+              </span>
+            </div>
+          </div>
+        </div>
+      `;
+    });
+
+    html += '</div>';
   }
 
   performanceCardsEl.innerHTML = html;

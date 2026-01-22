@@ -8109,32 +8109,82 @@ body.modal-open {
   color: var(--text-muted);
 }
 
-/* Performance Cards */
+/* Performance Cards - Enhanced List View */
 .performance-cards {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: var(--spacing-sm);
+  display: flex;
+  flex-direction: column;
+  gap: 0;
 }
 
-.performance-card {
-  padding: var(--spacing-md);
+.performance-list {
+  display: flex;
+  flex-direction: column;
   background-color: var(--background);
   border-radius: var(--radius-lg);
   border: 1px solid var(--border);
+  overflow: hidden;
 }
 
-.performance-card.best-performer {
-  border-color: var(--success);
-  background: linear-gradient(135deg, var(--background) 0%, var(--success-light) 100%);
+.performance-item {
+  padding: var(--spacing-sm) var(--spacing-md);
+  border-bottom: 1px solid var(--border);
 }
 
-.performance-card.needs-work {
-  border-color: var(--warning);
-  background: linear-gradient(135deg, var(--background) 0%, var(--warning-light) 100%);
+.performance-item:last-child {
+  border-bottom: none;
 }
 
-.performance-header {
+.performance-item.best-performer {
+  background: linear-gradient(135deg, transparent 0%, var(--accent-subtle) 100%);
+}
+
+.performance-item.needs-work {
+  background: linear-gradient(135deg, transparent 0%, var(--warning-subtle) 100%);
+}
+
+.performance-item-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
   margin-bottom: var(--spacing-xs);
+}
+
+.performance-goal-info {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+  min-width: 0;
+  flex: 1;
+}
+
+.performance-type-icon {
+  width: 16px;
+  height: 16px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.performance-type-icon svg {
+  width: 14px;
+  height: 14px;
+}
+
+.performance-type-icon.type-timer {
+  color: var(--type-timer);
+}
+
+.performance-type-icon.type-counter {
+  color: var(--type-counter);
+}
+
+.performance-type-icon.type-checkbox {
+  color: var(--type-checkbox);
+}
+
+.performance-type-icon.type-avoidance {
+  color: var(--type-avoidance);
 }
 
 .performance-badge {
@@ -8142,11 +8192,12 @@ body.modal-open {
   font-weight: var(--font-weight-semibold);
   padding: 2px 6px;
   border-radius: var(--radius-sm);
+  flex-shrink: 0;
 }
 
 .performance-badge.best {
-  background-color: var(--success);
-  color: white;
+  background-color: var(--accent);
+  color: var(--text-inverse);
 }
 
 .performance-badge.needs {
@@ -8156,18 +8207,82 @@ body.modal-open {
 
 .performance-goal-title {
   font-size: var(--font-size-sm);
-  font-weight: var(--font-weight-semibold);
+  font-weight: var(--font-weight-medium);
   color: var(--text);
-  margin-bottom: var(--spacing-xs);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
 
-.performance-rate {
-  font-size: var(--font-size-lg);
+.performance-item-stats {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.performance-progress-container {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+}
+
+.performance-progress-bar {
+  flex: 1;
+  height: 6px;
+  background-color: var(--border);
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.performance-progress-fill {
+  height: 100%;
+  border-radius: 3px;
+  transition: width 0.3s ease;
+}
+
+.performance-progress-fill.level-excellent {
+  background-color: var(--chart-bar-excellent);
+}
+
+.performance-progress-fill.level-good {
+  background-color: var(--chart-bar-good);
+}
+
+.performance-progress-fill.level-moderate {
+  background-color: var(--chart-bar-moderate);
+}
+
+.performance-progress-fill.level-low {
+  background-color: var(--chart-bar-low);
+}
+
+.performance-rate-value {
+  font-size: var(--font-size-sm);
   font-weight: var(--font-weight-bold);
-  color: var(--text);
+  min-width: 36px;
+  text-align: right;
+}
+
+.performance-rate-value.level-excellent {
+  color: var(--chart-bar-excellent);
+}
+
+.performance-rate-value.level-good {
+  color: var(--chart-bar-good);
+}
+
+.performance-rate-value.level-moderate {
+  color: var(--chart-bar-moderate);
+}
+
+.performance-rate-value.level-low {
+  color: var(--text-muted);
+}
+
+.performance-details-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
 }
 
 .performance-detail {
@@ -8175,12 +8290,31 @@ body.modal-open {
   color: var(--text-muted);
 }
 
+.performance-trend {
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-medium);
+}
+
+.performance-trend.above-average {
+  color: var(--chart-bar-excellent);
+}
+
+.performance-trend.average {
+  color: var(--text-muted);
+}
+
+.performance-trend.below-average {
+  color: var(--chart-bar-moderate);
+}
+
 .no-performance-data {
-  grid-column: 1 / -1;
   padding: var(--spacing-lg);
   text-align: center;
   color: var(--text-muted);
   font-size: var(--font-size-sm);
+  background-color: var(--background);
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--border);
 }
 
 /* Daily Breakdown */
@@ -8328,7 +8462,7 @@ body.modal-open {
 
 [data-theme="dark"] .time-card,
 [data-theme="dark"] .streak-card-mini,
-[data-theme="dark"] .performance-card,
+[data-theme="dark"] .performance-list,
 [data-theme="dark"] .daily-breakdown,
 [data-theme="dark"] .comparison-card,
 [data-theme="dark"] .week-date-range {
@@ -8344,12 +8478,16 @@ body.modal-open {
   background: linear-gradient(135deg, var(--card-bg) 0%, var(--reward-subtle) 100%);
 }
 
-[data-theme="dark"] .performance-card.best-performer {
-  background: linear-gradient(135deg, var(--card-bg) 0%, var(--accent-subtle) 100%);
+[data-theme="dark"] .performance-item.best-performer {
+  background: linear-gradient(135deg, transparent 0%, var(--accent-subtle) 100%);
 }
 
-[data-theme="dark"] .performance-card.needs-work {
-  background: linear-gradient(135deg, var(--card-bg) 0%, var(--warning-subtle) 100%);
+[data-theme="dark"] .performance-item.needs-work {
+  background: linear-gradient(135deg, transparent 0%, var(--warning-subtle) 100%);
+}
+
+[data-theme="dark"] .no-performance-data {
+  background-color: var(--card-bg);
 }
 
 [data-theme="dark"] .breakdown-bar-wrapper {

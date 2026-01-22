@@ -301,3 +301,50 @@
 - Adding CSS variables in both `:root` and `[data-theme='dark']` blocks ensures proper defaults before theme-specific overrides are applied
 - The theme-config.js `generateThemeCSS()` function should generate chart bar variables for all themes to ensure consistency
 
+## US-009: Enhance Weekly Review Goal Performance Section (Completed)
+**Date**: 2026-01-23
+
+### Changes Made
+
+1. **Redesigned performance section layout** (weeklyReview.js:354-504):
+   - Changed from 2-card grid (best/worst only) to full list view showing all goals
+   - Added `getGoalTypeIcon()` helper function for goal type icons (timer, counter, checkbox, avoidance)
+   - Added `getPerformanceLevel()` helper to classify completion rates (excellent ≥80%, good ≥60%, moderate ≥40%, low <40%)
+   - Calculate overall average and show trend comparison for each goal (above/below/at average)
+
+2. **Enhanced visual indicators** (weeklyReview.js):
+   - Added goal type icons with type-specific colors (`--type-timer`, `--type-counter`, etc.)
+   - Added visual progress bars with color-coded fills based on performance level
+   - Added trend indicators showing how each goal compares to the weekly average
+   - Retained "Best" and "Focus" badges for quick identification
+
+3. **New CSS classes** (popup.css:8112-8318):
+   - `.performance-list` - Container for the list of all goals
+   - `.performance-item` - Individual goal row with header and stats
+   - `.performance-item-header` - Contains goal info and badge
+   - `.performance-goal-info` - Goal type icon and title
+   - `.performance-type-icon` - SVG icon container with type-specific colors
+   - `.performance-progress-container` - Progress bar and percentage
+   - `.performance-progress-bar` and `.performance-progress-fill` - Visual progress indicator
+   - `.performance-rate-value` - Percentage text with level-based colors
+   - `.performance-details-row` - Days completed and trend comparison
+   - `.performance-trend` - Trend indicator (above-average, average, below-average)
+
+4. **Level-based color coding**:
+   - Uses `--chart-bar-excellent`, `--chart-bar-good`, `--chart-bar-moderate`, `--chart-bar-low` CSS variables
+   - Consistent with weekly overview bar colors for visual coherence
+   - Progress fill and rate value text both use matching colors
+
+5. **Dark mode support** (popup.css:8481-8491):
+   - Updated selectors from `.performance-card` to `.performance-item`
+   - `.performance-list` uses `--card-bg` background
+   - Best performer and needs-work items retain subtle gradient backgrounds
+
+### Key Learnings
+- Showing all goals (not just best/worst) gives users a complete picture of their weekly performance
+- Visual progress bars make it easier to compare goals at a glance than just percentages
+- Trend comparisons ("vs avg") provide context - a 60% completion rate is good if the average is 40%
+- Goal type icons help users quickly identify which type of goal each row represents
+- Using existing `--chart-bar-*` variables ensures consistency with other chart components
+- List layout is more scalable than grid when number of goals varies
+
