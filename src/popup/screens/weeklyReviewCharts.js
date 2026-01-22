@@ -75,9 +75,9 @@ export function renderDailyBreakdown(history, currentGoals) {
       <div class="breakdown-day ${isToday ? 'is-today' : ''} ${isFuture ? 'is-future' : ''}">
         <div class="breakdown-bar-wrapper">
           <div class="breakdown-bar ${barColorClass}" style="height: ${percentage}%"></div>
+          ${!isFuture ? `<span class="breakdown-hover-value">${Math.round(percentage)}%</span>` : ''}
         </div>
         <span class="breakdown-label">${dayNames[i]}</span>
-        ${!isFuture ? `<span class="breakdown-value">${Math.round(percentage)}%</span>` : ''}
       </div>
     `;
   }

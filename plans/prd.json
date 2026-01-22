@@ -72,7 +72,7 @@
       "title": "Refine daily breakdown display",
       "description": "In the weekly review's daily breakdown section, remove the percentage display at the bottom by default. Instead, implement a feature that shows the percentage only when the user hovers over the respective section, enhancing clarity and reducing visual clutter.",
       "priority": 10,
-      "passes": false
+      "passes": true
     },
     {
       "id": "US-011",

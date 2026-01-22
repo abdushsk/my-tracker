@@ -348,3 +348,30 @@
 - Using existing `--chart-bar-*` variables ensures consistency with other chart components
 - List layout is more scalable than grid when number of goals varies
 
+## US-010: Refine Daily Breakdown Display (Completed)
+**Date**: 2026-01-23
+
+### Changes Made
+
+1. **Removed percentage display at bottom by default** (weeklyReviewCharts.js:74-82):
+   - Changed from `<span class="breakdown-value">` appearing below each day label
+   - Moved percentage inside the bar wrapper as `<span class="breakdown-hover-value">`
+   - Percentage is now hidden by default, only shown on hover
+
+2. **Added hover-to-show percentage feature** (popup.css:8352-8418):
+   - Added `position: relative` and `cursor: pointer` to `.breakdown-bar-wrapper`
+   - Created new `.breakdown-hover-value` class with:
+     - Absolute positioning centered within the bar wrapper
+     - Hidden by default (`opacity: 0; visibility: hidden`)
+     - Tooltip-like styling with inverted colors (`--text-inverse` on `--text` background)
+     - Smooth transition on show/hide
+     - `pointer-events: none` to avoid interfering with hover
+   - Added `.breakdown-bar-wrapper:hover .breakdown-hover-value` rule to show percentage on hover
+
+### Key Learnings
+- Using `visibility: hidden` along with `opacity: 0` ensures the element is not clickable when hidden
+- `pointer-events: none` on the tooltip prevents it from interfering with the parent's hover state
+- Inverted color scheme (`--text-inverse` on `--text` background) provides good contrast for tooltip overlays in both light and dark modes
+- Adding `cursor: pointer` provides visual feedback that the bar area is interactive
+- Placing the percentage inside the bar wrapper (instead of below the day label) keeps the hover interaction localized to the relevant visual element
+
