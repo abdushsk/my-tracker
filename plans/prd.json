@@ -38,7 +38,7 @@
       "title": "Fix activity timeline in report",
       "description": "Now its 1am, and still i dont see today in the timeline, some utc issue?, use local time to add new day in timeline. also make the chart also almost full width, and in Y, just give starting 2 initals of the day, eg Mo, Tu, We, Th, Fr, Sa, Su in caps" ,
       "priority": 5,
-      "passes": false
+      "passes": true
     },
     {
       "id": "US-006",

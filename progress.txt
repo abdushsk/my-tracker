@@ -161,3 +161,37 @@
 - Category colors are fixed across themes (intentional - they represent distinct categories)
 - Reward/gold colors need darker shades in dark mode for better contrast
 
+## US-005: Fix Activity Timeline in Report (Completed)
+**Date**: 2026-01-23
+
+### Changes Made
+
+1. **Fixed UTC timezone issue** (models.js):
+   - Added new helper function `formatDateToLocalString(date)` that formats dates using local timezone instead of UTC
+   - Updated `getTodayDateString()` to use `formatDateToLocalString()` instead of `toISOString().split('T')[0]`
+   - Updated `getDateStringDaysAgo()` to use `formatDateToLocalString()` instead of `toISOString()`
+   - Updated `getWeekStartDateString()` to use `formatDateToLocalString()`
+   - Updated `getMonthStartDateString()` to use `formatDateToLocalString()`
+   - Updated `getDateFromTimestamp()` to use `formatDateToLocalString()`
+   - Updated `getActivityByHourForDateRange()` loop to use `formatDateToLocalString()` and parse dates with 'T12:00:00' to avoid edge cases
+
+2. **Fixed weekly chart data calculation** (reportsCharts.js):
+   - Changed `calculateWeeklyChartData()` to use `getDateStringDaysAgo()` instead of inline `toISOString()` for consistent local timezone handling
+   - Date parsing now uses 'T12:00:00' suffix to avoid timezone edge cases when creating Date objects from date strings
+
+3. **Changed Y-axis day labels to 2-letter uppercase** (reportsCharts.js):
+   - Updated `dayNames` array from `['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']` to `['SU', 'MO', 'TU', 'WE', 'TH', 'FR', 'SA']`
+   - Fixed date parsing in heatmap tooltip to use 'T12:00:00' for consistent behavior
+
+4. **Made activity chart nearly full width** (popup.css):
+   - Reduced `.activity-heatmap` padding from `var(--spacing-md)` to `var(--spacing-sm) var(--spacing-xs)`
+   - Reduced `.heatmap-hour-labels` margin-left from `40px` to `28px` (to match narrower day labels)
+   - Reduced `.heatmap-day-labels` width from `36px` to `24px` (2-letter labels need less space)
+   - Reduced `.heatmap-day-label` padding-right from `var(--spacing-xs)` to `4px`
+
+### Key Learnings
+- `toISOString()` returns UTC time which causes issues near midnight in local time (e.g., at 1 AM local, UTC date might still be the previous day)
+- Always use local date formatting when displaying/comparing dates for user-facing features
+- When parsing date strings like '2026-01-23' with `new Date()`, add 'T12:00:00' to avoid timezone edge cases that can shift the date
+- For 2-letter day abbreviations, reduce the width of label containers to maximize chart space
+

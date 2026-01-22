@@ -104,10 +104,11 @@ function calculateWeeklyChartData(history, currentGoals) {
   const historyByDate = groupHistoryByDate(history);
 
   // Get data for last 7 days (starting from 6 days ago to today)
+  // Use getDateStringDaysAgo for consistent local timezone handling
   for (let i = 6; i >= 0; i--) {
-    const date = new Date();
-    date.setDate(date.getDate() - i);
-    const dateStr = date.toISOString().split('T')[0];
+    const dateStr = getDateStringDaysAgo(i);
+    // Parse with noon time to avoid timezone edge cases
+    const date = new Date(dateStr + 'T12:00:00');
     const dayOfWeek = date.getDay() === 0 ? 6 : date.getDay() - 1; // Convert to Mon=0, Sun=6
 
     let completed = 0;
@@ -193,10 +194,11 @@ export async function renderActivityHeatmap() {
     dates.push(getDateStringDaysAgo(i));
   }
 
-  // Render day labels
-  const dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+  // Render day labels with 2-letter uppercase abbreviations
+  const dayNames = ['SU', 'MO', 'TU', 'WE', 'TH', 'FR', 'SA'];
   dayLabelsContainer.innerHTML = dates.map(dateStr => {
-    const date = new Date(dateStr + 'T00:00:00');
+    // Parse with noon time to avoid timezone edge cases
+    const date = new Date(dateStr + 'T12:00:00');
     const dayName = dayNames[date.getDay()];
     const isToday = dateStr === today;
     return `<span class="heatmap-day-label${isToday ? ' heatmap-day-today' : ''}">${dayName}</span>`;
@@ -232,7 +234,8 @@ export async function renderActivityHeatmap() {
         : 'No activity';
 
       const hourDisplay = hour === 0 ? '12 AM' : hour < 12 ? `${hour} AM` : hour === 12 ? '12 PM' : `${hour - 12} PM`;
-      const date = new Date(dateStr + 'T00:00:00');
+      // Parse with noon time to avoid timezone edge cases
+      const date = new Date(dateStr + 'T12:00:00');
       const dayDisplay = date.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
 
       gridHTML += `<div class="heatmap-cell level-${intensityLevel}"

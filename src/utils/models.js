@@ -480,27 +480,38 @@ function createHistoryEntryFromGoal(goal, date) {
 }
 
 /**
- * Get today's date in YYYY-MM-DD format
- * @returns {string} Today's date string
+ * Format a date object to YYYY-MM-DD string using local timezone
+ * @param {Date} date - Date object to format
+ * @returns {string} Date string in YYYY-MM-DD format (local time)
  */
-function getTodayDateString() {
-  const now = new Date();
-  return now.toISOString().split('T')[0];
+function formatDateToLocalString(date) {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const day = String(date.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
 }
 
 /**
- * Get a date string for N days ago in YYYY-MM-DD format
+ * Get today's date in YYYY-MM-DD format (local timezone)
+ * @returns {string} Today's date string
+ */
+function getTodayDateString() {
+  return formatDateToLocalString(new Date());
+}
+
+/**
+ * Get a date string for N days ago in YYYY-MM-DD format (local timezone)
  * @param {number} daysAgo - Number of days ago (0 = today)
  * @returns {string} Date string in YYYY-MM-DD format
  */
 function getDateStringDaysAgo(daysAgo) {
   const date = new Date();
   date.setDate(date.getDate() - daysAgo);
-  return date.toISOString().split('T')[0];
+  return formatDateToLocalString(date);
 }
 
 /**
- * Get the start of the current week (Monday) in YYYY-MM-DD format
+ * Get the start of the current week (Monday) in YYYY-MM-DD format (local timezone)
  * @returns {string} Monday's date string for the current week
  */
 function getWeekStartDateString() {
@@ -511,17 +522,17 @@ function getWeekStartDateString() {
   const daysToSubtract = dayOfWeek === 0 ? 6 : dayOfWeek - 1;
   const monday = new Date(now);
   monday.setDate(now.getDate() - daysToSubtract);
-  return monday.toISOString().split('T')[0];
+  return formatDateToLocalString(monday);
 }
 
 /**
- * Get the start of the current month in YYYY-MM-DD format
+ * Get the start of the current month in YYYY-MM-DD format (local timezone)
  * @returns {string} First day of the current month
  */
 function getMonthStartDateString() {
   const now = new Date();
   const firstDay = new Date(now.getFullYear(), now.getMonth(), 1);
-  return firstDay.toISOString().split('T')[0];
+  return formatDateToLocalString(firstDay);
 }
 
 /**
@@ -621,13 +632,13 @@ function createActivityLog(data) {
  */
 
 /**
- * Get a date string (YYYY-MM-DD) from a timestamp
+ * Get a date string (YYYY-MM-DD) from a timestamp (local timezone)
  * @param {number} timestamp - Unix timestamp in milliseconds
  * @returns {string} Date string in YYYY-MM-DD format
  */
 function getDateFromTimestamp(timestamp) {
   const date = new Date(timestamp);
-  return date.toISOString().split('T')[0];
+  return formatDateToLocalString(date);
 }
 
 /**
@@ -720,12 +731,13 @@ function getActivityByHour(activityLog, goalId, date) {
 function getActivityByHourForDateRange(activityLog, goalId, startDate, endDate) {
   const result = {};
 
-  // Generate all dates in the range
-  const start = new Date(startDate);
-  const end = new Date(endDate);
+  // Generate all dates in the range using local timezone
+  // Parse dates by adding T12:00:00 to avoid timezone edge cases when parsing
+  const start = new Date(startDate + 'T12:00:00');
+  const end = new Date(endDate + 'T12:00:00');
 
   for (let d = new Date(start); d <= end; d.setDate(d.getDate() + 1)) {
-    const dateStr = d.toISOString().split('T')[0];
+    const dateStr = formatDateToLocalString(d);
     result[dateStr] = getActivityByHour(activityLog, goalId, dateStr);
   }
 
