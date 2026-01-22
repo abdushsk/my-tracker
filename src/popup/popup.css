@@ -7773,3 +7773,155 @@ body.modal-open {
     animation: none;
   }
 }
+
+/* ========================================
+   US-074: Goal Notes and Description
+   ======================================== */
+
+/* Notes Textarea in Goal Form */
+.form-textarea {
+  min-height: 80px;
+  max-height: 150px;
+  resize: vertical;
+  font-family: inherit;
+  line-height: 1.5;
+}
+
+.notes-char-count {
+  display: flex;
+  justify-content: flex-end;
+  font-size: var(--font-size-xs);
+  color: var(--text-muted);
+  margin-top: var(--spacing-xs);
+}
+
+.notes-char-count.near-limit {
+  color: var(--warning);
+}
+
+.notes-char-count.near-limit span {
+  font-weight: 600;
+}
+
+/* Goal Notes Section on Cards */
+.goal-notes-section {
+  margin-bottom: var(--spacing-sm);
+  padding: var(--spacing-sm);
+  background-color: var(--surface);
+  border-radius: var(--radius-sm);
+  border-left: 3px solid var(--border);
+}
+
+.goal-notes-content {
+  font-size: var(--font-size-sm);
+  color: var(--text-secondary);
+  line-height: 1.5;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+}
+
+.goal-notes-content.collapsed {
+  /* Content stays inline when collapsed */
+}
+
+.goal-notes-content.expanded {
+  /* Full content shows when expanded */
+}
+
+.goal-notes-text {
+  /* Text styling */
+}
+
+.goal-notes-text strong {
+  font-weight: 600;
+  color: var(--text);
+}
+
+.notes-link {
+  color: var(--secondary);
+  text-decoration: underline;
+  text-decoration-color: transparent;
+  transition: text-decoration-color 150ms ease;
+}
+
+.notes-link:hover {
+  text-decoration-color: var(--secondary);
+}
+
+.goal-notes-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+  margin-top: var(--spacing-xs);
+  padding: 0;
+  border: none;
+  background: none;
+  color: var(--secondary);
+  font-size: var(--font-size-xs);
+  font-weight: 500;
+  cursor: pointer;
+  transition: color 150ms ease;
+}
+
+.goal-notes-toggle:hover {
+  color: var(--secondary-dark);
+}
+
+.goal-notes-toggle .toggle-icon {
+  transition: transform 200ms ease;
+}
+
+/* Compact view adjustments for notes */
+.goal-card.compact .goal-notes-section {
+  margin-bottom: var(--spacing-xs);
+  padding: var(--spacing-xs);
+}
+
+.goal-card.compact .goal-notes-content {
+  font-size: var(--font-size-xs);
+}
+
+.goal-card.compact .goal-notes-toggle {
+  font-size: 10px;
+}
+
+/* ----------------------------------------
+   Dark Mode Support for Notes
+   ---------------------------------------- */
+[data-theme="dark"] .goal-notes-section {
+  background-color: var(--background);
+  border-left-color: var(--border);
+}
+
+[data-theme="dark"] .goal-notes-text strong {
+  color: var(--text);
+}
+
+[data-theme="dark"] .notes-link {
+  color: var(--secondary-light);
+}
+
+[data-theme="dark"] .notes-link:hover {
+  text-decoration-color: var(--secondary-light);
+}
+
+[data-theme="dark"] .goal-notes-toggle {
+  color: var(--secondary-light);
+}
+
+[data-theme="dark"] .goal-notes-toggle:hover {
+  color: var(--secondary);
+}
+
+/* ----------------------------------------
+   Reduced Motion Support for Notes
+   ---------------------------------------- */
+@media (prefers-reduced-motion: reduce) {
+  .goal-notes-toggle .toggle-icon {
+    transition: none;
+  }
+
+  .notes-link {
+    transition: none;
+  }
+}

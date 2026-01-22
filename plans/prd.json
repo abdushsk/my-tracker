@@ -327,7 +327,7 @@
         "Character limit (500 chars)"
       ],
       "priority": 20,
-      "passes": false,
+      "passes": true,
       "dependsOn": ["US-058"]
     },
     {

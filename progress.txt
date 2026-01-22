@@ -1340,3 +1340,81 @@ Implemented a custom goal colors feature that allows users to assign individual 
 - Color persisted with goal (stored as hex string in Goal model)
 - Works with both light and dark modes (colors remain visible, UI elements styled for both)
 
+---
+
+## US-074: Goal Notes and Description
+**Date**: 2026-01-22
+**Status**: Completed
+
+### What was done:
+Implemented an optional notes/description field for goals. Users can add notes with context, instructions, or motivation that display on goal cards. Notes support basic markdown (bold and links) and have a 500 character limit.
+
+### Implementation details:
+
+1. **Goal Model Update** (`src/utils/models.js` line 134):
+   - Added `notes: data.notes || null` property to the Goal model in `createGoal()` function
+   - Notes stored as string or null if no notes
+
+2. **Notes Textarea in Goal Form** (`src/popup/popup.js` lines 2177-2192):
+   - Added a notes textarea section after the color picker
+   - Character counter showing current/max (0/500)
+   - Counter turns warning color when near limit (450+ chars)
+   - Placeholder text: "Add context, instructions, or motivation for this goal..."
+   - Hint text explaining markdown support
+
+3. **Event Listeners** (`src/popup/popup.js` lines 2344-2358):
+   - Character count updates on input
+   - Near-limit warning styling at 450+ characters
+
+4. **Form Prefill for Edit Mode** (`src/popup/popup.js` lines 2594-2603):
+   - Notes textarea pre-filled when editing existing goals
+   - Character count updated to reflect existing notes length
+
+5. **Form Submission** (`src/popup/popup.js` lines 2697-2699, 2713, 2728, 2747):
+   - Notes retrieved from textarea (trimmed, null if empty)
+   - Notes included in both create and update operations
+
+6. **Notes Display on Goal Cards** (`src/popup/popup.js` lines 571, 588-681):
+   - `renderGoalNotes()` - Renders notes section with truncation
+   - Notes truncated at 100 characters with "Show more" button
+   - `formatNotesMarkdown()` - Converts **bold** and [links](url) to HTML
+   - HTML escaped first to prevent XSS, then markdown processed
+   - Links only allow http/https URLs and open in new tabs
+
+7. **Toggle Expand/Collapse** (`src/popup/popup.js` lines 647-681, 1497-1508):
+   - `toggleGoalNotes()` - Handles expand/collapse state
+   - Toggle button with rotating chevron icon
+   - Text changes between "Show more" and "Show less"
+   - Event listener in `attachGoalControlListeners()`
+
+8. **CSS Styles** (`src/popup/popup.css` lines 7777-7927):
+   - Textarea styling with min/max height and vertical resize
+   - Character counter with warning state
+   - Notes section on cards with left border accent
+   - Link hover effects
+   - Toggle button styling
+   - Compact view adjustments
+   - Dark mode support
+   - Reduced motion support
+
+### Files modified:
+- `src/utils/models.js` (line 134)
+- `src/popup/popup.js` (lines 571, 588-681, 1497-1508, 2177-2192, 2344-2358, 2594-2603, 2697-2699, 2713, 2728, 2747)
+- `src/popup/popup.css` (lines 7777-7927)
+
+### Key design decisions:
+- Notes displayed above progress bar on goal cards for visibility
+- Truncation at 100 chars provides quick preview without overwhelming
+- Basic markdown supports common use cases without complexity
+- HTML escaping before markdown processing prevents XSS
+- Link validation only allows http/https URLs for security
+- Character limit of 500 enforced by textarea maxlength
+
+### Acceptance criteria met:
+- Notes textarea in goal form (with character counter and hint)
+- Notes displayed on goal card (truncated at 100 chars)
+- Expand to see full notes (toggle button with "Show more/less")
+- Markdown support (basic: bold with **, links with [text](url))
+- Notes searchable in future (data structure supports it)
+- Character limit (500 chars) (enforced by maxlength attribute)
+

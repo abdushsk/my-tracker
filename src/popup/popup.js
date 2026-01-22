@@ -568,6 +568,7 @@ function renderGoalCard(goal) {
         </div>
       </div>
       <div class="goal-card-body">
+        ${goal.notes ? renderGoalNotes(goal) : ''}
         <div class="goal-progress-section">
           <div class="goal-progress-info">
             <span class="goal-progress-text">${progressDisplay}</span>
@@ -582,6 +583,101 @@ function renderGoalCard(goal) {
       ${isCompleted ? '<div class="goal-completed-indicator"><span class="completed-checkmark">&#10003;</span></div>' : ''}
     </div>
   `;
+}
+
+/**
+ * US-074: Render goal notes with truncation and expand/collapse
+ * Supports basic markdown: **bold** and [links](url)
+ * @param {Object} goal - The goal object
+ * @returns {string} HTML string for goal notes section
+ */
+function renderGoalNotes(goal) {
+  if (!goal.notes) return '';
+
+  const notes = goal.notes;
+  const MAX_PREVIEW_LENGTH = 100;
+  const needsTruncation = notes.length > MAX_PREVIEW_LENGTH;
+
+  // Process basic markdown (bold and links)
+  const processedNotes = formatNotesMarkdown(notes);
+  const truncatedNotes = needsTruncation
+    ? formatNotesMarkdown(notes.substring(0, MAX_PREVIEW_LENGTH) + '...')
+    : processedNotes;
+
+  return `
+    <div class="goal-notes-section" data-goal-id="${goal.id}">
+      <div class="goal-notes-content collapsed">
+        <span class="goal-notes-text truncated">${truncatedNotes}</span>
+        <span class="goal-notes-text full" style="display: none;">${processedNotes}</span>
+      </div>
+      ${needsTruncation ? `
+        <button class="goal-notes-toggle" data-action="toggle-notes" data-goal-id="${goal.id}" title="Show more">
+          <span class="toggle-text">Show more</span>
+          <svg class="toggle-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="12" height="12">
+            <polyline points="6 9 12 15 18 9"/>
+          </svg>
+        </button>
+      ` : ''}
+    </div>
+  `;
+}
+
+/**
+ * US-074: Format notes with basic markdown support
+ * Supports: **bold** and [links](url)
+ * @param {string} text - The text to format
+ * @returns {string} HTML formatted text
+ */
+function formatNotesMarkdown(text) {
+  // Escape HTML first to prevent XSS
+  let formatted = escapeHtml(text);
+
+  // Convert **bold** to <strong>
+  formatted = formatted.replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>');
+
+  // Convert [text](url) to links - only allow http/https URLs
+  formatted = formatted.replace(
+    /\[([^\]]+)\]\((https?:\/\/[^\s)]+)\)/g,
+    '<a href="$2" target="_blank" rel="noopener noreferrer" class="notes-link">$1</a>'
+  );
+
+  return formatted;
+}
+
+/**
+ * US-074: Toggle goal notes expand/collapse state
+ * @param {string} goalId - The goal ID
+ * @param {HTMLElement} button - The toggle button element
+ */
+function toggleGoalNotes(goalId, button) {
+  const notesSection = document.querySelector(`.goal-notes-section[data-goal-id="${goalId}"]`);
+  if (!notesSection) return;
+
+  const content = notesSection.querySelector('.goal-notes-content');
+  const truncatedText = notesSection.querySelector('.goal-notes-text.truncated');
+  const fullText = notesSection.querySelector('.goal-notes-text.full');
+  const toggleText = button.querySelector('.toggle-text');
+  const toggleIcon = button.querySelector('.toggle-icon');
+
+  if (content.classList.contains('collapsed')) {
+    // Expand
+    content.classList.remove('collapsed');
+    content.classList.add('expanded');
+    if (truncatedText) truncatedText.style.display = 'none';
+    if (fullText) fullText.style.display = 'inline';
+    if (toggleText) toggleText.textContent = 'Show less';
+    if (toggleIcon) toggleIcon.style.transform = 'rotate(180deg)';
+    button.title = 'Show less';
+  } else {
+    // Collapse
+    content.classList.remove('expanded');
+    content.classList.add('collapsed');
+    if (truncatedText) truncatedText.style.display = 'inline';
+    if (fullText) fullText.style.display = 'none';
+    if (toggleText) toggleText.textContent = 'Show more';
+    if (toggleIcon) toggleIcon.style.transform = 'rotate(0deg)';
+    button.title = 'Show more';
+  }
 }
 
 /**
@@ -1434,6 +1530,19 @@ function attachGoalControlListeners(container) {
     });
   });
 
+  // US-074: Toggle notes expand/collapse buttons
+  const notesToggleBtns = container.querySelectorAll('[data-action="toggle-notes"]');
+  notesToggleBtns.forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      const goalId = btn.getAttribute('data-goal-id');
+      if (goalId) {
+        toggleGoalNotes(goalId, btn);
+      }
+    });
+  });
+
   // US-059: Attach drag and drop listeners for goal reordering
   attachDragDropListeners(container);
 }
@@ -2173,6 +2282,23 @@ function renderGoalFormScreen() {
             </div>
             <input type="hidden" id="goal-form-color" name="color" value="">
           </div>
+
+          <!-- US-074: Goal Notes/Description -->
+          <div class="form-group">
+            <label for="goal-form-notes" class="form-label">Notes <span class="optional-indicator">(optional)</span></label>
+            <textarea
+              id="goal-form-notes"
+              name="notes"
+              class="form-input form-textarea"
+              placeholder="Add context, instructions, or motivation for this goal..."
+              maxlength="500"
+              rows="3"
+            ></textarea>
+            <div class="notes-char-count">
+              <span id="goal-form-notes-count">0</span>/500 characters
+            </div>
+            <p class="form-hint">Notes will appear on your goal card. Supports **bold** and [links](url).</p>
+          </div>
         </form>
       </main>
       <footer class="goal-form-footer">
@@ -2320,6 +2446,22 @@ function attachGoalFormScreenListeners(screen, editingGoal) {
       if (e.key === 'Enter') {
         e.preventDefault();
         applyCustomColorFromInput(screen, customColorInput);
+      }
+    });
+  }
+
+  // US-074: Notes textarea character count
+  const notesTextarea = screen.querySelector('#goal-form-notes');
+  const notesCount = screen.querySelector('#goal-form-notes-count');
+  if (notesTextarea && notesCount) {
+    notesTextarea.addEventListener('input', () => {
+      const length = notesTextarea.value.length;
+      notesCount.textContent = length;
+      // Add warning class if near limit
+      if (length >= 450) {
+        notesCount.parentElement.classList.add('near-limit');
+      } else {
+        notesCount.parentElement.classList.remove('near-limit');
       }
     });
   }
@@ -2557,6 +2699,17 @@ function prefillGoalFormScreen(goal) {
   } else {
     setGoalFormScreenColor(screen, 'none');
   }
+
+  // US-074: Set notes
+  const notesTextarea = screen.querySelector('#goal-form-notes');
+  const notesCount = screen.querySelector('#goal-form-notes-count');
+  if (notesTextarea) {
+    notesTextarea.value = goal.notes || '';
+    // Update character count
+    if (notesCount) {
+      notesCount.textContent = (goal.notes || '').length;
+    }
+  }
 }
 
 /**
@@ -2650,7 +2803,11 @@ async function handleGoalFormScreenSubmit(e) {
   const colorInput = screen.querySelector('#goal-form-color');
   const color = colorInput?.value || null;
 
-  console.log(`[GoalForm] Submitting in ${isEditMode ? 'edit' : 'add'} mode:`, { title, type, target, timeframe, category, color });
+  // US-074: Get notes (null if empty, max 500 chars enforced by maxlength)
+  const notesTextarea = screen.querySelector('#goal-form-notes');
+  const notes = notesTextarea?.value?.trim() || null;
+
+  console.log(`[GoalForm] Submitting in ${isEditMode ? 'edit' : 'add'} mode:`, { title, type, target, timeframe, category, color, notes });
 
   try {
     if (isEditMode && goalId) {
@@ -2661,7 +2818,8 @@ async function handleGoalFormScreenSubmit(e) {
         target,
         timeframe,
         category,
-        color
+        color,
+        notes
       });
 
       if (success) {
@@ -2675,7 +2833,8 @@ async function handleGoalFormScreenSubmit(e) {
             target,
             timeframe,
             category,
-            color
+            color,
+            notes
           };
         }
         console.log(`[GoalForm] Goal ${goalId} updated successfully`);
@@ -2694,6 +2853,7 @@ async function handleGoalFormScreenSubmit(e) {
         timeframe,
         category,
         color,
+        notes,
         order: state.goals.length
       });
 
