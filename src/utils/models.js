@@ -1653,6 +1653,186 @@ function getChallengeProgressPercentage(challengeState) {
 }
 
 // =============================================================================
+// US-085: Pomodoro Timer Mode Model
+// =============================================================================
+
+/**
+ * Pomodoro phases
+ * @readonly
+ * @enum {string}
+ */
+const POMODORO_PHASES = {
+  WORK: 'work',
+  BREAK: 'break',
+  LONG_BREAK: 'long_break',
+  IDLE: 'idle'
+};
+
+/**
+ * Default Pomodoro configuration (in seconds)
+ * @type {Object}
+ */
+const POMODORO_DEFAULTS = {
+  WORK_DURATION: 25 * 60,      // 25 minutes
+  BREAK_DURATION: 5 * 60,       // 5 minutes
+  LONG_BREAK_DURATION: 15 * 60, // 15 minutes
+  SESSIONS_BEFORE_LONG_BREAK: 4 // Long break after 4 work sessions
+};
+
+/**
+ * @typedef {Object} PomodoroSettings
+ * @property {number} workDuration - Work session duration in seconds (default 25 min)
+ * @property {number} breakDuration - Short break duration in seconds (default 5 min)
+ * @property {number} longBreakDuration - Long break duration in seconds (default 15 min)
+ * @property {number} sessionsBeforeLongBreak - Number of work sessions before long break (default 4)
+ * @property {boolean} autoStartBreaks - Whether to auto-start breaks after work (default false)
+ * @property {boolean} autoStartWork - Whether to auto-start work after breaks (default false)
+ */
+
+/**
+ * @typedef {Object} PomodoroState
+ * @property {boolean} enabled - Whether Pomodoro mode is enabled for this timer goal
+ * @property {'work'|'break'|'long_break'|'idle'} phase - Current phase
+ * @property {number} sessionsCompleted - Number of work sessions completed (resets after long break)
+ * @property {number} totalSessionsToday - Total Pomodoro sessions completed today
+ * @property {number|null} phaseStartTime - Timestamp when current phase started
+ * @property {number} phaseProgress - Seconds elapsed in current phase
+ * @property {boolean} isRunning - Whether the timer is currently running
+ */
+
+/**
+ * Get default Pomodoro settings
+ * @returns {PomodoroSettings} Default Pomodoro settings
+ */
+function getDefaultPomodoroSettings() {
+  return {
+    workDuration: POMODORO_DEFAULTS.WORK_DURATION,
+    breakDuration: POMODORO_DEFAULTS.BREAK_DURATION,
+    longBreakDuration: POMODORO_DEFAULTS.LONG_BREAK_DURATION,
+    sessionsBeforeLongBreak: POMODORO_DEFAULTS.SESSIONS_BEFORE_LONG_BREAK,
+    autoStartBreaks: false,
+    autoStartWork: false
+  };
+}
+
+/**
+ * Get default Pomodoro state for a goal
+ * @returns {PomodoroState} Default Pomodoro state
+ */
+function getDefaultPomodoroState() {
+  return {
+    enabled: false,
+    phase: POMODORO_PHASES.IDLE,
+    sessionsCompleted: 0,
+    totalSessionsToday: 0,
+    phaseStartTime: null,
+    phaseProgress: 0,
+    isRunning: false
+  };
+}
+
+/**
+ * Get the duration for a given Pomodoro phase
+ * @param {'work'|'break'|'long_break'} phase - The phase
+ * @param {PomodoroSettings} settings - Pomodoro settings
+ * @returns {number} Duration in seconds
+ */
+function getPomodoroPhaseDuration(phase, settings) {
+  switch (phase) {
+    case POMODORO_PHASES.WORK:
+      return settings.workDuration || POMODORO_DEFAULTS.WORK_DURATION;
+    case POMODORO_PHASES.BREAK:
+      return settings.breakDuration || POMODORO_DEFAULTS.BREAK_DURATION;
+    case POMODORO_PHASES.LONG_BREAK:
+      return settings.longBreakDuration || POMODORO_DEFAULTS.LONG_BREAK_DURATION;
+    default:
+      return 0;
+  }
+}
+
+/**
+ * Determine the next Pomodoro phase after current phase completes
+ * @param {PomodoroState} state - Current Pomodoro state
+ * @param {PomodoroSettings} settings - Pomodoro settings
+ * @returns {'work'|'break'|'long_break'} Next phase
+ */
+function getNextPomodoroPhase(state, settings) {
+  if (state.phase === POMODORO_PHASES.WORK) {
+    // After work, check if it's time for a long break
+    const sessionsForLongBreak = settings.sessionsBeforeLongBreak || POMODORO_DEFAULTS.SESSIONS_BEFORE_LONG_BREAK;
+    // sessionsCompleted will be incremented when work phase ends, so we check current + 1
+    if ((state.sessionsCompleted + 1) % sessionsForLongBreak === 0) {
+      return POMODORO_PHASES.LONG_BREAK;
+    }
+    return POMODORO_PHASES.BREAK;
+  }
+  // After any break, next phase is work
+  return POMODORO_PHASES.WORK;
+}
+
+/**
+ * Get human-readable phase name
+ * @param {'work'|'break'|'long_break'|'idle'} phase - The phase
+ * @returns {string} Human-readable name
+ */
+function getPomodoroPhaseDisplayName(phase) {
+  switch (phase) {
+    case POMODORO_PHASES.WORK:
+      return 'Work';
+    case POMODORO_PHASES.BREAK:
+      return 'Break';
+    case POMODORO_PHASES.LONG_BREAK:
+      return 'Long Break';
+    case POMODORO_PHASES.IDLE:
+    default:
+      return 'Ready';
+  }
+}
+
+/**
+ * Calculate remaining time in current Pomodoro phase
+ * @param {PomodoroState} state - Current state
+ * @param {PomodoroSettings} settings - Settings
+ * @returns {number} Remaining seconds in current phase
+ */
+function getPomodoroRemainingTime(state, settings) {
+  if (state.phase === POMODORO_PHASES.IDLE) return 0;
+
+  const phaseDuration = getPomodoroPhaseDuration(state.phase, settings);
+  const elapsed = state.phaseProgress;
+  return Math.max(0, phaseDuration - elapsed);
+}
+
+/**
+ * Check if current Pomodoro phase is complete
+ * @param {PomodoroState} state - Current state
+ * @param {PomodoroSettings} settings - Settings
+ * @returns {boolean} True if phase is complete
+ */
+function isPomodoroPhaseComplete(state, settings) {
+  if (state.phase === POMODORO_PHASES.IDLE) return false;
+
+  const phaseDuration = getPomodoroPhaseDuration(state.phase, settings);
+  return state.phaseProgress >= phaseDuration;
+}
+
+/**
+ * Calculate progress percentage for current Pomodoro phase
+ * @param {PomodoroState} state - Current state
+ * @param {PomodoroSettings} settings - Settings
+ * @returns {number} Progress percentage (0-100)
+ */
+function getPomodoroProgressPercentage(state, settings) {
+  if (state.phase === POMODORO_PHASES.IDLE) return 0;
+
+  const phaseDuration = getPomodoroPhaseDuration(state.phase, settings);
+  if (phaseDuration === 0) return 100;
+
+  const percentage = (state.phaseProgress / phaseDuration) * 100;
+  return Math.min(100, Math.max(0, percentage));
+}
+
+// =============================================================================
 // Exports
 // =============================================================================
 
@@ -1728,5 +1908,16 @@ export {
   getAchievementXP,
   getChallengeXP,
   createXPHistoryEntry,
-  getLevelTitle
+  getLevelTitle,
+  // US-085: Pomodoro Timer Mode functions
+  POMODORO_PHASES,
+  POMODORO_DEFAULTS,
+  getDefaultPomodoroSettings,
+  getDefaultPomodoroState,
+  getPomodoroPhaseDuration,
+  getNextPomodoroPhase,
+  getPomodoroPhaseDisplayName,
+  getPomodoroRemainingTime,
+  isPomodoroPhaseComplete,
+  getPomodoroProgressPercentage
 };

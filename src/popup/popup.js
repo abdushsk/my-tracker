@@ -59,7 +59,15 @@ import {
   addXP,
   markFirstGoalBonusAwarded,
   getXPStats,
-  getRecentXPHistory
+  getRecentXPHistory,
+  // US-085: Pomodoro Timer Mode imports
+  getPomodoroSettings,
+  savePomodoroSettings,
+  getPomodoroStates,
+  savePomodoroStates,
+  updatePomodoroStateForGoal,
+  enablePomodoroForGoal,
+  disablePomodoroForGoal
 } from '../utils/storage.js';
 import {
   GOAL_TYPES,
@@ -115,7 +123,18 @@ import {
   getGoalsToUnlock,
   isChainCompleted,
   getChainProgress,
-  canSetChainParent
+  canSetChainParent,
+  // US-085: Pomodoro Timer Mode imports
+  POMODORO_PHASES,
+  POMODORO_DEFAULTS,
+  getDefaultPomodoroSettings,
+  getDefaultPomodoroState,
+  getPomodoroPhaseDuration,
+  getNextPomodoroPhase,
+  getPomodoroPhaseDisplayName,
+  getPomodoroRemainingTime,
+  isPomodoroPhaseComplete,
+  getPomodoroProgressPercentage
 } from '../utils/models.js';
 import {
   initSounds,
@@ -164,7 +183,10 @@ const state = {
   // US-079: Undo/Redo state management
   undoStack: [], // Stack of undoable actions (max 5)
   redoStack: [], // Stack of redoable actions
-  undoToastTimeoutId: null // Timeout ID for auto-dismissing undo toast
+  undoToastTimeoutId: null, // Timeout ID for auto-dismissing undo toast
+  // US-085: Pomodoro Timer Mode state
+  pomodoroStates: {}, // Map of goalId -> PomodoroState for each timer goal in Pomodoro mode
+  pomodoroSettings: null // Global Pomodoro settings
 };
 
 // =============================================================================
@@ -1368,10 +1390,19 @@ function showChainCompletionNotification(chainLength) {
 
 /**
  * Render timer-specific controls for a goal
+ * Supports both regular timer mode and Pomodoro mode (US-085)
  * @param {Object} goal - The timer goal object
  * @returns {string} HTML string for timer controls
  */
 function renderTimerControls(goal) {
+  const pomodoroState = state.pomodoroStates[goal.id];
+
+  // US-085: If Pomodoro mode is enabled, render Pomodoro controls
+  if (pomodoroState && pomodoroState.enabled) {
+    return renderPomodoroControls(goal, pomodoroState);
+  }
+
+  // Regular timer controls
   const isActive = goal.isActive;
   const activeTimer = state.activeTimers[goal.id];
 
@@ -1387,6 +1418,7 @@ function renderTimerControls(goal) {
 
   const playIcon = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"/></svg>';
   const pauseIcon = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>';
+  const tomatoIcon = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="14" height="14"><circle cx="12" cy="13" r="8"/><path d="M12 5V3"/><path d="M9 4c1.5 1 4.5 1 6 0"/></svg>';
 
   return `
     <div class="goal-controls goal-controls-timer">
@@ -1401,8 +1433,404 @@ function renderTimerControls(goal) {
               title="${isActive ? 'Pause' : 'Play'}">
         ${isActive ? pauseIcon : playIcon}
       </button>
+      <button class="goal-control-btn pomodoro-toggle-btn"
+              data-action="pomodoro-enable"
+              data-goal-id="${goal.id}"
+              title="Enable Pomodoro Mode">
+        ${tomatoIcon}
+      </button>
     </div>
   `;
+}
+
+// =============================================================================
+// US-085: Pomodoro Timer Mode Controls
+// =============================================================================
+
+/**
+ * Render Pomodoro-specific controls for a timer goal
+ * @param {Object} goal - The timer goal object
+ * @param {Object} pomodoroState - The Pomodoro state for this goal
+ * @returns {string} HTML string for Pomodoro controls
+ */
+function renderPomodoroControls(goal, pomodoroState) {
+  const settings = state.pomodoroSettings || getDefaultPomodoroSettings();
+  const phase = pomodoroState.phase;
+  const isRunning = pomodoroState.isRunning;
+
+  // Calculate current phase progress
+  let displayProgress = pomodoroState.phaseProgress;
+  if (isRunning && pomodoroState.phaseStartTime) {
+    const elapsedSinceStart = Math.floor((Date.now() - pomodoroState.phaseStartTime) / 1000);
+    displayProgress = pomodoroState.phaseProgress + elapsedSinceStart;
+  }
+
+  // Get phase duration and remaining time
+  const phaseDuration = phase !== POMODORO_PHASES.IDLE ? getPomodoroPhaseDuration(phase, settings) : settings.workDuration;
+  const remaining = Math.max(0, phaseDuration - displayProgress);
+
+  // Phase display info
+  const phaseDisplayName = getPomodoroPhaseDisplayName(phase);
+  const isWorkPhase = phase === POMODORO_PHASES.WORK;
+  const isBreakPhase = phase === POMODORO_PHASES.BREAK || phase === POMODORO_PHASES.LONG_BREAK;
+
+  // Icons
+  const playIcon = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"/></svg>';
+  const pauseIcon = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>';
+  const skipIcon = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="14" height="14"><polygon points="5 4 15 12 5 20 5 4"/><line x1="19" y1="5" x2="19" y2="19" stroke="currentColor" stroke-width="2"/></svg>';
+  const closeIcon = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="12" height="12"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>';
+
+  // Sessions indicator (tomatoes)
+  const sessionsCompleted = pomodoroState.sessionsCompleted || 0;
+  const sessionsBeforeLongBreak = settings.sessionsBeforeLongBreak || 4;
+  const sessionIndicators = Array.from({ length: sessionsBeforeLongBreak }, (_, i) =>
+    `<span class="pomodoro-session-dot ${i < (sessionsCompleted % sessionsBeforeLongBreak) ? 'completed' : ''}"></span>`
+  ).join('');
+
+  return `
+    <div class="goal-controls goal-controls-pomodoro" data-goal-id="${goal.id}">
+      <div class="pomodoro-header">
+        <span class="pomodoro-phase-badge ${isWorkPhase ? 'work' : ''} ${isBreakPhase ? 'break' : ''}">${phaseDisplayName}</span>
+        <div class="pomodoro-sessions">${sessionIndicators}</div>
+        <button class="pomodoro-close-btn" data-action="pomodoro-disable" data-goal-id="${goal.id}" title="Disable Pomodoro">
+          ${closeIcon}
+        </button>
+      </div>
+      <div class="pomodoro-timer-display" data-goal-id="${goal.id}">
+        <span class="pomodoro-time-remaining">${formatTime(remaining)}</span>
+        <span class="pomodoro-total-sessions" title="Total sessions today">${pomodoroState.totalSessionsToday || 0}</span>
+      </div>
+      <div class="pomodoro-controls">
+        <button class="goal-control-btn pomodoro-play-btn ${isRunning ? 'is-active' : ''}"
+                data-action="pomodoro-toggle"
+                data-goal-id="${goal.id}"
+                title="${isRunning ? 'Pause' : (phase === POMODORO_PHASES.IDLE ? 'Start Work' : 'Resume')}">
+          ${isRunning ? pauseIcon : playIcon}
+        </button>
+        ${phase !== POMODORO_PHASES.IDLE ? `
+          <button class="goal-control-btn pomodoro-skip-btn"
+                  data-action="pomodoro-skip"
+                  data-goal-id="${goal.id}"
+                  title="Skip to next phase">
+            ${skipIcon}
+          </button>
+        ` : ''}
+      </div>
+    </div>
+  `;
+}
+
+/**
+ * US-085: Enable Pomodoro mode for a timer goal
+ * @param {string} goalId - The goal ID
+ */
+async function handlePomodoroEnable(goalId) {
+  const goal = state.goals.find(g => g.id === goalId);
+  if (!goal || goal.type !== GOAL_TYPES.TIMER) {
+    console.error('[Pomodoro] Invalid goal for Pomodoro:', goalId);
+    return;
+  }
+
+  // Stop any running regular timer
+  if (goal.isActive) {
+    await handleTimerToggle(goalId);
+  }
+
+  // Create and save Pomodoro state
+  const pomodoroState = await enablePomodoroForGoal(goalId);
+  state.pomodoroStates[goalId] = pomodoroState;
+
+  console.log(`[Pomodoro] Enabled for goal ${goalId}`);
+  playSound(SOUNDS.START);
+
+  // Re-render to show Pomodoro controls
+  renderCurrentScreen();
+}
+
+/**
+ * US-085: Disable Pomodoro mode for a timer goal
+ * @param {string} goalId - The goal ID
+ */
+async function handlePomodoroDisable(goalId) {
+  const pomodoroState = state.pomodoroStates[goalId];
+
+  // Stop any running Pomodoro timer
+  if (pomodoroState && pomodoroState.isRunning) {
+    await handlePomodoroPause(goalId, pomodoroState);
+  }
+
+  // Remove Pomodoro state
+  await disablePomodoroForGoal(goalId);
+  delete state.pomodoroStates[goalId];
+
+  console.log(`[Pomodoro] Disabled for goal ${goalId}`);
+
+  // Re-render to show regular timer controls
+  renderCurrentScreen();
+}
+
+/**
+ * US-085: Toggle Pomodoro timer (play/pause)
+ * @param {string} goalId - The goal ID
+ */
+async function handlePomodoroToggle(goalId) {
+  const pomodoroState = state.pomodoroStates[goalId];
+  if (!pomodoroState || !pomodoroState.enabled) {
+    console.error('[Pomodoro] No Pomodoro state for goal:', goalId);
+    return;
+  }
+
+  if (pomodoroState.isRunning) {
+    await handlePomodoroPause(goalId, pomodoroState);
+  } else {
+    await handlePomodoroStart(goalId, pomodoroState);
+  }
+}
+
+/**
+ * US-085: Start or resume Pomodoro timer
+ * @param {string} goalId - The goal ID
+ * @param {Object} pomodoroState - Current Pomodoro state
+ */
+async function handlePomodoroStart(goalId, pomodoroState) {
+  const now = Date.now();
+  const settings = state.pomodoroSettings || getDefaultPomodoroSettings();
+
+  // If idle, start a work phase
+  if (pomodoroState.phase === POMODORO_PHASES.IDLE) {
+    pomodoroState.phase = POMODORO_PHASES.WORK;
+    pomodoroState.phaseProgress = 0;
+  }
+
+  // Start the timer
+  pomodoroState.isRunning = true;
+  pomodoroState.phaseStartTime = now;
+
+  // Update state
+  state.pomodoroStates[goalId] = pomodoroState;
+  await updatePomodoroStateForGoal(goalId, pomodoroState);
+
+  // Start the timer update interval
+  startTimerUpdateInterval();
+
+  // Play start sound
+  playSound(SOUNDS.START);
+
+  console.log(`[Pomodoro] Started ${pomodoroState.phase} phase for goal ${goalId}`);
+
+  // Re-render
+  renderCurrentScreen();
+}
+
+/**
+ * US-085: Pause Pomodoro timer
+ * @param {string} goalId - The goal ID
+ * @param {Object} pomodoroState - Current Pomodoro state
+ */
+async function handlePomodoroPause(goalId, pomodoroState) {
+  const now = Date.now();
+
+  // Calculate elapsed time in this phase
+  if (pomodoroState.phaseStartTime) {
+    const elapsedSinceStart = Math.floor((now - pomodoroState.phaseStartTime) / 1000);
+    pomodoroState.phaseProgress += elapsedSinceStart;
+  }
+
+  // Pause the timer
+  pomodoroState.isRunning = false;
+  pomodoroState.phaseStartTime = null;
+
+  // Update state
+  state.pomodoroStates[goalId] = pomodoroState;
+  await updatePomodoroStateForGoal(goalId, pomodoroState);
+
+  // Play pause sound
+  playSound(SOUNDS.PAUSE);
+
+  console.log(`[Pomodoro] Paused ${pomodoroState.phase} phase for goal ${goalId}`);
+
+  // Re-render
+  renderCurrentScreen();
+}
+
+/**
+ * US-085: Skip to next Pomodoro phase
+ * @param {string} goalId - The goal ID
+ */
+async function handlePomodoroSkip(goalId) {
+  const pomodoroState = state.pomodoroStates[goalId];
+  if (!pomodoroState || !pomodoroState.enabled) {
+    return;
+  }
+
+  // Complete current phase and transition to next
+  await handlePomodoroPhaseComplete(goalId, pomodoroState, true);
+}
+
+/**
+ * US-085: Handle Pomodoro phase completion
+ * @param {string} goalId - The goal ID
+ * @param {Object} pomodoroState - Current Pomodoro state
+ * @param {boolean} skipped - Whether the phase was skipped
+ */
+async function handlePomodoroPhaseComplete(goalId, pomodoroState, skipped = false) {
+  const settings = state.pomodoroSettings || getDefaultPomodoroSettings();
+  const goal = state.goals.find(g => g.id === goalId);
+  const currentPhase = pomodoroState.phase;
+
+  // If work phase completed (not skipped), increment sessions and add progress to goal
+  if (currentPhase === POMODORO_PHASES.WORK && !skipped) {
+    pomodoroState.sessionsCompleted++;
+    pomodoroState.totalSessionsToday++;
+
+    // Add work duration to the goal's progress
+    if (goal) {
+      const workDuration = settings.workDuration;
+      const newProgress = Math.min(goal.progress + workDuration, goal.target);
+      goal.progress = newProgress;
+      await updateGoal(goalId, { progress: newProgress });
+
+      // Check if goal is now complete
+      if (newProgress >= goal.target && !isGoalCompleted(goal)) {
+        await handleTimerCompletion(goalId);
+      }
+    }
+
+    console.log(`[Pomodoro] Work session ${pomodoroState.sessionsCompleted} completed for goal ${goalId}`);
+  }
+
+  // Determine next phase
+  const nextPhase = getNextPomodoroPhase(pomodoroState, settings);
+
+  // Reset for next phase
+  pomodoroState.phase = nextPhase;
+  pomodoroState.phaseProgress = 0;
+  pomodoroState.phaseStartTime = null;
+
+  // Auto-start behavior
+  const shouldAutoStart = (nextPhase === POMODORO_PHASES.WORK && settings.autoStartWork) ||
+                          ((nextPhase === POMODORO_PHASES.BREAK || nextPhase === POMODORO_PHASES.LONG_BREAK) && settings.autoStartBreaks);
+
+  if (shouldAutoStart) {
+    pomodoroState.isRunning = true;
+    pomodoroState.phaseStartTime = Date.now();
+  } else {
+    pomodoroState.isRunning = false;
+  }
+
+  // Update state
+  state.pomodoroStates[goalId] = pomodoroState;
+  await updatePomodoroStateForGoal(goalId, pomodoroState);
+
+  // Play phase change sound
+  if (currentPhase === POMODORO_PHASES.WORK) {
+    // Work session complete - play completion sound
+    playSound(SOUNDS.COMPLETE);
+  } else {
+    // Break complete - play start sound for next work session
+    playSound(SOUNDS.START);
+  }
+
+  // Show notification for phase change
+  showPomodoroPhaseNotification(goalId, currentPhase, nextPhase, pomodoroState.sessionsCompleted);
+
+  console.log(`[Pomodoro] Transitioned from ${currentPhase} to ${nextPhase} for goal ${goalId}`);
+
+  // Re-render
+  renderCurrentScreen();
+}
+
+/**
+ * US-085: Show notification for Pomodoro phase change
+ * @param {string} goalId - The goal ID
+ * @param {string} fromPhase - Previous phase
+ * @param {string} toPhase - New phase
+ * @param {number} sessionsCompleted - Number of sessions completed
+ */
+function showPomodoroPhaseNotification(goalId, fromPhase, toPhase, sessionsCompleted) {
+  const goal = state.goals.find(g => g.id === goalId);
+  const goalTitle = goal ? goal.title : 'Timer';
+
+  let message = '';
+  let icon = '';
+
+  if (fromPhase === POMODORO_PHASES.WORK) {
+    if (toPhase === POMODORO_PHASES.LONG_BREAK) {
+      message = `Great job! ${sessionsCompleted} sessions complete. Time for a long break!`;
+      icon = '🎉';
+    } else {
+      message = `Session ${sessionsCompleted} complete! Take a short break.`;
+      icon = '☕';
+    }
+  } else {
+    message = `Break over. Ready for another work session?`;
+    icon = '💪';
+  }
+
+  // Create and show notification toast
+  const existingToast = document.querySelector('.pomodoro-phase-toast');
+  if (existingToast) {
+    existingToast.remove();
+  }
+
+  const toast = document.createElement('div');
+  toast.className = 'pomodoro-phase-toast';
+  toast.innerHTML = `
+    <span class="pomodoro-toast-icon">${icon}</span>
+    <div class="pomodoro-toast-content">
+      <span class="pomodoro-toast-title">${goalTitle}</span>
+      <span class="pomodoro-toast-message">${message}</span>
+    </div>
+  `;
+  document.body.appendChild(toast);
+
+  // Trigger animation
+  requestAnimationFrame(() => {
+    toast.classList.add('show');
+  });
+
+  // Auto-dismiss after 5 seconds
+  setTimeout(() => {
+    toast.classList.remove('show');
+    setTimeout(() => toast.remove(), 300);
+  }, 5000);
+}
+
+/**
+ * US-085: Update Pomodoro timer displays (called from timer update interval)
+ */
+function updatePomodoroDisplays() {
+  const settings = state.pomodoroSettings || getDefaultPomodoroSettings();
+  const now = Date.now();
+
+  Object.entries(state.pomodoroStates).forEach(([goalId, pomodoroState]) => {
+    if (!pomodoroState.enabled || !pomodoroState.isRunning) return;
+
+    // Calculate current progress
+    let currentProgress = pomodoroState.phaseProgress;
+    if (pomodoroState.phaseStartTime) {
+      const elapsedSinceStart = Math.floor((now - pomodoroState.phaseStartTime) / 1000);
+      currentProgress += elapsedSinceStart;
+    }
+
+    // Get phase duration
+    const phaseDuration = getPomodoroPhaseDuration(pomodoroState.phase, settings);
+    const remaining = Math.max(0, phaseDuration - currentProgress);
+
+    // Update DOM
+    const timerDisplay = document.querySelector(`.pomodoro-timer-display[data-goal-id="${goalId}"]`);
+    if (timerDisplay) {
+      const timeElement = timerDisplay.querySelector('.pomodoro-time-remaining');
+      if (timeElement) {
+        timeElement.textContent = formatTime(remaining);
+      }
+    }
+
+    // Check if phase completed
+    if (currentProgress >= phaseDuration) {
+      handlePomodoroPhaseComplete(goalId, pomodoroState, false);
+    }
+  });
 }
 
 /**
@@ -1554,10 +1982,18 @@ function stopTimerUpdateInterval() {
 function updateTimerDisplays() {
   const activeTimerIds = Object.keys(state.activeTimers);
 
-  // If no active timers, stop the interval
-  if (activeTimerIds.length === 0) {
+  // US-085: Check for running Pomodoro timers
+  const runningPomodoroCount = Object.values(state.pomodoroStates).filter(s => s && s.enabled && s.isRunning).length;
+
+  // If no active timers and no running Pomodoros, stop the interval
+  if (activeTimerIds.length === 0 && runningPomodoroCount === 0) {
     stopTimerUpdateInterval();
     return;
+  }
+
+  // US-085: Update Pomodoro displays
+  if (runningPomodoroCount > 0) {
+    updatePomodoroDisplays();
   }
 
   const now = Date.now();
@@ -2016,6 +2452,58 @@ function attachGoalControlListeners(container) {
       const goalId = btn.getAttribute('data-goal-id');
       if (goalId) {
         toggleGoalNotes(goalId, btn);
+      }
+    });
+  });
+
+  // US-085: Pomodoro enable buttons
+  const pomodoroEnableBtns = container.querySelectorAll('[data-action="pomodoro-enable"]');
+  pomodoroEnableBtns.forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      const goalId = btn.getAttribute('data-goal-id');
+      if (goalId) {
+        handlePomodoroEnable(goalId);
+      }
+    });
+  });
+
+  // US-085: Pomodoro disable buttons
+  const pomodoroDisableBtns = container.querySelectorAll('[data-action="pomodoro-disable"]');
+  pomodoroDisableBtns.forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      const goalId = btn.getAttribute('data-goal-id');
+      if (goalId) {
+        handlePomodoroDisable(goalId);
+      }
+    });
+  });
+
+  // US-085: Pomodoro toggle (play/pause) buttons
+  const pomodoroToggleBtns = container.querySelectorAll('[data-action="pomodoro-toggle"]');
+  pomodoroToggleBtns.forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      const goalId = btn.getAttribute('data-goal-id');
+      if (goalId) {
+        handlePomodoroToggle(goalId);
+      }
+    });
+  });
+
+  // US-085: Pomodoro skip buttons
+  const pomodoroSkipBtns = container.querySelectorAll('[data-action="pomodoro-skip"]');
+  pomodoroSkipBtns.forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      const goalId = btn.getAttribute('data-goal-id');
+      if (goalId) {
+        handlePomodoroSkip(goalId);
       }
     });
   });
@@ -10273,6 +10761,64 @@ function renderSettingsScreen() {
           </button>
         </div>
 
+        <!-- US-085: Pomodoro Settings Section -->
+        <div class="settings-section">
+          <h2>Pomodoro Timer</h2>
+          <p class="settings-section-description">Configure Pomodoro technique settings for timer goals</p>
+
+          <div class="pomodoro-duration-inputs">
+            <div class="pomodoro-duration-item">
+              <span class="pomodoro-duration-label">Work</span>
+              <input type="number" id="pomodoro-work-duration" class="pomodoro-duration-input"
+                     min="1" max="120" value="${Math.floor((state.pomodoroSettings?.workDuration || 1500) / 60)}">
+              <span class="pomodoro-duration-unit">min</span>
+            </div>
+            <div class="pomodoro-duration-item">
+              <span class="pomodoro-duration-label">Break</span>
+              <input type="number" id="pomodoro-break-duration" class="pomodoro-duration-input"
+                     min="1" max="60" value="${Math.floor((state.pomodoroSettings?.breakDuration || 300) / 60)}">
+              <span class="pomodoro-duration-unit">min</span>
+            </div>
+            <div class="pomodoro-duration-item">
+              <span class="pomodoro-duration-label">Long Break</span>
+              <input type="number" id="pomodoro-long-break-duration" class="pomodoro-duration-input"
+                     min="1" max="120" value="${Math.floor((state.pomodoroSettings?.longBreakDuration || 900) / 60)}">
+              <span class="pomodoro-duration-unit">min</span>
+            </div>
+          </div>
+
+          <div class="setting-item setting-item-row" style="margin-top: 16px;">
+            <div class="setting-info">
+              <span class="setting-label">Sessions before long break</span>
+              <span class="setting-description">Number of work sessions before a long break</span>
+            </div>
+            <input type="number" id="pomodoro-sessions-count" class="pomodoro-duration-input" style="width: 60px;"
+                   min="1" max="10" value="${state.pomodoroSettings?.sessionsBeforeLongBreak || 4}">
+          </div>
+
+          <div class="setting-item setting-item-row" style="margin-top: 12px;">
+            <div class="setting-info">
+              <span class="setting-label">Auto-start breaks</span>
+              <span class="setting-description">Automatically start breaks after work</span>
+            </div>
+            <label class="toggle-switch" aria-label="Toggle auto-start breaks">
+              <input type="checkbox" id="pomodoro-auto-breaks" ${state.pomodoroSettings?.autoStartBreaks ? 'checked' : ''}>
+              <span class="toggle-slider"></span>
+            </label>
+          </div>
+
+          <div class="setting-item setting-item-row" style="margin-top: 12px;">
+            <div class="setting-info">
+              <span class="setting-label">Auto-start work</span>
+              <span class="setting-description">Automatically start work after breaks</span>
+            </div>
+            <label class="toggle-switch" aria-label="Toggle auto-start work">
+              <input type="checkbox" id="pomodoro-auto-work" ${state.pomodoroSettings?.autoStartWork ? 'checked' : ''}>
+              <span class="toggle-slider"></span>
+            </label>
+          </div>
+        </div>
+
         <!-- US-070: Data Management Section -->
         <div class="settings-section">
           <h2>Data Management</h2>
@@ -10658,6 +11204,101 @@ function attachNotificationSettingsListeners(screen) {
           `;
         }, 2000);
       }
+    });
+  }
+
+  // US-085: Attach Pomodoro settings listeners
+  attachPomodoroSettingsListeners(screen);
+}
+
+// ============================================
+// US-085: Pomodoro Settings Functions
+// ============================================
+
+/**
+ * US-085: Attach Pomodoro settings event listeners
+ * @param {HTMLElement} screen - The settings screen element
+ */
+function attachPomodoroSettingsListeners(screen) {
+  // Work duration input
+  const workDurationInput = screen.querySelector('#pomodoro-work-duration');
+  if (workDurationInput) {
+    workDurationInput.addEventListener('change', async (e) => {
+      const minutes = parseInt(e.target.value, 10) || 25;
+      state.pomodoroSettings = {
+        ...state.pomodoroSettings,
+        workDuration: minutes * 60
+      };
+      await savePomodoroSettings(state.pomodoroSettings);
+      console.log(`[Pomodoro] Work duration set to ${minutes} minutes`);
+    });
+  }
+
+  // Break duration input
+  const breakDurationInput = screen.querySelector('#pomodoro-break-duration');
+  if (breakDurationInput) {
+    breakDurationInput.addEventListener('change', async (e) => {
+      const minutes = parseInt(e.target.value, 10) || 5;
+      state.pomodoroSettings = {
+        ...state.pomodoroSettings,
+        breakDuration: minutes * 60
+      };
+      await savePomodoroSettings(state.pomodoroSettings);
+      console.log(`[Pomodoro] Break duration set to ${minutes} minutes`);
+    });
+  }
+
+  // Long break duration input
+  const longBreakDurationInput = screen.querySelector('#pomodoro-long-break-duration');
+  if (longBreakDurationInput) {
+    longBreakDurationInput.addEventListener('change', async (e) => {
+      const minutes = parseInt(e.target.value, 10) || 15;
+      state.pomodoroSettings = {
+        ...state.pomodoroSettings,
+        longBreakDuration: minutes * 60
+      };
+      await savePomodoroSettings(state.pomodoroSettings);
+      console.log(`[Pomodoro] Long break duration set to ${minutes} minutes`);
+    });
+  }
+
+  // Sessions before long break input
+  const sessionsCountInput = screen.querySelector('#pomodoro-sessions-count');
+  if (sessionsCountInput) {
+    sessionsCountInput.addEventListener('change', async (e) => {
+      const sessions = parseInt(e.target.value, 10) || 4;
+      state.pomodoroSettings = {
+        ...state.pomodoroSettings,
+        sessionsBeforeLongBreak: sessions
+      };
+      await savePomodoroSettings(state.pomodoroSettings);
+      console.log(`[Pomodoro] Sessions before long break set to ${sessions}`);
+    });
+  }
+
+  // Auto-start breaks toggle
+  const autoBreaksToggle = screen.querySelector('#pomodoro-auto-breaks');
+  if (autoBreaksToggle) {
+    autoBreaksToggle.addEventListener('change', async (e) => {
+      state.pomodoroSettings = {
+        ...state.pomodoroSettings,
+        autoStartBreaks: e.target.checked
+      };
+      await savePomodoroSettings(state.pomodoroSettings);
+      console.log(`[Pomodoro] Auto-start breaks: ${e.target.checked}`);
+    });
+  }
+
+  // Auto-start work toggle
+  const autoWorkToggle = screen.querySelector('#pomodoro-auto-work');
+  if (autoWorkToggle) {
+    autoWorkToggle.addEventListener('change', async (e) => {
+      state.pomodoroSettings = {
+        ...state.pomodoroSettings,
+        autoStartWork: e.target.checked
+      };
+      await savePomodoroSettings(state.pomodoroSettings);
+      console.log(`[Pomodoro] Auto-start work: ${e.target.checked}`);
     });
   }
 }
@@ -11896,8 +12537,8 @@ async function loadData() {
   try {
     state.isLoading = true;
 
-    // Load goals, settings, active timers, streak data, categories, templates, archived goals, achievements, and daily challenges in parallel
-    const [goals, settings, activeTimers, streakData, categories, templates, archivedGoals, achievements, dailyChallenges, xpData] = await Promise.all([
+    // Load goals, settings, active timers, streak data, categories, templates, archived goals, achievements, daily challenges, XP, and Pomodoro data in parallel
+    const [goals, settings, activeTimers, streakData, categories, templates, archivedGoals, achievements, dailyChallenges, xpData, pomodoroSettings, pomodoroStates] = await Promise.all([
       getGoals(),
       getSettings(),
       getActiveTimers(),
@@ -11907,7 +12548,9 @@ async function loadData() {
       getArchivedGoals(), // US-069: Load archived goals
       getAchievements(), // US-080: Load achievements
       getDailyChallenges(), // US-081: Load daily challenges
-      getXPData() // US-083: Load XP data
+      getXPData(), // US-083: Load XP data
+      getPomodoroSettings(), // US-085: Load Pomodoro settings
+      getPomodoroStates() // US-085: Load Pomodoro states
     ]);
 
     // Update state
@@ -11935,6 +12578,10 @@ async function loadData() {
       state.xpData = xpData;
     }
 
+    // US-085: Initialize Pomodoro data
+    state.pomodoroSettings = pomodoroSettings;
+    state.pomodoroStates = pomodoroStates;
+
     // US-081: Initialize daily challenges if not present or if it's a new day
     await initializeDailyChallenge(dailyChallenges);
 
@@ -11950,7 +12597,8 @@ async function loadData() {
       dailyChallengesEnabled: state.settings?.dailyChallengesEnabled,
       currentChallenge: state.dailyChallenges?.currentChallenge?.id,
       xpLevel: state.xpData?.currentLevel,
-      totalXP: state.xpData?.totalXP
+      totalXP: state.xpData?.totalXP,
+      pomodoroGoalsCount: Object.keys(state.pomodoroStates).length
     });
 
     // US-039: Initialize sound system with user settings

@@ -2303,3 +2303,106 @@ Implemented a Habit Chains feature that allows users to link goals in sequences.
 - Time delays between chain links could be added as a future enhancement
 - Consider adding chain visualization in Reports screen for routine analysis
 - Consider adding bulk chain creation UI for common routines
+
+---
+
+# Iteration - US-085: Pomodoro Timer Mode
+
+## Task Completed
+Implemented Pomodoro Timer Mode for timer goals. Users can now enable Pomodoro technique (25min work / 5min break cycles) for any timer goal.
+
+## Implementation Details
+
+### Data Model (models.js)
+- Added `POMODORO_PHASES` enum: WORK, BREAK, LONG_BREAK, IDLE
+- Added `POMODORO_DEFAULTS` configuration (25/5/15 minutes, 4 sessions before long break)
+- Created helper functions:
+  - `getDefaultPomodoroSettings()` - Default settings object
+  - `getDefaultPomodoroState()` - Initial state for a goal
+  - `getPomodoroPhaseDuration()` - Get duration for a phase
+  - `getNextPomodoroPhase()` - Determine next phase after current
+  - `getPomodoroPhaseDisplayName()` - Human-readable phase names
+  - `getPomodoroRemainingTime()` - Calculate remaining time
+  - `isPomodoroPhaseComplete()` - Check if phase is done
+  - `getPomodoroProgressPercentage()` - Progress percentage
+
+### Storage (storage.js)
+- Added STORAGE_KEYS for pomodoroSettings and pomodoroStates
+- Implemented storage functions:
+  - `getPomodoroSettings()` / `savePomodoroSettings()`
+  - `getPomodoroStates()` / `savePomodoroStates()`
+  - `updatePomodoroStateForGoal()` / `removePomodoroStateForGoal()`
+  - `enablePomodoroForGoal()` / `disablePomodoroForGoal()`
+
+### UI Components (popup.js)
+- Modified `renderTimerControls()` to detect Pomodoro mode and render appropriate controls
+- Added tomato icon button on regular timer controls to enable Pomodoro mode
+- Created `renderPomodoroControls()` for Pomodoro-specific UI:
+  - Phase badge (Work/Break/Long Break/Ready)
+  - Session dots (tomatoes) showing progress to long break
+  - Countdown timer showing remaining time in phase
+  - Play/pause and skip buttons
+  - Close button to disable Pomodoro mode
+- Created toast notification system for phase transitions
+
+### Event Handlers
+- `handlePomodoroEnable()` - Enable Pomodoro for a goal
+- `handlePomodoroDisable()` - Disable Pomodoro mode
+- `handlePomodoroToggle()` - Start/pause Pomodoro timer
+- `handlePomodoroStart()` - Start work/break phase
+- `handlePomodoroPause()` - Pause current phase
+- `handlePomodoroSkip()` - Skip to next phase
+- `handlePomodoroPhaseComplete()` - Handle phase transitions
+- `updatePomodoroDisplays()` - Update timer display in interval
+- `showPomodoroPhaseNotification()` - Show phase change toast
+
+### Settings Screen
+- Added Pomodoro Timer section with:
+  - Work duration input (minutes)
+  - Break duration input (minutes)
+  - Long break duration input (minutes)
+  - Sessions before long break count
+  - Auto-start breaks toggle
+  - Auto-start work toggle
+- Attached event listeners for all settings inputs
+
+### CSS Styling (popup.css)
+- Pomodoro toggle button on regular timer
+- Pomodoro controls container with gradient background
+- Phase badge with work/break colors
+- Session dots (tomato indicators)
+- Timer display with monospace font
+- Play/pause and skip buttons
+- Phase change toast notification
+- Dark mode variants
+- Compact view variants
+- Reduced motion support
+
+## Acceptance Criteria Met
+- [x] Pomodoro mode toggle for timer goals (tomato button)
+- [x] Default 25min work / 5min break / 15min long break
+- [x] Customizable durations in Settings
+- [x] Visual phase indicator (work/break badges with colors)
+- [x] Auto-start break after work (optional toggle)
+- [x] Pomodoro count tracking (session dots and total count)
+- [x] Sound notification on phase change
+
+## Files Modified
+- src/utils/models.js - Added Pomodoro phases, defaults, and helper functions
+- src/utils/storage.js - Added Pomodoro storage functions
+- src/popup/popup.js - Added Pomodoro UI, handlers, and settings
+- src/popup/popup.css - Added Pomodoro styling
+- plans/prd.json - Marked US-085 as passes: true
+
+## Technical Notes
+- Pomodoro state is stored per-goal in pomodoroStates storage
+- Work phase completion adds the full work duration to goal progress
+- Phase transitions trigger sound notifications and toast messages
+- Timer updates use existing 1-second interval mechanism
+- Settings are global (shared across all Pomodoro-enabled goals)
+- Session count resets after long break
+
+## Notes for Next Iteration
+- Consider adding browser notifications for phase changes when popup is closed
+- Could integrate with Achievements system for Pomodoro milestones
+- May want to add Pomodoro statistics in Reports screen

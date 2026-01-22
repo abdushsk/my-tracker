@@ -513,7 +513,7 @@
         "Sound notification on phase change"
       ],
       "priority": 31,
-      "passes": false,
+      "passes": true,
       "dependsOn": []
     },
     {

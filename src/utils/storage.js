@@ -17,7 +17,9 @@ const STORAGE_KEYS = {
   ARCHIVED_GOALS: 'archivedGoals', // US-069: Archived goals
   ACHIEVEMENTS: 'achievements', // US-080: Achievement progress data
   DAILY_CHALLENGES: 'dailyChallenges', // US-081: Daily challenges data
-  XP_DATA: 'xpData' // US-083: Level and XP system data
+  XP_DATA: 'xpData', // US-083: Level and XP system data
+  POMODORO_SETTINGS: 'pomodoroSettings', // US-085: Pomodoro timer settings
+  POMODORO_STATES: 'pomodoroStates' // US-085: Pomodoro states for each goal
 };
 
 /**
@@ -1607,6 +1609,146 @@ async function getRecentXPHistory(limit = 10) {
   }
 }
 
+// =============================================================================
+// US-085: Pomodoro Timer Mode Functions
+// =============================================================================
+
+/**
+ * Get Pomodoro settings from storage
+ * @returns {Promise<Object>} Pomodoro settings
+ */
+async function getPomodoroSettings() {
+  try {
+    const result = await chrome.storage.local.get(STORAGE_KEYS.POMODORO_SETTINGS);
+    return result[STORAGE_KEYS.POMODORO_SETTINGS] || {
+      workDuration: 25 * 60,       // 25 minutes
+      breakDuration: 5 * 60,        // 5 minutes
+      longBreakDuration: 15 * 60,   // 15 minutes
+      sessionsBeforeLongBreak: 4,
+      autoStartBreaks: false,
+      autoStartWork: false
+    };
+  } catch (error) {
+    console.error('Error getting Pomodoro settings:', error);
+    return {
+      workDuration: 25 * 60,
+      breakDuration: 5 * 60,
+      longBreakDuration: 15 * 60,
+      sessionsBeforeLongBreak: 4,
+      autoStartBreaks: false,
+      autoStartWork: false
+    };
+  }
+}
+
+/**
+ * Save Pomodoro settings to storage
+ * @param {Object} settings - Pomodoro settings
+ * @returns {Promise<void>}
+ */
+async function savePomodoroSettings(settings) {
+  try {
+    await chrome.storage.local.set({
+      [STORAGE_KEYS.POMODORO_SETTINGS]: settings
+    });
+    console.log('[Storage] Saved Pomodoro settings');
+  } catch (error) {
+    console.error('Error saving Pomodoro settings:', error);
+    throw error;
+  }
+}
+
+/**
+ * Get all Pomodoro states from storage
+ * @returns {Promise<Object>} Map of goalId -> PomodoroState
+ */
+async function getPomodoroStates() {
+  try {
+    const result = await chrome.storage.local.get(STORAGE_KEYS.POMODORO_STATES);
+    return result[STORAGE_KEYS.POMODORO_STATES] || {};
+  } catch (error) {
+    console.error('Error getting Pomodoro states:', error);
+    return {};
+  }
+}
+
+/**
+ * Save all Pomodoro states to storage
+ * @param {Object} states - Map of goalId -> PomodoroState
+ * @returns {Promise<void>}
+ */
+async function savePomodoroStates(states) {
+  try {
+    await chrome.storage.local.set({
+      [STORAGE_KEYS.POMODORO_STATES]: states
+    });
+  } catch (error) {
+    console.error('Error saving Pomodoro states:', error);
+    throw error;
+  }
+}
+
+/**
+ * Get Pomodoro state for a specific goal
+ * @param {string} goalId - Goal ID
+ * @returns {Promise<Object|null>} Pomodoro state or null
+ */
+async function getPomodoroStateForGoal(goalId) {
+  const states = await getPomodoroStates();
+  return states[goalId] || null;
+}
+
+/**
+ * Update Pomodoro state for a specific goal
+ * @param {string} goalId - Goal ID
+ * @param {Object} state - Updated Pomodoro state
+ * @returns {Promise<void>}
+ */
+async function updatePomodoroStateForGoal(goalId, state) {
+  const states = await getPomodoroStates();
+  states[goalId] = state;
+  await savePomodoroStates(states);
+}
+
+/**
+ * Remove Pomodoro state for a specific goal
+ * @param {string} goalId - Goal ID
+ * @returns {Promise<void>}
+ */
+async function removePomodoroStateForGoal(goalId) {
+  const states = await getPomodoroStates();
+  delete states[goalId];
+  await savePomodoroStates(states);
+}
+
+/**
+ * Enable Pomodoro mode for a timer goal
+ * @param {string} goalId - Goal ID
+ * @returns {Promise<Object>} Initial Pomodoro state
+ */
+async function enablePomodoroForGoal(goalId) {
+  const state = {
+    enabled: true,
+    phase: 'idle',
+    sessionsCompleted: 0,
+    totalSessionsToday: 0,
+    phaseStartTime: null,
+    phaseProgress: 0,
+    isRunning: false
+  };
+  await updatePomodoroStateForGoal(goalId, state);
+  return state;
+}
+
+/**
+ * Disable Pomodoro mode for a goal
+ * @param {string} goalId - Goal ID
+ * @returns {Promise<void>}
+ */
+async function disablePomodoroForGoal(goalId) {
+  await removePomodoroStateForGoal(goalId);
+}
+
 // Export functions for use in other modules
 export {
   STORAGE_KEYS,
@@ -1677,5 +1819,15 @@ export {
   addXP,
   markFirstGoalBonusAwarded,
   getXPStats,
-  getRecentXPHistory
+  getRecentXPHistory,
+  // US-085: Pomodoro Timer Mode functions
+  getPomodoroSettings,
+  savePomodoroSettings,
+  getPomodoroStates,
+  savePomodoroStates,
+  getPomodoroStateForGoal,
+  updatePomodoroStateForGoal,
+  removePomodoroStateForGoal,
+  enablePomodoroForGoal,
+  disablePomodoroForGoal
 };
