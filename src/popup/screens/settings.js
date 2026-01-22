@@ -766,7 +766,7 @@ function attachResetTimesListeners(screen) {
         loadNextResetTimes();
 
         // Play feedback sound
-        playSound('click');
+        playSound('tick');
       });
     }
   });

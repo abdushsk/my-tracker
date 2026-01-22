@@ -19,7 +19,9 @@ export const SOUNDS = {
   COMPLETE: 'complete',    // Goal completion celebration chime
   TICK: 'tick',           // Counter increment/decrement, checkbox toggle
   START: 'start',         // Timer start
-  PAUSE: 'pause'          // Timer pause
+  PAUSE: 'pause',         // Timer pause
+  CLICK: 'tick',          // UI click feedback (alias for tick)
+  ACHIEVEMENT: 'complete' // Achievement unlock (alias for complete)
 };
 
 /**

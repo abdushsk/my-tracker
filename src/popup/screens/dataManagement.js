@@ -96,7 +96,7 @@ export async function handleExportData() {
     showDataManagementFeedback('success', 'Data exported successfully!');
 
     // Play sound
-    playSound('click');
+    playSound('tick');
 
     console.log('[Export] Data exported successfully');
   } catch (error) {

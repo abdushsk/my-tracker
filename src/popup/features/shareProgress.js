@@ -31,7 +31,7 @@ export function attachShareReportsListeners(screen) {
  * US-082: Open the share modal
  */
 export function openShareModal() {
-  playSound('click');
+  playSound('tick');
 
   // Get current stats for preview
   const disciplineScore = document.getElementById('discipline-score-value')?.textContent || '--';
@@ -154,7 +154,7 @@ function attachShareModalListeners() {
       // Regenerate preview
       const templateId = btn.getAttribute('data-template');
       generateShareImage(templateId);
-      playSound('click');
+      playSound('tick');
     });
   });
 
@@ -272,7 +272,7 @@ function handleDownloadShareImage() {
 
     // Show success feedback
     showShareFeedback('success', 'Image downloaded!');
-    playSound('click');
+    playSound('tick');
 
     console.log('[Share] Image downloaded');
   } catch (error) {

@@ -51,7 +51,7 @@ export function attachNotificationSettingsListeners(screen, renderSettingsScreen
       renderSettingsScreen();
 
       // Play feedback sound
-      playSound('click');
+      playSound('tick');
     });
   }
 
@@ -82,7 +82,7 @@ export function attachNotificationSettingsListeners(screen, renderSettingsScreen
       }
 
       // Play feedback sound
-      playSound('click');
+      playSound('tick');
     });
   }
 
@@ -107,7 +107,7 @@ export function attachNotificationSettingsListeners(screen, renderSettingsScreen
       renderSettingsScreen();
 
       // Play feedback sound
-      playSound('click');
+      playSound('tick');
     });
   }
 
@@ -129,7 +129,7 @@ export function attachNotificationSettingsListeners(screen, renderSettingsScreen
       console.log(`[Settings] Quiet hours start set to: ${newTime}`);
 
       // Play feedback sound
-      playSound('click');
+      playSound('tick');
     });
   }
 
@@ -151,7 +151,7 @@ export function attachNotificationSettingsListeners(screen, renderSettingsScreen
       console.log(`[Settings] Quiet hours end set to: ${newTime}`);
 
       // Play feedback sound
-      playSound('click');
+      playSound('tick');
     });
   }
 
