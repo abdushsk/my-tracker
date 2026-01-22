@@ -1,0 +1,31 @@
+## US-055: Fix Footer Position When Few Goals
+**Date**: 2026-01-22
+**Status**: Completed
+
+### What was done:
+Fixed the footer positioning issue in the Daily Goals screen where the navigation buttons (Manage Goals, Reports) would float up when there were few or no goals.
+
+### Implementation details:
+1. Added explicit `height: 500px` to `html, body` (in addition to existing min/max-height) to ensure the height chain works properly with percentage-based heights.
+
+2. Added `min-height: 100%` to screen container classes (`.view-goals-screen`, etc.) to ensure they fill the available space.
+
+3. Added `margin-top: auto` to `.screen-footer` - this CSS trick pushes the footer to the bottom of the flex container when there's extra space.
+
+4. Changed `.goals-list-container` from `flex: 1` to `flex: 1 1 auto` for more explicit flex behavior.
+
+### Files modified:
+- `src/popup/popup.css` (lines 188-195, 359-369, 403-414, 488-502)
+
+### Key learnings:
+- In flexbox layouts, `height: 100%` only works when the parent has an explicit height (not just min/max-height)
+- `margin-top: auto` on the last flex item pushes it to the bottom of the container
+- `flex: 1 1 auto` is more explicit than `flex: 1` (shorthand for `flex: 1 1 0`)
+- The Chrome extension popup has fixed dimensions (380px width, 500-600px height)
+
+### Acceptance criteria met:
+- Footer buttons stay at bottom regardless of goal count
+- Works with 0 goals (empty state)
+- Works with 1-2 goals
+- Content area scrolls when many goals
+- Layout remains consistent across all scenarios

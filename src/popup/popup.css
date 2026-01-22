@@ -188,6 +188,7 @@ body {
 /* Popup dimensions - Chrome extension popup */
 html, body {
   width: 380px;
+  height: 500px;
   min-height: 500px;
   max-height: 600px;
   overflow: hidden;
@@ -363,6 +364,7 @@ select:focus {
   display: flex;
   flex-direction: column;
   height: 100%;
+  min-height: 100%;
   overflow: hidden;
 }
 
@@ -398,7 +400,7 @@ select:focus {
   color: var(--text);
 }
 
-/* Screen footer */
+/* Screen footer - US-055: Ensure footer stays at bottom regardless of content */
 .screen-footer {
   display: flex;
   justify-content: space-around;
@@ -408,6 +410,7 @@ select:focus {
   background-color: var(--background);
   flex-shrink: 0;
   min-height: 60px;
+  margin-top: auto; /* Push footer to bottom when content is sparse */
 }
 
 /* Navigation button */
@@ -483,8 +486,9 @@ select:focus {
    ======================================== */
 
 /* Goals list container - scrollable area between header and footer */
+/* US-055: flex: 1 ensures this container expands to fill space, pushing footer to bottom */
 .goals-list-container {
-  flex: 1;
+  flex: 1 1 auto;
   overflow-y: auto;
   overflow-x: hidden;
   padding: var(--spacing-md);

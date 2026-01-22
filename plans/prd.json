@@ -17,7 +17,7 @@
         "Layout remains consistent across all scenarios"
       ],
       "priority": 1,
-      "passes": false,
+      "passes": true,
       "dependsOn": []
     },
     {
