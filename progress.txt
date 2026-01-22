@@ -928,3 +928,89 @@ Implemented a floating action button (FAB) for quick goal creation in the View G
 - Smooth animation on open/close (CSS transitions)
 - Doesn't obstruct goal cards (positioned above footer, 80px from bottom)
 
+---
+
+## US-069: Goal Archive System
+**Date**: 2026-01-22
+**Status**: Completed
+
+### What was done:
+Implemented a comprehensive goal archive system that allows users to archive goals instead of deleting them. Archived goals are preserved and can be restored at any time. A dedicated Archive screen was created to view, restore, and permanently delete archived goals.
+
+### Implementation details:
+
+1. **Storage Layer** (`src/utils/storage.js`):
+   - Added `ARCHIVED_GOALS` storage key
+   - Added functions: `getArchivedGoals()`, `saveArchivedGoals()`, `archiveGoal()`, `restoreArchivedGoal()`, `deleteArchivedGoal()`, `getArchivedGoalById()`
+   - Archive operation moves goal from active to archived storage with `archivedAt` timestamp
+   - Restore operation resets progress but preserves goal configuration
+   - Goal history/configuration is preserved when archiving
+
+2. **State Management** (`src/popup/popup.js`):
+   - Added `archivedGoals: []` to global state
+   - Added `SCREENS.ARCHIVE` to screen enum
+   - Added `SCREEN_IDS[SCREENS.ARCHIVE]` mapping to 'screen-archive'
+   - Archived goals loaded during `loadData()` alongside other data
+
+3. **Archive Button on Manage Goals** (`src/popup/popup.js`):
+   - Added archive button (box icon) to `renderManageGoalItem()` between template and edit buttons
+   - Added `handleArchiveGoal()` function to process archiving
+   - Added event listener in `attachManageGoalsListeners()` for `[data-action="archive"]`
+   - Success feedback shown after archiving
+
+4. **View Archive Button** (`src/popup/popup.js`):
+   - Added "Archive" button to Manage Goals actions bar
+   - Shows count of archived goals when > 0
+   - Navigates to Archive screen on click
+
+5. **Archive Screen** (`src/popup/popup.js`):
+   - `renderArchiveScreen()` - Full-page layout with header and archived goals list
+   - `renderArchiveEmptyState()` - Empty state with helpful message
+   - `renderArchivedGoalsList()` - Sorts archived goals by date (most recent first)
+   - `renderArchivedGoalItem()` - Shows goal info + archived date + restore/delete buttons
+   - `formatArchivedDate()` - Human-readable relative date (today, yesterday, X days ago, etc.)
+
+6. **Restore and Delete Functionality** (`src/popup/popup.js`):
+   - `handleRestoreArchivedGoal()` - Restores goal to active with reset progress
+   - `handleDeleteArchivedGoal()` - Permanently deletes archived goal
+   - `attachArchiveListeners()` - Event handlers for restore/delete buttons
+   - Confirmation dialog before permanent deletion
+
+7. **HTML Structure** (`src/popup/popup.html`):
+   - Added `<div id="screen-archive" class="screen">` placeholder
+
+8. **CSS Styles** (`src/popup/popup.css` lines 6083-6355):
+   - Archive screen layout (header, content, scrollable area)
+   - Empty state styling with archive icon
+   - Archived goal item styling (slightly faded to indicate inactive)
+   - Type indicator styling matching manage goals pattern
+   - Timeframe badge colors
+   - Archived date italic styling
+   - Restore button (green hover)
+   - Archive button (neutral hover)
+   - Delete archived button (red hover)
+   - Dark mode adjustments
+   - Reduced motion support
+
+### Files modified:
+- `src/utils/storage.js` (lines 17, 539-690, 730-736)
+- `src/popup/popup.js` (lines 34-38, 82, 104, 118, 186-187, 1738-1745, 1777-1784, 2778-3066, 4915-4921, 6118-6145)
+- `src/popup/popup.html` (lines 46-49)
+- `src/popup/popup.css` (lines 6083-6355)
+
+### Key design decisions:
+- Archive preserves full goal data including progress history
+- Restore resets progress to 0 for a fresh start (user expectation)
+- Archived goals are slightly faded to indicate inactive status
+- Confirmation required before permanent deletion
+- Archive button placed between template and edit buttons for logical flow
+- Archive count shown in button when goals are archived
+
+### Acceptance criteria met:
+- Archive option in goal menu (alongside edit/delete) - Archive button added to manage goal actions
+- Archived goals removed from View Goals - Goals moved to separate archived storage
+- Archive screen accessible from Manage Goals - "Archive" button with count in actions bar
+- Restore archived goal to active - Restore button with green hover, resets progress
+- Permanently delete from archive - Delete button with confirmation dialog
+- Archive preserves goal history/progress - Full goal data preserved with archivedAt timestamp
+

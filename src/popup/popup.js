@@ -30,7 +30,12 @@ import {
   getTemplates,
   addTemplate,
   deleteTemplate,
-  BUILT_IN_TEMPLATES
+  BUILT_IN_TEMPLATES,
+  // US-069: Archive imports
+  getArchivedGoals,
+  archiveGoal,
+  restoreArchivedGoal,
+  deleteArchivedGoal
 } from '../utils/storage.js';
 import {
   GOAL_TYPES,
@@ -74,6 +79,7 @@ const state = {
   categoryFilter: 'all', // US-065: Current category filter for View Goals
   templates: [], // US-066: Goal templates
   focusedGoalId: null, // US-067: Currently focused goal ID for Focus Mode
+  archivedGoals: [], // US-069: Archived goals
   currentScreen: 'viewGoals',
   isLoading: true,
   timerIntervalId: null, // Interval ID for updating timer display
@@ -95,6 +101,7 @@ const SCREENS = {
   GOAL_FORM: 'goalForm',
   TEMPLATE_GALLERY: 'templateGallery', // US-066: Template gallery screen
   FOCUS_MODE: 'focusMode', // US-067: Focus Mode screen
+  ARCHIVE: 'archive', // US-069: Archive screen
   REPORTS: 'reports',
   SETTINGS: 'settings'
 };
@@ -108,6 +115,7 @@ const SCREEN_IDS = {
   [SCREENS.GOAL_FORM]: 'screen-goal-form',
   [SCREENS.TEMPLATE_GALLERY]: 'screen-template-gallery', // US-066
   [SCREENS.FOCUS_MODE]: 'screen-focus-mode', // US-067
+  [SCREENS.ARCHIVE]: 'screen-archive', // US-069
   [SCREENS.REPORTS]: 'screen-reports',
   [SCREENS.SETTINGS]: 'screen-settings'
 };
@@ -174,6 +182,9 @@ function renderCurrentScreen() {
       break;
     case SCREENS.FOCUS_MODE:
       renderFocusModeScreen(); // US-067
+      break;
+    case SCREENS.ARCHIVE:
+      renderArchiveScreen(); // US-069
       break;
     case SCREENS.REPORTS:
       renderReportsScreen();
@@ -1724,6 +1735,14 @@ function renderManageGoalsScreen() {
             </svg>
             <span>From Template</span>
           </button>
+          <button class="btn btn-ghost btn-view-archive" id="view-archive-btn" title="View archived goals">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="btn-icon">
+              <polyline points="21 8 21 21 3 21 3 8"/>
+              <rect x="1" y="3" width="22" height="5"/>
+              <line x1="10" y1="12" x2="14" y2="12"/>
+            </svg>
+            <span>Archive${state.archivedGoals.length > 0 ? ` (${state.archivedGoals.length})` : ''}</span>
+          </button>
         </div>
         <div class="manage-goals-list-container">
           ${sortedGoals.length === 0
@@ -1752,6 +1771,15 @@ function renderManageGoalsScreen() {
     fromTemplateBtn.addEventListener('click', (e) => {
       e.preventDefault();
       showScreen(SCREENS.TEMPLATE_GALLERY);
+    });
+  }
+
+  // US-069: Attach View Archive button click listener - navigate to archive screen
+  const viewArchiveBtn = screen.querySelector('#view-archive-btn');
+  if (viewArchiveBtn) {
+    viewArchiveBtn.addEventListener('click', (e) => {
+      e.preventDefault();
+      showScreen(SCREENS.ARCHIVE);
     });
   }
 
@@ -2765,6 +2793,296 @@ async function handleSaveAsTemplate(goalId) {
 }
 
 // =============================================================================
+// US-069: Goal Archive System
+// =============================================================================
+
+/**
+ * Handle archiving a goal
+ * @param {string} goalId - The goal ID to archive
+ */
+async function handleArchiveGoal(goalId) {
+  const goal = state.goals.find(g => g.id === goalId);
+  if (!goal) {
+    console.error('[Archive] Goal not found:', goalId);
+    showFormError('Goal not found. Please try again.');
+    return;
+  }
+
+  console.log('[Archive] Archiving goal:', goal.title);
+
+  try {
+    const success = await archiveGoal(goalId);
+
+    if (success) {
+      // Update local state
+      state.goals = state.goals.filter(g => g.id !== goalId);
+      state.archivedGoals = await getArchivedGoals();
+
+      console.log('[Archive] Goal archived successfully:', goal.title);
+      showSuccessFeedback(`"${goal.title}" archived!`);
+
+      // Re-render the manage goals screen
+      renderManageGoalsScreen();
+    } else {
+      showFormError('Failed to archive goal. Please try again.');
+    }
+  } catch (error) {
+    console.error('[Archive] Error archiving goal:', error);
+    showFormError('An error occurred. Please try again.');
+  }
+}
+
+/**
+ * Handle restoring an archived goal
+ * @param {string} goalId - The archived goal ID to restore
+ */
+async function handleRestoreArchivedGoal(goalId) {
+  const archivedGoal = state.archivedGoals.find(g => g.id === goalId);
+  if (!archivedGoal) {
+    console.error('[Archive] Archived goal not found:', goalId);
+    showFormError('Goal not found. Please try again.');
+    return;
+  }
+
+  console.log('[Archive] Restoring archived goal:', archivedGoal.title);
+
+  try {
+    const success = await restoreArchivedGoal(goalId);
+
+    if (success) {
+      // Update local state
+      state.archivedGoals = state.archivedGoals.filter(g => g.id !== goalId);
+      state.goals = await getGoals();
+
+      console.log('[Archive] Goal restored successfully:', archivedGoal.title);
+      showSuccessFeedback(`"${archivedGoal.title}" restored!`);
+
+      // Re-render the archive screen
+      renderArchiveScreen();
+    } else {
+      showFormError('Failed to restore goal. Please try again.');
+    }
+  } catch (error) {
+    console.error('[Archive] Error restoring goal:', error);
+    showFormError('An error occurred. Please try again.');
+  }
+}
+
+/**
+ * Handle permanently deleting an archived goal
+ * @param {string} goalId - The archived goal ID to delete permanently
+ */
+async function handleDeleteArchivedGoal(goalId) {
+  const archivedGoal = state.archivedGoals.find(g => g.id === goalId);
+  if (!archivedGoal) {
+    console.error('[Archive] Archived goal not found:', goalId);
+    showFormError('Goal not found. Please try again.');
+    return;
+  }
+
+  console.log('[Archive] Permanently deleting archived goal:', archivedGoal.title);
+
+  try {
+    const success = await deleteArchivedGoal(goalId);
+
+    if (success) {
+      // Update local state
+      state.archivedGoals = state.archivedGoals.filter(g => g.id !== goalId);
+
+      console.log('[Archive] Goal permanently deleted:', archivedGoal.title);
+      showSuccessFeedback(`"${archivedGoal.title}" permanently deleted.`);
+
+      // Re-render the archive screen
+      renderArchiveScreen();
+    } else {
+      showFormError('Failed to delete goal. Please try again.');
+    }
+  } catch (error) {
+    console.error('[Archive] Error deleting archived goal:', error);
+    showFormError('An error occurred. Please try again.');
+  }
+}
+
+/**
+ * Render the Archive screen
+ * US-069: Shows archived goals with restore and delete options
+ */
+function renderArchiveScreen() {
+  const screen = document.getElementById(SCREEN_IDS[SCREENS.ARCHIVE]);
+  if (!screen) return;
+
+  const archivedGoals = state.archivedGoals || [];
+
+  screen.innerHTML = `
+    <div class="archive-screen">
+      <header class="screen-header archive-header">
+        <button class="back-btn" data-screen="${SCREENS.MANAGE_GOALS}" title="Back to Manage Goals">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="back-icon">
+            <line x1="19" y1="12" x2="5" y2="12"/>
+            <polyline points="12 19 5 12 12 5"/>
+          </svg>
+          <span class="back-label">Back</span>
+        </button>
+        <h1 class="archive-title">Archived Goals</h1>
+        <div class="header-spacer"></div>
+      </header>
+      <main class="archive-content">
+        ${archivedGoals.length === 0
+          ? renderArchiveEmptyState()
+          : renderArchivedGoalsList(archivedGoals)}
+      </main>
+    </div>
+  `;
+
+  // Attach navigation event listeners
+  attachNavigationListeners(screen);
+
+  // Attach archive action listeners
+  attachArchiveListeners(screen);
+}
+
+/**
+ * Render empty state for Archive screen
+ * @returns {string} HTML string for empty state
+ */
+function renderArchiveEmptyState() {
+  return `
+    <div class="archive-empty-state">
+      <div class="archive-empty-icon">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" fill="none">
+          <rect x="6" y="14" width="52" height="44" rx="4" fill="var(--background-secondary)" stroke="var(--border)" stroke-width="2"/>
+          <rect x="2" y="6" width="60" height="12" rx="2" fill="var(--background-secondary)" stroke="var(--border)" stroke-width="2"/>
+          <line x1="26" y1="32" x2="38" y2="32" stroke="var(--text-muted)" stroke-width="3" stroke-linecap="round"/>
+        </svg>
+      </div>
+      <p class="archive-empty-message">No archived goals</p>
+      <p class="archive-empty-submessage">Archive goals you want to keep but don't need active right now</p>
+    </div>
+  `;
+}
+
+/**
+ * Render the archived goals list
+ * @param {Array} archivedGoals - Array of archived goal objects
+ * @returns {string} HTML string for the list
+ */
+function renderArchivedGoalsList(archivedGoals) {
+  // Sort by archivedAt date, most recent first
+  const sortedGoals = [...archivedGoals].sort((a, b) => (b.archivedAt || 0) - (a.archivedAt || 0));
+
+  return `
+    <div class="archived-goals-list">
+      ${sortedGoals.map(goal => renderArchivedGoalItem(goal)).join('')}
+    </div>
+  `;
+}
+
+/**
+ * Render a single archived goal item
+ * @param {Object} goal - The archived goal object
+ * @returns {string} HTML string for the goal item
+ */
+function renderArchivedGoalItem(goal) {
+  const typeIcon = getGoalTypeIconSmall(goal.type);
+  const typeLabel = getGoalTypeLabel(goal.type);
+  const targetDisplay = formatTargetForManage(goal);
+  const archivedDate = goal.archivedAt ? formatArchivedDate(goal.archivedAt) : 'Unknown date';
+
+  return `
+    <div class="archived-goal-item" data-goal-id="${goal.id}">
+      <div class="archived-goal-info">
+        <div class="archived-goal-type-indicator type-${goal.type}" title="${typeLabel}">
+          ${typeIcon}
+        </div>
+        <div class="archived-goal-details">
+          <span class="archived-goal-title">${escapeHtml(goal.title)}</span>
+          <div class="archived-goal-meta">
+            <span class="archived-goal-timeframe timeframe-${goal.timeframe}">${capitalizeFirst(goal.timeframe)}</span>
+            <span class="archived-goal-target">${targetDisplay}</span>
+            <span class="archived-goal-date">Archived ${archivedDate}</span>
+          </div>
+        </div>
+      </div>
+      <div class="archived-goal-actions">
+        <button class="manage-action-btn restore-btn" data-action="restore" data-goal-id="${goal.id}" title="Restore goal" aria-label="Restore ${escapeHtml(goal.title)}">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="action-icon">
+            <polyline points="1 4 1 10 7 10"/>
+            <path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"/>
+          </svg>
+        </button>
+        <button class="manage-action-btn delete-archived-btn" data-action="delete-archived" data-goal-id="${goal.id}" title="Delete permanently" aria-label="Permanently delete ${escapeHtml(goal.title)}">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="action-icon">
+            <polyline points="3 6 5 6 21 6"/>
+            <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
+            <line x1="10" y1="11" x2="10" y2="17"/>
+            <line x1="14" y1="11" x2="14" y2="17"/>
+          </svg>
+        </button>
+      </div>
+    </div>
+  `;
+}
+
+/**
+ * Format archived date for display
+ * @param {number} timestamp - The archived timestamp
+ * @returns {string} Formatted date string
+ */
+function formatArchivedDate(timestamp) {
+  const date = new Date(timestamp);
+  const now = new Date();
+  const diffDays = Math.floor((now - date) / (1000 * 60 * 60 * 24));
+
+  if (diffDays === 0) {
+    return 'today';
+  } else if (diffDays === 1) {
+    return 'yesterday';
+  } else if (diffDays < 7) {
+    return `${diffDays} days ago`;
+  } else if (diffDays < 30) {
+    const weeks = Math.floor(diffDays / 7);
+    return weeks === 1 ? '1 week ago' : `${weeks} weeks ago`;
+  } else {
+    return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+  }
+}
+
+/**
+ * Attach event listeners for Archive screen actions
+ * @param {HTMLElement} container - The container element
+ */
+function attachArchiveListeners(container) {
+  // Restore button click handlers
+  const restoreButtons = container.querySelectorAll('[data-action="restore"]');
+  restoreButtons.forEach(btn => {
+    btn.addEventListener('click', async (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      const goalId = btn.getAttribute('data-goal-id');
+      if (goalId) {
+        await handleRestoreArchivedGoal(goalId);
+      }
+    });
+  });
+
+  // Delete permanently button click handlers
+  const deleteButtons = container.querySelectorAll('[data-action="delete-archived"]');
+  deleteButtons.forEach(btn => {
+    btn.addEventListener('click', async (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      const goalId = btn.getAttribute('data-goal-id');
+      if (goalId) {
+        // Show confirmation before permanent deletion
+        if (confirm('Are you sure you want to permanently delete this goal? This cannot be undone.')) {
+          await handleDeleteArchivedGoal(goalId);
+        }
+      }
+    });
+  });
+}
+
+// =============================================================================
 // US-067: Focus Mode
 // =============================================================================
 
@@ -3637,6 +3955,19 @@ function attachManageGoalsListeners(container) {
       const goalId = btn.getAttribute('data-goal-id');
       if (goalId) {
         await handleSaveAsTemplate(goalId);
+      }
+    });
+  });
+
+  // US-069: Archive button click handlers
+  const archiveButtons = container.querySelectorAll('[data-action="archive"]');
+  archiveButtons.forEach(btn => {
+    btn.addEventListener('click', async (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      const goalId = btn.getAttribute('data-goal-id');
+      if (goalId) {
+        await handleArchiveGoal(goalId);
       }
     });
   });
@@ -4901,6 +5232,13 @@ function renderManageGoalItem(goal) {
             <line x1="9" y1="21" x2="9" y2="9"/>
           </svg>
         </button>
+        <button class="manage-action-btn archive-btn" data-action="archive" data-goal-id="${goal.id}" title="Archive goal" aria-label="Archive ${escapeHtml(goal.title)}">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="action-icon">
+            <polyline points="21 8 21 21 3 21 3 8"/>
+            <rect x="1" y="3" width="22" height="5"/>
+            <line x1="10" y1="12" x2="14" y2="12"/>
+          </svg>
+        </button>
         <button class="manage-action-btn edit-btn" data-action="edit" data-goal-id="${goal.id}" title="Edit goal" aria-label="Edit ${escapeHtml(goal.title)}">
           <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="action-icon">
             <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
@@ -6104,14 +6442,15 @@ async function loadData() {
   try {
     state.isLoading = true;
 
-    // Load goals, settings, active timers, streak data, categories, and templates in parallel
-    const [goals, settings, activeTimers, streakData, categories, templates] = await Promise.all([
+    // Load goals, settings, active timers, streak data, categories, templates, and archived goals in parallel
+    const [goals, settings, activeTimers, streakData, categories, templates, archivedGoals] = await Promise.all([
       getGoals(),
       getSettings(),
       getActiveTimers(),
       getStreakData(),
       getCategories(),
-      getTemplates() // US-066: Load templates
+      getTemplates(), // US-066: Load templates
+      getArchivedGoals() // US-069: Load archived goals
     ]);
 
     // Update state
@@ -6121,6 +6460,7 @@ async function loadData() {
     state.streakData = streakData;
     state.categories = categories;
     state.templates = templates; // US-066
+    state.archivedGoals = archivedGoals; // US-069
 
     console.log('Data loaded:', {
       goalsCount: goals.length,
@@ -6128,7 +6468,8 @@ async function loadData() {
       activeTimersCount: Object.keys(activeTimers).length,
       streakData: streakData,
       categoriesCount: categories.length,
-      templatesCount: templates.length
+      templatesCount: templates.length,
+      archivedGoalsCount: archivedGoals.length
     });
 
     // US-039: Initialize sound system with user settings

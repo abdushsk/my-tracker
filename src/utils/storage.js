@@ -13,7 +13,8 @@ const STORAGE_KEYS = {
   ACTIVE_TIMERS: 'activeTimers',
   STREAK_DATA: 'streakData',
   CATEGORIES: 'categories',
-  TEMPLATES: 'templates' // US-066: Goal templates
+  TEMPLATES: 'templates', // US-066: Goal templates
+  ARCHIVED_GOALS: 'archivedGoals' // US-069: Archived goals
 };
 
 /**
@@ -535,6 +536,159 @@ async function getTemplateById(templateId) {
   }
 }
 
+// =============================================================================
+// US-069: Goal Archive System
+// =============================================================================
+
+/**
+ * Get all archived goals from storage
+ * @returns {Promise<Array>} Array of archived goal objects
+ */
+async function getArchivedGoals() {
+  try {
+    const result = await chrome.storage.local.get(STORAGE_KEYS.ARCHIVED_GOALS);
+    return result[STORAGE_KEYS.ARCHIVED_GOALS] || [];
+  } catch (error) {
+    console.error('Error getting archived goals:', error);
+    return [];
+  }
+}
+
+/**
+ * Save archived goals to storage
+ * @param {Array} archivedGoals - Array of archived goal objects to save
+ * @returns {Promise<boolean>} Success status
+ */
+async function saveArchivedGoals(archivedGoals) {
+  try {
+    await chrome.storage.local.set({ [STORAGE_KEYS.ARCHIVED_GOALS]: archivedGoals });
+    return true;
+  } catch (error) {
+    console.error('Error saving archived goals:', error);
+    return false;
+  }
+}
+
+/**
+ * Archive a goal - moves it from active goals to archived goals
+ * Preserves all goal data including progress history
+ * @param {string} goalId - The goal ID to archive
+ * @returns {Promise<boolean>} Success status
+ */
+async function archiveGoal(goalId) {
+  try {
+    const goals = await getGoals();
+    const goalToArchive = goals.find(g => g.id === goalId);
+
+    if (!goalToArchive) {
+      console.error('Goal not found for archiving:', goalId);
+      return false;
+    }
+
+    // Add archive metadata
+    const archivedGoal = {
+      ...goalToArchive,
+      archivedAt: Date.now()
+    };
+
+    // Add to archived goals
+    const archivedGoals = await getArchivedGoals();
+    archivedGoals.push(archivedGoal);
+    await saveArchivedGoals(archivedGoals);
+
+    // Remove from active goals
+    const remainingGoals = goals.filter(g => g.id !== goalId);
+    await saveGoals(remainingGoals);
+
+    console.log('Goal archived successfully:', goalId);
+    return true;
+  } catch (error) {
+    console.error('Error archiving goal:', error);
+    return false;
+  }
+}
+
+/**
+ * Restore an archived goal - moves it from archived back to active goals
+ * Resets progress but preserves goal configuration
+ * @param {string} goalId - The archived goal ID to restore
+ * @returns {Promise<boolean>} Success status
+ */
+async function restoreArchivedGoal(goalId) {
+  try {
+    const archivedGoals = await getArchivedGoals();
+    const goalToRestore = archivedGoals.find(g => g.id === goalId);
+
+    if (!goalToRestore) {
+      console.error('Archived goal not found:', goalId);
+      return false;
+    }
+
+    // Remove archive metadata and reset progress for fresh start
+    const restoredGoal = {
+      ...goalToRestore,
+      progress: 0,
+      isActive: false,
+      lastResetAt: Date.now()
+    };
+    delete restoredGoal.archivedAt;
+
+    // Add to active goals
+    const goals = await getGoals();
+    goals.push(restoredGoal);
+    await saveGoals(goals);
+
+    // Remove from archived goals
+    const remainingArchived = archivedGoals.filter(g => g.id !== goalId);
+    await saveArchivedGoals(remainingArchived);
+
+    console.log('Goal restored successfully:', goalId);
+    return true;
+  } catch (error) {
+    console.error('Error restoring archived goal:', error);
+    return false;
+  }
+}
+
+/**
+ * Permanently delete an archived goal
+ * @param {string} goalId - The archived goal ID to delete permanently
+ * @returns {Promise<boolean>} Success status
+ */
+async function deleteArchivedGoal(goalId) {
+  try {
+    const archivedGoals = await getArchivedGoals();
+    const filteredArchived = archivedGoals.filter(g => g.id !== goalId);
+
+    if (filteredArchived.length === archivedGoals.length) {
+      console.warn('Archived goal not found for deletion:', goalId);
+      return false;
+    }
+
+    await saveArchivedGoals(filteredArchived);
+    console.log('Archived goal permanently deleted:', goalId);
+    return true;
+  } catch (error) {
+    console.error('Error deleting archived goal:', error);
+    return false;
+  }
+}
+
+/**
+ * Get an archived goal by ID
+ * @param {string} goalId - The archived goal ID to find
+ * @returns {Promise<Object|null>} The archived goal object or null
+ */
+async function getArchivedGoalById(goalId) {
+  try {
+    const archivedGoals = await getArchivedGoals();
+    return archivedGoals.find(g => g.id === goalId) || null;
+  } catch (error) {
+    console.error('Error getting archived goal by ID:', error);
+    return null;
+  }
+}
+
 // Export functions for use in other modules
 export {
   STORAGE_KEYS,
@@ -572,5 +726,12 @@ export {
   getBuiltInTemplates,
   addTemplate,
   deleteTemplate,
-  getTemplateById
+  getTemplateById,
+  // US-069: Archive functions
+  getArchivedGoals,
+  saveArchivedGoals,
+  archiveGoal,
+  restoreArchivedGoal,
+  deleteArchivedGoal,
+  getArchivedGoalById
 };
