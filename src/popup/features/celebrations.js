@@ -251,14 +251,24 @@ export function launchConfetti(options = {}) {
 export function triggerCompletionCelebration(goalId, options = {}) {
   const { intensity = 'normal' } = options;
 
+  // US-019: Check if this goal has already had its completion animation
+  const completionAnimationKey = `completion-${goalId}`;
+  const alreadyAnimated = state.animatedIcons.has(completionAnimationKey);
+
   // Add to just-completed set
   state.justCompletedGoals.add(goalId);
 
-  // US-064: Launch enhanced confetti animation
-  launchConfetti({
-    intensity,
-    duration: intensity === 'high' ? 2500 : 2000
-  });
+  // US-019: Mark this goal's completion animation as played
+  state.animatedIcons.add(completionAnimationKey);
+
+  // US-064: Launch enhanced confetti animation (only on first completion)
+  // US-019: Skip confetti if already animated this session
+  if (!alreadyAnimated) {
+    launchConfetti({
+      intensity,
+      duration: intensity === 'high' ? 2500 : 2000
+    });
+  }
 
   // US-077: Motivational quotes disabled
   // Previously showed quotes on completion, now disabled for cleaner UX

@@ -5,138 +5,18 @@
   "featuresFile": "plans/FEATURES.md",
   "userStories": [
     {
-      "id": "US-001",
-      "title": "Streamline goal cards",
-      "description": "Make sure all goalcards have consistent styling. Progress bars colors should be every consistent across all goal types. Progress path is currently not visible is dark mode, give it some lighter shade. Fix all hover state issue, eg. if i over over some icon, the text and the color both changes to dark color, fix it so that they are more consistent",
-      "priority": 1,
-      "passes": true
-    },
-    {
-      "id": "US-002",
-      "title": "Enhance dark mode visibility",
-      "description": "Improve the visibility of progress paths in dark mode by using lighter shades. Ensure that all elements are easily distinguishable and maintain a consistent color scheme across the extension.",
-      "priority": 2,
-      "passes": true
-    },
-    {
-      "id": "US-003",
-      "title": "Fix hover state inconsistencies",
-      "description": "Review and correct hover state behaviors for all interactive elements. Ensure that text and icon colors change appropriately on hover to enhance user experience and maintain visual consistency.",
-      "priority": 3,
-      "passes": true
-    },
-    {
-      "id": "US-004",
-      "title": "Conduct comprehensive UI review",
-      "description": "Perform a thorough review of the entire user interface to identify and address any additional inconsistencies or issues. Ensure that the overall design is cohesive and user-friendly.",
-      "priority": 4,
-      "passes": true
-    },
-    {
-      "id": "US-005",
-      "title": "Fix activity timeline in report",
-      "description": "Now its 1am, and still i dont see today in the timeline, some utc issue?, use local time to add new day in timeline. also make the chart also almost full width, and in Y, just give starting 2 initals of the day, eg Mo, Tu, We, Th, Fr, Sa, Su in caps",
-      "priority": 5,
-      "passes": true
-    },
-    {
-      "id": "US-006",
-      "title": "Improve timeline and chart display",
-      "description": "Ensure that the activity timeline correctly reflects the current day by addressing any potential UTC issues. Adjust the chart to utilize nearly the full width of the display and modify the Y-axis labels to show only the first two initials of each day (e.g., Mo, Tu, We, Th, Fr, Sa, Su) in uppercase for better readability. Plus in case of dark mode, the no progress boxes is not visible, make it lighter shade",
-      "priority": 6,
-      "passes": true
-    },
-    {
-      "id": "US-007",
-      "title": "New Achievements unlock",
-      "description": "I dont like the achivement announcement popup, its too intrusive, instead add a small toast notification at the bottom left corner that says 'Achievement Unlocked: <achievement name>' and disappears after 3 seconds with some nice confetti animation.",
-      "priority": 7,
-      "passes": true
-    },
-    {
-      "id": "US-008",
-      "title": "Weekly Overview bars color",
-      "description": "Weekly overviews are not using correct colors according to the theme",
-      "priority": 8,
-      "passes": true
-    },
-    {
-      "id": "US-009",
-      "title": "Enhance weekly review goal performance section",
-      "description": "Improve the goal performance section in the weekly review by providing clearer insights and visualizations. Ensure that the data presented is easy to understand and helps users track their progress effectively.",
-      "priority": 9,
-      "passes": true
-    },
-    {
-      "id": "US-010",
-      "title": "Refine daily breakdown display",
-      "description": "In the weekly review's daily breakdown section, remove the percentage display at the bottom by default. Instead, implement a feature that shows the percentage only when the user hovers over the respective section, enhancing clarity and reducing visual clutter.",
-      "priority": 10,
-      "passes": true
-    },
-    {
-      "id": "US-011",
-      "title": "Add new goal screen title is not in center, fix it",
-      "description": "",
-      "priority": 11,
-      "passes": true
-    },
-    {
-      "id": "US-012",
-      "title": "Ensure consistent hover and active colors",
-      "description": "Review all interactive elements, such as buttons and icons, to ensure that the hover and active (after press) colors are consistent. Address any discrepancies to enhance the overall user experience and maintain visual coherence throughout the extension.",
-      "priority": 12,
-      "passes": true
-    },
-    {
-      "id": "US-013",
-      "title": "Fix in-progress bar color inconsistency",
-      "description": "Address the color inconsistency of the in-progress bar in dark mode, which currently displays a blue shade. Ensure that the in-progress bar color aligns with the overall color scheme used for other progress bars to maintain visual consistency throughout the extension.",
-      "priority": 13,
-      "passes": true
-    },
-    {
-      "id": "US-014",
-      "title": "Update app name to 'My Tracker'",
-      "description": "Change the application name from 'Daily Goals Tracker' to 'My Tracker' across all instances in the extension, including the manifest file, UI elements, and documentation. Ensure that the new name is consistently applied throughout the user interface and related materials.",
-      "priority": 14,
-      "passes": true
-    },
-    {
-      "id": "US-015",
-      "title": "Improve checkbox goal card UI",
-      "description": "Redesign the checkbox goal card to make it more compact and visually appealing. Focus on enhancing the layout, typography, and overall aesthetics to improve user engagement and satisfaction.",
-      "priority": 15,
-      "passes": true
-    },
-    {
-      "id": "US-016",
-      "title": "Optimize checkbox goal focus mode",
-      "description": "In the focus mode for checkbox goals, streamline the interface by displaying only the checkbox itself. Remove additional elements such as the 'mark as done' text button and the progress bar to create a cleaner and more focused user experience.",
-      "priority": 16,
-      "passes": true
-    },
-    {
-      "id": "US-017",
-      "title": "Refine last 30 days stats chart",
-      "description": "Enhance the readability of the last 30 days stats chart by adjusting the x-axis labels. Display only the starting date, ending date, and every 5th date in between to reduce clutter and improve clarity.",
-      "priority": 17,
-      "passes": true
-    },
-    {
-      "id": "US-018",
-      "title": "Improve no-progress box visibility in dark/light mode",
-      "description": "Enhance the visibility of the no-progress boxes in the activity timeline within the report section when in dark/light mode. Use a lighter grey shade to ensure that these boxes are easily distinguishable against the dark/white background, improving overall user experience. or select whichever looks fine",
-      "priority": 18,
-      "passes": true
-    },
-    // when i click on goal card, play, pause, etc, all the icons does the inital animation again, fix it so that only first time it plays the animation
-    {
       "id": "US-019",
       "title": "Optimize icon animation behavior",
       "description": "In the goals screen, Modify the icon animation behavior so that animations only play the first time an icon is interacted with (e.g., when clicking on a goal card, play, pause, etc.). Prevent the animations from replaying on subsequent interactions to enhance user experience and reduce visual distraction.",
       "priority": 19,
       "passes": true
+    },
+    {
+      "id": "US-020",
+      "title": "Fix x-axis clipping in Goal Statistics for last 30 days",
+      "description": "In the Goal Statistics section, address the issue where the x-axis labels for the last 30 days are getting clipped or overlapping, making them difficult to read. Ensure that all day numbers are fully visible and properly spaced to enhance readability and user experience.",
+      "priority": 20,
+      "passes": false
     }
   ]
 }

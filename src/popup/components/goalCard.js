@@ -72,12 +72,16 @@ export function renderGoalCard(goal) {
 
   // Build CSS classes for the card - always use compact view
   const justCompleted = state.justCompletedGoals.has(goal.id);
+  // US-019: Track if completion animation has already played
+  const completionAnimationKey = `completion-${goal.id}`;
+  const completionAnimated = state.animatedIcons.has(completionAnimationKey);
   const cardClasses = [
     'goal-card',
     `goal-type-${goal.type}`,
     isCompleted ? 'goal-completed' : '',
     goal.type === GOAL_TYPES.TIMER && goal.isActive ? 'goal-timer-active' : '',
     justCompleted ? 'just-completed' : '',
+    completionAnimated ? 'completion-animated' : '', // US-019: Prevent re-animation
     'compact' // Always compact
   ].filter(Boolean).join(' ');
 
@@ -170,6 +174,10 @@ function renderCheckboxGoalCard(goal, options) {
 
   const checkIcon = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>`;
 
+  // US-019: Check if this goal's checkbox animation has already played
+  const animationKey = `checkbox-${goal.id}`;
+  const animationPlayed = state.animatedIcons.has(animationKey) ? 'animation-played' : '';
+
   return `
     <div class="${cardClasses} ${hasCustomColor}" data-goal-id="${goal.id}" ${categoryDataAttr} ${goalColorStyle} draggable="true">
       <div class="goal-card-header checkbox-card-header">
@@ -183,7 +191,7 @@ function renderCheckboxGoalCard(goal, options) {
             <circle cx="15" cy="18" r="1.5"/>
           </svg>
         </div>
-        <button class="checkbox-inline-toggle ${isCompleted ? 'checked' : ''}"
+        <button class="checkbox-inline-toggle ${isCompleted ? 'checked' : ''} ${animationPlayed}"
                 data-action="checkbox-toggle"
                 data-goal-id="${goal.id}"
                 title="${isCompleted ? 'Mark as incomplete' : 'Mark as complete'}"
@@ -478,9 +486,12 @@ function renderCounterControls(goal) {
  */
 function renderCheckboxControls(goal) {
   const completed = isGoalCompleted(goal);
+  // US-019: Check if animation has already played
+  const animationKey = `checkbox-${goal.id}`;
+  const animationPlayed = state.animatedIcons.has(animationKey) ? 'animation-played' : '';
   return `
     <div class="goal-controls goal-controls-checkbox">
-      <button class="goal-control-btn checkbox-toggle-btn ${completed ? 'checked' : ''}" data-action="checkbox-toggle" data-goal-id="${goal.id}" title="Toggle completion">
+      <button class="goal-control-btn checkbox-toggle-btn ${completed ? 'checked' : ''} ${animationPlayed}" data-action="checkbox-toggle" data-goal-id="${goal.id}" title="Toggle completion">
         <span class="checkbox-box">
           ${completed
             ? '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>'

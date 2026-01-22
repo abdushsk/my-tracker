@@ -715,3 +715,62 @@
   - Dark mode: lighten the hue by increasing lightness
 - All theme heatmap0 colors were adjusted by approximately 8-12% in the appropriate direction
 
+## US-019: Optimize Icon Animation Behavior (Completed)
+**Date**: 2026-01-23
+
+### Changes Made
+
+1. **Added animation tracking state** (state.js:34):
+   - Added new `animatedIcons: new Set()` to track which icons have already played their animation in the current session
+   - This prevents animations from replaying on subsequent interactions
+
+2. **Updated checkbox inline toggle animations** (popup.css:3243-3264):
+   - Changed `.checkbox-inline-toggle.checked .checkbox-inline-box` to no longer have animation by default
+   - Added `.checkbox-inline-toggle.checked:not(.animation-played) .checkbox-inline-box` selector for first-time animation
+   - Changed `.checkbox-inline-box svg` to no longer have animation by default
+   - Added `.checkbox-inline-toggle:not(.animation-played) .checkbox-inline-box svg` selector for first-time animation
+
+3. **Updated legacy checkbox toggle animations** (popup.css:3366-3385):
+   - Changed `.checkbox-toggle-btn.checked .checkbox-box` to no longer have animation by default
+   - Added `.checkbox-toggle-btn.checked:not(.animation-played) .checkbox-box` selector for first-time animation
+   - Changed `.checkbox-box svg` to no longer have animation by default
+   - Added `.checkbox-toggle-btn:not(.animation-played) .checkbox-box svg` selector for first-time animation
+
+4. **Updated completion pulse animation** (popup.css:3670-3672):
+   - Changed `.goal-card.goal-completed.just-completed` to include `:not(.completion-animated)` selector
+   - This ensures the completion pulse only plays on first completion of a goal in a session
+
+5. **Updated goal card rendering** (goalCard.js:73-86, 173-175, 489-491):
+   - Added `completion-animated` class to card classes when goal has already been animated
+   - Added `animation-played` class to checkbox inline toggle when animation has already played
+   - Added `animation-played` class to legacy checkbox toggle button when animation has already played
+
+6. **Updated checkbox toggle handler** (popup.js:958-960):
+   - Added code to mark checkbox animation as played after first toggle using `state.animatedIcons.add(checkboxAnimationKey)`
+
+7. **Updated completion celebration** (celebrations.js:254-270):
+   - Check if completion animation has already played before launching confetti
+   - Mark completion animation as played after first trigger
+   - Skip confetti animation on subsequent completions within the same session
+
+### Animation Behavior Changes
+
+**Before:**
+- Checkbox pop animation played every time a checkbox was toggled
+- Checkmark draw animation played every time checkmark appeared
+- Completion pulse animation played every time goal was completed
+- Confetti launched every time goal was completed
+
+**After:**
+- Checkbox pop animation only plays on first toggle in a session
+- Checkmark draw animation only plays on first appearance in a session
+- Completion pulse animation only plays on first completion in a session
+- Confetti only launches on first completion in a session
+
+### Key Learnings
+- CSS `:not(.classname)` selector is an effective way to conditionally disable animations without JavaScript
+- Using a session-based Set (`state.animatedIcons`) allows tracking animations across re-renders while resetting on page refresh
+- The animation tracking key pattern (`checkbox-${goalId}`, `completion-${goalId}`) allows independent tracking for each goal
+- CSS animations attached to state classes (like `.checked`) re-trigger on each re-render unless prevented with additional class logic
+- Separating animation from state styling (`.checked` for styling, `:not(.animation-played)` for animation) provides cleaner control
+

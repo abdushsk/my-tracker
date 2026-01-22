@@ -955,6 +955,10 @@ async function handleCheckboxToggle(goalId) {
 
   console.log(`[Checkbox] Toggled goal ${goalId}: progress now ${newProgress} (${newProgress >= goal.target ? 'completed' : 'not completed'})`);
 
+  // US-019: Mark checkbox animation as played after first toggle
+  const checkboxAnimationKey = `checkbox-${goalId}`;
+  state.animatedIcons.add(checkboxAnimationKey);
+
   // Check if goal just completed
   const isNowCompleted = isGoalCompleted(goal);
   if (!wasCompleted && isNowCompleted) {
