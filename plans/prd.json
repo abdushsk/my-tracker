@@ -16,7 +16,7 @@
       "title": "Fix x-axis clipping in Goal Statistics for last 30 days",
       "description": "In the Goal Statistics section, address the issue where the x-axis labels for the last 30 days are getting clipped or overlapping, making them difficult to read. Ensure that all day numbers are fully visible and properly spaced to enhance readability and user experience.",
       "priority": 20,
-      "passes": false
+      "passes": true
     }
   ]
 }

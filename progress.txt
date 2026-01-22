@@ -774,3 +774,43 @@
 - CSS animations attached to state classes (like `.checked`) re-trigger on each re-render unless prevented with additional class logic
 - Separating animation from state styling (`.checked` for styling, `:not(.animation-played)` for animation) provides cleaner control
 
+## US-020: Fix X-Axis Clipping in Goal Statistics (Completed)
+**Date**: 2026-01-23
+
+### Changes Made
+
+1. **Refactored label rendering to use absolute positioning** (statisticsChart.js:105-116):
+   - Changed from rendering 30 labels (23 hidden) to only rendering 7 visible labels
+   - Labels now use absolute positioning with calculated percentage-based `left` values
+   - Position formula: `((index + 0.5) / 30) * 100%` centers labels under their corresponding bars
+   - Removed `hidden` class approach in favor of only rendering needed labels
+
+2. **Updated CSS for absolute positioned labels** (popup.css:7821-7833):
+   - Changed `.progress-chart-labels` from flexbox to `position: relative` with fixed `height: 16px`
+   - Changed `.progress-chart-label` from `flex: 1` to `position: absolute` with `transform: translateX(-50%)` for centering
+   - Increased font size from `9px` to `10px` for better readability
+   - Removed `min-width: 0`, `overflow: hidden`, `text-overflow: ellipsis` properties that were causing clipping
+   - Removed `.progress-chart-label.hidden` rule (no longer needed)
+
+### Root Cause Analysis
+The previous implementation had these issues:
+- All 30 labels were rendered with `flex: 1`, equally dividing container width
+- Hidden labels used `visibility: hidden` which kept them in the layout
+- With 30 items sharing space + 2px gaps, each label had very limited width
+- Edge labels (index 0, 29) were particularly prone to clipping at container edges
+- 2-digit dates (like 25, 29) needed more space than available
+
+### Solution Approach
+- Only render the 7 visible labels (indices 0, 5, 10, 15, 20, 25, 29)
+- Use absolute positioning to place each label at its exact position
+- `transform: translateX(-50%)` centers each label under its bar
+- Labels are no longer constrained by flex width calculations
+- No overflow/clipping issues since each label has natural width
+
+### Key Learnings
+- For sparse label displays on charts, absolute positioning is cleaner than hiding flex items
+- Using `visibility: hidden` to hide flex items still affects layout calculations
+- The formula `((index + 0.5) / 30) * 100%` centers labels under bars in a 30-bar chart
+- `transform: translateX(-50%)` is ideal for centering absolutely positioned elements
+- Rendering fewer DOM elements (7 vs 30) is also more performant
+

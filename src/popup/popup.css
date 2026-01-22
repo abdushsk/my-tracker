@@ -7819,26 +7819,17 @@ body.modal-open {
 }
 
 .progress-chart-labels {
-  display: flex;
-  justify-content: space-between;
-  gap: 2px;
-  overflow: hidden;
+  position: relative;
+  height: 16px;
   width: 100%;
 }
 
 .progress-chart-label {
-  flex: 1;
-  min-width: 0;
-  text-align: center;
-  font-size: 9px;
+  position: absolute;
+  transform: translateX(-50%);
+  font-size: 10px;
   color: var(--text-tertiary);
-  overflow: hidden;
-  text-overflow: ellipsis;
   white-space: nowrap;
-}
-
-.progress-chart-label.hidden {
-  visibility: hidden;
 }
 
 .progress-chart-label.label-today {
