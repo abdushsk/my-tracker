@@ -68,6 +68,7 @@ export function renderGoalCard(goal) {
   const isCompleted = isGoalCompleted(goal);
   const typeIcon = getGoalTypeIcon(goal.type);
   const progressDisplay = formatProgressDisplay(goal);
+  const isCheckbox = goal.type === GOAL_TYPES.CHECKBOX;
 
   // Build CSS classes for the card - always use compact view
   const justCompleted = state.justCompletedGoals.has(goal.id);
@@ -87,6 +88,18 @@ export function renderGoalCard(goal) {
   // US-073: Custom goal color for accent stripe
   const goalColorStyle = goal.color ? `style="--goal-custom-color: ${goal.color}"` : '';
   const hasCustomColor = goal.color ? 'has-custom-color' : '';
+
+  // US-015: Checkbox goals use a more compact inline layout
+  if (isCheckbox) {
+    return renderCheckboxGoalCard(goal, {
+      cardClasses,
+      hasCustomColor,
+      categoryDataAttr,
+      goalColorStyle,
+      isCompleted,
+      categoryInfo
+    });
+  }
 
   return `
     <div class="${cardClasses} ${hasCustomColor}" data-goal-id="${goal.id}" ${categoryDataAttr} ${goalColorStyle} draggable="true">
@@ -142,6 +155,68 @@ export function renderGoalCard(goal) {
         </div>
         ${renderGoalControls(goal)}
       </div>
+    </div>
+  `;
+}
+
+/**
+ * US-015: Render a compact checkbox goal card with inline toggle
+ * @param {Object} goal - The checkbox goal object
+ * @param {Object} options - Card rendering options
+ * @returns {string} HTML string for the checkbox goal card
+ */
+function renderCheckboxGoalCard(goal, options) {
+  const { cardClasses, hasCustomColor, categoryDataAttr, goalColorStyle, isCompleted, categoryInfo } = options;
+
+  const checkIcon = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>`;
+
+  return `
+    <div class="${cardClasses} ${hasCustomColor}" data-goal-id="${goal.id}" ${categoryDataAttr} ${goalColorStyle} draggable="true">
+      <div class="goal-card-header checkbox-card-header">
+        <div class="drag-handle" title="Drag to reorder">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="16" height="16">
+            <circle cx="9" cy="6" r="1.5"/>
+            <circle cx="15" cy="6" r="1.5"/>
+            <circle cx="9" cy="12" r="1.5"/>
+            <circle cx="15" cy="12" r="1.5"/>
+            <circle cx="9" cy="18" r="1.5"/>
+            <circle cx="15" cy="18" r="1.5"/>
+          </svg>
+        </div>
+        <button class="checkbox-inline-toggle ${isCompleted ? 'checked' : ''}"
+                data-action="checkbox-toggle"
+                data-goal-id="${goal.id}"
+                title="${isCompleted ? 'Mark as incomplete' : 'Mark as complete'}"
+                aria-label="${isCompleted ? 'Mark as incomplete' : 'Mark as complete'}">
+          <span class="checkbox-inline-box">
+            ${isCompleted ? checkIcon : ''}
+          </span>
+        </button>
+        <div class="goal-card-title-row checkbox-title-row">
+          <h3 class="goal-title ${isCompleted ? 'checkbox-title-done' : ''}">${escapeHtml(goal.title)}</h3>
+        </div>
+        <div class="goal-header-actions">
+          <button class="stats-btn" data-action="view-stats" data-goal-id="${goal.id}" title="View statistics" aria-label="View statistics for ${escapeHtml(goal.title)}">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="16" height="16">
+              <line x1="18" y1="20" x2="18" y2="10"/>
+              <line x1="12" y1="20" x2="12" y2="4"/>
+              <line x1="6" y1="20" x2="6" y2="14"/>
+            </svg>
+          </button>
+          <button class="focus-btn" data-action="focus" data-goal-id="${goal.id}" title="Focus on this goal" aria-label="Focus on ${escapeHtml(goal.title)}">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="16" height="16">
+              <circle cx="12" cy="12" r="10"/>
+              <circle cx="12" cy="12" r="6"/>
+              <circle cx="12" cy="12" r="2"/>
+            </svg>
+          </button>
+          <div class="goal-badges">
+            ${categoryInfo ? `<span class="goal-category-badge" style="background-color: ${categoryInfo.light}; color: ${categoryInfo.color}"><span class="category-color-dot" style="background-color: ${categoryInfo.color}"></span>${categoryInfo.name}</span>` : ''}
+            <span class="goal-timeframe-badge timeframe-${goal.timeframe}">${capitalizeFirst(goal.timeframe)}</span>
+          </div>
+        </div>
+      </div>
+      ${goal.notes ? `<div class="goal-card-body checkbox-card-body">${renderGoalNotes(goal)}</div>` : ''}
     </div>
   `;
 }

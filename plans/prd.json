@@ -107,7 +107,7 @@
       "title": "Improve checkbox goal card UI",
       "description": "Redesign the checkbox goal card to make it more compact and visually appealing. Focus on enhancing the layout, typography, and overall aesthetics to improve user engagement and satisfaction.",
       "priority": 15,
-      "passes": false
+      "passes": true
     },
     {
       "id": "US-016",

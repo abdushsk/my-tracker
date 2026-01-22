@@ -549,3 +549,61 @@
 - Code comments don't necessarily need to change for a rebrand, but updating them maintains consistency and helps future developers
 - Documentation files describing the project (like FEATURES.md) may be left unchanged to preserve project history
 
+## US-015: Improve Checkbox Goal Card UI (Completed)
+**Date**: 2026-01-23
+
+### Changes Made
+
+1. **Created compact inline checkbox layout** (goalCard.js:168-222):
+   - Added new `renderCheckboxGoalCard()` function for checkbox-specific card rendering
+   - Checkbox goals now have an inline toggle in the header row instead of a separate controls section
+   - Removed progress bar/wrapper for checkbox goals (binary 0/100% not useful)
+   - Notes section preserved when present, but rendered more compactly
+
+2. **Inline checkbox toggle button** (popup.css:3195-3217):
+   - New `.checkbox-inline-toggle` button class: 24x24px, positioned after drag handle
+   - Clean hover state with accent subtle background
+   - Active state with satisfying scale(0.92) feedback
+
+3. **Inline checkbox box styling** (popup.css:3219-3267):
+   - New `.checkbox-inline-box`: 20x20px with 2px border
+   - Unchecked state: `--text-muted` border color
+   - Hover state: `--accent` border color with 1.05 scale
+   - Checked state: filled `--accent` background with pop animation
+   - Checkmark animation with subtle rotation for polish
+
+4. **Completed title styling** (popup.css:3269-3281):
+   - New `.checkbox-title-done` class with strikethrough using `--accent` color
+   - Subtle 0.7 opacity for completed items
+   - Card background gradient using `--accent-subtle`
+
+5. **Preserved legacy checkbox controls** (popup.css:3283-3415):
+   - Kept `.checkbox-toggle-btn`, `.checkbox-box`, and related styles for focus mode
+   - Reduced min-height from 56px to 48px
+   - Updated to use semantic color variables (`--accent`, `--accent-subtle`)
+
+### Layout Changes
+
+**Before (old checkbox goal card):**
+```
+[Header: Drag | Type Icon | Title | Stats | Focus | Badges]
+[Notes section - if applicable]
+[Progress: "0/1" | "0%"]
+[Progress Bar: 0% or 100%]
+[Large "Mark as done" Button with checkbox icon + label]
+```
+
+**After (new compact checkbox goal card):**
+```
+[Header: Drag | [✓] | Title | Stats | Focus | Badges]
+[Notes section - only if applicable]
+```
+
+### Key Learnings
+- For binary goals like checkboxes, progress bars showing 0% or 100% add visual clutter without value
+- Inline checkbox toggles in the title row create a more natural task list feel
+- The checkbox can serve as both the type indicator and the interaction element, eliminating redundancy
+- Keeping legacy controls for focus mode maintains compatibility with existing features
+- CSS variables (`--accent`, `--text-muted`, etc.) handle theme switching automatically for new components
+- Using `data-action="checkbox-toggle"` ensures the existing event delegation continues to work
+
