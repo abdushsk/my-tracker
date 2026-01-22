@@ -689,6 +689,292 @@ async function getArchivedGoalById(goalId) {
   }
 }
 
+// ============================================
+// US-070: Export/Import Data Functions
+// ============================================
+
+/**
+ * Export all application data as a JSON object
+ * Includes: goals, settings, categories, templates, archived goals, activity log, history, streak data
+ * @returns {Promise<Object>} Export data object with version and timestamp
+ */
+async function exportAllData() {
+  try {
+    const [
+      goals,
+      settings,
+      categories,
+      customTemplates,
+      archivedGoals,
+      activityLog,
+      history,
+      streakData
+    ] = await Promise.all([
+      getGoals(),
+      getSettings(),
+      getCategories(),
+      getCustomTemplates(),
+      getArchivedGoals(),
+      getActivityLog(),
+      getHistory(),
+      getStreakData()
+    ]);
+
+    return {
+      version: '1.0.0',
+      exportedAt: new Date().toISOString(),
+      data: {
+        goals,
+        settings,
+        categories,
+        customTemplates,
+        archivedGoals,
+        activityLog,
+        history,
+        streakData
+      }
+    };
+  } catch (error) {
+    console.error('Error exporting data:', error);
+    throw new Error('Failed to export data');
+  }
+}
+
+/**
+ * Validate import data structure
+ * @param {Object} importData - The data to validate
+ * @returns {{valid: boolean, errors: string[]}} Validation result
+ */
+function validateImportData(importData) {
+  const errors = [];
+
+  // Check basic structure
+  if (!importData || typeof importData !== 'object') {
+    return { valid: false, errors: ['Invalid data format: expected an object'] };
+  }
+
+  // Check version
+  if (!importData.version) {
+    errors.push('Missing version field');
+  }
+
+  // Check data object
+  if (!importData.data || typeof importData.data !== 'object') {
+    return { valid: false, errors: ['Missing or invalid data field'] };
+  }
+
+  const { data } = importData;
+
+  // Validate goals array
+  if (data.goals !== undefined) {
+    if (!Array.isArray(data.goals)) {
+      errors.push('goals must be an array');
+    } else {
+      data.goals.forEach((goal, index) => {
+        if (!goal.id) errors.push(`Goal at index ${index} is missing id`);
+        if (!goal.title) errors.push(`Goal at index ${index} is missing title`);
+        if (!['timer', 'counter', 'checkbox'].includes(goal.type)) {
+          errors.push(`Goal at index ${index} has invalid type: ${goal.type}`);
+        }
+      });
+    }
+  }
+
+  // Validate settings object
+  if (data.settings !== undefined && typeof data.settings !== 'object') {
+    errors.push('settings must be an object');
+  }
+
+  // Validate categories array
+  if (data.categories !== undefined) {
+    if (!Array.isArray(data.categories)) {
+      errors.push('categories must be an array');
+    } else {
+      data.categories.forEach((cat, index) => {
+        if (!cat.id) errors.push(`Category at index ${index} is missing id`);
+        if (!cat.name) errors.push(`Category at index ${index} is missing name`);
+        if (!cat.color) errors.push(`Category at index ${index} is missing color`);
+      });
+    }
+  }
+
+  // Validate custom templates array
+  if (data.customTemplates !== undefined && !Array.isArray(data.customTemplates)) {
+    errors.push('customTemplates must be an array');
+  }
+
+  // Validate archived goals array
+  if (data.archivedGoals !== undefined && !Array.isArray(data.archivedGoals)) {
+    errors.push('archivedGoals must be an array');
+  }
+
+  // Validate activity log array
+  if (data.activityLog !== undefined && !Array.isArray(data.activityLog)) {
+    errors.push('activityLog must be an array');
+  }
+
+  // Validate history array
+  if (data.history !== undefined && !Array.isArray(data.history)) {
+    errors.push('history must be an array');
+  }
+
+  // Validate streak data object
+  if (data.streakData !== undefined && typeof data.streakData !== 'object') {
+    errors.push('streakData must be an object');
+  }
+
+  return { valid: errors.length === 0, errors };
+}
+
+/**
+ * Import data with merge or replace strategy
+ * @param {Object} importData - The validated import data
+ * @param {string} mode - 'merge' or 'replace'
+ * @returns {Promise<{success: boolean, message: string, stats: Object}>}
+ */
+async function importAllData(importData, mode = 'merge') {
+  try {
+    const { data } = importData;
+    const stats = {
+      goalsImported: 0,
+      categoriesImported: 0,
+      templatesImported: 0,
+      archivedGoalsImported: 0
+    };
+
+    if (mode === 'replace') {
+      // Replace all data
+      if (data.goals) {
+        await saveGoals(data.goals);
+        stats.goalsImported = data.goals.length;
+      }
+      if (data.settings) {
+        await saveSettings(data.settings);
+      }
+      if (data.categories) {
+        await saveCategories(data.categories);
+        stats.categoriesImported = data.categories.length;
+      }
+      if (data.customTemplates) {
+        await saveCustomTemplates(data.customTemplates);
+        stats.templatesImported = data.customTemplates.length;
+      }
+      if (data.archivedGoals) {
+        await saveArchivedGoals(data.archivedGoals);
+        stats.archivedGoalsImported = data.archivedGoals.length;
+      }
+      if (data.activityLog) {
+        await saveActivityLog(data.activityLog);
+      }
+      if (data.history) {
+        await saveHistory(data.history);
+      }
+      if (data.streakData) {
+        await saveStreakData(data.streakData);
+      }
+    } else {
+      // Merge mode - add new items, skip duplicates
+
+      // Merge goals (skip duplicates by ID)
+      if (data.goals && data.goals.length > 0) {
+        const existingGoals = await getGoals();
+        const existingIds = new Set(existingGoals.map(g => g.id));
+        const newGoals = data.goals.filter(g => !existingIds.has(g.id));
+        if (newGoals.length > 0) {
+          await saveGoals([...existingGoals, ...newGoals]);
+          stats.goalsImported = newGoals.length;
+        }
+      }
+
+      // Merge categories (skip duplicates by ID)
+      if (data.categories && data.categories.length > 0) {
+        const existingCategories = await getCategories();
+        const existingCatIds = new Set(existingCategories.map(c => c.id));
+        const newCategories = data.categories.filter(c => !existingCatIds.has(c.id));
+        if (newCategories.length > 0) {
+          await saveCategories([...existingCategories, ...newCategories]);
+          stats.categoriesImported = newCategories.length;
+        }
+      }
+
+      // Merge custom templates (skip duplicates by ID)
+      if (data.customTemplates && data.customTemplates.length > 0) {
+        const existingTemplates = await getCustomTemplates();
+        const existingTemplateIds = new Set(existingTemplates.map(t => t.id));
+        const newTemplates = data.customTemplates.filter(t => !existingTemplateIds.has(t.id));
+        if (newTemplates.length > 0) {
+          await saveCustomTemplates([...existingTemplates, ...newTemplates]);
+          stats.templatesImported = newTemplates.length;
+        }
+      }
+
+      // Merge archived goals (skip duplicates by ID)
+      if (data.archivedGoals && data.archivedGoals.length > 0) {
+        const existingArchived = await getArchivedGoals();
+        const existingArchivedIds = new Set(existingArchived.map(g => g.id));
+        const newArchived = data.archivedGoals.filter(g => !existingArchivedIds.has(g.id));
+        if (newArchived.length > 0) {
+          await saveArchivedGoals([...existingArchived, ...newArchived]);
+          stats.archivedGoalsImported = newArchived.length;
+        }
+      }
+
+      // For settings, merge individual properties (don't overwrite existing)
+      if (data.settings) {
+        const existingSettings = await getSettings();
+        const mergedSettings = { ...data.settings, ...existingSettings };
+        await saveSettings(mergedSettings);
+      }
+
+      // Merge activity log (append, avoiding exact duplicates by timestamp+goalId+action)
+      if (data.activityLog && data.activityLog.length > 0) {
+        const existingLog = await getActivityLog();
+        const existingLogKeys = new Set(existingLog.map(e => `${e.timestamp}-${e.goalId}-${e.action}`));
+        const newLogEntries = data.activityLog.filter(e =>
+          !existingLogKeys.has(`${e.timestamp}-${e.goalId}-${e.action}`)
+        );
+        if (newLogEntries.length > 0) {
+          await saveActivityLog([...existingLog, ...newLogEntries]);
+        }
+      }
+
+      // Merge history (append, avoiding exact duplicates by date)
+      if (data.history && data.history.length > 0) {
+        const existingHistory = await getHistory();
+        const existingDates = new Set(existingHistory.map(h => h.date));
+        const newHistory = data.history.filter(h => !existingDates.has(h.date));
+        if (newHistory.length > 0) {
+          await saveHistory([...existingHistory, ...newHistory]);
+        }
+      }
+
+      // For streak data, keep the better values
+      if (data.streakData) {
+        const existingStreak = await getStreakData();
+        const mergedStreak = {
+          currentStreak: Math.max(existingStreak.currentStreak || 0, data.streakData.currentStreak || 0),
+          bestStreak: Math.max(existingStreak.bestStreak || 0, data.streakData.bestStreak || 0),
+          lastCompletionDate: existingStreak.lastCompletionDate || data.streakData.lastCompletionDate
+        };
+        await saveStreakData(mergedStreak);
+      }
+    }
+
+    return {
+      success: true,
+      message: mode === 'replace' ? 'Data replaced successfully' : 'Data merged successfully',
+      stats
+    };
+  } catch (error) {
+    console.error('Error importing data:', error);
+    return {
+      success: false,
+      message: `Import failed: ${error.message}`,
+      stats: {}
+    };
+  }
+}
+
 // Export functions for use in other modules
 export {
   STORAGE_KEYS,
@@ -733,5 +1019,9 @@ export {
   archiveGoal,
   restoreArchivedGoal,
   deleteArchivedGoal,
-  getArchivedGoalById
+  getArchivedGoalById,
+  // US-070: Export/Import functions
+  exportAllData,
+  validateImportData,
+  importAllData
 };

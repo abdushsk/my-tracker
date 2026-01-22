@@ -1014,3 +1014,92 @@ Implemented a comprehensive goal archive system that allows users to archive goa
 - Permanently delete from archive - Delete button with confirmation dialog
 - Archive preserves goal history/progress - Full goal data preserved with archivedAt timestamp
 
+---
+
+## US-070: Export/Import Data
+**Date**: 2026-01-22
+**Status**: Completed
+
+### What was done:
+Implemented a comprehensive data export/import feature that allows users to backup all their data as a JSON file and restore from backups. Users can choose to merge imported data with existing data or replace all existing data.
+
+### Implementation details:
+
+1. **Storage Layer** (`src/utils/storage.js` lines 692-976):
+   - `exportAllData()` - Exports all data including: goals, settings, categories, custom templates, archived goals, activity log, history, streak data
+   - `validateImportData()` - Validates the structure of import data, checking for required fields and proper data types
+   - `importAllData(importData, mode)` - Imports data with either 'merge' or 'replace' mode:
+     - **Merge mode**: Adds new items (by ID), skips duplicates, keeps existing settings, merges activity logs
+     - **Replace mode**: Overwrites all existing data with imported data
+
+2. **Settings Screen UI** (`src/popup/popup.js` lines 6160-6186):
+   - Added "Data Management" section between Categories and About
+   - Export button with download icon
+   - Import button with upload icon
+   - Hidden file input for JSON file selection
+
+3. **Export Functionality** (`src/popup/popup.js` lines 6446-6490):
+   - `handleExportData()` - Exports all data and triggers download
+   - Creates JSON blob with pretty-printed data
+   - Filename includes current date: `daily-goals-tracker-backup-YYYY-MM-DD.json`
+   - Shows success/error feedback
+
+4. **Import Functionality** (`src/popup/popup.js` lines 6493-6610):
+   - `handleImportFileSelect()` - Handles file selection and validation
+   - `showImportOptionsDialog()` - Modal dialog for choosing merge vs replace
+   - `performImport()` - Executes the import and reloads state
+
+5. **Feedback System** (`src/popup/popup.js` lines 6652-6688):
+   - `showDataManagementFeedback()` - Displays success/error/loading toasts
+   - Animated appearance and auto-dismiss after 4 seconds
+   - Different colors for success (green), error (red), loading (blue)
+
+6. **CSS Styles** (`src/popup/popup.css` lines 1719-1975):
+   - Data management button grid (2 columns)
+   - Button hover/active states
+   - Feedback toast animations (slideInDown, slideOutUp)
+   - Import modal overlay and content
+   - Import option buttons with icon + label + description
+   - Dark mode and reduced motion support
+
+### Export Data Structure:
+```json
+{
+  "version": "1.0.0",
+  "exportedAt": "2026-01-22T...",
+  "data": {
+    "goals": [...],
+    "settings": {...},
+    "categories": [...],
+    "customTemplates": [...],
+    "archivedGoals": [...],
+    "activityLog": [...],
+    "history": [...],
+    "streakData": {...}
+  }
+}
+```
+
+### Files modified:
+- `src/utils/storage.js` (lines 692-976, 1023-1026)
+- `src/popup/popup.js` (lines 39-42, 6160-6186, 6281-6282, 6409-6689)
+- `src/popup/popup.css` (lines 1719-1975)
+
+### Key design decisions:
+- Export includes ALL user data for complete backup
+- Validation checks structure and required fields before import
+- Merge mode is default - safer, preserves existing work
+- Replace mode requires explicit confirmation
+- Import modal shows backup date and item counts
+- Activity log deduplication uses timestamp+goalId+action key
+- Streak data merge keeps the higher values
+
+### Acceptance criteria met:
+- Export button in Settings (Data Management section)
+- Downloads JSON file with all data (complete backup with version and timestamp)
+- Import button in Settings (triggers file picker)
+- File picker for JSON import (.json files only)
+- Validation of import data (structure and field validation)
+- Merge or replace options on import (modal dialog with both options)
+- Success/error feedback (animated toasts with appropriate colors)
+
