@@ -95,69 +95,12 @@ export function getUndoActionDescription(action) {
 }
 
 /**
- * Show the undo toast notification
+ * Show the undo toast notification (disabled - no toast notifications)
  * @param {Object} action - The action that can be undone
  */
 export function showUndoToast(action) {
-  // Clear any existing timeout
-  if (state.undoToastTimeoutId) {
-    clearTimeout(state.undoToastTimeoutId);
-    state.undoToastTimeoutId = null;
-  }
-
-  // Get or create toast element
-  let toast = document.getElementById('undo-toast');
-  if (!toast) {
-    toast = document.createElement('div');
-    toast.id = 'undo-toast';
-    toast.className = 'undo-toast';
-    document.body.appendChild(toast);
-  }
-
-  const description = getUndoActionDescription(action);
-
-  toast.innerHTML = `
-    <span class="undo-toast-message">${escapeHtml(description)}</span>
-    <button class="undo-toast-btn" id="undo-btn" title="Undo (Ctrl+Z)">
-      Undo
-    </button>
-    <button class="undo-toast-close" id="undo-toast-close" title="Dismiss">
-      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-        <line x1="18" y1="6" x2="6" y2="18"/>
-        <line x1="6" y1="6" x2="18" y2="18"/>
-      </svg>
-    </button>
-  `;
-
-  // Show the toast
-  requestAnimationFrame(() => {
-    toast.classList.add('visible');
-  });
-
-  // Attach event listeners
-  const undoBtn = toast.querySelector('#undo-btn');
-  const closeBtn = toast.querySelector('#undo-toast-close');
-
-  // Remove old listeners by cloning
-  const newUndoBtn = undoBtn.cloneNode(true);
-  const newCloseBtn = closeBtn.cloneNode(true);
-  undoBtn.parentNode.replaceChild(newUndoBtn, undoBtn);
-  closeBtn.parentNode.replaceChild(newCloseBtn, closeBtn);
-
-  newUndoBtn.addEventListener('click', (e) => {
-    e.preventDefault();
-    performUndo();
-  });
-
-  newCloseBtn.addEventListener('click', (e) => {
-    e.preventDefault();
-    hideUndoToast();
-  });
-
-  // Auto-hide after duration
-  state.undoToastTimeoutId = setTimeout(() => {
-    hideUndoToast();
-  }, UNDO_TOAST_DURATION);
+  // Disabled - no toast notifications shown
+  console.log(`[Undo] Action available: ${action.type} for "${action.goalTitle}"`);
 }
 
 /**

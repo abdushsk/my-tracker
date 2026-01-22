@@ -4,12 +4,8 @@
  */
 
 import { state, SCREENS, SCREEN_IDS } from '../state.js';
-import { isGoalCompleted, getLevelTitle, getLevelProgress } from '../../utils/models.js';
-import { saveSettings } from '../../utils/storage.js';
-import { getDailyQuote, renderQuoteHTML } from '../../utils/quotes.js';
-import { renderDailyChallengeCard, attachDailyChallengeListeners } from '../features/dailyChallenges.js';
-import { renderQuickAddFAB, attachQuickAddFABListeners } from './quickAdd.js';
 import { renderGoalCard } from '../components/goalCard.js';
+import { toggleTheme } from '../utils/theme.js';
 
 // =============================================================================
 // Callback Registration
@@ -44,95 +40,31 @@ export function renderViewGoalsScreen() {
   const screen = document.getElementById(SCREEN_IDS[SCREENS.VIEW_GOALS]);
   if (!screen) return;
 
-  const completedCount = getCompletedCount();
-  const totalCount = state.goals.length;
-  const currentStreak = state.streakData?.currentStreak || 0;
-
-  // US-056: Check compact view setting
-  const isCompactView = state.settings?.compactViewEnabled || false;
-
-  // US-083: Get level data
-  const currentLevel = state.xpData?.currentLevel || 1;
-  const levelInfo = getLevelTitle(currentLevel);
-  const levelProgress = getLevelProgress(state.xpData?.totalXP || 0);
-
   screen.innerHTML = `
     <div class="view-goals-screen">
-      <header class="screen-header view-goals-header">
-        <div class="header-main">
-          <h1 class="app-title">Daily Goals</h1>
-          <div class="level-badge" title="Level ${currentLevel} - ${levelInfo.title}&#10;${levelProgress.currentLevelXP}/${levelProgress.xpForNextLevel} XP to next level">
-            <span class="level-icon">${levelInfo.icon}</span>
-            <span class="level-number">Lv.${currentLevel}</span>
-            <div class="level-progress-mini">
-              <div class="level-progress-bar-mini" style="width: ${levelProgress.percentage}%"></div>
-            </div>
-          </div>
-          <div class="header-actions">
-            <button class="view-toggle-btn ${isCompactView ? 'compact-active' : ''}" id="compact-view-toggle" aria-label="${isCompactView ? 'Switch to expanded view' : 'Switch to compact view'}" title="${isCompactView ? 'Expanded view' : 'Compact view'}">
-              ${isCompactView
-                ? `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="18" height="18">
-                    <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
-                    <line x1="3" y1="9" x2="21" y2="9"/>
-                    <line x1="3" y1="15" x2="21" y2="15"/>
-                  </svg>`
-                : `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="18" height="18">
-                    <rect x="3" y="3" width="7" height="7"/>
-                    <rect x="14" y="3" width="7" height="7"/>
-                    <rect x="14" y="14" width="7" height="7"/>
-                    <rect x="3" y="14" width="7" height="7"/>
-                  </svg>`
-              }
-            </button>
-            <button class="settings-btn" data-screen="${SCREENS.SETTINGS}" aria-label="Settings">
-              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="20" height="20">
-                <circle cx="12" cy="12" r="3"/>
-                <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/>
-              </svg>
-            </button>
-          </div>
+      <header class="screen-header main-screen-header">
+        <h1 class="screen-title">Today</h1>
+        <div class="header-actions">
+          <button class="header-text-btn" data-screen="${SCREENS.MANAGE_GOALS}" title="Manage goals">Manage</button>
+          <button class="theme-toggle-btn" id="theme-toggle" aria-label="Toggle theme" title="Toggle theme">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" width="18" height="18">
+              <circle cx="12" cy="12" r="5"/>
+              <line x1="12" y1="1" x2="12" y2="3"/>
+              <line x1="12" y1="21" x2="12" y2="23"/>
+              <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/>
+              <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/>
+              <line x1="1" y1="12" x2="3" y2="12"/>
+              <line x1="21" y1="12" x2="23" y2="12"/>
+              <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/>
+              <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>
+            </svg>
+          </button>
         </div>
-        <div class="header-stats">
-          <div class="stat-item completed-stat">
-            <span class="stat-icon">&#10003;</span>
-            <span class="stat-value">${completedCount}/${totalCount}</span>
-            <span class="stat-label">completed</span>
-          </div>
-          <div class="stat-divider"></div>
-          <div class="stat-item streak-stat ${currentStreak > 0 ? 'active-streak' : ''}">
-            <span class="stat-icon streak-icon">&#128293;</span>
-            <span class="stat-value">${currentStreak}</span>
-            <span class="stat-label">day streak</span>
-          </div>
-        </div>
-        ${renderCategoryFilterBar()}
       </header>
+      ${renderCategoryFilterBar()}
       <main class="goals-list-container">
-        ${renderDailyChallengeCard()}
         ${state.goals.length === 0 ? renderEmptyState() : renderGoalsList()}
       </main>
-      <footer class="screen-footer">
-        <button class="nav-btn" data-screen="${SCREENS.MANAGE_GOALS}">
-          <span class="nav-icon">
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
-              <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
-            </svg>
-          </span>
-          <span class="nav-label">Manage Goals</span>
-        </button>
-        <button class="nav-btn" data-screen="${SCREENS.REPORTS}">
-          <span class="nav-icon">
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <line x1="18" y1="20" x2="18" y2="10"/>
-              <line x1="12" y1="20" x2="12" y2="4"/>
-              <line x1="6" y1="20" x2="6" y2="14"/>
-            </svg>
-          </span>
-          <span class="nav-label">Reports</span>
-        </button>
-      </footer>
-      ${renderQuickAddFAB()}
     </div>
   `;
 
@@ -146,17 +78,11 @@ export function renderViewGoalsScreen() {
     callbacks.attachGoalControlListeners(screen);
   }
 
-  // US-056: Attach compact view toggle listener
-  attachCompactViewToggleListener(screen);
-
   // US-065: Attach category filter listeners
   attachCategoryFilterListeners(screen);
 
-  // US-068: Attach quick add FAB listeners
-  attachQuickAddFABListeners(screen);
-
-  // US-081: Attach daily challenge listeners
-  attachDailyChallengeListeners(screen);
+  // Attach theme toggle listener
+  attachThemeToggleListener(screen);
 
   // Start timer update interval if there are active timers
   if (Object.keys(state.activeTimers).length > 0 && callbacks.startTimerUpdateInterval) {
@@ -167,14 +93,6 @@ export function renderViewGoalsScreen() {
 // =============================================================================
 // Helper Functions
 // =============================================================================
-
-/**
- * Get count of completed goals
- * @returns {number} Number of completed goals
- */
-function getCompletedCount() {
-  return state.goals.filter(goal => isGoalCompleted(goal)).length;
-}
 
 /**
  * US-065: Render category filter bar
@@ -209,10 +127,6 @@ function renderCategoryFilterBar() {
  * @returns {string} HTML string for empty state
  */
 function renderEmptyState() {
-  // US-077: Show motivational quote if enabled
-  const quotesEnabled = state.settings?.quotesEnabled !== false;
-  const quote = quotesEnabled ? getDailyQuote() : null;
-
   return `
     <div class="empty-state">
       <div class="empty-illustration">
@@ -233,7 +147,6 @@ function renderEmptyState() {
       </div>
       <h2 class="empty-message">No goals yet</h2>
       <p class="empty-submessage">Set your first goal and start building better habits today!</p>
-      ${quote ? renderQuoteHTML(quote, 'empty-state-quote') : ''}
       <button class="btn btn-primary btn-lg add-first-goal" data-screen="${SCREENS.MANAGE_GOALS}">
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="btn-icon">
           <line x1="12" y1="5" x2="12" y2="19"/>
@@ -263,13 +176,10 @@ function renderGoalsList() {
     sortedGoals = sortedGoals.filter(goal => goal.category === state.categoryFilter);
   }
 
-  // US-056: Check compact view setting
-  const isCompactView = state.settings?.compactViewEnabled || false;
-
   // Show empty message if no goals match the filter
   if (sortedGoals.length === 0 && state.categoryFilter !== 'all') {
     return `
-      <div class="goals-list ${isCompactView ? 'compact-view' : ''}">
+      <div class="goals-list compact-view">
         <div class="empty-filter-state">
           <p class="empty-filter-message">No goals in this category</p>
         </div>
@@ -277,8 +187,9 @@ function renderGoalsList() {
     `;
   }
 
+  // Always use compact view
   return `
-    <div class="goals-list ${isCompactView ? 'compact-view' : ''}">
+    <div class="goals-list compact-view">
       ${sortedGoals.map(goal => renderGoalCard(goal)).join('')}
     </div>
   `;
@@ -287,27 +198,6 @@ function renderGoalsList() {
 // =============================================================================
 // Event Listeners
 // =============================================================================
-
-/**
- * US-056: Attach compact view toggle listener
- * @param {HTMLElement} container - The screen container
- */
-function attachCompactViewToggleListener(container) {
-  const toggleBtn = container.querySelector('#compact-view-toggle');
-  if (!toggleBtn) return;
-
-  toggleBtn.addEventListener('click', async () => {
-    // Toggle compact view setting
-    const newValue = !state.settings.compactViewEnabled;
-    state.settings = { ...state.settings, compactViewEnabled: newValue };
-
-    // Save to storage
-    await saveSettings(state.settings);
-
-    // Re-render the view goals screen with smooth transition
-    renderViewGoalsScreen();
-  });
-}
 
 /**
  * US-065: Attach category filter listeners
@@ -325,5 +215,18 @@ function attachCategoryFilterListeners(container) {
       // Re-render the view goals screen to apply filter
       renderViewGoalsScreen();
     });
+  });
+}
+
+/**
+ * Attach theme toggle listener
+ * @param {HTMLElement} container - The screen container
+ */
+function attachThemeToggleListener(container) {
+  const toggleBtn = container.querySelector('#theme-toggle');
+  if (!toggleBtn) return;
+
+  toggleBtn.addEventListener('click', () => {
+    toggleTheme();
   });
 }

@@ -59,11 +59,6 @@ import {
   initKeyboardShortcuts
 } from './features/keyboardNav.js';
 
-import {
-  // renderChainIndicator, renderLockedOverlay now used in ./components/goalCard.js
-  // renderChainParentOptions now used in ./screens/goalForm.js
-  unlockChainedGoals
-} from './features/habitChains.js';
 
 import {
   registerAchievementsCallbacks,
@@ -214,7 +209,10 @@ import {
   // US-085: Pomodoro Timer Mode imports
   getPomodoroSettings,
   // savePomodoroSettings now used in ./screens/settings.js
-  getPomodoroStates
+  getPomodoroStates,
+  // Focus mode persistence
+  getFocusedGoalId,
+  clearFocusedGoalId
   // US-086: resetBreakReminderState now used in ./screens/settings.js
 } from '../utils/storage.js';
 import {
@@ -236,9 +234,6 @@ import {
   // US-083: Level and XP System imports (others now in ./features/xpLevels.js)
   getDefaultXPData
   // getLevelProgress, getLevelTitle now used in ./screens/viewGoals.js
-  // US-084: Habit Chain imports (others now in ./features/habitChains.js)
-  // CHAIN_STATUS now used in ./screens/goalForm.js
-  // isGoalInChain, isGoalLocked now used in ./components/goalCard.js
 } from '../utils/models.js';
 import {
   initSounds,
@@ -262,6 +257,55 @@ import {
 // =============================================================================
 // Screen Navigation
 // =============================================================================
+
+/**
+ * Main screens that show the bottom nav
+ */
+const MAIN_SCREENS = [SCREENS.VIEW_GOALS, SCREENS.REPORTS, SCREENS.SETTINGS];
+
+/**
+ * Update the main bottom nav active state
+ * @param {string} screenName - The current screen name
+ */
+function updateMainNavState(screenName) {
+  const mainNav = document.getElementById('main-nav');
+  if (!mainNav) return;
+
+  // Show/hide nav based on screen type
+  if (MAIN_SCREENS.includes(screenName)) {
+    mainNav.classList.remove('hidden');
+  } else {
+    mainNav.classList.add('hidden');
+  }
+
+  // Update active button
+  const navBtns = mainNav.querySelectorAll('.nav-btn');
+  navBtns.forEach(btn => {
+    const btnScreen = btn.getAttribute('data-screen');
+    if (btnScreen === screenName) {
+      btn.classList.add('active');
+    } else {
+      btn.classList.remove('active');
+    }
+  });
+}
+
+/**
+ * Initialize the persistent main navigation
+ */
+function initMainNav() {
+  const mainNav = document.getElementById('main-nav');
+  if (!mainNav) return;
+
+  mainNav.querySelectorAll('.nav-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const screenName = btn.getAttribute('data-screen');
+      if (screenName) {
+        showScreen(screenName);
+      }
+    });
+  });
+}
 
 /**
  * Show a specific screen and hide all others
@@ -299,6 +343,9 @@ function showScreen(screenName) {
     console.error(`Screen element not found: ${SCREEN_IDS[screenName]}`);
   }
 
+  // Update main nav state
+  updateMainNavState(screenName);
+
   // Render the screen content
   renderCurrentScreen();
 }
@@ -309,8 +356,13 @@ function showScreen(screenName) {
 
 /**
  * Render the current screen's content
+ * Preserves scroll position for seamless updates
  */
 function renderCurrentScreen() {
+  // Save scroll position before re-render
+  const goalsContainer = document.querySelector('.goals-list-container');
+  const scrollTop = goalsContainer ? goalsContainer.scrollTop : 0;
+
   switch (state.currentScreen) {
     case SCREENS.VIEW_GOALS:
       renderViewGoalsScreen();
@@ -348,6 +400,20 @@ function renderCurrentScreen() {
     default:
       console.error(`Unknown screen: ${state.currentScreen}`);
   }
+
+  // Restore scroll position synchronously after render
+  if (scrollTop > 0) {
+    const newGoalsContainer = document.querySelector('.goals-list-container');
+    if (newGoalsContainer) {
+      // Disable smooth scrolling temporarily
+      newGoalsContainer.style.scrollBehavior = 'auto';
+      newGoalsContainer.scrollTop = scrollTop;
+      // Re-enable after next frame
+      requestAnimationFrame(() => {
+        newGoalsContainer.style.scrollBehavior = '';
+      });
+    }
+  }
 }
 
 // View Goals screen functions (renderViewGoalsScreen, getCompletedCount, renderCategoryFilterBar,
@@ -359,7 +425,6 @@ function renderCurrentScreen() {
 // Goal card functions (getGoalTypeIcon, renderGoalCard, toggleGoalNotes, renderGoalControls)
 // are now imported from ./components/goalCard.js
 
-// US-084: renderChainIndicator and renderLockedOverlay are imported from ./features/habitChains.js
 // US-085: Pomodoro Timer Mode functions are imported from ./features/pomodoro.js
 
 // US-086: Break Reminder functions are now imported from ./features/breakReminders.js
@@ -386,7 +451,8 @@ async function handleTimerToggle(goalId) {
     const activeTimer = state.activeTimers[goalId];
     if (activeTimer && activeTimer.startTime) {
       const elapsedSinceStart = Math.floor((now - activeTimer.startTime) / 1000);
-      const newProgress = Math.min(goal.progress + elapsedSinceStart, goal.target);
+      // Allow progress to exceed target (overtime tracking)
+      const newProgress = goal.progress + elapsedSinceStart;
 
       // Update goal in state
       goal.progress = newProgress;
@@ -539,9 +605,9 @@ function updateTimerDisplays() {
       return;
     }
 
-    // Calculate current elapsed time
+    // Calculate current elapsed time (allow overtime - don't cap at target)
     const elapsedSinceStart = Math.floor((now - activeTimer.startTime) / 1000);
-    const currentProgress = Math.min(goal.progress + elapsedSinceStart, goal.target);
+    const currentProgress = goal.progress + elapsedSinceStart;
 
     // Update the timer display in DOM
     const timerDisplay = document.querySelector(`.timer-display[data-goal-id="${goalId}"]`);
@@ -559,25 +625,27 @@ function updateTimerDisplays() {
       const progressPercent = goalCard.querySelector('.goal-progress-percent');
 
       if (progressFill) {
+        // Cap visual progress bar at 100%
         const percentage = goal.target > 0 ? Math.min(100, (currentProgress / goal.target) * 100) : 100;
         progressFill.style.width = `${percentage}%`;
       }
 
       if (progressPercent) {
+        // Cap percentage display at 100%
         const percentage = goal.target > 0 ? Math.min(100, (currentProgress / goal.target) * 100) : 100;
         progressPercent.textContent = `${Math.round(percentage)}%`;
       }
 
-      // Update progress text display
+      // Update progress text display (show actual time including overtime)
       const progressText = goalCard.querySelector('.goal-progress-text');
       if (progressText) {
         progressText.textContent = `${formatTime(currentProgress)} / ${formatTime(goal.target)}`;
       }
     }
 
-    // Check if goal just completed
+    // Check if goal just completed (trigger celebration once, but don't stop timer)
     if (currentProgress >= goal.target && !isGoalCompleted(goal)) {
-      handleTimerCompletion(goalId);
+      handleTimerCompletionCelebrationOnly(goalId);
     }
   });
 
@@ -597,15 +665,6 @@ function updateTimerDisplays() {
 async function handleTimerCompletion(goalId) {
   const goal = state.goals.find(g => g.id === goalId);
   if (!goal) return;
-
-  const activeTimer = state.activeTimers[goalId];
-  const now = Date.now();
-
-  // Calculate final progress
-  let elapsedSinceStart = 0;
-  if (activeTimer && activeTimer.startTime) {
-    elapsedSinceStart = Math.floor((now - activeTimer.startTime) / 1000);
-  }
 
   const finalProgress = goal.target; // Cap at target
 
@@ -650,11 +709,51 @@ async function handleTimerCompletion(goalId) {
   // US-081: Update daily challenge progress
   updateChallengeProgress('goal_complete', { goal, goalType: goal.type });
 
-  // US-084: Unlock any chained goals waiting on this one
-  await unlockChainedGoals(goal);
-
   // Re-render to show completion state
   renderCurrentScreen();
+}
+
+/**
+ * Handle timer completion celebration only (without stopping the timer)
+ * Used when timer reaches target but should continue running for overtime tracking
+ * @param {string} goalId - The ID of the completed timer goal
+ */
+async function handleTimerCompletionCelebrationOnly(goalId) {
+  const goal = state.goals.find(g => g.id === goalId);
+  if (!goal) return;
+
+  // Mark as completed in storage (progress will be saved when paused)
+  // Log completion
+  const completeLog = createActivityLog({
+    goalId: goalId,
+    action: ACTIVITY_ACTIONS.COMPLETE,
+    value: goal.target
+  });
+  await addActivityLogEntry(completeLog);
+
+  console.log(`[Timer] Goal ${goalId} completed! Timer continues running for overtime.`);
+
+  // US-039: Play completion sound
+  playSound(SOUNDS.COMPLETE);
+
+  // US-019: Trigger completion celebration animation
+  triggerCompletionCelebration(goalId);
+
+  // US-080: Check achievements on goal completion
+  const achievementUnlocked = await checkAchievements('goal_complete', { goal });
+
+  // US-083: Award XP for goal completion
+  await awardGoalCompletionXP(goal, true);
+
+  // US-083: Award XP for achievement unlock
+  if (achievementUnlocked) {
+    await awardAchievementXP(null);
+  }
+
+  // US-081: Update daily challenge progress
+  updateChallengeProgress('goal_complete', { goal, goalType: goal.type });
+
+  // Note: Timer continues running, no re-render needed (display updates via interval)
 }
 
 // =============================================================================
@@ -726,9 +825,6 @@ async function handleCounterIncrement(goalId) {
 
     // US-081: Update daily challenge progress for goal completion
     updateChallengeProgress('goal_complete', { goal, goalType: goal.type });
-
-    // US-084: Unlock any chained goals waiting on this one
-    await unlockChainedGoals(goal);
   } else {
     // US-039: Play tick sound for regular increment
     playSound(SOUNDS.TICK);
@@ -877,9 +973,6 @@ async function handleCheckboxToggle(goalId) {
 
     // US-081: Update daily challenge progress for goal completion
     updateChallengeProgress('goal_complete', { goal, goalType: goal.type });
-
-    // US-084: Unlock any chained goals waiting on this one
-    await unlockChainedGoals(goal);
   } else {
     // US-039: Play tick sound for regular toggle
     playSound(SOUNDS.TICK);
@@ -1158,16 +1251,6 @@ function capitalizeFirst(str) {
 
 // escapeHtml is now imported from ./utils/formatting.js
 
-/**
- * Placeholder for backward compatibility - escapeHtml is now imported
- * @deprecated Use import from ./utils/formatting.js
- */
-function escapeHtmlLocal(text) {
-  const div = document.createElement('div');
-  div.textContent = text;
-  return div.innerHTML;
-}
-
 // Keyboard navigation functions (getVisibleGoals, selectGoalByIndex, initKeyboardShortcuts, etc.)
 // are now imported from ./features/keyboardNav.js
 
@@ -1369,22 +1452,18 @@ async function syncActiveTimersWithGoals() {
       const elapsedSinceStart = Math.floor((now - timerData.startTime) / 1000);
       const currentProgress = goal.progress + elapsedSinceStart;
 
-      // Check if timer should be auto-completed (progress >= target)
-      if (currentProgress >= goal.target) {
-        console.log(`[Sync] Timer goal ${goalId} completed while popup was closed`);
+      // Timer continues running even past target (overtime tracking)
+      // Just ensure goal.isActive is true
+      if (!goal.isActive) {
+        goal.isActive = true;
+        await updateGoal(goalId, { isActive: true });
+      }
 
-        // Cap progress at target
-        goal.progress = goal.target;
-        goal.isActive = false;
+      // Check if timer just completed (was not completed before)
+      if (currentProgress >= goal.target && !isGoalCompleted(goal)) {
+        console.log(`[Sync] Timer goal ${goalId} completed while popup was closed, continuing for overtime`);
 
-        // Update in storage
-        await updateGoal(goalId, { progress: goal.target, isActive: false });
-
-        // Remove from active timers
-        delete state.activeTimers[goalId];
-        await saveActiveTimers(state.activeTimers);
-
-        // Log completion
+        // Log completion (but don't stop timer)
         const completeLog = createActivityLog({
           goalId: goalId,
           action: ACTIVITY_ACTIONS.COMPLETE,
@@ -1397,14 +1476,9 @@ async function syncActiveTimersWithGoals() {
         setTimeout(() => {
           state.justCompletedGoals.delete(goalId);
         }, 1500);
-      } else {
-        // Timer is still running - ensure goal.isActive is true
-        if (!goal.isActive) {
-          goal.isActive = true;
-          await updateGoal(goalId, { isActive: true });
-        }
-        console.log(`[Sync] Timer goal ${goalId} running: ${formatTime(currentProgress)} elapsed`);
       }
+
+      console.log(`[Sync] Timer goal ${goalId} running: ${formatTime(currentProgress)} elapsed`);
     }
   }
 
@@ -1621,11 +1695,31 @@ async function initApp() {
   // Set up listener for system theme changes
   setupSystemThemeListener();
 
+  // Initialize persistent main navigation
+  initMainNav();
+
   // US-078: Initialize keyboard shortcuts
   initKeyboardShortcuts();
 
-  // Show the default screen (View Goals)
-  showScreen(SCREENS.VIEW_GOALS);
+  // Check if we should restore focus mode
+  const savedFocusedGoalId = await getFocusedGoalId();
+  if (savedFocusedGoalId) {
+    // Verify the goal still exists
+    const goalExists = state.goals.some(g => g.id === savedFocusedGoalId);
+    if (goalExists) {
+      // Restore focus mode state and show focus mode screen
+      state.focusedGoalId = savedFocusedGoalId;
+      showScreen(SCREENS.FOCUS_MODE);
+      console.log('[FocusMode] Restored focus mode for goal:', savedFocusedGoalId);
+    } else {
+      // Goal no longer exists, clear the saved focus mode
+      await clearFocusedGoalId();
+      showScreen(SCREENS.VIEW_GOALS);
+    }
+  } else {
+    // Show the default screen (View Goals)
+    showScreen(SCREENS.VIEW_GOALS);
+  }
 
   console.log('Daily Goals Tracker popup initialized successfully');
 }

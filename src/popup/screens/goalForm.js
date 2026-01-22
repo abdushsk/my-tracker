@@ -8,17 +8,12 @@ import { escapeHtml } from '../utils/formatting.js';
 import {
   GOAL_TYPES,
   TIMEFRAMES,
-  createGoal,
-  isGoalCompleted,
-  CHAIN_STATUS
+  createGoal
 } from '../../utils/models.js';
 import {
   saveGoals,
   updateGoal
 } from '../../utils/storage.js';
-import {
-  renderChainParentOptions
-} from '../features/habitChains.js';
 import {
   setGoalFormScreenType,
   setGoalFormScreenTimeframe,
@@ -116,7 +111,6 @@ export function renderGoalFormScreen() {
             <line x1="19" y1="12" x2="5" y2="12"/>
             <polyline points="12 19 5 12 12 5"/>
           </svg>
-          <span class="back-label">Back</span>
         </button>
         <h1 class="goal-form-title">${title}</h1>
         <div class="header-spacer"></div>
@@ -425,32 +419,6 @@ export function renderGoalFormScreen() {
             <p class="form-hint">Notes will appear on your goal card. Supports **bold** and [links](url).</p>
           </div>
 
-          <!-- US-084: Habit Chain Linking -->
-          <div class="form-group">
-            <label class="form-label">Chain After <span class="optional-indicator">(optional)</span></label>
-            <div class="chain-selector">
-              <select id="goal-form-chain-parent" name="chain-parent" class="form-input form-select">
-                <option value="">None - This goal is independent</option>
-                ${renderChainParentOptions(editingGoal)}
-              </select>
-              <div class="chain-link-icon">
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                  <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/>
-                  <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/>
-                </svg>
-              </div>
-            </div>
-            <p class="form-hint chain-hint">
-              Link this goal to complete after another goal. The goal will be <strong>locked</strong> until the parent goal is completed.
-            </p>
-            <div class="chain-info" id="goal-form-chain-info" style="display: none;">
-              <div class="chain-visualization">
-                <span class="chain-parent-name" id="chain-parent-display"></span>
-                <span class="chain-arrow">&#8594;</span>
-                <span class="chain-current-name">This Goal</span>
-              </div>
-            </div>
-          </div>
         </form>
       </main>
       <footer class="goal-form-footer">
@@ -626,25 +594,6 @@ function attachGoalFormScreenListeners(screen, editingGoal) {
     });
   }
 
-  // US-084: Chain parent selector
-  const chainParentSelect = screen.querySelector('#goal-form-chain-parent');
-  const chainInfo = screen.querySelector('#goal-form-chain-info');
-  const chainParentDisplay = screen.querySelector('#chain-parent-display');
-
-  if (chainParentSelect) {
-    chainParentSelect.addEventListener('change', () => {
-      const selectedParentId = chainParentSelect.value;
-      if (selectedParentId && chainInfo && chainParentDisplay) {
-        const parentGoal = state.goals.find(g => g.id === selectedParentId);
-        if (parentGoal) {
-          chainParentDisplay.textContent = parentGoal.title;
-          chainInfo.style.display = 'block';
-        }
-      } else if (chainInfo) {
-        chainInfo.style.display = 'none';
-      }
-    });
-  }
 }
 
 // =============================================================================
@@ -753,22 +702,12 @@ async function handleGoalFormScreenSubmit(e) {
   const notesTextarea = screen.querySelector('#goal-form-notes');
   const notes = notesTextarea?.value?.trim() || null;
 
-  // US-084: Get chain parent (null if 'none' or empty)
-  const chainParentSelect = screen.querySelector('#goal-form-chain-parent');
-  const chainParentId = chainParentSelect?.value || null;
-
-  console.log(`[GoalForm] Submitting in ${isEditMode ? 'edit' : 'add'} mode:`, { title, type, target, timeframe, category, color, notes, chainParentId, forgivenessEnabled });
+  console.log(`[GoalForm] Submitting in ${isEditMode ? 'edit' : 'add'} mode:`, { title, type, target, timeframe, category, color, notes, forgivenessEnabled });
 
   try {
     if (isEditMode && goalId) {
       // Edit mode: update existing goal
-      // US-084: Determine chain status based on chain parent
       const existingGoal = state.goals.find(g => g.id === goalId);
-      let chainStatus = CHAIN_STATUS.UNLOCKED;
-      if (chainParentId) {
-        const parentGoal = state.goals.find(g => g.id === chainParentId);
-        chainStatus = (parentGoal && isGoalCompleted(parentGoal)) ? CHAIN_STATUS.UNLOCKED : CHAIN_STATUS.LOCKED;
-      }
 
       // US-087: Include avoidance-specific properties in update
       const updateData = {
@@ -778,9 +717,7 @@ async function handleGoalFormScreenSubmit(e) {
         timeframe,
         category,
         color,
-        notes,
-        chainParentId,
-        chainStatus
+        notes
       };
 
       // Add avoidance-specific fields if changing to avoidance type
@@ -826,7 +763,6 @@ async function handleGoalFormScreenSubmit(e) {
         category,
         color,
         notes,
-        chainParentId, // US-084: Add chain parent
         forgivenessEnabled, // US-087: Avoidance forgiveness setting
         order: state.goals.length
       });

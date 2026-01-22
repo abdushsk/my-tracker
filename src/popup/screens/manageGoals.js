@@ -6,12 +6,7 @@
 import { state, SCREENS, SCREEN_IDS } from '../state.js';
 import { escapeHtml } from '../utils/formatting.js';
 import { GOAL_TYPES } from '../../utils/models.js';
-import {
-  deleteGoal,
-  saveActiveTimers,
-  archiveGoal,
-  getArchivedGoals
-} from '../../utils/storage.js';
+import { deleteGoal, saveActiveTimers } from '../../utils/storage.js';
 
 // =============================================================================
 // Callback Registration
@@ -21,12 +16,10 @@ import {
  * Registered callbacks for cross-module communication
  */
 const callbacks = {
-  showScreen: null,
   attachNavigationListeners: null,
   openGoalFormScreen: null,
   showSuccessFeedback: null,
   showFormError: null,
-  handleSaveAsTemplate: null,
   capitalizeFirst: null,
   renderCurrentScreen: null
 };
@@ -129,7 +122,7 @@ export function formatTargetForManage(goal) {
 
 /**
  * Render the Manage Goals screen
- * US-020: Full layout implementation
+ * Simplified design with clean header
  */
 export function renderManageGoalsScreen() {
   const screen = document.getElementById(SCREEN_IDS[SCREENS.MANAGE_GOALS]);
@@ -146,42 +139,18 @@ export function renderManageGoalsScreen() {
   screen.innerHTML = `
     <div class="manage-goals-screen">
       <header class="screen-header manage-goals-header">
-        <button class="back-btn" data-screen="${SCREENS.VIEW_GOALS}" title="Back to Goals">
+        <button class="back-btn" data-screen="${SCREENS.VIEW_GOALS}" title="Back to Today">
           <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="back-icon">
             <line x1="19" y1="12" x2="5" y2="12"/>
             <polyline points="12 19 5 12 12 5"/>
           </svg>
-          <span class="back-label">Back</span>
         </button>
-        <h1 class="manage-title">Manage Goals</h1>
-        <div class="header-spacer"></div>
+        <h1 class="manage-goals-title">Manage Goals</h1>
+        <div class="header-actions">
+          <button class="header-text-btn" id="add-goal-btn" title="Add new goal">+ Add</button>
+        </div>
       </header>
       <main class="manage-goals-content">
-        <div class="manage-goals-actions">
-          <button class="btn btn-primary btn-add-goal" id="add-goal-btn">
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="btn-icon">
-              <line x1="12" y1="5" x2="12" y2="19"/>
-              <line x1="5" y1="12" x2="19" y2="12"/>
-            </svg>
-            <span>Add Goal</span>
-          </button>
-          <button class="btn btn-secondary btn-from-template" id="from-template-btn">
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="btn-icon">
-              <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
-              <line x1="3" y1="9" x2="21" y2="9"/>
-              <line x1="9" y1="21" x2="9" y2="9"/>
-            </svg>
-            <span>From Template</span>
-          </button>
-          <button class="btn btn-ghost btn-view-archive" id="view-archive-btn" title="View archived goals">
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="btn-icon">
-              <polyline points="21 8 21 21 3 21 3 8"/>
-              <rect x="1" y="3" width="22" height="5"/>
-              <line x1="10" y1="12" x2="14" y2="12"/>
-            </svg>
-            <span>Archive${state.archivedGoals.length > 0 ? ` (${state.archivedGoals.length})` : ''}</span>
-          </button>
-        </div>
         <div class="manage-goals-list-container">
           ${sortedGoals.length === 0
             ? renderManageGoalsEmptyState()
@@ -196,7 +165,7 @@ export function renderManageGoalsScreen() {
     callbacks.attachNavigationListeners(screen);
   }
 
-  // US-058: Attach Add Goal button click listener - navigate to full-page form
+  // Attach Add Goal button click listener
   const addGoalBtn = screen.querySelector('#add-goal-btn');
   if (addGoalBtn) {
     addGoalBtn.addEventListener('click', (e) => {
@@ -207,29 +176,7 @@ export function renderManageGoalsScreen() {
     });
   }
 
-  // US-066: Attach From Template button click listener - navigate to template gallery
-  const fromTemplateBtn = screen.querySelector('#from-template-btn');
-  if (fromTemplateBtn) {
-    fromTemplateBtn.addEventListener('click', (e) => {
-      e.preventDefault();
-      if (callbacks.showScreen) {
-        callbacks.showScreen(SCREENS.TEMPLATE_GALLERY);
-      }
-    });
-  }
-
-  // US-069: Attach View Archive button click listener - navigate to archive screen
-  const viewArchiveBtn = screen.querySelector('#view-archive-btn');
-  if (viewArchiveBtn) {
-    viewArchiveBtn.addEventListener('click', (e) => {
-      e.preventDefault();
-      if (callbacks.showScreen) {
-        callbacks.showScreen(SCREENS.ARCHIVE);
-      }
-    });
-  }
-
-  // US-029: Attach Edit/Delete button listeners
+  // Attach Delete/Template button listeners
   attachManageGoalsListeners(screen);
 }
 
@@ -269,7 +216,6 @@ function renderManageGoalsList(goals) {
 
 /**
  * Render a single goal item for the Manage Goals list
- * US-021: Shows title, type icon, timeframe badge, Edit and Delete buttons
  * @param {Object} goal - The goal object
  * @returns {string} HTML string for the goal list item
  */
@@ -294,32 +240,10 @@ function renderManageGoalItem(goal) {
         </div>
       </div>
       <div class="manage-goal-actions">
-        <button class="manage-action-btn save-template-btn" data-action="save-template" data-goal-id="${goal.id}" title="Save as template" aria-label="Save ${escapeHtml(goal.title)} as template">
-          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="action-icon">
-            <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
-            <line x1="3" y1="9" x2="21" y2="9"/>
-            <line x1="9" y1="21" x2="9" y2="9"/>
-          </svg>
-        </button>
-        <button class="manage-action-btn archive-btn" data-action="archive" data-goal-id="${goal.id}" title="Archive goal" aria-label="Archive ${escapeHtml(goal.title)}">
-          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="action-icon">
-            <polyline points="21 8 21 21 3 21 3 8"/>
-            <rect x="1" y="3" width="22" height="5"/>
-            <line x1="10" y1="12" x2="14" y2="12"/>
-          </svg>
-        </button>
-        <button class="manage-action-btn edit-btn" data-action="edit" data-goal-id="${goal.id}" title="Edit goal" aria-label="Edit ${escapeHtml(goal.title)}">
-          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="action-icon">
-            <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
-            <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
-          </svg>
-        </button>
         <button class="manage-action-btn delete-btn" data-action="delete" data-goal-id="${goal.id}" title="Delete goal" aria-label="Delete ${escapeHtml(goal.title)}">
           <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="action-icon">
             <polyline points="3 6 5 6 21 6"/>
             <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
-            <line x1="10" y1="11" x2="10" y2="17"/>
-            <line x1="14" y1="11" x2="14" y2="17"/>
           </svg>
         </button>
       </div>
@@ -332,24 +256,11 @@ function renderManageGoalItem(goal) {
 // =============================================================================
 
 /**
- * Attach event listeners for Manage Goals screen actions (Edit/Delete/Save Template)
+ * Attach event listeners for Manage Goals screen actions (Delete only)
  * @param {HTMLElement} container - The container element
  */
 function attachManageGoalsListeners(container) {
-  // US-029: Edit button click handlers
-  const editButtons = container.querySelectorAll('[data-action="edit"]');
-  editButtons.forEach(btn => {
-    btn.addEventListener('click', (e) => {
-      e.preventDefault();
-      e.stopPropagation();
-      const goalId = btn.getAttribute('data-goal-id');
-      if (goalId) {
-        handleEditGoal(goalId);
-      }
-    });
-  });
-
-  // US-030: Delete button click handlers
+  // Delete button click handlers
   const deleteButtons = container.querySelectorAll('[data-action="delete"]');
   deleteButtons.forEach(btn => {
     btn.addEventListener('click', (e) => {
@@ -361,99 +272,6 @@ function attachManageGoalsListeners(container) {
       }
     });
   });
-
-  // US-066: Save as template button click handlers
-  const templateButtons = container.querySelectorAll('[data-action="save-template"]');
-  templateButtons.forEach(btn => {
-    btn.addEventListener('click', (e) => {
-      e.preventDefault();
-      e.stopPropagation();
-      const goalId = btn.getAttribute('data-goal-id');
-      if (goalId && callbacks.handleSaveAsTemplate) {
-        callbacks.handleSaveAsTemplate(goalId);
-      }
-    });
-  });
-
-  // US-069: Archive button click handlers
-  const archiveButtons = container.querySelectorAll('[data-action="archive"]');
-  archiveButtons.forEach(btn => {
-    btn.addEventListener('click', (e) => {
-      e.preventDefault();
-      e.stopPropagation();
-      const goalId = btn.getAttribute('data-goal-id');
-      if (goalId) {
-        handleArchiveGoal(goalId);
-      }
-    });
-  });
-}
-
-/**
- * Handle Edit button click to open goal form screen with goal data
- * @param {string} goalId - The ID of the goal to edit
- */
-function handleEditGoal(goalId) {
-  const goal = state.goals.find(g => g.id === goalId);
-
-  if (!goal) {
-    console.error(`[Edit] Goal not found: ${goalId}`);
-    if (callbacks.showFormError) {
-      callbacks.showFormError('Goal not found. Please refresh and try again.');
-    }
-    return;
-  }
-
-  console.log(`[Edit] Opening edit screen for goal: ${goal.title} (${goalId})`);
-
-  // US-058: Open the full-page form in edit mode with the goal data
-  if (callbacks.openGoalFormScreen) {
-    callbacks.openGoalFormScreen('edit', goal);
-  }
-}
-
-/**
- * Handle archiving a goal
- * @param {string} goalId - The goal ID to archive
- */
-async function handleArchiveGoal(goalId) {
-  const goal = state.goals.find(g => g.id === goalId);
-  if (!goal) {
-    console.error('[Archive] Goal not found:', goalId);
-    if (callbacks.showFormError) {
-      callbacks.showFormError('Goal not found. Please try again.');
-    }
-    return;
-  }
-
-  console.log('[Archive] Archiving goal:', goal.title);
-
-  try {
-    const success = await archiveGoal(goalId);
-
-    if (success) {
-      // Update local state
-      state.goals = state.goals.filter(g => g.id !== goalId);
-      state.archivedGoals = await getArchivedGoals();
-
-      console.log('[Archive] Goal archived successfully:', goal.title);
-      if (callbacks.showSuccessFeedback) {
-        callbacks.showSuccessFeedback(`"${goal.title}" archived!`);
-      }
-
-      // Re-render the manage goals screen
-      renderManageGoalsScreen();
-    } else {
-      if (callbacks.showFormError) {
-        callbacks.showFormError('Failed to archive goal. Please try again.');
-      }
-    }
-  } catch (error) {
-    console.error('[Archive] Error archiving goal:', error);
-    if (callbacks.showFormError) {
-      callbacks.showFormError('An error occurred. Please try again.');
-    }
-  }
 }
 
 // =============================================================================

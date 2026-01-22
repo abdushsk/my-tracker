@@ -260,11 +260,8 @@ export function triggerCompletionCelebration(goalId, options = {}) {
     duration: intensity === 'high' ? 2500 : 2000
   });
 
-  // US-077: Show motivational quote on completion if enabled
-  const quotesEnabled = state.settings?.quotesEnabled !== false;
-  if (quotesEnabled) {
-    showCompletionQuote();
-  }
+  // US-077: Motivational quotes disabled
+  // Previously showed quotes on completion, now disabled for cleaner UX
 
   // Schedule removal of the just-completed state after animation
   setTimeout(() => {

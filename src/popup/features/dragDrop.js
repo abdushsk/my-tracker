@@ -1,6 +1,6 @@
 /**
  * Drag-to-Reorder Feature (US-059)
- * Allows users to reorder daily goals by dragging
+ * Live dragging - card follows cursor and other cards shift in real-time
  */
 
 import { state } from '../state.js';
@@ -10,17 +10,10 @@ import { saveGoals } from '../../utils/storage.js';
 // Callback Registration
 // =============================================================================
 
-/**
- * Registered callbacks for cross-module communication
- */
 const callbacks = {
   renderCurrentScreen: null
 };
 
-/**
- * Register callbacks from the main popup module
- * @param {Object} cbs - Callback functions
- */
 export function registerDragDropCallbacks(cbs) {
   Object.assign(callbacks, cbs);
 }
@@ -29,10 +22,44 @@ export function registerDragDropCallbacks(cbs) {
 // Drag State
 // =============================================================================
 
-// Track the currently dragged element
-let draggedGoalCard = null;
+let isDragging = false;
+let draggedCard = null;
 let draggedGoalId = null;
-let dragPlaceholder = null;
+let dragClone = null;
+let placeholder = null;
+let startY = 0;
+let startX = 0;
+let offsetY = 0;
+let offsetX = 0;
+let goalsList = null;
+
+// =============================================================================
+// Cleanup Helpers
+// =============================================================================
+
+/**
+ * Clean up any orphaned drag elements from previous drag sessions
+ * This ensures no lingering elements from interrupted drags
+ */
+function cleanupOrphanedDragElements() {
+  // Remove any orphaned drag clones
+  document.querySelectorAll('.drag-clone').forEach(el => el.remove());
+
+  // Remove any orphaned placeholders
+  document.querySelectorAll('.drag-placeholder').forEach(el => el.remove());
+
+  // Remove dragging class from any cards
+  document.querySelectorAll('.goal-card.dragging').forEach(el => {
+    el.classList.remove('dragging');
+  });
+
+  // Reset state variables
+  isDragging = false;
+  dragClone = null;
+  placeholder = null;
+  draggedCard = null;
+  draggedGoalId = null;
+}
 
 // =============================================================================
 // Drag Event Handlers
@@ -43,228 +70,297 @@ let dragPlaceholder = null;
  * @param {HTMLElement} container - Container with goal cards
  */
 export function attachDragDropListeners(container) {
+  // Clean up any orphaned elements from previous drags
+  cleanupOrphanedDragElements();
+
   const goalCards = container.querySelectorAll('.goal-card[draggable="true"]');
 
   goalCards.forEach(card => {
-    // Dragstart - when user starts dragging
-    card.addEventListener('dragstart', handleDragStart);
+    // Remove native drag behavior
+    card.setAttribute('draggable', 'false');
 
-    // Dragend - when drag operation ends
-    card.addEventListener('dragend', handleDragEnd);
-
-    // Dragover - when dragging over another card
-    card.addEventListener('dragover', handleDragOver);
-
-    // Dragenter - when entering another card's space
-    card.addEventListener('dragenter', handleDragEnter);
-
-    // Dragleave - when leaving a card's space
-    card.addEventListener('dragleave', handleDragLeave);
-
-    // Drop - when dropping on a card
-    card.addEventListener('drop', handleDrop);
+    // Use mouse events for live dragging
+    card.addEventListener('mousedown', handleMouseDown);
+    card.addEventListener('touchstart', handleTouchStart, { passive: false });
   });
 
-  // Also attach to the goals list container for drops at the end
-  const goalsList = container.querySelector('.goals-list');
-  if (goalsList) {
-    goalsList.addEventListener('dragover', handleGoalsListDragOver);
-    goalsList.addEventListener('drop', handleGoalsListDrop);
-  }
+  // Store reference to goals list
+  goalsList = container.querySelector('.goals-list');
 }
 
 /**
- * Handle drag start event
- * @param {DragEvent} e - The drag event
+ * Handle mouse down - start drag
  */
-function handleDragStart(e) {
+function handleMouseDown(e) {
+  // Only left mouse button
+  if (e.button !== 0) return;
+
+  // Don't drag if clicking on buttons or inputs
+  if (e.target.closest('button, input, .goal-controls')) return;
+
   const card = e.target.closest('.goal-card');
   if (!card) return;
 
-  draggedGoalCard = card;
+  e.preventDefault();
+  startDrag(card, e.clientX, e.clientY);
+
+  // Add global listeners
+  document.addEventListener('mousemove', handleMouseMove);
+  document.addEventListener('mouseup', handleMouseUp);
+}
+
+/**
+ * Handle touch start - start drag
+ */
+function handleTouchStart(e) {
+  // Don't drag if touching buttons or inputs
+  if (e.target.closest('button, input, .goal-controls')) return;
+
+  const card = e.target.closest('.goal-card');
+  if (!card) return;
+
+  const touch = e.touches[0];
+  startDrag(card, touch.clientX, touch.clientY);
+
+  // Add global listeners
+  document.addEventListener('touchmove', handleTouchMove, { passive: false });
+  document.addEventListener('touchend', handleTouchEnd);
+}
+
+/**
+ * Start dragging a card
+ */
+function startDrag(card, clientX, clientY) {
+  // Ensure any previous drag is cleaned up first
+  if (isDragging) {
+    cleanupOrphanedDragElements();
+  }
+
+  isDragging = true;
+  draggedCard = card;
   draggedGoalId = card.getAttribute('data-goal-id');
 
-  // Set drag data
-  e.dataTransfer.effectAllowed = 'move';
-  e.dataTransfer.setData('text/plain', draggedGoalId);
-
-  // Add dragging class after a small delay for visual feedback
-  setTimeout(() => {
-    card.classList.add('dragging');
-  }, 0);
-
-  // Create placeholder element
-  dragPlaceholder = document.createElement('div');
-  dragPlaceholder.className = 'drag-placeholder';
-  dragPlaceholder.style.height = `${card.offsetHeight}px`;
-}
-
-/**
- * Handle drag end event
- * @param {DragEvent} e - The drag event
- */
-function handleDragEnd(e) {
-  const card = e.target.closest('.goal-card');
-  if (card) {
-    card.classList.remove('dragging');
-  }
-
-  // Remove any drag-over classes from all cards
-  document.querySelectorAll('.goal-card.drag-over').forEach(c => {
-    c.classList.remove('drag-over');
-  });
-
-  // Remove placeholder if it exists
-  if (dragPlaceholder && dragPlaceholder.parentNode) {
-    dragPlaceholder.parentNode.removeChild(dragPlaceholder);
-  }
-
-  // Reset drag state
-  draggedGoalCard = null;
-  draggedGoalId = null;
-  dragPlaceholder = null;
-}
-
-/**
- * Handle drag over event
- * @param {DragEvent} e - The drag event
- */
-function handleDragOver(e) {
-  e.preventDefault();
-  e.dataTransfer.dropEffect = 'move';
-
-  const card = e.target.closest('.goal-card');
-  if (!card || card === draggedGoalCard) return;
-
-  // Determine if we're in the top or bottom half of the card
   const rect = card.getBoundingClientRect();
-  const midpoint = rect.top + rect.height / 2;
-  const isAbove = e.clientY < midpoint;
+  startX = clientX;
+  startY = clientY;
+  offsetX = clientX - rect.left;
+  offsetY = clientY - rect.top;
 
-  // Update visual indicator
-  card.classList.remove('drag-over-top', 'drag-over-bottom');
-  card.classList.add(isAbove ? 'drag-over-top' : 'drag-over-bottom');
+  // Create a clone that will follow the cursor (preserve all classes)
+  dragClone = card.cloneNode(true);
+  dragClone.classList.add('drag-clone');
+  dragClone.classList.remove('dragging');
+  dragClone.style.cssText = `
+    position: fixed;
+    left: ${rect.left}px;
+    top: ${rect.top}px;
+    width: ${rect.width}px;
+    z-index: 1000;
+    pointer-events: none;
+    transform: scale(1.03);
+    box-shadow: 0 12px 28px rgba(0,0,0,0.15);
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
+  `;
+  document.body.appendChild(dragClone);
+
+  // Create placeholder
+  placeholder = document.createElement('div');
+  placeholder.className = 'drag-placeholder';
+  placeholder.style.height = `${rect.height}px`;
+
+  // Hide original card and insert placeholder
+  card.classList.add('dragging');
+  card.parentNode.insertBefore(placeholder, card);
+
+  // Animate clone scale
+  requestAnimationFrame(() => {
+    dragClone.style.transform = 'scale(1.05)';
+  });
 }
 
 /**
- * Handle drag enter event
- * @param {DragEvent} e - The drag event
+ * Handle mouse move - update drag position
  */
-function handleDragEnter(e) {
+function handleMouseMove(e) {
+  if (!isDragging) return;
   e.preventDefault();
-  const card = e.target.closest('.goal-card');
-  if (card && card !== draggedGoalCard) {
-    card.classList.add('drag-over');
+  updateDragPosition(e.clientX, e.clientY);
+}
+
+/**
+ * Handle touch move - update drag position
+ */
+function handleTouchMove(e) {
+  if (!isDragging) return;
+  e.preventDefault();
+  const touch = e.touches[0];
+  updateDragPosition(touch.clientX, touch.clientY);
+}
+
+/**
+ * Update the dragged card position and check for reordering
+ */
+function updateDragPosition(clientX, clientY) {
+  if (!dragClone || !placeholder) return;
+
+  // Move the clone to follow cursor
+  const cloneTop = clientY - offsetY;
+  dragClone.style.left = `${clientX - offsetX}px`;
+  dragClone.style.top = `${cloneTop}px`;
+
+  // Find which card we're over and move placeholder
+  if (!goalsList) return;
+
+  const cards = Array.from(goalsList.querySelectorAll('.goal-card:not(.dragging)'));
+  if (cards.length === 0) return;
+
+  // Use the center of the dragged clone for position comparison
+  // This feels more natural - the card slots in based on where its center is
+  const dragCenterY = cloneTop + (placeholder.offsetHeight / 2);
+
+  // Find the first card whose midpoint is below our drag center
+  let insertBeforeCard = null;
+
+  for (const card of cards) {
+    const rect = card.getBoundingClientRect();
+    const midY = rect.top + rect.height / 2;
+
+    if (dragCenterY < midY) {
+      insertBeforeCard = card;
+      break;
+    }
+  }
+
+  // Move placeholder to new position
+  if (insertBeforeCard) {
+    goalsList.insertBefore(placeholder, insertBeforeCard);
+  } else {
+    goalsList.appendChild(placeholder);
   }
 }
 
 /**
- * Handle drag leave event
- * @param {DragEvent} e - The drag event
+ * Handle mouse up - end drag
  */
-function handleDragLeave(e) {
-  const card = e.target.closest('.goal-card');
-  if (!card) return;
-
-  // Only remove class if we're actually leaving the card (not entering a child)
-  const relatedTarget = e.relatedTarget;
-  if (!card.contains(relatedTarget)) {
-    card.classList.remove('drag-over', 'drag-over-top', 'drag-over-bottom');
-  }
+function handleMouseUp(e) {
+  document.removeEventListener('mousemove', handleMouseMove);
+  document.removeEventListener('mouseup', handleMouseUp);
+  endDrag();
 }
 
 /**
- * Handle drop event on a goal card
- * @param {DragEvent} e - The drag event
+ * Handle touch end - end drag
  */
-async function handleDrop(e) {
-  e.preventDefault();
-  e.stopPropagation();
+function handleTouchEnd(e) {
+  document.removeEventListener('touchmove', handleTouchMove);
+  document.removeEventListener('touchend', handleTouchEnd);
+  endDrag();
+}
 
-  const targetCard = e.target.closest('.goal-card');
-  if (!targetCard || !draggedGoalId) return;
+/**
+ * End the drag operation and finalize position
+ */
+async function endDrag() {
+  if (!isDragging) return;
+  isDragging = false;
 
-  const targetGoalId = targetCard.getAttribute('data-goal-id');
-  if (targetGoalId === draggedGoalId) return;
+  // Animate clone back to placeholder position
+  if (dragClone && placeholder) {
+    const placeholderRect = placeholder.getBoundingClientRect();
 
-  // Determine drop position (above or below target)
-  const rect = targetCard.getBoundingClientRect();
-  const midpoint = rect.top + rect.height / 2;
-  const dropAbove = e.clientY < midpoint;
+    dragClone.style.transition = 'all 0.2s ease';
+    dragClone.style.transform = 'scale(1)';
+    dragClone.style.left = `${placeholderRect.left}px`;
+    dragClone.style.top = `${placeholderRect.top}px`;
+    dragClone.style.boxShadow = '0 2px 8px rgba(0,0,0,0.08)';
 
-  // Reorder the goals
-  await reorderGoals(draggedGoalId, targetGoalId, dropAbove);
+    // Wait for animation then clean up
+    await new Promise(resolve => setTimeout(resolve, 200));
+  }
+
+  // Calculate new order based on placeholder position
+  if (goalsList && placeholder && draggedGoalId) {
+    const allElements = Array.from(goalsList.children);
+    let insertIndex = 0;
+
+    for (let i = 0; i < allElements.length; i++) {
+      const el = allElements[i];
+      if (el === placeholder) break;
+      if (el.classList.contains('goal-card') && !el.classList.contains('dragging')) {
+        insertIndex++;
+      }
+    }
+
+    // Reorder goals array
+    const draggedIndex = state.goals.findIndex(g => g.id === draggedGoalId);
+    if (draggedIndex !== -1) {
+      const [draggedGoal] = state.goals.splice(draggedIndex, 1);
+
+      // Insert at the calculated position
+      // No adjustment needed - insertIndex is the count of non-dragging cards before placeholder
+      // which directly maps to the correct array index after removal
+      state.goals.splice(insertIndex, 0, draggedGoal);
+
+      // Update order property
+      state.goals.forEach((goal, index) => {
+        goal.order = index;
+      });
+
+      // Save and re-render
+      await saveGoals(state.goals);
+    }
+  }
 
   // Clean up
-  targetCard.classList.remove('drag-over', 'drag-over-top', 'drag-over-bottom');
+  if (dragClone) {
+    dragClone.remove();
+    dragClone = null;
+  }
+
+  if (placeholder) {
+    placeholder.remove();
+    placeholder = null;
+  }
+
+  if (draggedCard) {
+    draggedCard.classList.remove('dragging');
+    draggedCard = null;
+  }
+
+  draggedGoalId = null;
+  goalsList = null;
+
+  // Re-render
+  if (callbacks.renderCurrentScreen) {
+    callbacks.renderCurrentScreen();
+  }
 }
 
-/**
- * Handle drag over event on the goals list container
- * @param {DragEvent} e - The drag event
- */
-function handleGoalsListDragOver(e) {
-  e.preventDefault();
-  e.dataTransfer.dropEffect = 'move';
-}
-
-/**
- * Handle drop event on the goals list container (for dropping at end)
- * @param {DragEvent} e - The drag event
- */
-async function handleGoalsListDrop(e) {
-  // Only handle if not dropped on a card
-  if (e.target.closest('.goal-card')) return;
-
-  e.preventDefault();
-
-  if (!draggedGoalId) return;
-
-  // Move to end of list
-  await reorderGoals(draggedGoalId, null, false);
-}
-
-/**
- * Reorder goals array and persist to storage
- * @param {string} draggedId - ID of the dragged goal
- * @param {string|null} targetId - ID of the target goal (null for end of list)
- * @param {boolean} dropAbove - Whether to drop above or below the target
- */
+// Legacy export for compatibility
 export async function reorderGoals(draggedId, targetId, dropAbove) {
-  // Find the dragged goal
   const draggedIndex = state.goals.findIndex(g => g.id === draggedId);
   if (draggedIndex === -1) return;
 
-  // Remove the dragged goal from array
   const [draggedGoal] = state.goals.splice(draggedIndex, 1);
 
   if (targetId === null) {
-    // Move to end of list
     state.goals.push(draggedGoal);
   } else {
-    // Find target index (after removal of dragged)
     let targetIndex = state.goals.findIndex(g => g.id === targetId);
     if (targetIndex === -1) {
-      // Target not found, add to end
       state.goals.push(draggedGoal);
     } else {
-      // Insert at correct position
-      if (!dropAbove) {
-        targetIndex++;
-      }
+      if (!dropAbove) targetIndex++;
       state.goals.splice(targetIndex, 0, draggedGoal);
     }
   }
 
-  // Update order property for all goals
   state.goals.forEach((goal, index) => {
     goal.order = index;
   });
 
-  // Persist to storage
   await saveGoals(state.goals);
 
-  // Re-render the screen
   if (callbacks.renderCurrentScreen) {
     callbacks.renderCurrentScreen();
   }

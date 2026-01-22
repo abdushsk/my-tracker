@@ -1905,17 +1905,6 @@ export {
   isGoalCompleted,
   getGoalCompletionPercentage,
   resetGoalProgress,
-  // US-084: Habit Chain functions
-  CHAIN_STATUS,
-  isGoalInChain,
-  getChainParent,
-  getChainChildren,
-  getFullChain,
-  isGoalLocked,
-  getGoalsToUnlock,
-  isChainCompleted,
-  getChainProgress,
-  canSetChainParent,
   // History Entry functions
   createHistoryEntry,
   createHistoryEntryFromGoal,

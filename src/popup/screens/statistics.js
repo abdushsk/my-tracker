@@ -85,11 +85,11 @@ export function renderGoalStatisticsScreen() {
   screen.innerHTML = `
     <div class="goal-statistics-screen">
       <header class="screen-header goal-statistics-header">
-        <button class="back-btn" data-screen="${SCREENS.VIEW_GOALS}">
+        <button class="back-btn" data-screen="${SCREENS.VIEW_GOALS}" title="Back">
           <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="back-icon">
-            <polyline points="15 18 9 12 15 6"/>
+            <line x1="19" y1="12" x2="5" y2="12"/>
+            <polyline points="12 19 5 12 12 5"/>
           </svg>
-          <span class="back-label">Back</span>
         </button>
         <h1 class="goal-statistics-title">Goal Statistics</h1>
         <div class="header-spacer"></div>

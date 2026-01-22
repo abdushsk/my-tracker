@@ -63,7 +63,6 @@ export function renderTemplateGalleryScreen() {
             <line x1="19" y1="12" x2="5" y2="12"/>
             <polyline points="12 19 5 12 12 5"/>
           </svg>
-          <span class="back-label">Back</span>
         </button>
         <h1 class="template-gallery-title">Goal Templates</h1>
         <div class="header-spacer"></div>

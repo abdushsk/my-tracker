@@ -10,6 +10,10 @@ import {
   isGoalCompleted,
   getGoalCompletionPercentage
 } from '../../utils/models.js';
+import {
+  saveFocusedGoalId,
+  clearFocusedGoalId
+} from '../../utils/storage.js';
 
 // =============================================================================
 // Callback Registration
@@ -45,7 +49,7 @@ export function registerFocusModeCallbacks(cbs) {
  * Enter focus mode for a specific goal
  * @param {string} goalId - The ID of the goal to focus on
  */
-export function enterFocusMode(goalId) {
+export async function enterFocusMode(goalId) {
   const goal = state.goals.find(g => g.id === goalId);
   if (!goal) {
     console.error('[FocusMode] Goal not found:', goalId);
@@ -53,6 +57,10 @@ export function enterFocusMode(goalId) {
   }
 
   state.focusedGoalId = goalId;
+
+  // Persist focus mode to storage so it can be restored on reopen
+  await saveFocusedGoalId(goalId);
+
   if (callbacks.showScreen) {
     callbacks.showScreen(SCREENS.FOCUS_MODE);
   }
@@ -62,8 +70,12 @@ export function enterFocusMode(goalId) {
 /**
  * Exit focus mode and return to View Goals screen
  */
-export function exitFocusMode() {
+export async function exitFocusMode() {
   state.focusedGoalId = null;
+
+  // Clear focus mode from storage
+  await clearFocusedGoalId();
+
   if (callbacks.showScreen) {
     callbacks.showScreen(SCREENS.VIEW_GOALS);
   }
@@ -133,13 +145,6 @@ export function renderFocusModeScreen() {
         <div class="focus-controls-section">
           ${renderFocusModeControls(goal)}
         </div>
-
-        ${isCompleted ? `
-          <div class="focus-completed-message">
-            <span class="focus-completed-icon">&#10003;</span>
-            <span class="focus-completed-text">Goal Completed!</span>
-          </div>
-        ` : ''}
       </main>
     </div>
   `;
@@ -186,29 +191,24 @@ function renderFocusTimerDisplay(goal) {
   const isActive = goal.isActive;
   const activeTimer = state.activeTimers[goal.id];
 
-  // Calculate current elapsed time for display
+  // Calculate current elapsed time for display (allow overtime)
   let displayProgress = goal.progress;
   if (isActive && activeTimer && activeTimer.startTime) {
     const elapsedSinceStart = Math.floor((Date.now() - activeTimer.startTime) / 1000);
-    displayProgress = Math.min(goal.progress + elapsedSinceStart, goal.target);
+    displayProgress = goal.progress + elapsedSinceStart;
   }
 
   const timeRemaining = Math.max(0, goal.target - displayProgress);
+  const isOvertime = displayProgress > goal.target;
 
   return `
-    <div class="focus-timer-display ${isActive ? 'active' : ''}" data-goal-id="${goal.id}">
+    <div class="focus-timer-display ${isActive ? 'active' : ''} ${isOvertime ? 'overtime' : ''}" data-goal-id="${goal.id}">
       <div class="focus-timer-main">
         <span class="focus-timer-value">${formatTime(displayProgress)}</span>
       </div>
       <div class="focus-timer-target">
         <span class="focus-timer-label">of ${formatTime(goal.target)}</span>
       </div>
-      ${timeRemaining > 0 ? `
-        <div class="focus-timer-remaining">
-          <span class="focus-remaining-value">${formatTime(timeRemaining)}</span>
-          <span class="focus-remaining-label">remaining</span>
-        </div>
-      ` : ''}
     </div>
   `;
 }
@@ -219,8 +219,6 @@ function renderFocusTimerDisplay(goal) {
  * @returns {string} HTML string
  */
 function renderFocusCounterDisplay(goal) {
-  const remaining = Math.max(0, goal.target - goal.progress);
-
   return `
     <div class="focus-counter-display" data-goal-id="${goal.id}">
       <div class="focus-counter-main">
@@ -228,12 +226,6 @@ function renderFocusCounterDisplay(goal) {
         <span class="focus-counter-separator">/</span>
         <span class="focus-counter-target">${goal.target}</span>
       </div>
-      ${remaining > 0 ? `
-        <div class="focus-counter-remaining">
-          <span class="focus-remaining-value">${remaining}</span>
-          <span class="focus-remaining-label">to go</span>
-        </div>
-      ` : ''}
     </div>
   `;
 }
@@ -299,12 +291,11 @@ function renderFocusTimerControls(goal) {
 
   return `
     <div class="focus-controls focus-timer-controls">
-      <button class="focus-control-btn focus-play-btn ${isActive ? 'is-active' : ''}"
+      <button class="focus-timer-icon-btn ${isActive ? 'is-active' : ''}"
               data-action="timer-toggle"
               data-goal-id="${goal.id}"
               title="${isActive ? 'Pause' : 'Start'}">
         ${isActive ? pauseIcon : playIcon}
-        <span class="focus-control-label">${isActive ? 'Pause' : 'Start'}</span>
       </button>
     </div>
   `;
@@ -469,8 +460,10 @@ export function updateFocusModeTimerDisplay() {
 
   const now = Date.now();
   const elapsedSinceStart = Math.floor((now - activeTimer.startTime) / 1000);
-  const currentProgress = Math.min(goal.progress + elapsedSinceStart, goal.target);
+  // Allow overtime - don't cap at target
+  const currentProgress = goal.progress + elapsedSinceStart;
   const timeRemaining = Math.max(0, goal.target - currentProgress);
+  // Cap visual progress at 100%
   const progressPercent = goal.target > 0 ? Math.min(100, (currentProgress / goal.target) * 100) : 100;
 
   // Update timer display

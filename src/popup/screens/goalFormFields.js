@@ -3,7 +3,6 @@
  * Type, timeframe, category, and color selector handlers
  */
 
-import { state } from '../state.js';
 import { GOAL_TYPES } from '../../utils/models.js';
 
 // =============================================================================
@@ -297,21 +296,4 @@ export function prefillGoalFormScreen(screen, goal) {
     }
   }
 
-  // US-084: Set chain parent
-  const chainParentSelect = screen.querySelector('#goal-form-chain-parent');
-  const chainInfo = screen.querySelector('#goal-form-chain-info');
-  const chainParentDisplay = screen.querySelector('#chain-parent-display');
-
-  if (chainParentSelect && goal.chainParentId) {
-    chainParentSelect.value = goal.chainParentId;
-
-    // Show chain info visualization
-    if (chainInfo && chainParentDisplay) {
-      const parentGoal = state.goals.find(g => g.id === goal.chainParentId);
-      if (parentGoal) {
-        chainParentDisplay.textContent = parentGoal.title;
-        chainInfo.style.display = 'block';
-      }
-    }
-  }
 }

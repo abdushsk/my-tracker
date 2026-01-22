@@ -68,11 +68,8 @@ export function renderSettingsScreen() {
   // US-052: Full settings screen layout
   screen.innerHTML = `
     <div class="settings-screen">
-      <header class="screen-header">
-        <button class="back-btn" data-screen="${SCREENS.VIEW_GOALS}">
-          <span>&#8592;</span> Back
-        </button>
-        <h1>Settings</h1>
+      <header class="screen-header main-screen-header">
+        <h1 class="screen-title">Settings</h1>
       </header>
       <main class="settings-content">
         <!-- Sound Settings Section -->

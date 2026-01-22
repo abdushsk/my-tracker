@@ -21,7 +21,8 @@ const STORAGE_KEYS = {
   POMODORO_SETTINGS: 'pomodoroSettings', // US-085: Pomodoro timer settings
   POMODORO_STATES: 'pomodoroStates', // US-085: Pomodoro states for each goal
   BREAK_REMINDER_STATE: 'breakReminderState', // US-086: Break reminder state
-  BREAK_LOG: 'breakLog' // US-086: Break taken log
+  BREAK_LOG: 'breakLog', // US-086: Break taken log
+  FOCUSED_GOAL_ID: 'focusedGoalId' // Focus mode persistence
 };
 
 /**
@@ -2029,6 +2030,53 @@ function getRandomBreakActivity() {
   return BREAK_ACTIVITIES[index];
 }
 
+// =============================================================================
+// Focus Mode Persistence
+// =============================================================================
+
+/**
+ * Get the focused goal ID from storage
+ * @returns {Promise<string|null>} The focused goal ID or null if not in focus mode
+ */
+async function getFocusedGoalId() {
+  try {
+    const result = await chrome.storage.local.get(STORAGE_KEYS.FOCUSED_GOAL_ID);
+    return result[STORAGE_KEYS.FOCUSED_GOAL_ID] || null;
+  } catch (error) {
+    console.error('Error getting focused goal ID:', error);
+    return null;
+  }
+}
+
+/**
+ * Save the focused goal ID to storage
+ * @param {string} goalId - The goal ID to save
+ * @returns {Promise<boolean>} Success status
+ */
+async function saveFocusedGoalId(goalId) {
+  try {
+    await chrome.storage.local.set({ [STORAGE_KEYS.FOCUSED_GOAL_ID]: goalId });
+    return true;
+  } catch (error) {
+    console.error('Error saving focused goal ID:', error);
+    return false;
+  }
+}
+
+/**
+ * Clear the focused goal ID from storage (exit focus mode)
+ * @returns {Promise<boolean>} Success status
+ */
+async function clearFocusedGoalId() {
+  try {
+    await chrome.storage.local.remove(STORAGE_KEYS.FOCUSED_GOAL_ID);
+    return true;
+  } catch (error) {
+    console.error('Error clearing focused goal ID:', error);
+    return false;
+  }
+}
+
 /**
  * Get all break activities
  * @returns {Array} All break activity suggestions
@@ -2135,5 +2183,9 @@ export {
   getBreakStats,
   shouldShowBreakReminder,
   getRandomBreakActivity,
-  getAllBreakActivities
+  getAllBreakActivities,
+  // Focus mode persistence
+  getFocusedGoalId,
+  saveFocusedGoalId,
+  clearFocusedGoalId
 };

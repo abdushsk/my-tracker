@@ -58,8 +58,8 @@ export async function awardGoalCompletionXP(goal, wasJustCompleted = true) {
     }
   }
 
-  // Show XP toast
-  showXPToast(xpCalc.totalXP, xpCalc.bonuses);
+  // XP toast disabled for cleaner UX
+  // showXPToast(xpCalc.totalXP, xpCalc.bonuses);
 
   // Check for level-up
   if (result.leveledUp) {
@@ -91,7 +91,8 @@ export async function awardPerfectDayXP() {
       state.xpData.currentLevel = result.newLevel;
       showLevelUpNotification(result.newLevel, result.oldLevel);
     }
-    showXPToast(xp, [{ type: 'perfect_day', amount: xp, description: 'Perfect Day!' }]);
+    // XP toast disabled for cleaner UX
+    // showXPToast(xp, [{ type: 'perfect_day', amount: xp, description: 'Perfect Day!' }]);
   }
 }
 
@@ -141,7 +142,8 @@ export async function awardChallengeXP(difficulty) {
         showLevelUpNotification(result.newLevel, result.oldLevel);
       }, 2000);
     }
-    showXPToast(xp, [{ type: 'challenge', amount: xp, description: 'Challenge Complete!' }]);
+    // XP toast disabled for cleaner UX
+    // showXPToast(xp, [{ type: 'challenge', amount: xp, description: 'Challenge Complete!' }]);
   }
 }
 

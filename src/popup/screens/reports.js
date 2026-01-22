@@ -54,23 +54,8 @@ export function renderReportsScreen() {
   // US-043: Full Reports Screen Layout with all sections
   screen.innerHTML = `
     <div class="reports-screen">
-      <header class="screen-header reports-header">
-        <button class="back-btn" data-screen="${SCREENS.VIEW_GOALS}">
-          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="back-icon">
-            <polyline points="15 18 9 12 15 6"/>
-          </svg>
-          <span class="back-label">Back</span>
-        </button>
-        <h1 class="reports-title">Reports</h1>
-        <button class="share-reports-btn" data-action="share-reports" title="Share progress">
-          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <circle cx="18" cy="5" r="3"/>
-            <circle cx="6" cy="12" r="3"/>
-            <circle cx="18" cy="19" r="3"/>
-            <line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/>
-            <line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/>
-          </svg>
-        </button>
+      <header class="screen-header main-screen-header">
+        <h1 class="screen-title">Reports</h1>
       </header>
       <main class="reports-content">
         <!-- Discipline Score Section - Prominent display -->

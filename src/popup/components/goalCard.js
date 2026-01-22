@@ -5,8 +5,7 @@
 
 import { state } from '../state.js';
 import { formatTime, formatProgressDisplay, escapeHtml } from '../utils/formatting.js';
-import { GOAL_TYPES, isGoalCompleted, getGoalCompletionPercentage, isGoalLocked, isGoalInChain } from '../../utils/models.js';
-import { renderChainIndicator, renderLockedOverlay } from '../features/habitChains.js';
+import { GOAL_TYPES, isGoalCompleted, getGoalCompletionPercentage } from '../../utils/models.js';
 import { renderPomodoroControls } from '../features/pomodoro.js';
 
 // =============================================================================
@@ -70,21 +69,15 @@ export function renderGoalCard(goal) {
   const typeIcon = getGoalTypeIcon(goal.type);
   const progressDisplay = formatProgressDisplay(goal);
 
-  // US-084: Check if goal is locked (chain parent not completed)
-  const goalLocked = isGoalLocked(goal, state.goals);
-
-  // Build CSS classes for the card
+  // Build CSS classes for the card - always use compact view
   const justCompleted = state.justCompletedGoals.has(goal.id);
-  const isCompactView = state.settings?.compactViewEnabled || false;
   const cardClasses = [
     'goal-card',
     `goal-type-${goal.type}`,
     isCompleted ? 'goal-completed' : '',
     goal.type === GOAL_TYPES.TIMER && goal.isActive ? 'goal-timer-active' : '',
     justCompleted ? 'just-completed' : '',
-    isCompactView ? 'compact' : '',
-    goalLocked ? 'goal-locked' : '',
-    isGoalInChain(goal, state.goals) ? 'goal-in-chain' : ''
+    'compact' // Always compact
   ].filter(Boolean).join(' ');
 
   // US-065: Get category info for badge display
@@ -135,7 +128,6 @@ export function renderGoalCard(goal) {
       </div>
       <div class="goal-card-body">
         ${goal.notes ? renderGoalNotes(goal) : ''}
-        ${renderChainIndicator(goal, goalLocked)}
         <div class="goal-progress-section">
           <div class="goal-progress-info">
             <span class="goal-progress-text">${progressDisplay}</span>
@@ -145,9 +137,8 @@ export function renderGoalCard(goal) {
             <div class="goal-progress-fill" style="width: ${progressPercent}%"></div>
           </div>
         </div>
-        ${goalLocked ? renderLockedOverlay(goal) : renderGoalControls(goal)}
+        ${renderGoalControls(goal)}
       </div>
-      ${isCompleted ? '<div class="goal-completed-indicator"><span class="completed-checkmark">&#10003;</span></div>' : ''}
     </div>
   `;
 }
@@ -294,11 +285,6 @@ function renderTimerControls(goal) {
 
   return `
     <div class="goal-controls goal-controls-timer">
-      <div class="timer-display" data-goal-id="${goal.id}">
-        <span class="timer-current">${formatTime(displayProgress)}</span>
-        <span class="timer-separator">/</span>
-        <span class="timer-target">${formatTime(goal.target)}</span>
-      </div>
       <button class="goal-control-btn timer-play-btn ${isActive ? 'is-active' : ''}"
               data-action="timer-toggle"
               data-goal-id="${goal.id}"

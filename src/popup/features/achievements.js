@@ -75,11 +75,11 @@ export function renderAchievementsScreen() {
   screen.innerHTML = `
     <div class="achievements-screen">
       <header class="screen-header achievements-header">
-        <button class="back-btn" data-screen="${SCREENS.REPORTS}">
+        <button class="back-btn" data-screen="${SCREENS.REPORTS}" title="Back to Reports">
           <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="back-icon">
-            <polyline points="15 18 9 12 15 6"/>
+            <line x1="19" y1="12" x2="5" y2="12"/>
+            <polyline points="12 19 5 12 12 5"/>
           </svg>
-          <span class="back-label">Back</span>
         </button>
         <h1 class="achievements-title">Achievements</h1>
         <div class="header-spacer"></div>

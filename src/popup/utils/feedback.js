@@ -10,38 +10,12 @@ import { escapeHtml } from './formatting.js';
 // =============================================================================
 
 /**
- * Show success feedback to the user (brief toast notification)
+ * Show success feedback to the user (disabled - no toast notifications)
  * @param {string} message - The success message to display
  */
 export function showSuccessFeedback(message) {
-  // Create toast element if it doesn't exist
-  let toast = document.getElementById('feedback-toast');
-  if (!toast) {
-    toast = document.createElement('div');
-    toast.id = 'feedback-toast';
-    toast.className = 'feedback-toast';
-    document.body.appendChild(toast);
-  }
-
-  // Set success styling and message
-  toast.className = 'feedback-toast success';
-  toast.innerHTML = `
-    <span class="toast-icon">
-      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-        <polyline points="20 6 9 17 4 12"/>
-      </svg>
-    </span>
-    <span class="toast-message">${escapeHtml(message)}</span>
-  `;
-
-  // Show the toast
-  toast.classList.add('visible');
-
-  // Auto-hide after 2.5 seconds
-  setTimeout(() => {
-    toast.classList.remove('visible');
-  }, 2500);
-
+  // Disabled - no toast notifications shown
+  // Just log for debugging if needed
   console.log(`[Feedback] Success: ${message}`);
 }
 

@@ -1,6 +1,6 @@
 /* ========================================
-   Daily Goals Tracker - Base Styles
-   US-005: Base CSS Styles
+   Daily Goals Tracker - Minimal Design System v2.0
+   "When in doubt, leave it out"
    ======================================== */
 
 /* CSS Reset */
@@ -12,97 +12,176 @@
   padding: 0;
 }
 
-/* CSS Variables for theming - Light Mode (default) */
+/* ========================================
+   Design Tokens - Light Mode (default)
+   ======================================== */
 :root {
-  /* Primary colors */
-  --primary: #4CAF50;
-  --primary-hover: #43A047;
-  --primary-light: #E8F5E9;
+  /* Surface colors - clean, minimal hierarchy */
+  --surface: #FFFFFF;
+  --surface-raised: #FAFAFA;
+  --surface-sunken: #F5F5F5;
 
-  /* Secondary colors */
-  --secondary: #2196F3;
-  --secondary-hover: #1E88E5;
-  --secondary-light: #E3F2FD;
-
-  /* Background colors */
-  --background: #FFFFFF;
-  --background-secondary: #F5F5F5;
-  --background-card: #FFFFFF;
-  --card-bg: #FFFFFF;
-
-  /* Text colors */
-  --text: #212121;
-  --text-secondary: #757575;
-  --text-muted: #9E9E9E;
+  /* Text colors - clear hierarchy */
+  --text-primary: #1A1A1A;
+  --text-secondary: #666666;
+  --text-muted: #999999;
+  --text-disabled: #BDBDBD;
   --text-inverse: #FFFFFF;
 
-  /* Status colors */
-  --success: #4CAF50;
-  --success-light: #E8F5E9;
-  --danger: #F44336;
-  --danger-hover: #E53935;
-  --danger-light: #FFEBEE;
-  --warning: #FF9800;
-  --warning-light: #FFF3E0;
+  /* Single accent color - emerald green */
+  --accent: #10B981;
+  --accent-hover: #059669;
+  --accent-active: #047857;
+  --accent-subtle: #D1FAE5;
+  --accent-text: #065F46;
 
-  /* Border colors */
-  --border: #E0E0E0;
-  --border-focus: #4CAF50;
+  /* Semantic colors - used sparingly */
+  --danger: #EF4444;
+  --danger-hover: #DC2626;
+  --danger-subtle: #FEE2E2;
+  --warning: #F59E0B;
+  --warning-subtle: #FEF3C7;
+  --info: #3B82F6;
+  --info-subtle: #DBEAFE;
 
-  /* Special colors - Goal types and timeframes */
-  --counter-color: #E65100;
-  --counter-accent: #FB8C00;
-  --counter-light: #FFF3E0;
-  --yearly-color: #7B1FA2;
-  --yearly-light: #F3E5F5;
-  --gold: #FFB300;
-  --gold-bright: #FFD700;
+  /* Border colors - subtle */
+  --border: #E5E5E5;
+  --border-subtle: #F0F0F0;
+  --border-focus: var(--accent);
 
-  /* Shadow */
-  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
-  --shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  --shadow-lg: 0 4px 8px rgba(0, 0, 0, 0.15);
+  /* Goal type colors - muted, badge-only */
+  --type-timer: #3B82F6;
+  --type-timer-subtle: #DBEAFE;
+  --type-counter: #F59E0B;
+  --type-counter-subtle: #FEF3C7;
+  --type-checkbox: #10B981;
+  --type-checkbox-subtle: #D1FAE5;
+  --type-avoidance: #8B5CF6;
+  --type-avoidance-subtle: #EDE9FE;
 
-  /* Heatmap colors (GitHub-style green) */
-  --heatmap-level-0: #E0E0E0;
-  --heatmap-level-1: #9be9a8;
-  --heatmap-level-2: #40c463;
-  --heatmap-level-3: #30a14e;
-  --heatmap-level-4: #216e39;
+  /* Timeframe colors */
+  --timeframe-daily: var(--accent);
+  --timeframe-daily-subtle: var(--accent-subtle);
+  --timeframe-weekly: var(--info);
+  --timeframe-weekly-subtle: var(--info-subtle);
+  --timeframe-monthly: var(--warning);
+  --timeframe-monthly-subtle: var(--warning-subtle);
+  --timeframe-yearly: var(--type-avoidance);
+  --timeframe-yearly-subtle: var(--type-avoidance-subtle);
 
-  /* Spacing */
-  --spacing-xs: 4px;
-  --spacing-sm: 8px;
-  --spacing-md: 16px;
-  --spacing-lg: 24px;
-  --spacing-xl: 32px;
+  /* Shadows - very subtle */
+  --shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.03);
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.04);
+  --shadow-md: 0 2px 8px rgba(0, 0, 0, 0.06);
+  --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.08);
 
-  /* Border radius */
-  --radius-sm: 4px;
-  --radius-md: 6px;
+  /* Heatmap colors */
+  --heatmap-level-0: #F0F0F0;
+  --heatmap-level-1: #D1FAE5;
+  --heatmap-level-2: #6EE7B7;
+  --heatmap-level-3: #34D399;
+  --heatmap-level-4: #10B981;
+
+  /* Spacing - 4px base unit */
+  --space-0: 0;
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --space-8: 32px;
+
+  /* Legacy spacing aliases */
+  --spacing-xs: var(--space-1);
+  --spacing-sm: var(--space-2);
+  --spacing-md: var(--space-4);
+  --spacing-lg: var(--space-6);
+  --spacing-xl: var(--space-8);
+
+  /* Border radius - consistent */
+  --radius-sm: 6px;
+  --radius-md: 8px;
   --radius: 8px;
   --radius-lg: 12px;
+  --radius-xl: 16px;
   --radius-full: 9999px;
 
-  /* Transitions */
-  --transition-fast: 150ms ease;
-  --transition-normal: 200ms ease;
-  --transition: 200ms ease;
-  --transition-slow: 300ms ease;
+  /* Motion - fast and purposeful */
+  --duration-instant: 50ms;
+  --duration-fast: 100ms;
+  --duration-normal: 150ms;
+  --duration-slow: 250ms;
 
-  /* Typography */
-  --font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
-  --font-size-xs: 11px;
-  --font-size-sm: 12px;
-  --font-size-base: 14px;
-  --font-size-lg: 16px;
-  --font-size-xl: 18px;
+  --ease-out: cubic-bezier(0, 0, 0.2, 1);
+  --ease-in: cubic-bezier(0.4, 0, 1, 1);
+  --ease-in-out: cubic-bezier(0.4, 0, 0.2, 1);
+  --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+
+  /* Legacy transition aliases */
+  --transition-fast: var(--duration-fast) var(--ease-out);
+  --transition-normal: var(--duration-normal) var(--ease-out);
+  --transition: var(--duration-normal) var(--ease-out);
+  --transition-slow: var(--duration-slow) var(--ease-out);
+
+  /* Typography - clean system fonts */
+  --font-sans: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+  --font-mono: 'SF Mono', 'Fira Code', 'JetBrains Mono', Consolas, monospace;
+  --font-family: var(--font-sans);
+
+  /* Type scale - reduced */
+  --text-xs: 11px;
+  --text-sm: 13px;
+  --text-base: 14px;
+  --text-lg: 16px;
+  --text-xl: 20px;
+
+  /* Legacy font size aliases */
+  --font-size-xs: var(--text-xs);
+  --font-size-sm: var(--text-sm);
+  --font-size-base: var(--text-base);
+  --font-size-lg: var(--text-lg);
+  --font-size-xl: var(--text-xl);
   --font-size-2xl: 24px;
-  --font-weight-normal: 400;
-  --font-weight-medium: 500;
-  --font-weight-semibold: 600;
-  --font-weight-bold: 700;
+
+  /* Font weights */
+  --weight-normal: 400;
+  --weight-medium: 500;
+  --weight-semibold: 600;
+  --weight-bold: 700;
+
+  /* Legacy weight aliases */
+  --font-weight-normal: var(--weight-normal);
+  --font-weight-medium: var(--weight-medium);
+  --font-weight-semibold: var(--weight-semibold);
+  --font-weight-bold: var(--weight-bold);
+
   --line-height: 1.5;
+  --line-height-tight: 1.25;
+
+  /* Legacy color aliases for backward compatibility */
+  --primary: var(--accent);
+  --primary-hover: var(--accent-hover);
+  --primary-light: var(--accent-subtle);
+  --secondary: var(--info);
+  --secondary-hover: #2563EB;
+  --secondary-light: var(--info-subtle);
+  --background: var(--surface);
+  --background-secondary: var(--surface-sunken);
+  --background-card: var(--surface);
+  --card-bg: var(--surface);
+  --text: var(--text-primary);
+  --success: var(--accent);
+  --success-light: var(--accent-subtle);
+  --danger-light: var(--danger-subtle);
+  --counter-color: var(--type-counter);
+  --counter-accent: #FBBF24;
+  --counter-light: var(--type-counter-subtle);
+  --yearly-color: var(--type-avoidance);
+  --yearly-light: var(--type-avoidance-subtle);
+  --gold: #FBBF24;
+  --gold-bright: #FCD34D;
+  --shadow: var(--shadow-md);
 }
 
 /* ========================================
@@ -111,61 +190,95 @@
 
 /* Dark Mode CSS Variables */
 [data-theme='dark'] {
-  /* Primary colors - slightly brighter for dark mode visibility */
-  --primary: #66BB6A;
-  --primary-hover: #81C784;
-  --primary-light: #1B3A1E;
-
-  /* Secondary colors - adjusted for dark mode */
-  --secondary: #42A5F5;
-  --secondary-hover: #64B5F6;
-  --secondary-light: #1A2A3A;
-
-  /* Background colors - dark surfaces */
-  --background: #121212;
-  --background-secondary: #1E1E1E;
-  --background-card: #1E1E1E;
-  --card-bg: #1E1E1E;
+  /* Surface colors - dark, minimal hierarchy */
+  --surface: #0A0A0A;
+  --surface-raised: #141414;
+  --surface-sunken: #050505;
 
   /* Text colors - light text on dark */
-  --text: #E0E0E0;
-  --text-secondary: #BDBDBD;
-  --text-muted: #757575;
-  --text-inverse: #121212;
+  --text-primary: #FAFAFA;
+  --text-secondary: #A3A3A3;
+  --text-muted: #737373;
+  --text-disabled: #525252;
+  --text-inverse: #0A0A0A;
 
-  /* Status colors - slightly adjusted for dark mode */
-  --success: #66BB6A;
-  --success-light: #1B3A1E;
-  --danger: #EF5350;
-  --danger-hover: #E57373;
-  --danger-light: #3A1B1B;
-  --warning: #FFA726;
-  --warning-light: #3A2E1B;
+  /* Accent colors - slightly brighter for dark mode */
+  --accent: #34D399;
+  --accent-hover: #6EE7B7;
+  --accent-active: #A7F3D0;
+  --accent-subtle: rgba(52, 211, 153, 0.15);
+  --accent-text: #A7F3D0;
 
-  /* Border colors - subtle on dark */
-  --border: #333333;
-  --border-focus: #66BB6A;
+  /* Semantic colors */
+  --danger: #F87171;
+  --danger-hover: #FCA5A5;
+  --danger-subtle: rgba(248, 113, 113, 0.15);
+  --warning: #FBBF24;
+  --warning-subtle: rgba(251, 191, 36, 0.15);
+  --info: #60A5FA;
+  --info-subtle: rgba(96, 165, 250, 0.15);
 
-  /* Special colors - Goal types and timeframes (adjusted for dark mode) */
-  --counter-color: #FFA726;
-  --counter-accent: #FFB74D;
-  --counter-light: #3A2E1B;
-  --yearly-color: #BA68C8;
-  --yearly-light: #2A1A2E;
-  --gold: #FFCA28;
-  --gold-bright: #FFE082;
+  /* Border colors */
+  --border: #262626;
+  --border-subtle: #1A1A1A;
+  --border-focus: var(--accent);
 
-  /* Shadow - more prominent on dark backgrounds */
-  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.3);
-  --shadow: 0 2px 6px rgba(0, 0, 0, 0.4);
-  --shadow-lg: 0 4px 12px rgba(0, 0, 0, 0.5);
+  /* Goal type colors - adjusted for dark mode */
+  --type-timer: #60A5FA;
+  --type-timer-subtle: rgba(96, 165, 250, 0.15);
+  --type-counter: #FBBF24;
+  --type-counter-subtle: rgba(251, 191, 36, 0.15);
+  --type-checkbox: #34D399;
+  --type-checkbox-subtle: rgba(52, 211, 153, 0.15);
+  --type-avoidance: #A78BFA;
+  --type-avoidance-subtle: rgba(167, 139, 250, 0.15);
 
-  /* Heatmap colors - adjusted for dark mode (darker base, brighter greens) */
-  --heatmap-level-0: #333333;
-  --heatmap-level-1: #0e4429;
-  --heatmap-level-2: #006d32;
-  --heatmap-level-3: #26a641;
-  --heatmap-level-4: #39d353;
+  /* Timeframe colors */
+  --timeframe-daily: var(--accent);
+  --timeframe-daily-subtle: var(--accent-subtle);
+  --timeframe-weekly: var(--info);
+  --timeframe-weekly-subtle: var(--info-subtle);
+  --timeframe-monthly: var(--warning);
+  --timeframe-monthly-subtle: var(--warning-subtle);
+  --timeframe-yearly: var(--type-avoidance);
+  --timeframe-yearly-subtle: var(--type-avoidance-subtle);
+
+  /* Shadows - subtle on dark */
+  --shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.2);
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.25);
+  --shadow-md: 0 2px 8px rgba(0, 0, 0, 0.3);
+  --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.4);
+
+  /* Heatmap colors */
+  --heatmap-level-0: #1A1A1A;
+  --heatmap-level-1: #064E3B;
+  --heatmap-level-2: #059669;
+  --heatmap-level-3: #10B981;
+  --heatmap-level-4: #34D399;
+
+  /* Legacy aliases */
+  --primary: var(--accent);
+  --primary-hover: var(--accent-hover);
+  --primary-light: var(--accent-subtle);
+  --secondary: var(--info);
+  --secondary-hover: #93C5FD;
+  --secondary-light: var(--info-subtle);
+  --background: var(--surface);
+  --background-secondary: var(--surface-sunken);
+  --background-card: var(--surface-raised);
+  --card-bg: var(--surface-raised);
+  --text: var(--text-primary);
+  --success: var(--accent);
+  --success-light: var(--accent-subtle);
+  --danger-light: var(--danger-subtle);
+  --counter-color: var(--type-counter);
+  --counter-accent: #FCD34D;
+  --counter-light: var(--type-counter-subtle);
+  --yearly-color: var(--type-avoidance);
+  --yearly-light: var(--type-avoidance-subtle);
+  --gold: #FBBF24;
+  --gold-bright: #FCD34D;
+  --shadow: var(--shadow-md);
 }
 
 /* Smooth theme transition for all elements */
@@ -446,71 +559,133 @@ select:focus {
   outline-offset: 2px;
 }
 
-/* Screen footer - US-055: Ensure footer stays at bottom regardless of content */
+/* Screen footer - Hidden when using persistent nav */
 .screen-footer {
-  display: flex;
-  justify-content: space-around;
-  align-items: center;
-  padding: var(--spacing-sm) var(--spacing-md);
-  border-top: 1px solid var(--border);
-  background-color: var(--background);
-  flex-shrink: 0;
-  min-height: 60px;
-  margin-top: auto; /* Push footer to bottom when content is sparse */
+  display: none;
 }
 
-/* Navigation button */
+/* Persistent Bottom Navigation */
+.main-bottom-nav {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: var(--space-1);
+  padding: var(--space-2) var(--space-4);
+  border-top: 1px solid var(--border-subtle);
+  background-color: var(--surface);
+  min-height: 56px;
+  z-index: 100;
+}
+
+/* Hide main nav on detail screens */
+.main-bottom-nav.hidden {
+  display: none;
+}
+
+/* Adjust screens to account for fixed nav */
+#app {
+  padding-bottom: 70px;
+}
+
+/* Category filter bar - inside content area */
+.view-goals-screen .category-filter-bar {
+  padding: var(--space-2) var(--space-4);
+  background-color: var(--surface-sunken);
+}
+
+/* Main screen header - consistent pattern for Goals, Reports, Settings */
+.main-screen-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--space-4);
+  border-bottom: 1px solid var(--border-subtle);
+  background-color: var(--surface);
+  min-height: 56px;
+}
+
+.main-screen-header .screen-title {
+  font-size: var(--text-xl);
+  font-weight: var(--weight-semibold);
+  color: var(--text-primary);
+  margin: 0;
+  line-height: 1.2;
+}
+
+.main-screen-header .header-title-section {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.main-screen-header .header-progress-text {
+  font-size: var(--text-sm);
+  color: var(--text-muted);
+}
+
+.main-screen-header .header-actions {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+/* Navigation button - Clean, minimal */
 .nav-btn {
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
   gap: 2px;
-  padding: var(--spacing-sm) var(--spacing-lg);
-  color: var(--text-secondary);
-  font-size: var(--font-size-xs);
-  font-weight: var(--font-weight-medium);
-  border-radius: var(--radius);
-  transition: all var(--transition-fast);
-  min-width: 80px;
+  padding: var(--space-2) var(--space-4);
+  color: var(--text-muted);
+  font-size: var(--text-xs);
+  font-weight: var(--weight-medium);
+  border-radius: var(--radius-sm);
+  transition: all var(--duration-fast) var(--ease-out);
+  min-width: 72px;
   position: relative;
+  background: transparent;
+  border: none;
 }
 
 .nav-btn:hover {
-  color: var(--primary);
-  background-color: var(--primary-light);
+  color: var(--text-primary);
+  background-color: var(--surface-sunken);
 }
 
 .nav-btn:active {
-  transform: scale(0.95);
+  transform: scale(0.97);
 }
 
 .nav-btn.active {
-  color: var(--primary);
-  background-color: var(--primary-light);
+  color: var(--accent);
 }
 
 .nav-btn.active::after {
   content: '';
   position: absolute;
-  bottom: -2px;
+  bottom: 4px;
   left: 50%;
   transform: translateX(-50%);
-  width: 24px;
-  height: 3px;
-  background-color: var(--primary);
+  width: 4px;
+  height: 4px;
+  background-color: var(--accent);
   border-radius: var(--radius-full);
 }
 
 /* Navigation icon */
 .nav-icon {
-  font-size: 20px;
+  font-size: 18px;
   line-height: 1;
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 24px;
-  height: 24px;
+  width: 22px;
+  height: 22px;
 }
 
 /* SVG icon styling */
@@ -519,48 +694,43 @@ select:focus {
   height: 20px;
   stroke: currentColor;
   fill: none;
+  stroke-width: 1.5;
 }
 
 /* Navigation label */
 .nav-label {
-  font-size: var(--font-size-xs);
+  font-size: var(--text-xs);
   line-height: 1.2;
+  opacity: 0.8;
+}
+
+.nav-btn.active .nav-label {
+  opacity: 1;
 }
 
 /* ========================================
    US-014: View Goals Screen - Goals List Container
    ======================================== */
 
-/* Goals list container - scrollable area between header and footer */
-/* US-055: flex: 1 ensures this container expands to fill space, pushing footer to bottom */
+/* Goals list container - Clean, minimal */
 .goals-list-container {
   flex: 1 1 auto;
   overflow-y: auto;
   overflow-x: hidden;
-  padding: var(--spacing-md);
-  background-color: var(--background-secondary);
-  /* Subtle inner shadow for depth */
-  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.03);
-  /* Ensure proper scroll behavior */
+  padding: var(--space-3);
+  padding-bottom: 80px; /* Account for fixed bottom nav */
+  background-color: var(--surface-sunken);
   scroll-behavior: smooth;
-  /* Prevent content from overflowing horizontally */
   min-height: 0;
 }
 
-/* When goals list has content, add subtle border effect */
-.goals-list-container:not(:empty) {
-  border-top: 1px solid var(--border);
-  border-bottom: 1px solid var(--border);
-}
-
-/* Custom scrollbar for goals list */
+/* Custom scrollbar - Very subtle */
 .goals-list-container::-webkit-scrollbar {
   width: 4px;
 }
 
 .goals-list-container::-webkit-scrollbar-track {
   background: transparent;
-  margin: var(--spacing-sm) 0;
 }
 
 .goals-list-container::-webkit-scrollbar-thumb {
@@ -573,38 +743,55 @@ select:focus {
 }
 
 /* ========================================
-   US-011: View Goals Screen - Header
+   US-011: View Goals Screen - Header (Minimal v2.0)
+   Clean, focused header with simple title + progress
    ======================================== */
 
-/* View Goals Header - Enhanced styling */
+/* View Goals Header - Simplified */
 .view-goals-header {
   flex-direction: column;
   align-items: stretch;
-  padding: var(--spacing-md) var(--spacing-md) var(--spacing-sm);
-  gap: var(--spacing-sm);
+  padding: var(--space-4) var(--space-4) var(--space-3);
+  gap: var(--space-2);
+  border-bottom: 1px solid var(--border-subtle);
+  background-color: var(--surface);
 }
 
 .header-main {
-  position: relative;
   display: flex;
   justify-content: space-between;
   align-items: center;
+  gap: var(--space-3);
 }
 
-.app-title {
-  font-size: var(--font-size-xl);
-  font-weight: var(--font-weight-bold);
-  color: var(--primary);
-  margin: 0;
-  letter-spacing: -0.5px;
+/* Header Title Section */
+.header-title-section {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
   flex: 1;
-  text-align: center;
+  min-width: 0;
 }
 
-/* US-052: Settings button in header */
-.settings-btn {
-  position: absolute;
-  right: var(--spacing-md);
+/* App Title - Simple, left-aligned */
+.app-title {
+  font-size: var(--text-xl);
+  font-weight: var(--weight-semibold);
+  color: var(--text-primary);
+  margin: 0;
+  letter-spacing: -0.3px;
+  line-height: 1.2;
+}
+
+/* Header Progress Text */
+.header-progress-text {
+  font-size: var(--text-sm);
+  color: var(--text-muted);
+  font-weight: var(--weight-normal);
+}
+
+/* Theme Toggle Button */
+.theme-toggle-btn {
   display: flex;
   align-items: center;
   justify-content: center;
@@ -613,15 +800,104 @@ select:focus {
   padding: 0;
   border: none;
   background: transparent;
-  color: var(--text-secondary);
-  border-radius: var(--radius);
+  color: var(--text-muted);
+  border-radius: var(--radius-sm);
   cursor: pointer;
-  transition: color var(--transition), background-color var(--transition);
+  transition: all var(--duration-fast) var(--ease-out);
+}
+
+.theme-toggle-btn:hover {
+  color: var(--warning);
+  background-color: var(--surface-sunken);
+}
+
+.theme-toggle-btn:active {
+  transform: scale(0.95);
+}
+
+.theme-toggle-btn svg {
+  width: 18px;
+  height: 18px;
+}
+
+/* Header Actions Container */
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+}
+
+/* Header Text Button - for Manage link */
+.header-text-btn {
+  padding: var(--space-1) var(--space-2);
+  font-size: var(--text-sm);
+  font-weight: var(--weight-medium);
+  color: var(--accent);
+  background: transparent;
+  border: none;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.header-text-btn:hover {
+  background-color: var(--accent-subtle);
+  color: var(--accent-hover);
+}
+
+.header-text-btn:active {
+  transform: scale(0.97);
+}
+
+/* View Toggle Button */
+.view-toggle-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  border: none;
+  background: transparent;
+  color: var(--text-muted);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: all var(--duration-fast) var(--ease-out);
+}
+
+.view-toggle-btn:hover {
+  color: var(--text-primary);
+  background-color: var(--surface-sunken);
+}
+
+.view-toggle-btn.compact-active {
+  color: var(--accent);
+}
+
+.view-toggle-btn svg {
+  width: 18px;
+  height: 18px;
+}
+
+/* Settings button - Minimal */
+.settings-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  border: none;
+  background: transparent;
+  color: var(--text-muted);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: all var(--duration-fast) var(--ease-out);
 }
 
 .settings-btn:hover {
-  color: var(--primary);
-  background-color: var(--primary-light);
+  color: var(--text-primary);
+  background-color: var(--surface-sunken);
 }
 
 .settings-btn:active {
@@ -629,105 +905,94 @@ select:focus {
 }
 
 .settings-btn svg {
-  width: 20px;
-  height: 20px;
+  width: 18px;
+  height: 18px;
 }
 
-/* Header stats container */
+/* Header stats - Compact, inline */
 .header-stats {
   display: flex;
-  justify-content: center;
   align-items: center;
-  gap: var(--spacing-md);
-  padding: var(--spacing-sm) var(--spacing-md);
-  background-color: var(--background-secondary);
-  border-radius: var(--radius);
-  min-height: 40px;
+  gap: var(--space-4);
+  padding: 0;
+  background-color: transparent;
+  min-height: auto;
 }
 
-/* Individual stat item */
+/* Individual stat item - Minimal */
 .stat-item {
   display: flex;
   align-items: center;
-  gap: var(--spacing-xs);
+  gap: var(--space-1);
   line-height: 1;
 }
 
-/* Stat icon - fixed size container for consistent alignment */
+/* Stat icon - Small */
 .stat-icon {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 20px;
-  height: 20px;
-  font-size: var(--font-size-base);
-  color: var(--text-secondary);
+  font-size: var(--text-sm);
+  color: var(--text-muted);
   flex-shrink: 0;
 }
 
 .stat-value {
-  font-size: var(--font-size-base);
-  font-weight: var(--font-weight-semibold);
-  color: var(--text);
+  font-size: var(--text-sm);
+  font-weight: var(--weight-medium);
+  color: var(--text-secondary);
   line-height: 1;
 }
 
 .stat-label {
-  font-size: var(--font-size-xs);
+  font-size: var(--text-xs);
   color: var(--text-muted);
   line-height: 1;
 }
 
 /* Completed stat styling */
 .completed-stat .stat-icon {
-  color: var(--success);
-  font-weight: var(--font-weight-bold);
+  color: var(--accent);
 }
 
-/* Streak stat styling */
+.completed-stat .stat-value {
+  color: var(--text-primary);
+}
+
+/* Streak stat styling - Subtle */
 .streak-stat .streak-icon {
-  font-size: var(--font-size-lg);
+  font-size: var(--text-sm);
 }
 
 .streak-stat.active-streak .stat-value {
   color: var(--warning);
 }
 
-.streak-stat.active-streak .streak-icon {
-  animation: flame-pulse 1.5s ease-in-out infinite;
-}
-
-@keyframes flame-pulse {
-  0%, 100% {
-    transform: scale(1);
-    opacity: 1;
-  }
-  50% {
-    transform: scale(1.1);
-    opacity: 0.8;
-  }
-}
-
-/* Stat divider */
+/* Stat divider - Subtle */
 .stat-divider {
   width: 1px;
-  height: 20px;
-  background-color: var(--border);
+  height: 12px;
+  background-color: var(--border-subtle);
   align-self: center;
   flex-shrink: 0;
+}
+
+/* Level badge - Hidden by default in minimal design */
+.level-badge {
+  display: none;
 }
 
 /* Quick stats - legacy support */
 .quick-stats {
   display: flex;
-  gap: var(--spacing-sm);
+  gap: var(--space-2);
 }
 
 .completed-count {
-  font-size: var(--font-size-sm);
+  font-size: var(--text-sm);
   color: var(--text-secondary);
-  padding: var(--spacing-xs) var(--spacing-sm);
-  background-color: var(--background-secondary);
+  padding: var(--space-1) var(--space-2);
+  background-color: var(--surface-sunken);
   border-radius: var(--radius-full);
 }
 
@@ -806,148 +1071,128 @@ select:focus {
   color: var(--text-muted);
 }
 
-/* Add first goal button - large variant */
-.add-first-goal {
-  padding: var(--spacing-md) var(--spacing-lg);
-  font-size: var(--font-size-base);
-  font-weight: var(--font-weight-semibold);
-  gap: var(--spacing-sm);
-  box-shadow: var(--shadow);
-  transition: all var(--transition);
+/* ========================================
+   Buttons - Minimal Design v2.0
+   ======================================== */
+
+/* Base button - Clean, minimal */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  padding: var(--space-2) var(--space-4);
+  font-size: var(--text-base);
+  font-weight: var(--weight-medium);
+  border-radius: var(--radius-sm);
+  border: none;
+  cursor: pointer;
+  transition: all var(--duration-fast) var(--ease-out);
+  text-decoration: none;
+  line-height: 1.4;
 }
 
-.add-first-goal:hover {
-  transform: translateY(-2px);
-  box-shadow: var(--shadow-lg);
+.btn:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
 }
 
-.add-first-goal:active {
-  transform: translateY(0);
-  box-shadow: var(--shadow);
+.btn:active {
+  transform: scale(0.98);
+}
+
+/* Primary button - Accent color */
+.btn-primary {
+  background-color: var(--accent);
+  color: var(--text-inverse);
+}
+
+.btn-primary:hover {
+  background-color: var(--accent-hover);
+}
+
+/* Secondary/Ghost button */
+.btn-secondary {
+  background-color: transparent;
+  color: var(--text-secondary);
+  border: 1px solid var(--border);
+}
+
+.btn-secondary:hover {
+  background-color: var(--surface-sunken);
+  color: var(--text-primary);
+  border-color: var(--border);
+}
+
+/* Danger button */
+.btn-danger {
+  background-color: var(--danger);
+  color: var(--text-inverse);
+}
+
+.btn-danger:hover {
+  background-color: var(--danger-hover);
+}
+
+/* Ghost button - No background */
+.btn-ghost {
+  background-color: transparent;
+  color: var(--text-secondary);
+}
+
+.btn-ghost:hover {
+  background-color: var(--surface-sunken);
+  color: var(--text-primary);
 }
 
 /* Button icon */
 .btn-icon {
-  width: 18px;
-  height: 18px;
+  width: 16px;
+  height: 16px;
   flex-shrink: 0;
 }
 
 /* Large button variant */
 .btn-lg {
-  padding: var(--spacing-md) var(--spacing-lg);
-  font-size: var(--font-size-base);
+  padding: var(--space-3) var(--space-5);
+  font-size: var(--text-base);
 }
 
-/* Primary button */
-.btn {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  padding: var(--spacing-sm) var(--spacing-md);
-  font-size: var(--font-size-base);
-  font-weight: var(--font-weight-medium);
-  border-radius: var(--radius);
-  transition: all var(--transition-fast);
+/* Small button variant */
+.btn-sm {
+  padding: var(--space-1) var(--space-3);
+  font-size: var(--text-sm);
 }
 
-.btn-primary {
-  background-color: var(--primary);
+/* Add first goal button - CTA style */
+.add-first-goal {
+  padding: var(--space-3) var(--space-5);
+  font-size: var(--text-base);
+  font-weight: var(--weight-medium);
+  gap: var(--space-2);
+  background-color: var(--accent);
   color: var(--text-inverse);
+  border-radius: var(--radius-md);
 }
 
-.btn-primary:hover {
-  background-color: var(--primary-hover);
+.add-first-goal:hover {
+  background-color: var(--accent-hover);
+  transform: translateY(-1px);
+}
+
+.add-first-goal:active {
+  transform: translateY(0);
 }
 
 /* Goals list */
 .goals-list {
   display: flex;
   flex-direction: column;
-  gap: var(--spacing-md);
-  /* Add padding at bottom for better scroll experience */
-  padding-bottom: var(--spacing-xs);
+  gap: var(--space-2);
+  padding-bottom: var(--space-2);
 }
 
-/* Scroll indicator - shows when list is scrollable */
-.goals-list-container.has-scroll::after {
-  content: '';
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  height: 32px;
-  background: linear-gradient(to top, var(--background-secondary) 0%, transparent 100%);
-  pointer-events: none;
-  opacity: 0.8;
-}
-
-/* Basic goal card (placeholder - will be enhanced in US-015) */
-.goal-card {
-  padding: var(--spacing-md);
-  background-color: var(--background-card);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-lg);
-  box-shadow: var(--shadow-sm);
-  transition: box-shadow var(--transition-fast), transform var(--transition-fast);
-}
-
-/* Goal card hover effect */
-.goal-card:hover {
-  box-shadow: var(--shadow);
-}
-
-.goal-card .goal-title {
-  font-weight: var(--font-weight-medium);
-  font-size: var(--font-size-base);
-  margin-bottom: var(--spacing-xs);
-  color: var(--text);
-}
-
-.goal-card .goal-type {
-  font-size: var(--font-size-xs);
-  color: var(--text-muted);
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-  margin-bottom: var(--spacing-xs);
-}
-
-.goal-card .goal-progress {
-  font-size: var(--font-size-sm);
-  color: var(--text-secondary);
-  font-weight: var(--font-weight-medium);
-}
-
-/* Goal card header with title and timeframe badge */
-.goal-card-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  gap: var(--spacing-sm);
-  margin-bottom: var(--spacing-xs);
-}
-
-/* Timeframe badge */
-.goal-timeframe-badge {
-  font-size: var(--font-size-xs);
-  padding: 2px var(--spacing-sm);
-  border-radius: var(--radius-full);
-  font-weight: var(--font-weight-medium);
-  text-transform: capitalize;
-  white-space: nowrap;
-  flex-shrink: 0;
-}
-
-/* Timeframe badge color variants */
-.timeframe-daily {
-  background-color: var(--primary-light);
-  color: var(--primary);
-}
-
-.timeframe-weekly {
-  background-color: var(--secondary-light);
-  color: var(--secondary);
-}
+/* Legacy goal card styles removed - see US-015 section for minimal design */
 
 .timeframe-monthly {
   background-color: var(--warning-light);
@@ -978,15 +1223,15 @@ select:focus {
   gap: 4px;
 }
 
-/* Category color indicator dot */
+/* Category color indicator dot - Smaller */
 .category-color-dot {
-  width: 8px;
-  height: 8px;
+  width: 6px;
+  height: 6px;
   border-radius: var(--radius-full);
   flex-shrink: 0;
 }
 
-/* Category side stripe on goal cards */
+/* Category side stripe on goal cards - Subtle, thin */
 .goal-card[data-category] {
   position: relative;
 }
@@ -995,79 +1240,40 @@ select:focus {
   content: '';
   position: absolute;
   left: 0;
-  top: 0;
-  bottom: 0;
-  width: 4px;
-  border-radius: var(--radius-lg) 0 0 var(--radius-lg);
+  top: 8px;
+  bottom: 8px;
+  width: 3px;
+  border-radius: var(--radius-full);
+  opacity: 0.6;
+  transition: opacity var(--duration-fast) var(--ease-out);
+}
+
+.goal-card[data-category]:hover::before {
+  opacity: 1;
 }
 
 /* Category-specific stripe colors */
 .goal-card[data-category="work"]::before {
-  background-color: #2196F3;
+  background-color: var(--type-timer);
 }
 
 .goal-card[data-category="health"]::before {
-  background-color: #4CAF50;
+  background-color: var(--accent);
 }
 
 .goal-card[data-category="learning"]::before {
-  background-color: #9C27B0;
+  background-color: var(--type-avoidance);
 }
 
 .goal-card[data-category="personal"]::before {
-  background-color: #FF9800;
+  background-color: var(--type-counter);
 }
 
-/* Header badges container - holds both timeframe and category badges */
-.goal-badges {
-  display: flex;
-  gap: var(--spacing-xs);
-  align-items: center;
-  flex-wrap: wrap;
-}
+/* Legacy badge container - see US-015 for updated styling */
 
-/* Goal progress section */
-.goal-progress-section {
-  display: flex;
-  flex-direction: column;
-  gap: var(--spacing-xs);
-  margin-top: var(--spacing-sm);
-}
+/* Legacy progress section - see US-015 for updated styling */
 
-.goal-progress-text {
-  font-size: var(--font-size-sm);
-  color: var(--text-secondary);
-  font-weight: var(--font-weight-medium);
-}
-
-/* Progress bar */
-.goal-progress-bar {
-  height: 6px;
-  background-color: var(--background-secondary);
-  border-radius: var(--radius-full);
-  overflow: hidden;
-}
-
-.goal-progress-fill {
-  height: 100%;
-  background-color: var(--primary);
-  border-radius: var(--radius-full);
-  transition: width var(--transition);
-}
-
-/* Completed goal styling */
-.goal-card.goal-completed {
-  border-color: var(--success);
-  background-color: var(--success-light);
-}
-
-.goal-card.goal-completed .goal-progress-fill {
-  background-color: var(--success);
-}
-
-.goal-card.goal-completed .goal-title {
-  color: var(--success);
-}
+/* Completed goal styling - see US-019 section for main styles */
 
 /* ========================================
    US-020: Manage Goals Screen - Layout
@@ -1085,24 +1291,27 @@ select:focus {
 
 /* Back button overrides for manage-goals-header */
 .manage-goals-header .back-btn {
-  padding: var(--spacing-sm) var(--spacing-md);
-  font-weight: var(--font-weight-medium);
+  padding: var(--spacing-sm);
+  min-width: 36px;
+  min-height: 36px;
+  justify-content: center;
 }
 
 .manage-goals-header .back-icon {
-  width: 18px;
-  height: 18px;
+  width: 20px;
+  height: 20px;
 }
 
-.manage-goals-header .back-label {
-  line-height: 1;
-}
-
-.manage-title {
+.manage-goals-title {
   font-size: var(--font-size-lg);
   font-weight: var(--font-weight-semibold);
   color: var(--text);
   margin: 0;
+}
+
+.manage-goals-header .header-actions {
+  display: flex;
+  align-items: center;
 }
 
 /* Spacer for flex alignment (keeps title centered) - matches back button width */
@@ -1459,17 +1668,15 @@ select:focus {
 
 /* Back button overrides for goal-form-header */
 .goal-form-header .back-btn {
-  padding: var(--spacing-sm) var(--spacing-md);
-  font-weight: var(--font-weight-medium);
+  padding: var(--spacing-sm);
+  min-width: 36px;
+  min-height: 36px;
+  justify-content: center;
 }
 
 .goal-form-header .back-icon {
-  width: 18px;
-  height: 18px;
-}
-
-.goal-form-header .back-label {
-  line-height: 1;
+  width: 20px;
+  height: 20px;
 }
 
 .goal-form-title {
@@ -1504,6 +1711,7 @@ select:focus {
   flex: 1;
   overflow-y: auto;
   padding: var(--spacing-md);
+  padding-bottom: 80px; /* Account for fixed bottom nav */
 }
 
 .discipline-score {
@@ -1538,6 +1746,7 @@ select:focus {
   flex: 1;
   overflow-y: auto;
   padding: var(--spacing-md);
+  padding-bottom: 80px; /* Account for fixed bottom nav */
 }
 
 .settings-section {
@@ -2332,144 +2541,188 @@ select:focus {
 }
 
 /* ========================================
-   US-015: Goal Card - Base Component
+   US-015: Goal Card - Minimal Design v2.0
+   Progressive disclosure: show less, reveal on interaction
    ======================================== */
 
-/* Goal Card - Enhanced styling */
+/* Goal Card - Clean, minimal styling */
 .goal-card {
   position: relative;
-  padding: var(--spacing-md);
-  background-color: var(--background-card);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-lg);
-  box-shadow: var(--shadow-sm);
-  transition: box-shadow var(--transition), transform var(--transition), border-color var(--transition);
+  padding: var(--space-3) var(--space-4);
+  background-color: var(--surface);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  transition: all var(--duration-fast) var(--ease-out);
   overflow: hidden;
 }
 
 .goal-card:hover {
-  box-shadow: var(--shadow);
-  transform: translateY(-1px);
+  border-color: var(--border);
+  background-color: var(--surface-raised);
 }
 
-/* Goal Card Header */
+.goal-card:focus-within {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 2px var(--accent-subtle);
+}
+
+/* Goal Card Header - Properly aligned */
 .goal-card-header {
   display: flex;
+  align-items: center;
   justify-content: space-between;
-  align-items: flex-start;
-  gap: var(--spacing-sm);
-  margin-bottom: var(--spacing-sm);
+  gap: var(--space-2);
+  margin-bottom: var(--space-2);
+  min-height: 24px;
 }
 
 .goal-card-title-row {
   display: flex;
   align-items: center;
-  gap: var(--spacing-sm);
+  gap: var(--space-2);
   flex: 1;
   min-width: 0;
+  height: 24px;
 }
 
-/* Goal Type Indicator Icon */
+/* Goal Type Indicator - Smaller, subtle */
 .goal-type-indicator {
   display: flex;
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
-  width: 28px;
-  height: 28px;
-  border-radius: var(--radius);
-  background-color: var(--background-secondary);
+  width: 20px;
+  height: 20px;
+  border-radius: var(--radius-sm);
+  background-color: transparent;
 }
 
 .goal-type-indicator .goal-type-icon {
   width: 16px;
   height: 16px;
-  color: var(--text-secondary);
+  color: var(--text-muted);
 }
 
 /* Type-specific indicator colors */
-.goal-type-timer .goal-type-indicator {
-  background-color: var(--secondary-light);
-}
-
 .goal-type-timer .goal-type-indicator .goal-type-icon {
-  color: var(--secondary);
-}
-
-.goal-type-counter .goal-type-indicator {
-  background-color: var(--counter-light);
+  color: var(--type-timer);
 }
 
 .goal-type-counter .goal-type-indicator .goal-type-icon {
-  color: var(--counter-color);
-}
-
-.goal-type-checkbox .goal-type-indicator {
-  background-color: var(--primary-light);
+  color: var(--type-counter);
 }
 
 .goal-type-checkbox .goal-type-indicator .goal-type-icon {
-  color: var(--primary);
+  color: var(--type-checkbox);
 }
 
-/* Goal Title */
+.goal-type-avoidance .goal-type-indicator .goal-type-icon {
+  color: var(--type-avoidance);
+}
+
+/* Goal Title - Clean */
 .goal-card .goal-title {
-  font-size: var(--font-size-base);
-  font-weight: var(--font-weight-semibold);
-  color: var(--text);
+  font-size: var(--text-base);
+  font-weight: var(--weight-medium);
+  color: var(--text-primary);
   margin: 0;
-  line-height: 1.3;
-  /* Truncate long titles */
+  line-height: 1.4;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+  flex: 1;
 }
 
-/* Timeframe Badge - Enhanced */
-.goal-timeframe-badge {
-  font-size: var(--font-size-xs);
-  padding: 3px var(--spacing-sm);
-  border-radius: var(--radius-full);
-  font-weight: var(--font-weight-medium);
-  text-transform: capitalize;
-  white-space: nowrap;
+/* Header Actions - Always visible, aligned right */
+.goal-header-actions {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
   flex-shrink: 0;
-  letter-spacing: 0.3px;
+  height: 24px;
 }
 
-/* Timeframe badge color variants */
+/* Stats and Focus buttons - Always visible */
+.stats-btn,
+.focus-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  border-radius: var(--radius-sm);
+  color: var(--text-muted);
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  transition: all var(--duration-fast) var(--ease-out);
+}
+
+.stats-btn:hover,
+.focus-btn:hover {
+  color: var(--text-primary);
+  background-color: var(--surface-sunken);
+}
+
+/* Badges container - Always visible */
+.goal-badges {
+  display: flex;
+  gap: var(--space-1);
+  align-items: center;
+}
+
+/* Timeframe Badge - Subtle */
+.goal-timeframe-badge {
+  font-size: var(--text-xs);
+  padding: 2px var(--space-2);
+  border-radius: var(--radius-full);
+  font-weight: var(--weight-medium);
+  text-transform: lowercase;
+  white-space: nowrap;
+  background-color: var(--surface-sunken);
+  color: var(--text-secondary);
+  transition: all var(--duration-fast) var(--ease-out);
+}
+
+/* Timeframe badge color variants - subtle */
 .timeframe-daily {
-  background-color: var(--primary-light);
-  color: var(--primary);
+  background-color: var(--timeframe-daily-subtle);
+  color: var(--timeframe-daily);
 }
 
 .timeframe-weekly {
-  background-color: var(--secondary-light);
-  color: var(--secondary);
+  background-color: var(--timeframe-weekly-subtle);
+  color: var(--timeframe-weekly);
 }
 
 .timeframe-monthly {
-  background-color: var(--warning-light);
-  color: var(--counter-color);
+  background-color: var(--timeframe-monthly-subtle);
+  color: var(--timeframe-monthly);
 }
 
 .timeframe-yearly {
-  background-color: var(--yearly-light);
-  color: var(--yearly-color);
+  background-color: var(--timeframe-yearly-subtle);
+  color: var(--timeframe-yearly);
+}
+
+/* Category Badge - Very subtle */
+/* Category badge - hidden, category shown via filter bar */
+.goal-category-badge {
+  display: none;
 }
 
 /* Goal Card Body */
 .goal-card-body {
   display: flex;
   flex-direction: column;
-  gap: var(--spacing-sm);
+  gap: var(--space-2);
 }
 
-/* Goal Progress Section - Enhanced */
+/* Goal Progress Section - Streamlined */
 .goal-progress-section {
   display: flex;
   flex-direction: column;
-  gap: var(--spacing-xs);
+  gap: var(--space-1);
 }
 
 .goal-progress-info {
@@ -2479,65 +2732,78 @@ select:focus {
 }
 
 .goal-progress-text {
-  font-size: var(--font-size-sm);
+  font-size: var(--text-sm);
   color: var(--text-secondary);
-  font-weight: var(--font-weight-medium);
+  font-weight: var(--weight-normal);
   font-variant-numeric: tabular-nums;
 }
 
 .goal-progress-percent {
-  font-size: var(--font-size-xs);
+  font-size: var(--text-xs);
   color: var(--text-muted);
-  font-weight: var(--font-weight-medium);
+  font-weight: var(--weight-medium);
+  opacity: 0;
+  transition: opacity var(--duration-fast) var(--ease-out);
 }
 
-/* Progress Bar - Enhanced */
+.goal-card:hover .goal-progress-percent {
+  opacity: 1;
+}
+
+/* Progress Bar - Thin and clean */
 .goal-progress-bar {
-  height: 8px;
-  background-color: var(--background-secondary);
+  height: 4px;
+  background-color: var(--surface-sunken);
   border-radius: var(--radius-full);
   overflow: hidden;
 }
 
 .goal-progress-fill {
   height: 100%;
-  background: linear-gradient(90deg, var(--primary) 0%, var(--primary-hover) 100%);
+  background-color: var(--accent);
   border-radius: var(--radius-full);
-  transition: width var(--transition);
+  transition: width var(--duration-slow) var(--ease-out);
   min-width: 0;
 }
 
-/* Type-specific progress fill colors */
+/* Type-specific progress fill colors - single solid color */
 .goal-type-timer .goal-progress-fill {
-  background: linear-gradient(90deg, var(--secondary) 0%, var(--secondary-hover) 100%);
+  background-color: var(--type-timer);
 }
 
 .goal-type-counter .goal-progress-fill {
-  background: linear-gradient(90deg, var(--counter-accent) 0%, var(--counter-color) 100%);
+  background-color: var(--type-counter);
 }
 
 .goal-type-checkbox .goal-progress-fill {
-  background: linear-gradient(90deg, var(--primary) 0%, var(--primary-hover) 100%);
+  background-color: var(--type-checkbox);
 }
 
-/* Goal Controls Container */
+.goal-type-avoidance .goal-progress-fill {
+  background-color: var(--type-avoidance);
+}
+
+/* Goal Controls Container - Minimal */
 .goal-controls {
   display: flex;
   align-items: center;
-  gap: var(--spacing-sm);
-  margin-top: var(--spacing-xs);
-  padding-top: var(--spacing-sm);
-  border-top: 1px solid var(--border);
+  gap: var(--space-2);
+  margin-top: var(--space-2);
+  padding-top: var(--space-2);
+  border-top: 1px solid var(--border-subtle);
 }
 
-/* Goal Control Button Base */
+/* Goal Control Button Base - Clean */
 .goal-control-btn {
   display: flex;
   align-items: center;
   justify-content: center;
-  border-radius: var(--radius);
-  transition: all var(--transition-fast);
+  border-radius: var(--radius-sm);
+  transition: all var(--duration-fast) var(--ease-out);
   cursor: pointer;
+  background: transparent;
+  border: none;
+  color: var(--text-secondary);
 }
 
 .goal-control-btn svg {
@@ -2546,7 +2812,8 @@ select:focus {
 }
 
 .goal-control-btn:hover {
-  transform: scale(1.05);
+  color: var(--text-primary);
+  background-color: var(--surface-sunken);
 }
 
 .goal-control-btn:active {
@@ -2554,59 +2821,57 @@ select:focus {
 }
 
 /* ========================================
-   US-016: Timer Type Controls
+   US-016: Timer Type Controls - Minimal
    ======================================== */
 
 /* Timer Controls Container */
 .goal-controls-timer {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  gap: var(--spacing-md);
+  justify-content: center;
+  gap: var(--space-3);
 }
 
-/* Timer Display */
+/* Timer Display - Clean monospace */
 .timer-display {
   display: flex;
   align-items: baseline;
-  gap: 4px;
-  font-family: 'SF Mono', 'Menlo', 'Monaco', 'Courier New', monospace;
+  gap: 2px;
+  font-family: var(--font-mono);
 }
 
 .timer-current {
-  font-size: var(--font-size-xl);
-  font-weight: var(--font-weight-bold);
-  color: var(--text);
-  letter-spacing: 0.5px;
+  font-size: var(--text-lg);
+  font-weight: var(--weight-semibold);
+  color: var(--text-primary);
+  letter-spacing: -0.5px;
 }
 
 .timer-separator {
-  font-size: var(--font-size-base);
+  font-size: var(--text-sm);
   color: var(--text-muted);
   margin: 0 2px;
 }
 
 .timer-target {
-  font-size: var(--font-size-sm);
+  font-size: var(--text-sm);
   color: var(--text-muted);
-  font-weight: var(--font-weight-medium);
+  font-weight: var(--weight-normal);
 }
 
-/* Timer Play/Pause Button */
+/* Timer Play/Pause Button - Compact */
 .timer-play-btn {
-  width: 48px;
-  height: 48px;
-  background-color: var(--secondary);
+  width: 40px;
+  height: 40px;
+  background-color: var(--type-timer);
   color: var(--text-inverse);
   border-radius: var(--radius-full);
-  box-shadow: var(--shadow-sm);
   flex-shrink: 0;
-  transition: all var(--transition-fast);
+  transition: all var(--duration-fast) var(--ease-out);
 }
 
 .timer-play-btn:hover {
-  background-color: var(--secondary-hover);
-  box-shadow: var(--shadow);
+  background-color: var(--info);
   transform: scale(1.05);
 }
 
@@ -2615,33 +2880,36 @@ select:focus {
 }
 
 .timer-play-btn svg {
-  width: 22px;
-  height: 22px;
+  width: 18px;
+  height: 18px;
 }
 
 /* Active state for timer button */
 .timer-play-btn.is-active {
   background-color: var(--warning);
-  animation: timer-pulse 2s ease-in-out infinite;
 }
 
 .timer-play-btn.is-active:hover {
-  background-color: var(--counter-color);
+  background-color: var(--type-counter);
 }
 
-@keyframes timer-pulse {
-  0%, 100% {
-    box-shadow: var(--shadow-sm), 0 0 0 0 rgba(255, 152, 0, 0.4);
-  }
-  50% {
-    box-shadow: var(--shadow-sm), 0 0 0 8px rgba(255, 152, 0, 0);
-  }
-}
-
-/* Timer goal card active state */
+/* Timer goal card active state - subtle */
 .goal-type-timer.goal-timer-active {
-  border-color: var(--secondary);
-  box-shadow: var(--shadow), 0 0 0 2px var(--secondary-light);
+  border-color: var(--type-timer);
+}
+
+/* Pomodoro button - subtle */
+.timer-pomodoro-btn {
+  width: 32px;
+  height: 32px;
+  background-color: transparent;
+  color: var(--text-muted);
+  border-radius: var(--radius-sm);
+}
+
+.timer-pomodoro-btn:hover {
+  background-color: var(--surface-sunken);
+  color: var(--danger);
 }
 
 .goal-type-timer.goal-timer-active .goal-progress-fill {
@@ -3108,168 +3376,52 @@ select:focus {
    US-019: Goal Card - Completion State
    ======================================== */
 
-/* Completed Goal State - Enhanced with glow and celebration feel */
+/* Completed Goal State - Green left stripe indicator + reduced opacity */
 .goal-card.goal-completed {
-  border-color: var(--success);
-  border-width: 2px;
-  background: linear-gradient(135deg, var(--background-card) 0%, var(--success-light) 100%);
-  /* Green glow effect */
-  box-shadow:
-    var(--shadow),
-    0 0 0 3px rgba(76, 175, 80, 0.15),
-    0 0 20px rgba(76, 175, 80, 0.2);
-  transform: translateY(-1px);
+  opacity: 0.65;
 }
 
-.goal-card.goal-completed:hover {
-  box-shadow:
-    var(--shadow-lg),
-    0 0 0 3px rgba(76, 175, 80, 0.2),
-    0 0 25px rgba(76, 175, 80, 0.25);
-  transform: translateY(-2px);
+.goal-card.goal-completed::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  width: 4px;
+  background-color: var(--accent);
+  border-radius: var(--radius-md) 0 0 var(--radius-md);
+  z-index: 1;
 }
 
 .goal-card.goal-completed .goal-progress-fill {
-  background: linear-gradient(90deg, var(--success) 0%, #388E3C 100%);
-}
-
-.goal-card.goal-completed .goal-title {
-  color: var(--success);
+  background-color: var(--accent);
 }
 
 .goal-card.goal-completed .goal-progress-percent {
-  color: var(--success);
-  font-weight: var(--font-weight-semibold);
+  color: var(--accent);
 }
 
-/* Completed Indicator - Enhanced with animation */
-/* US-063: Repositioned to bottom-right to not obscure header content */
+/* Hide checkmark indicator */
 .goal-completed-indicator {
-  position: absolute;
-  bottom: var(--spacing-sm);
-  right: var(--spacing-sm);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 28px;
-  height: 28px;
-  background-color: var(--success);
-  border-radius: var(--radius-full);
-  box-shadow: 0 2px 8px rgba(76, 175, 80, 0.4);
-  animation: completion-badge-appear 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
-  z-index: 2;
+  display: none;
 }
 
-@keyframes completion-badge-appear {
-  0% {
-    transform: scale(0) rotate(-45deg);
-    opacity: 0;
-  }
-  60% {
-    transform: scale(1.2) rotate(10deg);
-  }
-  100% {
-    transform: scale(1) rotate(0);
-    opacity: 1;
-  }
+/* Just-completed animation - subtle pulse */
+.goal-card.goal-completed.just-completed {
+  animation: completion-pulse 0.4s ease;
 }
 
-.completed-checkmark {
-  color: var(--text-inverse);
-  font-size: var(--font-size-base);
-  font-weight: var(--font-weight-bold);
-  line-height: 1;
-  animation: checkmark-bounce 0.5s ease 0.2s;
-}
-
-@keyframes checkmark-bounce {
+@keyframes completion-pulse {
   0%, 100% {
     transform: scale(1);
   }
   50% {
-    transform: scale(1.3);
+    transform: scale(1.01);
   }
 }
 
-/* Glow pulse animation for just-completed goals */
-.goal-card.goal-completed.just-completed {
-  animation: completion-glow 1.5s ease;
-}
-
-@keyframes completion-glow {
-  0% {
-    box-shadow:
-      var(--shadow),
-      0 0 0 0 rgba(76, 175, 80, 0.4),
-      0 0 0 0 rgba(76, 175, 80, 0.3);
-  }
-  30% {
-    box-shadow:
-      var(--shadow),
-      0 0 0 8px rgba(76, 175, 80, 0.2),
-      0 0 30px rgba(76, 175, 80, 0.4);
-  }
-  100% {
-    box-shadow:
-      var(--shadow),
-      0 0 0 3px rgba(76, 175, 80, 0.15),
-      0 0 20px rgba(76, 175, 80, 0.2);
-  }
-}
-
-/* US-064: Enhanced Confetti burst effect for completion celebration */
-/* Primary burst - larger particles with more colors */
-.goal-card.goal-completed.just-completed::before {
-  content: '';
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  width: 150%;
-  height: 150%;
-  background-image:
-    radial-gradient(circle, var(--success) 4px, transparent 4px),
-    radial-gradient(circle, var(--gold-bright) 3px, transparent 3px),
-    radial-gradient(circle, var(--warning) 4px, transparent 4px),
-    radial-gradient(circle, var(--secondary) 3px, transparent 3px),
-    radial-gradient(circle, #FF6B6B 3px, transparent 3px),
-    radial-gradient(circle, #A78BFA 4px, transparent 4px);
-  background-size: 25px 25px, 20px 20px, 22px 22px, 18px 18px, 24px 24px, 21px 21px;
-  background-position:
-    0 0,
-    12px 8px,
-    6px 16px,
-    18px 4px,
-    3px 12px,
-    15px 18px;
-  animation: confetti-burst-primary 1.2s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
-  pointer-events: none;
-  z-index: 10;
-}
-
-/* Secondary burst - delayed smaller particles for layered effect */
-.goal-card.goal-completed.just-completed::after {
-  content: '';
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  width: 120%;
-  height: 120%;
-  background-image:
-    radial-gradient(circle, var(--gold-bright) 2px, transparent 2px),
-    radial-gradient(circle, var(--success) 2px, transparent 2px),
-    radial-gradient(circle, #FF6B6B 2px, transparent 2px),
-    radial-gradient(circle, var(--secondary) 2px, transparent 2px);
-  background-size: 15px 15px, 12px 12px, 14px 14px, 13px 13px;
-  background-position:
-    4px 4px,
-    8px 10px,
-    2px 8px,
-    10px 2px;
-  animation: confetti-burst-secondary 1.4s cubic-bezier(0.25, 0.46, 0.45, 0.94) 0.1s forwards;
-  pointer-events: none;
-  z-index: 9;
-  opacity: 0;
-}
+/* Confetti effects disabled for minimal design */
+/* Enable via .with-confetti class if needed */
 
 /* Primary burst animation - faster expansion with rotation */
 @keyframes confetti-burst-primary {
@@ -3312,91 +3464,15 @@ select:focus {
 /* Type-specific completion enhancements */
 
 /* Timer goal completed */
-.goal-type-timer.goal-completed .timer-play-btn {
-  background-color: var(--success);
-  cursor: default;
-  animation: none;
-}
-
-.goal-type-timer.goal-completed .timer-play-btn:hover {
-  background-color: var(--success);
-  transform: none;
-}
-
+/* Timer completed - keep normal styling, border indicates completion */
 .goal-type-timer.goal-completed .timer-current {
-  color: var(--success);
+  color: var(--text-secondary);
 }
 
-/* Counter goal completed */
+/* Counter goal completed - subtle styling */
 .goal-type-counter.goal-completed .counter-increment-btn {
-  background-color: var(--success-light);
-  color: var(--success);
-}
-
-/* Make completed card progress bar shimmer */
-.goal-card.goal-completed .goal-progress-fill {
-  position: relative;
-  overflow: hidden;
-}
-
-.goal-card.goal-completed .goal-progress-fill::after {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: -100%;
-  width: 100%;
-  height: 100%;
-  background: linear-gradient(
-    90deg,
-    transparent,
-    rgba(255, 255, 255, 0.4),
-    transparent
-  );
-  animation: shimmer-sweep 2s ease-in-out infinite;
-}
-
-@keyframes shimmer-sweep {
-  0% {
-    left: -100%;
-  }
-  100% {
-    left: 100%;
-  }
-}
-
-/* Success sparkle particles around completed indicator */
-.goal-completed-indicator::before,
-.goal-completed-indicator::after {
-  content: '';
-  position: absolute;
-  width: 4px;
-  height: 4px;
-  background-color: var(--gold-bright);
-  border-radius: var(--radius-full);
-  animation: sparkle 1.5s ease-in-out infinite;
-}
-
-.goal-completed-indicator::before {
-  top: -6px;
-  right: -6px;
-  animation-delay: 0s;
-}
-
-.goal-completed-indicator::after {
-  bottom: -6px;
-  left: -6px;
-  animation-delay: 0.75s;
-}
-
-@keyframes sparkle {
-  0%, 100% {
-    transform: scale(0);
-    opacity: 0;
-  }
-  50% {
-    transform: scale(1);
-    opacity: 1;
-  }
+  background-color: var(--surface-sunken);
+  color: var(--text-secondary);
 }
 
 /* ========================================
@@ -3404,49 +3480,7 @@ select:focus {
    ======================================== */
 
 /* Header actions container for toggle and settings buttons */
-.header-actions {
-  position: absolute;
-  right: 0;
-  display: flex;
-  align-items: center;
-  gap: var(--spacing-xs);
-}
-
-/* Adjust settings button position when inside header-actions */
-.header-actions .settings-btn {
-  position: static;
-}
-
-/* View toggle button - matches settings button style */
-.view-toggle-btn {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 32px;
-  height: 32px;
-  padding: 0;
-  border: none;
-  background: transparent;
-  color: var(--text-secondary);
-  border-radius: var(--radius);
-  cursor: pointer;
-  transition: color var(--transition), background-color var(--transition);
-}
-
-.view-toggle-btn:hover {
-  color: var(--primary);
-  background-color: var(--primary-light);
-}
-
-.view-toggle-btn:active {
-  transform: scale(0.95);
-}
-
-/* Active state when compact view is on */
-.view-toggle-btn.compact-active {
-  color: var(--primary);
-  background-color: var(--primary-light);
-}
+/* Note: Main .header-actions styles are defined earlier in the file */
 
 /* Compact view goals list - reduced gap */
 .goals-list.compact-view {
@@ -3606,103 +3640,74 @@ select:focus {
 }
 
 /* ========================================
-   US-059: Drag-to-Reorder Daily Goals
+   US-059: Drag-to-Reorder Daily Goals - Minimal
    ======================================== */
 
-/* Drag handle - grip icon */
+/* Drag handle - Hidden by default, shown on hover */
 .drag-handle {
   display: flex;
   align-items: center;
   justify-content: center;
   width: 20px;
   height: 24px;
-  margin-right: var(--spacing-xs);
+  margin-right: var(--space-1);
   color: var(--text-muted);
   cursor: grab;
-  opacity: 0.5;
-  transition: opacity var(--transition), color var(--transition);
+  opacity: 0.4;
+  transition: opacity var(--duration-fast) var(--ease-out), color var(--duration-fast) var(--ease-out);
   flex-shrink: 0;
+  border-radius: var(--radius-sm);
+}
+
+.goal-card:hover .drag-handle {
+  opacity: 0.7;
 }
 
 .drag-handle:hover {
-  opacity: 1;
-  color: var(--text-secondary);
+  opacity: 1 !important;
+  color: var(--accent);
+  background-color: var(--surface-sunken);
 }
 
 .drag-handle:active {
   cursor: grabbing;
+  color: var(--accent);
 }
 
 .drag-handle svg {
-  width: 14px;
-  height: 14px;
-}
-
-/* Compact mode drag handle - smaller */
-.goal-card.compact .drag-handle {
-  width: 16px;
-  height: 20px;
-  margin-right: var(--spacing-xs);
-}
-
-.goal-card.compact .drag-handle svg {
   width: 12px;
   height: 12px;
 }
 
-/* Goal card dragging state */
+/* Compact mode drag handle */
+.goal-card.compact .drag-handle {
+  width: 14px;
+  height: 16px;
+  margin-right: var(--space-1);
+}
+
+.goal-card.compact .drag-handle svg {
+  width: 10px;
+  height: 10px;
+}
+
+/* Goal card dragging state - completely remove from flow */
 .goal-card.dragging {
-  opacity: 0.5;
-  transform: scale(0.98);
-  box-shadow: none;
+  display: none !important;
 }
 
-/* Goal card being dragged over */
-.goal-card.drag-over {
-  border-color: var(--primary);
+/* Drag clone - the card that follows cursor */
+.goal-card.drag-clone {
+  cursor: grabbing;
 }
 
-/* Visual indicator for drop position - top */
-.goal-card.drag-over-top {
-  position: relative;
-}
-
-.goal-card.drag-over-top::before {
-  content: '';
-  position: absolute;
-  top: -6px;
-  left: 0;
-  right: 0;
-  height: 3px;
-  background-color: var(--primary);
-  border-radius: var(--radius-full);
-  z-index: 10;
-}
-
-/* Visual indicator for drop position - bottom */
-.goal-card.drag-over-bottom {
-  position: relative;
-}
-
-.goal-card.drag-over-bottom::after {
-  content: '';
-  position: absolute;
-  bottom: -6px;
-  left: 0;
-  right: 0;
-  height: 3px;
-  background-color: var(--primary);
-  border-radius: var(--radius-full);
-  z-index: 10;
-}
-
-/* Drag placeholder - shows where item will be dropped */
+/* Drag placeholder - subtle gap where item will be dropped */
 .drag-placeholder {
-  background-color: var(--primary-light);
-  border: 2px dashed var(--primary);
-  border-radius: var(--radius);
-  margin: var(--spacing-sm) 0;
-  transition: height var(--transition-fast);
+  background-color: var(--surface-sunken);
+  border: 2px dashed var(--border);
+  border-radius: var(--radius-md);
+  margin-bottom: var(--space-2);
+  transition: all 0.15s ease;
 }
 
 /* Goals list styling during drag */
@@ -5184,13 +5189,15 @@ body.modal-open {
 
 /* Back button overrides for reports-header */
 .reports-header .back-btn {
-  padding: var(--spacing-sm) var(--spacing-md);
-  font-weight: var(--font-weight-medium);
+  padding: var(--spacing-sm);
+  min-width: 36px;
+  min-height: 36px;
+  justify-content: center;
 }
 
 .reports-header .back-icon {
-  width: 18px;
-  height: 18px;
+  width: 20px;
+  height: 20px;
 }
 
 .reports-title {
@@ -5206,6 +5213,7 @@ body.modal-open {
   overflow-y: auto;
   overflow-x: hidden;
   padding: var(--spacing-md);
+  padding-bottom: 80px; /* Account for fixed bottom nav */
   background-color: var(--background-secondary);
   scroll-behavior: smooth;
 }
@@ -5794,6 +5802,18 @@ body.modal-open {
   background: var(--background);
 }
 
+.template-gallery-header .back-btn {
+  padding: var(--spacing-sm);
+  min-width: 36px;
+  min-height: 36px;
+  justify-content: center;
+}
+
+.template-gallery-header .back-icon {
+  width: 20px;
+  height: 20px;
+}
+
 .template-gallery-title {
   flex: 1;
   text-align: center;
@@ -5997,42 +6017,14 @@ body.modal-open {
    US-067: Focus Mode Styles
    ============================================================================= */
 
-/* Focus button on goal cards */
-.goal-header-actions {
-  display: flex;
-  align-items: center;
-  gap: var(--spacing-sm);
-}
-
-.focus-btn {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 28px;
-  height: 28px;
-  padding: 0;
-  background: transparent;
-  border: 1px solid transparent;
-  border-radius: var(--radius);
-  color: var(--text-muted);
-  cursor: pointer;
-  transition: all var(--transition-fast);
-  flex-shrink: 0;
-}
-
+/* Focus button hover styles - base styles defined earlier */
 .focus-btn:hover {
-  background-color: var(--background-secondary);
-  color: var(--secondary);
-  border-color: var(--secondary);
+  background-color: var(--surface-sunken);
+  color: var(--accent);
 }
 
 .focus-btn:active {
   transform: scale(0.95);
-}
-
-.focus-btn svg {
-  width: 16px;
-  height: 16px;
 }
 
 /* Compact view focus button */
@@ -6346,6 +6338,21 @@ body.modal-open {
   background: var(--success);
 }
 
+/* Focus Mode Completed State - green indication */
+.focus-mode-screen.focus-completed {
+  background: linear-gradient(180deg, var(--success-light) 0%, var(--background) 30%);
+}
+
+.focus-mode-screen.focus-completed .focus-goal-title {
+  color: var(--success);
+}
+
+.focus-mode-screen.focus-completed .focus-timer-value,
+.focus-mode-screen.focus-completed .focus-counter-value,
+.focus-mode-screen.focus-completed .focus-progress-percent {
+  color: var(--success);
+}
+
 .focus-progress-percent {
   font-size: var(--font-size-sm);
   font-weight: var(--font-weight-semibold);
@@ -6395,7 +6402,45 @@ body.modal-open {
   height: 20px;
 }
 
-/* Timer play button */
+/* Timer play button - icon only */
+.focus-timer-icon-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 56px;
+  height: 56px;
+  padding: 0;
+  background: var(--type-timer);
+  color: var(--text-inverse);
+  border: none;
+  border-radius: var(--radius-full);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.focus-timer-icon-btn svg {
+  width: 24px;
+  height: 24px;
+}
+
+.focus-timer-icon-btn:hover {
+  background: var(--info);
+  transform: scale(1.05);
+}
+
+.focus-timer-icon-btn:active {
+  transform: scale(0.95);
+}
+
+.focus-timer-icon-btn.is-active {
+  background: var(--warning);
+}
+
+.focus-timer-icon-btn.is-active:hover {
+  background: var(--type-counter);
+}
+
+/* Legacy focus-play-btn for backwards compatibility */
 .focus-play-btn {
   background: var(--secondary);
   min-width: 160px;
@@ -6466,43 +6511,8 @@ body.modal-open {
 }
 
 /* Completed Message */
-.focus-completed-message {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: var(--spacing-sm);
-  padding: var(--spacing-md) var(--spacing-lg);
-  background: var(--success-light);
-  border-radius: var(--radius);
-  animation: focus-complete-appear 0.5s ease-out;
-}
+/* Focus completed styles removed - no special completed state in focus mode */
 
-@keyframes focus-complete-appear {
-  from {
-    opacity: 0;
-    transform: scale(0.9);
-  }
-  to {
-    opacity: 1;
-    transform: scale(1);
-  }
-}
-
-.focus-completed-icon {
-  font-size: 24px;
-  color: var(--success);
-}
-
-.focus-completed-text {
-  font-size: var(--font-size-lg);
-  font-weight: var(--font-weight-semibold);
-  color: var(--success);
-}
-
-/* Focus mode when goal is completed */
-.focus-mode-screen.focus-completed {
-  background: linear-gradient(180deg, var(--success-light) 0%, var(--background) 50%);
-}
 
 /* Dark mode adjustments for Focus Mode */
 [data-theme="dark"] .focus-exit-btn {
@@ -6525,14 +6535,6 @@ body.modal-open {
 [data-theme="dark"] .focus-decrement-btn {
   background: var(--background-card);
   border-color: var(--border);
-}
-
-[data-theme="dark"] .focus-completed-message {
-  background: rgba(76, 175, 80, 0.15);
-}
-
-[data-theme="dark"] .focus-mode-screen.focus-completed {
-  background: linear-gradient(180deg, rgba(76, 175, 80, 0.1) 0%, var(--background) 50%);
 }
 
 /* ========================================
@@ -6897,6 +6899,18 @@ body.modal-open {
   min-height: 48px;
 }
 
+.archive-header .back-btn {
+  padding: var(--spacing-sm);
+  min-width: 36px;
+  min-height: 36px;
+  justify-content: center;
+}
+
+.archive-header .back-icon {
+  width: 20px;
+  height: 20px;
+}
+
 .archive-title {
   font-size: var(--font-size-lg);
   font-weight: 600;
@@ -7166,6 +7180,18 @@ body.modal-open {
   padding: var(--spacing-sm) var(--spacing-md);
   background: var(--bg-primary);
   border-bottom: 1px solid var(--border);
+}
+
+.goal-statistics-header .back-btn {
+  padding: var(--spacing-sm);
+  min-width: 36px;
+  min-height: 36px;
+  justify-content: center;
+}
+
+.goal-statistics-header .back-icon {
+  width: 20px;
+  height: 20px;
 }
 
 .goal-statistics-title {
@@ -7497,39 +7523,10 @@ body.modal-open {
   color: var(--text-secondary);
 }
 
-/* Stats Button on Goal Card */
-.stats-btn {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 28px;
-  height: 28px;
-  border: none;
-  border-radius: var(--radius-sm);
-  background: transparent;
-  color: var(--text-tertiary);
-  cursor: pointer;
-  transition: all 0.2s ease;
-}
-
-.stats-btn:hover {
-  background: var(--bg-secondary);
-  color: var(--secondary);
-}
-
-.stats-btn:active {
-  transform: scale(0.95);
-}
-
-.stats-btn svg {
-  width: 16px;
-  height: 16px;
-}
-
-/* Compact view adjustments for stats button */
+/* Stats Button - base styles defined earlier, compact adjustments only */
 .goal-card.compact .stats-btn {
-  width: 24px;
-  height: 24px;
+  width: 20px;
+  height: 20px;
 }
 
 .goal-card.compact .stats-btn svg {
@@ -7670,8 +7667,15 @@ body.modal-open {
 }
 
 .weekly-review-header .back-btn {
-  padding: var(--spacing-sm) var(--spacing-md);
-  font-weight: var(--font-weight-medium);
+  padding: var(--spacing-sm);
+  min-width: 36px;
+  min-height: 36px;
+  justify-content: center;
+}
+
+.weekly-review-header .back-icon {
+  width: 20px;
+  height: 20px;
 }
 
 .weekly-review-title {
@@ -8234,36 +8238,11 @@ body.modal-open {
 }
 
 /* ----------------------------------------
-   Goal Card Custom Color Accent
+   Goal Card Custom Color Accent - Disabled
+   Only completion state shows left border (green)
    ---------------------------------------- */
 .goal-card.has-custom-color {
-  position: relative;
-  overflow: hidden;
-}
-
-.goal-card.has-custom-color::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  bottom: 0;
-  width: 4px;
-  background-color: var(--goal-custom-color, var(--primary));
-  border-radius: var(--radius-lg) 0 0 var(--radius-lg);
-}
-
-/* Adjust card padding for color stripe */
-.goal-card.has-custom-color {
-  padding-left: calc(var(--spacing-md) + 4px);
-}
-
-/* Color stripe for compact view */
-.goal-card.compact.has-custom-color::before {
-  width: 3px;
-}
-
-.goal-card.compact.has-custom-color {
-  padding-left: calc(var(--spacing-sm) + 3px);
+  /* Custom color stripe disabled - completion uses green border instead */
 }
 
 /* ----------------------------------------
@@ -8886,6 +8865,18 @@ body.modal-open {
   padding: var(--spacing-md);
   border-bottom: 1px solid var(--border);
   background: var(--bg);
+}
+
+.achievements-header .back-btn {
+  padding: var(--spacing-sm);
+  min-width: 36px;
+  min-height: 36px;
+  justify-content: center;
+}
+
+.achievements-header .back-icon {
+  width: 20px;
+  height: 20px;
 }
 
 .achievements-title {
@@ -10250,373 +10241,6 @@ body.modal-open {
   .level-confetti-particle {
     animation: none;
     opacity: 0;
-  }
-}
-
-/* =============================================================================
-   US-084: Habit Chains - Linked Goals
-   ============================================================================= */
-
-/* Chain Selector in Goal Form */
-.chain-selector {
-  position: relative;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.chain-selector .form-select {
-  flex: 1;
-  padding-right: 32px;
-}
-
-.chain-link-icon {
-  position: absolute;
-  right: 10px;
-  top: 50%;
-  transform: translateY(-50%);
-  color: var(--text-tertiary);
-  pointer-events: none;
-}
-
-.chain-link-icon svg {
-  width: 16px;
-  height: 16px;
-}
-
-.chain-hint {
-  margin-top: 6px;
-  font-size: 12px;
-  color: var(--text-secondary);
-  line-height: 1.4;
-}
-
-.chain-hint strong {
-  color: var(--warning-color, #f39c12);
-}
-
-/* Chain Info Visualization */
-.chain-info {
-  margin-top: 12px;
-  padding: 10px 12px;
-  background: var(--bg-secondary);
-  border-radius: 6px;
-  border: 1px solid var(--border-color);
-}
-
-.chain-visualization {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  font-size: 13px;
-}
-
-.chain-visualization .chain-parent-name {
-  padding: 4px 8px;
-  background: var(--bg-tertiary);
-  border-radius: 4px;
-  font-weight: 500;
-  color: var(--text-primary);
-}
-
-.chain-arrow {
-  color: var(--text-tertiary);
-  font-size: 16px;
-}
-
-.chain-current-name {
-  padding: 4px 8px;
-  background: var(--primary-color);
-  color: white;
-  border-radius: 4px;
-  font-weight: 500;
-}
-
-/* Chain Indicator on Goal Card */
-.chain-indicator {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  padding: 6px 10px;
-  margin-bottom: 8px;
-  border-radius: 6px;
-  font-size: 12px;
-  background: var(--bg-secondary);
-  border: 1px solid var(--border-color);
-}
-
-.chain-indicator.chain-locked {
-  background: rgba(231, 76, 60, 0.1);
-  border-color: rgba(231, 76, 60, 0.3);
-  color: #e74c3c;
-}
-
-.chain-indicator.chain-unlocked {
-  background: rgba(39, 174, 96, 0.1);
-  border-color: rgba(39, 174, 96, 0.3);
-  color: #27ae60;
-}
-
-.chain-icon svg {
-  width: 14px;
-  height: 14px;
-}
-
-.chain-status {
-  font-size: 14px;
-}
-
-.chain-indicator .chain-parent-name {
-  font-weight: 500;
-  flex: 1;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-/* Locked Goal State */
-.goal-card.goal-locked {
-  opacity: 0.7;
-  position: relative;
-}
-
-.goal-card.goal-locked .goal-card-header,
-.goal-card.goal-locked .goal-progress-section {
-  filter: grayscale(0.3);
-}
-
-.goal-card.goal-locked::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: rgba(0, 0, 0, 0.03);
-  border-radius: inherit;
-  pointer-events: none;
-  z-index: 1;
-}
-
-/* Locked Overlay */
-.goal-locked-overlay {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  padding: 20px;
-  background: var(--bg-secondary);
-  border-radius: 8px;
-  border: 2px dashed var(--border-color);
-  text-align: center;
-  margin-top: 8px;
-}
-
-.locked-icon {
-  color: var(--text-tertiary);
-  margin-bottom: 8px;
-}
-
-.locked-icon svg {
-  width: 32px;
-  height: 32px;
-  opacity: 0.5;
-}
-
-.locked-message {
-  font-size: 13px;
-  color: var(--text-secondary);
-  margin: 0;
-  line-height: 1.4;
-}
-
-.locked-message strong {
-  color: var(--text-primary);
-}
-
-/* Chain Unlock Notification */
-.chain-unlock-notification {
-  position: fixed;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%) scale(0.8);
-  background: linear-gradient(135deg, #27ae60 0%, #2ecc71 100%);
-  color: white;
-  padding: 16px 24px;
-  border-radius: 12px;
-  box-shadow: 0 8px 32px rgba(39, 174, 96, 0.4);
-  z-index: 10003;
-  opacity: 0;
-  transition: all 0.3s ease;
-  pointer-events: none;
-}
-
-.chain-unlock-notification.show {
-  opacity: 1;
-  transform: translate(-50%, -50%) scale(1);
-}
-
-.chain-unlock-notification.hide {
-  opacity: 0;
-  transform: translate(-50%, -50%) scale(0.8);
-}
-
-.chain-unlock-content {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-}
-
-.chain-unlock-icon svg {
-  width: 24px;
-  height: 24px;
-}
-
-.chain-unlock-text {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-}
-
-.chain-unlock-title {
-  font-weight: 600;
-  font-size: 14px;
-}
-
-.chain-unlock-goal {
-  font-size: 13px;
-  opacity: 0.9;
-}
-
-/* Chain Complete Notification */
-.chain-complete-notification {
-  position: fixed;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%) scale(0.8);
-  background: linear-gradient(135deg, #9b59b6 0%, #8e44ad 100%);
-  color: white;
-  padding: 20px 28px;
-  border-radius: 16px;
-  box-shadow: 0 8px 32px rgba(155, 89, 182, 0.5);
-  z-index: 10003;
-  opacity: 0;
-  transition: all 0.3s ease;
-  pointer-events: none;
-}
-
-.chain-complete-notification.show {
-  opacity: 1;
-  transform: translate(-50%, -50%) scale(1);
-}
-
-.chain-complete-notification.hide {
-  opacity: 0;
-  transform: translate(-50%, -50%) scale(0.8);
-}
-
-.chain-complete-content {
-  display: flex;
-  align-items: center;
-  gap: 16px;
-}
-
-.chain-complete-icon svg {
-  width: 32px;
-  height: 32px;
-}
-
-.chain-complete-text {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-}
-
-.chain-complete-title {
-  font-weight: 700;
-  font-size: 18px;
-}
-
-.chain-complete-count {
-  font-size: 14px;
-  opacity: 0.9;
-}
-
-/* Goal in Chain Styling */
-.goal-card.goal-in-chain {
-  border-left: 3px solid var(--primary-color);
-}
-
-.goal-card.goal-in-chain.goal-locked {
-  border-left-color: var(--warning-color, #f39c12);
-}
-
-/* Dark Mode - Habit Chains */
-[data-theme="dark"] .chain-indicator {
-  background: var(--bg-tertiary);
-}
-
-[data-theme="dark"] .chain-indicator.chain-locked {
-  background: rgba(231, 76, 60, 0.15);
-}
-
-[data-theme="dark"] .chain-indicator.chain-unlocked {
-  background: rgba(39, 174, 96, 0.15);
-}
-
-[data-theme="dark"] .goal-locked-overlay {
-  background: var(--bg-tertiary);
-  border-color: var(--border-color);
-}
-
-[data-theme="dark"] .chain-unlock-notification {
-  background: linear-gradient(135deg, #2ecc71 0%, #27ae60 100%);
-}
-
-[data-theme="dark"] .chain-complete-notification {
-  background: linear-gradient(135deg, #8e44ad 0%, #9b59b6 100%);
-}
-
-[data-theme="dark"] .goal-card.goal-locked::before {
-  background: rgba(0, 0, 0, 0.1);
-}
-
-/* Compact View - Chain Indicator */
-.goal-card.compact .chain-indicator {
-  padding: 4px 8px;
-  font-size: 11px;
-  margin-bottom: 6px;
-}
-
-.goal-card.compact .chain-indicator .chain-icon svg {
-  width: 12px;
-  height: 12px;
-}
-
-.goal-card.compact .goal-locked-overlay {
-  padding: 12px;
-}
-
-.goal-card.compact .locked-icon svg {
-  width: 24px;
-  height: 24px;
-}
-
-.goal-card.compact .locked-message {
-  font-size: 11px;
-}
-
-/* Reduced Motion - Chain Notifications */
-@media (prefers-reduced-motion: reduce) {
-  .chain-unlock-notification,
-  .chain-complete-notification {
-    transition: opacity 0.1s ease;
-    transform: translate(-50%, -50%);
-  }
-
-  .chain-unlock-notification.show,
-  .chain-complete-notification.show {
-    transform: translate(-50%, -50%);
   }
 }
 
