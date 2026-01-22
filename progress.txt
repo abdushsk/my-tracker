@@ -1188,3 +1188,81 @@ Implemented a detailed statistics view for each individual goal. Users can now v
 - Progress chart (last 30 days) (bar chart with completion status)
 - Comparison to average (average daily progress and days tracked)
 
+---
+
+## US-072: Weekly Review Screen
+**Date**: 2026-01-22
+**Status**: Completed
+
+### What was done:
+Implemented a comprehensive Weekly Review screen that summarizes the user's weekly accomplishments. The screen is accessible from the Reports screen via a prominent navigation button and shows various statistics about the week's progress.
+
+### Implementation details:
+
+1. **Screen Registration** (`src/popup/popup.js`):
+   - Added `WEEKLY_REVIEW: 'weeklyReview'` to SCREENS enum
+   - Added `[SCREENS.WEEKLY_REVIEW]: 'screen-weekly-review'` to SCREEN_IDS mapping
+   - Added case in `renderCurrentScreen()` switch to call `renderWeeklyReviewScreen()`
+
+2. **HTML Structure** (`src/popup/popup.html`):
+   - Added `<div id="screen-weekly-review" class="screen">` placeholder for the screen
+
+3. **Weekly Review Screen Rendering** (`src/popup/popup.js` lines 3619-4115):
+   - `renderWeeklyReviewScreen()` - Renders the full Weekly Review layout with:
+     - Header with back button and title
+     - Week date range display (e.g., "Jan 20 - Jan 22")
+     - Goals completed section with large count and completion rate
+     - Total time tracked section showing hours/minutes from timer goals
+     - Streaks section with current and best streak mini-cards
+     - Goal performance section showing best and worst performing goals
+     - Daily breakdown bar chart showing Mon-Sun completion percentages
+     - Week-over-week comparison showing improvement/decline
+
+4. **Statistics Calculation Functions** (`src/popup/popup.js`):
+   - `updateWeeklyReviewStats()` - Orchestrates all data calculations
+   - `updateWeekDateRange()` - Displays formatted week date range
+   - `updateWeeklyCompletions()` - Shows completed/total with color-coded rate
+   - `updateWeeklyTimeTracked()` - Sums timer durations from activity log
+   - `updateGoalPerformance()` - Finds best/worst goals by completion rate
+   - `renderDailyBreakdown()` - Renders bar chart for each day of the week
+   - `updateWeekComparison()` - Compares this week to previous week
+
+5. **Navigation from Reports** (`src/popup/popup.js`):
+   - Added "Weekly Review" navigation button at the bottom of Reports screen
+   - Button styled as a prominent card with icon, title, description, and arrow
+
+6. **CSS Styles** (`src/popup/popup.css` lines 7039-7585):
+   - Weekly Review navigation button styling
+   - Screen container, header, and content area
+   - Completions card with large value display
+   - Time card with clock icon
+   - Streak mini-cards (reused from Reports patterns)
+   - Performance cards with best/needs-work badges
+   - Daily breakdown bar chart with color-coded bars
+   - Comparison card with improvement/decline indicators
+   - Dark mode support for all elements
+   - Reduced motion support
+
+### Files modified:
+- `src/popup/popup.html` (lines 56-59)
+- `src/popup/popup.js` (lines 104-129 screen registration, 202-204 render switch, 3619-4115 Weekly Review functions, 6468-6490 Reports navigation)
+- `src/popup/popup.css` (lines 7039-7585)
+
+### Key design decisions:
+- Full-page screen pattern consistent with other screens (Goal Statistics, Archive, etc.)
+- Weekly date range shows Monday to current day (not full week if mid-week)
+- Time tracked calculates from activity log pause/complete actions plus current timer progress
+- Performance cards show best/worst goals only when there are multiple goals with different rates
+- Daily breakdown shows Mon-Sun with future days dimmed
+- Week comparison shows percentage improvement/decline or "No data" if previous week empty
+- Color coding follows existing patterns: green (excellent), primary (good), warning (moderate), danger (low)
+
+### Acceptance criteria met:
+- Weekly Review screen in Reports section (accessible via navigation button)
+- Summary of week's completions (large display with X/Y format and percentage)
+- Total time tracked across all timers (calculated from activity log + current progress)
+- Goals with best/worst completion rates (performance cards section)
+- Achievements unlocked this week (partially - streaks are shown; full achievements system is separate user story US-080)
+- Comparison to previous week (shows percentage change with trend icon)
+- Optional: weekly notification prompt (not implemented - this is a separate feature)
+

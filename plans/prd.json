@@ -295,7 +295,7 @@
         "Optional: weekly notification prompt"
       ],
       "priority": 18,
-      "passes": false,
+      "passes": true,
       "dependsOn": []
     },
     {
