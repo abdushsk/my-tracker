@@ -47,7 +47,7 @@ export function renderChallengeStatsSection() {
         <div class="challenge-stat-card">
           <div class="challenge-stat-icon">🔥</div>
           <div class="challenge-stat-value">${currentStreak}</div>
-          <div class="challenge-stat-label">Current Streak</div>
+          <div class="challenge-stat-label">Streak</div>
         </div>
         <div class="challenge-stat-card">
           <div class="challenge-stat-icon">⭐</div>

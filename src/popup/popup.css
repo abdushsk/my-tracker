@@ -1249,21 +1249,6 @@ select:focus {
 }
 
 /* Category-specific stripe colors */
-.goal-card[data-category="work"]::before {
-  background-color: var(--type-timer);
-}
-
-.goal-card[data-category="health"]::before {
-  background-color: var(--accent);
-}
-
-.goal-card[data-category="learning"]::before {
-  background-color: var(--type-avoidance);
-}
-
-.goal-card[data-category="personal"]::before {
-  background-color: var(--type-counter);
-}
 
 /* Legacy badge container - see US-015 for updated styling */
 
@@ -2840,8 +2825,7 @@ select:focus {
   font-size: var(--text-xs);
   color: var(--text-muted);
   font-weight: var(--weight-medium);
-  opacity: 0;
-  transition: opacity var(--duration-fast) var(--ease-out);
+  opacity: 100;
 }
 
 .goal-card:hover .goal-progress-percent {
