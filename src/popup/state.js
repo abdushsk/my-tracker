@@ -32,6 +32,7 @@ export const state = {
   timerIntervalId: null, // Interval ID for updating timer display
   justCompletedGoals: new Set(), // Track goals that just completed for animation (US-019)
   animatedIcons: new Set(), // US-019: Track icons that have already played their animation
+  expandedCompletedGoals: new Set(), // Track which completed goals are expanded to show controls
   keyboardSelectedGoalIndex: -1, // US-078: Currently selected goal index for keyboard navigation
   keyboardShortcutsHelpVisible: false, // US-078: Whether keyboard shortcuts help overlay is visible
   // US-079: Undo/Redo state management

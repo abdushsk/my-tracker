@@ -172,7 +172,8 @@ import {
 import {
   getGoalTypeIcon,
   // renderGoalCard now used in ./screens/viewGoals.js
-  toggleGoalNotes
+  toggleGoalNotes,
+  toggleCompletedGoalExpand
   // renderGoalControls used internally by goalCard.js
 } from './components/goalCard.js';
 
@@ -1194,6 +1195,20 @@ function attachGoalControlListeners(container) {
       const goalId = btn.getAttribute('data-goal-id');
       if (goalId) {
         toggleGoalNotes(goalId, btn);
+      }
+    });
+  });
+
+  // Toggle completed goal expand/collapse buttons
+  const expandCompletedBtns = container.querySelectorAll('[data-action="toggle-completed-expand"]');
+  expandCompletedBtns.forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      const goalId = btn.getAttribute('data-goal-id');
+      if (goalId) {
+        toggleCompletedGoalExpand(goalId);
+        renderViewGoalsScreen();
       }
     });
   });

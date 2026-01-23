@@ -105,6 +105,28 @@ export function renderGoalCard(goal) {
     });
   }
 
+  // Compact completed view - show completed non-checkbox goals in single-row format
+  // Unless expanded or timer is running, then show the full card
+  const isTimerRunning = goal.type === GOAL_TYPES.TIMER && goal.isActive;
+  if (isCompleted && !state.expandedCompletedGoals?.has(goal.id) && !isTimerRunning) {
+    return renderCompactCompletedCard(goal, {
+      cardClasses,
+      hasCustomColor,
+      categoryDataAttr,
+      goalColorStyle,
+      typeIcon,
+      progressDisplay,
+      categoryInfo
+    });
+  }
+
+  // Collapse button for expanded completed goals
+  const collapseBtn = isCompleted ? `
+    <button class="collapse-completed-btn" data-action="toggle-completed-expand" data-goal-id="${goal.id}" title="Collapse">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="14" height="14"><polyline points="18 15 12 9 6 15"/></svg>
+    </button>
+  ` : '';
+
   return `
     <div class="${cardClasses} ${hasCustomColor}" data-goal-id="${goal.id}" ${categoryDataAttr} ${goalColorStyle} draggable="true">
       <div class="goal-card-header">
@@ -123,6 +145,7 @@ export function renderGoalCard(goal) {
           <h3 class="goal-title">${escapeHtml(goal.title)}</h3>
         </div>
         <div class="goal-header-actions">
+          ${collapseBtn}
           <button class="stats-btn" data-action="view-stats" data-goal-id="${goal.id}" title="View statistics for this goal" aria-label="View statistics for ${escapeHtml(goal.title)}">
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="16" height="16">
               <line x1="18" y1="20" x2="18" y2="10"/>
@@ -225,6 +248,59 @@ function renderCheckboxGoalCard(goal, options) {
         </div>
       </div>
       ${goal.notes ? `<div class="goal-card-body checkbox-card-body">${renderGoalNotes(goal)}</div>` : ''}
+    </div>
+  `;
+}
+
+/**
+ * Render a compact single-row view for completed non-checkbox goals
+ * @param {Object} goal - The goal object
+ * @param {Object} options - Card rendering options
+ * @returns {string} HTML string for the compact completed card
+ */
+function renderCompactCompletedCard(goal, options) {
+  const { cardClasses, hasCustomColor, categoryDataAttr, goalColorStyle, typeIcon, progressDisplay, categoryInfo } = options;
+
+  const checkIcon = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>`;
+
+  const expandIcon = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="14" height="14"><polyline points="6 9 12 15 18 9"/></svg>`;
+
+  return `
+    <div class="${cardClasses} ${hasCustomColor} compact-completed" data-goal-id="${goal.id}" ${categoryDataAttr} ${goalColorStyle} draggable="true">
+      <div class="goal-card-header compact-completed-header">
+        <div class="drag-handle" title="Drag to reorder">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="16" height="16">
+            <circle cx="9" cy="6" r="1.5"/>
+            <circle cx="15" cy="6" r="1.5"/>
+            <circle cx="9" cy="12" r="1.5"/>
+            <circle cx="15" cy="12" r="1.5"/>
+            <circle cx="9" cy="18" r="1.5"/>
+            <circle cx="15" cy="18" r="1.5"/>
+          </svg>
+        </div>
+        <span class="compact-completed-check">${checkIcon}</span>
+        <span class="goal-type-indicator compact-completed-type">${typeIcon}</span>
+        <div class="goal-card-title-row compact-completed-title-row">
+          <h3 class="goal-title compact-completed-title">${escapeHtml(goal.title)}</h3>
+        </div>
+        <span class="compact-completed-progress">${progressDisplay}</span>
+        <div class="goal-header-actions">
+          <button class="expand-completed-btn" data-action="toggle-completed-expand" data-goal-id="${goal.id}" title="Expand">
+            ${expandIcon}
+          </button>
+          <button class="stats-btn" data-action="view-stats" data-goal-id="${goal.id}" title="View statistics" aria-label="View statistics for ${escapeHtml(goal.title)}">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="16" height="16">
+              <line x1="18" y1="20" x2="18" y2="10"/>
+              <line x1="12" y1="20" x2="12" y2="4"/>
+              <line x1="6" y1="20" x2="6" y2="14"/>
+            </svg>
+          </button>
+          <div class="goal-badges">
+            ${categoryInfo ? `<span class="goal-category-badge" style="background-color: ${categoryInfo.light}; color: ${categoryInfo.color}"><span class="category-color-dot" style="background-color: ${categoryInfo.color}"></span>${categoryInfo.name}</span>` : ''}
+            <span class="goal-timeframe-badge timeframe-${goal.timeframe}">${capitalizeFirst(goal.timeframe)}</span>
+          </div>
+        </div>
+      </div>
     </div>
   `;
 }
@@ -386,6 +462,21 @@ export function toggleGoalNotes(goalId, button) {
     if (toggleText) toggleText.textContent = 'Show more';
     if (toggleIcon) toggleIcon.style.transform = 'rotate(0deg)';
     button.title = 'Show more';
+  }
+}
+
+/**
+ * Toggle expand/collapse state for completed goals
+ * @param {string} goalId - The goal ID
+ * @returns {boolean} The new expanded state
+ */
+export function toggleCompletedGoalExpand(goalId) {
+  if (state.expandedCompletedGoals.has(goalId)) {
+    state.expandedCompletedGoals.delete(goalId);
+    return false;
+  } else {
+    state.expandedCompletedGoals.add(goalId);
+    return true;
   }
 }
 
