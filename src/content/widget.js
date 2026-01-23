@@ -1055,7 +1055,7 @@
         }
       });
 
-      // Drag functionality
+      // Drag functionalitys
       this.setupDrag();
 
       
