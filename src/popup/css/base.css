@@ -425,6 +425,26 @@ html, body {
   display: flex;
 }
 
+/* Compact mode - dynamic height for Chrome extension popup */
+html.compact-mode,
+html.compact-mode body {
+  height: fit-content;
+  min-height: auto;
+  max-height: 500px;
+}
+
+html.compact-mode #app {
+  height: fit-content;
+  min-height: auto;
+  max-height: 500px;
+}
+
+html.compact-mode .screen {
+  height: fit-content;
+  min-height: auto;
+  max-height: 500px;
+}
+
 /* Common typography elements */
 h1, h2, h3, h4, h5, h6 {
   font-weight: var(--font-weight-semibold);

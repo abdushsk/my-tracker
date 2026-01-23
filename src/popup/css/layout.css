@@ -628,6 +628,14 @@ body.compact-mode #app {
 /* Adjust goals list container in compact mode */
 body.compact-mode .goals-list-container {
   padding-bottom: var(--space-3);
+  max-height: 320px;
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+/* Compact mode goals list */
+body.compact-mode .goals-list {
+  overflow: visible;
 }
 
 /* Filter chips wrapper for flexible layout */

@@ -40,8 +40,9 @@ export function renderViewGoalsScreen() {
   const screen = document.getElementById(SCREEN_IDS[SCREENS.VIEW_GOALS]);
   if (!screen) return;
 
-  // Apply compact mode class to body if active
+  // Apply compact mode class to body and html if active
   document.body.classList.toggle('compact-mode', state.compactMode);
+  document.documentElement.classList.toggle('compact-mode', state.compactMode);
 
   screen.innerHTML = `
     <div class="view-goals-screen">
@@ -104,6 +105,9 @@ export function renderViewGoalsScreen() {
   if (Object.keys(state.activeTimers).length > 0 && callbacks.startTimerUpdateInterval) {
     callbacks.startTimerUpdateInterval();
   }
+
+  // Update dynamic height for compact mode
+  updateCompactModeHeight();
 }
 
 // =============================================================================
@@ -299,4 +303,14 @@ export function loadCompactModeState() {
   if (saved !== null) {
     state.compactMode = JSON.parse(saved);
   }
+}
+
+/**
+ * Update popup height dynamically in compact mode
+ * Chrome extension popup auto-sizes based on content when height is auto
+ */
+function updateCompactModeHeight() {
+  // Clear any inline styles that might interfere with CSS rules
+  document.body.style.height = '';
+  document.documentElement.style.height = '';
 }
