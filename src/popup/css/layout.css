@@ -96,6 +96,8 @@
 
 /* Category filter bar - inside content area */
 .view-goals-screen .category-filter-bar {
+  display: flex;
+  align-items: center;
   padding: var(--space-2) var(--space-4);
   background-color: var(--surface-sunken);
 }
@@ -572,5 +574,85 @@
 .empty-filter-message {
   font-size: var(--font-size-base);
   color: var(--text-muted);
+}
+
+/* ========================================
+   Compact Mode - Minimal goals-only view
+   ======================================== */
+
+/* Compact mode button styling */
+.compact-mode-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  border: none;
+  background: transparent;
+  color: var(--text-muted);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: all var(--duration-fast) var(--ease-out);
+  flex-shrink: 0;
+}
+
+.compact-mode-btn:hover {
+  color: var(--text-primary);
+  background-color: var(--surface-sunken);
+}
+
+.compact-mode-btn:active {
+  transform: scale(0.95);
+}
+
+.compact-mode-btn.active {
+  color: var(--accent);
+}
+
+.compact-mode-btn svg {
+  width: 18px;
+  height: 18px;
+}
+
+/* Hide bottom navigation in compact mode */
+body.compact-mode .main-bottom-nav {
+  display: none;
+}
+
+/* Remove bottom padding when nav is hidden */
+body.compact-mode #app {
+  padding-bottom: 0;
+}
+
+/* Adjust goals list container in compact mode */
+body.compact-mode .goals-list-container {
+  padding-bottom: var(--space-3);
+}
+
+/* Filter chips wrapper for flexible layout */
+.filter-chips {
+  display: flex;
+  gap: var(--spacing-xs);
+  overflow-x: auto;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  flex: 1;
+  min-width: 0;
+}
+
+.filter-chips::-webkit-scrollbar {
+  display: none;
+}
+
+/* Compact mode filter bar - with expand button on right */
+.category-filter-bar.compact-mode-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2);
+  padding: var(--space-2) var(--space-4);
+  background-color: var(--surface);
+  border-bottom: 1px solid var(--border-subtle);
 }
 

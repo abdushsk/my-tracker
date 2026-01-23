@@ -44,7 +44,8 @@ export const state = {
   // US-086: Break Reminders state
   breakReminderState: null, // Break reminder state
   breakReminderVisible: false, // Whether break reminder overlay is visible
-  breakReminderCheckTimeoutId: null // Timeout for periodic break reminder check
+  breakReminderCheckTimeoutId: null, // Timeout for periodic break reminder check
+  compactMode: false // Compact Mode: shows only goals, hides navigation and extras
 };
 
 // =============================================================================

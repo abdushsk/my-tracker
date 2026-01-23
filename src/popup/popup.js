@@ -158,7 +158,8 @@ import {
 
 import {
   registerViewGoalsCallbacks,
-  renderViewGoalsScreen
+  renderViewGoalsScreen,
+  loadCompactModeState
 } from './screens/viewGoals.js';
 
 import {
@@ -1424,6 +1425,9 @@ async function loadData() {
 
     // US-031: Sync active timers with goals - ensure isActive flags are in sync
     await syncActiveTimersWithGoals();
+
+    // Load compact mode preference from localStorage
+    loadCompactModeState();
 
     state.isLoading = false;
   } catch (error) {

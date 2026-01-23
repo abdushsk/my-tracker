@@ -40,12 +40,24 @@ export function renderViewGoalsScreen() {
   const screen = document.getElementById(SCREEN_IDS[SCREENS.VIEW_GOALS]);
   if (!screen) return;
 
+  // Apply compact mode class to body if active
+  document.body.classList.toggle('compact-mode', state.compactMode);
+
   screen.innerHTML = `
     <div class="view-goals-screen">
+      ${!state.compactMode ? `
       <header class="screen-header main-screen-header">
         <h1 class="screen-title">Today</h1>
         <div class="header-actions">
           <button class="header-text-btn" data-screen="${SCREENS.MANAGE_GOALS}" title="Manage goals">Manage</button>
+          <button class="compact-mode-btn" id="compact-mode-toggle" aria-label="Enter compact mode" title="Enter compact mode">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" width="18" height="18">
+              <polyline points="4 14 10 14 10 20"/>
+              <polyline points="20 10 14 10 14 4"/>
+              <line x1="14" y1="10" x2="21" y2="3"/>
+              <line x1="3" y1="21" x2="10" y2="14"/>
+            </svg>
+          </button>
           <button class="theme-toggle-btn" id="theme-toggle" aria-label="Toggle theme" title="Toggle theme">
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" width="18" height="18">
               <circle cx="12" cy="12" r="5"/>
@@ -61,7 +73,8 @@ export function renderViewGoalsScreen() {
           </button>
         </div>
       </header>
-      ${renderCategoryFilterBar()}
+      ` : ''}
+      ${renderCategoryFilterBar(state.compactMode)}
       <main class="goals-list-container">
         ${state.goals.length === 0 ? renderEmptyState() : renderGoalsList()}
       </main>
@@ -84,6 +97,9 @@ export function renderViewGoalsScreen() {
   // Attach theme toggle listener
   attachThemeToggleListener(screen);
 
+  // Attach compact mode toggle listener
+  attachCompactModeToggleListener(screen);
+
   // Start timer update interval if there are active timers
   if (Object.keys(state.activeTimers).length > 0 && callbacks.startTimerUpdateInterval) {
     callbacks.startTimerUpdateInterval();
@@ -96,19 +112,36 @@ export function renderViewGoalsScreen() {
 
 /**
  * US-065: Render category filter bar
+ * @param {boolean} compactMode - Whether compact mode is active
  * @returns {string} HTML string for category filter bar
  */
-function renderCategoryFilterBar() {
-  // Only show filter bar if there are goals with categories
+function renderCategoryFilterBar(compactMode = false) {
+  // In compact mode, always show the bar (for the expand button)
+  // In normal mode, only show if there are goals with categories
   const hasGoalsWithCategories = state.goals.some(goal => goal.category);
-  if (!hasGoalsWithCategories && state.categoryFilter === 'all') {
+  const showCategoryFilters = hasGoalsWithCategories || state.categoryFilter !== 'all';
+
+  if (!compactMode && !showCategoryFilters) {
     return ''; // Don't show filter bar if no goals have categories
   }
 
   const activeFilter = state.categoryFilter || 'all';
 
-  return `
-    <div class="category-filter-bar" role="group" aria-label="Filter by category">
+  // Expand button for compact mode
+  const expandButton = compactMode ? `
+    <button class="compact-mode-btn active" id="compact-mode-toggle" aria-label="Exit compact mode" title="Exit compact mode">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" width="18" height="18">
+        <polyline points="15 3 21 3 21 9"/>
+        <polyline points="9 21 3 21 3 15"/>
+        <line x1="21" y1="3" x2="14" y2="10"/>
+        <line x1="3" y1="21" x2="10" y2="14"/>
+      </svg>
+    </button>
+  ` : '';
+
+  // Category filter chips (only show if there are categories)
+  const filterChips = showCategoryFilters ? `
+    <div class="filter-chips">
       <button class="category-filter-chip ${activeFilter === 'all' ? 'active' : ''}" data-category="all">
         All
       </button>
@@ -118,6 +151,13 @@ function renderCategoryFilterBar() {
           ${cat.name}
         </button>
       `).join('')}
+    </div>
+  ` : '<div class="filter-chips"></div>';
+
+  return `
+    <div class="category-filter-bar ${compactMode ? 'compact-mode-bar' : ''}" role="group" aria-label="${compactMode ? 'Compact mode toolbar' : 'Filter by category'}">
+      ${filterChips}
+      ${expandButton}
     </div>
   `;
 }
@@ -229,4 +269,33 @@ function attachThemeToggleListener(container) {
   toggleBtn.addEventListener('click', () => {
     toggleTheme();
   });
+}
+
+/**
+ * Attach compact mode toggle listener
+ * @param {HTMLElement} container - The screen container
+ */
+function attachCompactModeToggleListener(container) {
+  const toggleBtn = container.querySelector('#compact-mode-toggle');
+  if (!toggleBtn) return;
+
+  toggleBtn.addEventListener('click', () => {
+    state.compactMode = !state.compactMode;
+
+    // Save compact mode preference to localStorage
+    localStorage.setItem('compactMode', JSON.stringify(state.compactMode));
+
+    // Re-render to apply changes
+    renderViewGoalsScreen();
+  });
+}
+
+/**
+ * Load compact mode state from localStorage on startup
+ */
+export function loadCompactModeState() {
+  const saved = localStorage.getItem('compactMode');
+  if (saved !== null) {
+    state.compactMode = JSON.parse(saved);
+  }
 }
