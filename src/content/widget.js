@@ -1055,8 +1055,9 @@
         }
       });
 
-      // Drag functionality
+      // Drag functionalitys
       this.setupDrag();
+
       // Listen for theme changes
       if (window.matchMedia) {
         window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', (e) => {
