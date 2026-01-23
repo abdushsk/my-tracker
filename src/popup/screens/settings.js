@@ -270,6 +270,18 @@ export function renderSettingsScreen() {
               <span class="toggle-slider"></span>
             </label>
           </div>
+
+          <!-- Floating Widget Toggle -->
+          <div class="setting-item setting-item-row" id="widget-toggle-row">
+            <div class="setting-info">
+              <span class="setting-label">Floating Widget</span>
+              <span class="setting-description">Show quick access widget on all web pages</span>
+            </div>
+            <label class="toggle-switch" aria-label="Toggle floating widget">
+              <input type="checkbox" id="widget-toggle" ${state.settings?.floatingWidgetEnabled ? 'checked' : ''}>
+              <span class="toggle-slider"></span>
+            </label>
+          </div>
         </div>
 
         <!-- US-075: Reset Times Section -->
@@ -526,6 +538,9 @@ export function renderSettingsScreen() {
   // US-081: Attach daily challenges toggle listener
   attachChallengesToggleListener(screen);
 
+  // Attach floating widget toggle listener
+  attachWidgetToggleListener(screen);
+
   // US-075: Attach reset times listeners
   attachResetTimesListeners(screen);
 
@@ -724,6 +739,29 @@ function attachChallengesToggleListener(screen) {
       await saveSettings(state.settings);
 
       console.log(`[Settings] Daily challenges: ${enabled ? 'enabled' : 'disabled'}`);
+    });
+  }
+}
+
+/**
+ * Attach floating widget toggle listener
+ */
+function attachWidgetToggleListener(screen) {
+  const widgetToggle = screen.querySelector('#widget-toggle');
+  if (widgetToggle) {
+    widgetToggle.addEventListener('change', async (e) => {
+      const enabled = e.target.checked;
+
+      // Update state
+      state.settings = {
+        ...state.settings,
+        floatingWidgetEnabled: enabled
+      };
+
+      // Save to storage
+      await saveSettings(state.settings);
+
+      console.log(`[Settings] Floating widget: ${enabled ? 'enabled' : 'disabled'}`);
     });
   }
 }

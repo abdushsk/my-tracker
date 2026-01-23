@@ -25,9 +25,16 @@
   "background": {
     "service_worker": "src/background/service-worker.js"
   },
+  "content_scripts": [
+    {
+      "matches": ["<all_urls>"],
+      "js": ["src/content/widget.js"],
+      "run_at": "document_idle"
+    }
+  ],
   "web_accessible_resources": [
     {
-      "resources": ["src/assets/sounds/*.wav"],
+      "resources": ["src/assets/sounds/*.wav", "src/assets/icons/*.png"],
       "matches": ["<all_urls>"]
     }
   ]
