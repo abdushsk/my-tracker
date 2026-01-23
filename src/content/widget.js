@@ -1055,10 +1055,8 @@
         }
       });
 
-      // Drag functionalitys
+      // Drag functionality
       this.setupDrag();
-
-      
 
       // Listen for theme changes
       if (window.matchMedia) {
