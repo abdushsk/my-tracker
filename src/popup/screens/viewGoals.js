@@ -140,15 +140,16 @@ function renderCategoryFilterBar(compactMode = false) {
   ` : '';
 
   // Category filter chips (only show if there are categories)
+  // In compact mode, show only colored dots for categories (except "All")
   const filterChips = showCategoryFilters ? `
-    <div class="filter-chips">
+    <div class="filter-chips ${compactMode ? 'compact-chips' : ''}">
       <button class="category-filter-chip ${activeFilter === 'all' ? 'active' : ''}" data-category="all">
         All
       </button>
       ${state.categories.map(cat => `
-        <button class="category-filter-chip ${activeFilter === cat.id ? 'active' : ''}" data-category="${cat.id}">
+        <button class="category-filter-chip ${compactMode ? 'dot-only' : ''} ${activeFilter === cat.id ? 'active' : ''}" data-category="${cat.id}" ${compactMode ? `data-tooltip="${cat.name}"` : ''}>
           <span class="filter-dot" style="background-color: ${cat.color}"></span>
-          ${cat.name}
+          ${compactMode ? '' : cat.name}
         </button>
       `).join('')}
     </div>
