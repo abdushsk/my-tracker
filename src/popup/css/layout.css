@@ -633,6 +633,24 @@ body.compact-mode .goals-list-container {
   overflow-x: hidden;
 }
 
+/* Compact mode subtle scrollbar */
+body.compact-mode .goals-list-container::-webkit-scrollbar {
+  width: 4px;
+}
+
+body.compact-mode .goals-list-container::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+body.compact-mode .goals-list-container::-webkit-scrollbar-thumb {
+  background: var(--border);
+  border-radius: 4px;
+}
+
+body.compact-mode .goals-list-container::-webkit-scrollbar-thumb:hover {
+  background: var(--text-muted);
+}
+
 /* Compact mode goals list */
 body.compact-mode .goals-list {
   overflow: visible;
