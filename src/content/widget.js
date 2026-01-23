@@ -17,7 +17,8 @@
   const STORAGE_KEYS = {
     GOALS: 'goals',
     SETTINGS: 'settings',
-    ACTIVE_TIMERS: 'activeTimers'
+    ACTIVE_TIMERS: 'activeTimers',
+    WIDGET_GOAL_ORDER: 'widgetGoalOrder' // Per-site goal order for widget
   };
 
   // ============================================
@@ -31,7 +32,13 @@
     activeTimers: {},
     position: { x: null, y: null },
     isDragging: false,
-    theme: 'light'
+    theme: 'light',
+    goalOrder: [] // Per-site goal order (array of goal IDs)
+  };
+
+  // Get current site key for per-site position storage
+  const getSiteKey = () => {
+    return window.location.hostname || 'default';
   };
 
   // ============================================
@@ -52,8 +59,8 @@
     .widget-container {
       position: fixed;
       z-index: 2147483647;
-      font-size: 14px;
-      line-height: 1.5;
+      font-size: 12px;
+      line-height: 1.4;
       transition: opacity 0.2s ease;
     }
 
@@ -63,9 +70,9 @@
 
     /* Collapsed Icon Button */
     .widget-icon {
-      width: 44px;
-      height: 44px;
-      border-radius: 12px;
+      width: 40px;
+      height: 40px;
+      border-radius: 10px;
       background: var(--widget-bg);
       border: 1px solid var(--widget-border);
       box-shadow: var(--widget-shadow);
@@ -93,23 +100,23 @@
     }
 
     .widget-icon svg {
-      width: 24px;
-      height: 24px;
+      width: 20px;
+      height: 20px;
       color: var(--widget-accent);
     }
 
     /* Badge on icon */
     .widget-badge {
       position: absolute;
-      top: -4px;
-      right: -4px;
-      min-width: 18px;
-      height: 18px;
-      padding: 0 5px;
-      border-radius: 9px;
+      top: -3px;
+      right: -3px;
+      min-width: 16px;
+      height: 16px;
+      padding: 0 4px;
+      border-radius: 8px;
       background: var(--widget-danger);
       color: white;
-      font-size: 11px;
+      font-size: 10px;
       font-weight: 600;
       display: flex;
       align-items: center;
@@ -127,16 +134,16 @@
     /* Expanded Panel */
     .widget-panel {
       position: absolute;
-      width: 300px;
-      max-height: 420px;
+      width: 280px;
+      max-height: 380px;
       background: var(--widget-bg);
       border: 1px solid var(--widget-border);
-      border-radius: 12px;
+      border-radius: 10px;
       box-shadow: var(--widget-shadow);
       overflow: hidden;
       display: none;
       flex-direction: column;
-      bottom: 54px;
+      bottom: 50px;
       right: 0;
     }
 
@@ -152,7 +159,7 @@
 
     .widget-container.position-top .widget-panel {
       bottom: auto;
-      top: 54px;
+      top: 50px;
     }
 
     /* Panel Header */
@@ -160,7 +167,7 @@
       display: flex;
       align-items: center;
       justify-content: space-between;
-      padding: 12px 14px;
+      padding: 8px 10px;
       border-bottom: 1px solid var(--widget-border);
       background: var(--widget-bg-raised);
     }
@@ -168,24 +175,24 @@
     .widget-title {
       display: flex;
       align-items: center;
-      gap: 8px;
+      gap: 6px;
       font-weight: 600;
-      font-size: 14px;
+      font-size: 12px;
       color: var(--widget-text);
     }
 
     .widget-title svg {
-      width: 18px;
-      height: 18px;
+      width: 14px;
+      height: 14px;
       color: var(--widget-accent);
     }
 
     .widget-close {
-      width: 28px;
-      height: 28px;
+      width: 24px;
+      height: 24px;
       border: none;
       background: transparent;
-      border-radius: 6px;
+      border-radius: 5px;
       cursor: pointer;
       display: flex;
       align-items: center;
@@ -200,16 +207,16 @@
     }
 
     .widget-close svg {
-      width: 16px;
-      height: 16px;
+      width: 14px;
+      height: 14px;
     }
 
     /* Goals List */
     .widget-goals {
       flex: 1;
       overflow-y: auto;
-      padding: 8px;
-      max-height: 320px;
+      padding: 6px;
+      max-height: 290px;
     }
 
     .widget-goals::-webkit-scrollbar {
@@ -242,13 +249,13 @@
     .goal-item {
       display: flex;
       flex-direction: column;
-      gap: 8px;
-      padding: 10px 12px;
+      gap: 5px;
+      padding: 8px 10px;
       background: var(--widget-bg);
       border: 1px solid var(--widget-border);
-      border-radius: 8px;
-      margin-bottom: 6px;
-      transition: border-color 0.15s ease;
+      border-radius: 6px;
+      margin-bottom: 5px;
+      transition: border-color 0.15s ease, transform 0.3s ease, opacity 0.3s ease;
     }
 
     .goal-item:hover {
@@ -256,7 +263,7 @@
     }
 
     .goal-item.completed {
-      opacity: 0.7;
+      opacity: 0.6;
     }
 
     .goal-item.completed .goal-title {
@@ -264,11 +271,16 @@
       color: var(--widget-text-secondary);
     }
 
+    .goal-item.animating {
+      transform: translateY(10px);
+      opacity: 0;
+    }
+
     .goal-header {
       display: flex;
       align-items: center;
       justify-content: space-between;
-      gap: 8px;
+      gap: 6px;
     }
 
     .goal-info {
@@ -277,7 +289,7 @@
     }
 
     .goal-title {
-      font-size: 13px;
+      font-size: 11px;
       font-weight: 500;
       color: var(--widget-text);
       white-space: nowrap;
@@ -286,13 +298,13 @@
     }
 
     .goal-progress-text {
-      font-size: 11px;
+      font-size: 10px;
       color: var(--widget-text-secondary);
     }
 
     /* Progress Bar */
     .goal-progress-bar {
-      height: 4px;
+      height: 3px;
       background: var(--widget-bg-sunken);
       border-radius: 2px;
       overflow: hidden;
@@ -309,27 +321,44 @@
       background: var(--widget-accent);
     }
 
+    .goal-item.completed .goal-progress-bar {
+      display: none;
+    }
+
+    /* Drag and Drop */
+    .goal-item.dragging {
+      display: none !important;
+    }
+
+    .drag-placeholder {
+      background: var(--widget-bg-sunken);
+      border: 2px dashed var(--widget-border);
+      border-radius: 6px;
+      margin-bottom: 5px;
+      transition: all 0.15s ease;
+    }
+
     /* Goal Controls */
     .goal-controls {
       display: flex;
       align-items: center;
       justify-content: center;
-      gap: 8px;
+      gap: 6px;
     }
 
     /* Counter Controls */
     .counter-controls {
       display: flex;
       align-items: center;
-      gap: 8px;
+      gap: 4px;
     }
 
     .counter-btn {
-      width: 32px;
-      height: 32px;
+      width: 26px;
+      height: 26px;
       border: 1px solid var(--widget-border);
       background: var(--widget-bg);
-      border-radius: 6px;
+      border-radius: 5px;
       cursor: pointer;
       display: flex;
       align-items: center;
@@ -350,14 +379,14 @@
     }
 
     .counter-btn svg {
-      width: 16px;
-      height: 16px;
+      width: 12px;
+      height: 12px;
     }
 
     .counter-value {
-      min-width: 50px;
+      min-width: 40px;
       text-align: center;
-      font-size: 14px;
+      font-size: 11px;
       font-weight: 600;
       color: var(--widget-text);
     }
@@ -366,21 +395,21 @@
     .timer-controls {
       display: flex;
       align-items: center;
-      gap: 10px;
+      gap: 8px;
     }
 
     .timer-display {
       font-family: 'SF Mono', 'Fira Code', monospace;
-      font-size: 14px;
+      font-size: 11px;
       font-weight: 500;
       color: var(--widget-text);
-      min-width: 70px;
+      min-width: 50px;
       text-align: center;
     }
 
     .timer-btn {
-      width: 36px;
-      height: 36px;
+      width: 28px;
+      height: 28px;
       border: none;
       border-radius: 50%;
       cursor: pointer;
@@ -411,8 +440,8 @@
     }
 
     .timer-btn svg {
-      width: 16px;
-      height: 16px;
+      width: 12px;
+      height: 12px;
     }
 
     /* Checkbox Controls */
@@ -422,11 +451,11 @@
     }
 
     .checkbox-btn {
-      width: 28px;
-      height: 28px;
+      width: 22px;
+      height: 22px;
       border: 2px solid var(--widget-border);
       background: var(--widget-bg);
-      border-radius: 6px;
+      border-radius: 5px;
       cursor: pointer;
       display: flex;
       align-items: center;
@@ -446,38 +475,38 @@
     }
 
     .checkbox-btn svg {
-      width: 16px;
-      height: 16px;
+      width: 12px;
+      height: 12px;
     }
 
     /* Avoidance Controls */
     .avoidance-controls {
       display: flex;
       align-items: center;
-      gap: 8px;
+      gap: 6px;
     }
 
     .avoidance-streak {
       display: flex;
       align-items: center;
-      gap: 4px;
-      font-size: 13px;
+      gap: 3px;
+      font-size: 11px;
       font-weight: 500;
       color: var(--widget-accent);
     }
 
     .avoidance-streak svg {
-      width: 14px;
-      height: 14px;
+      width: 12px;
+      height: 12px;
     }
 
     .slip-btn {
-      padding: 4px 10px;
+      padding: 3px 8px;
       border: 1px solid var(--widget-danger);
       background: transparent;
       border-radius: 4px;
       cursor: pointer;
-      font-size: 11px;
+      font-size: 10px;
       color: var(--widget-danger);
       transition: background 0.15s ease;
     }
@@ -491,28 +520,28 @@
       display: flex;
       align-items: center;
       justify-content: space-between;
-      padding: 10px 14px;
+      padding: 8px 10px;
       border-top: 1px solid var(--widget-border);
       background: var(--widget-bg-raised);
     }
 
     .widget-summary {
-      font-size: 12px;
+      font-size: 10px;
       color: var(--widget-text-secondary);
     }
 
     .widget-open-btn {
-      padding: 6px 12px;
+      padding: 5px 10px;
       border: none;
       background: var(--widget-accent);
       color: white;
-      border-radius: 6px;
+      border-radius: 5px;
       cursor: pointer;
-      font-size: 12px;
+      font-size: 10px;
       font-weight: 500;
       display: flex;
       align-items: center;
-      gap: 4px;
+      gap: 3px;
       transition: background 0.15s ease;
     }
 
@@ -521,8 +550,8 @@
     }
 
     .widget-open-btn svg {
-      width: 14px;
-      height: 14px;
+      width: 12px;
+      height: 12px;
     }
 
     /* Theme Variables - Light */
@@ -591,6 +620,20 @@
       this.shadow = null;
       this.container = null;
       this.timerIntervals = {};
+
+      // Drag state
+      this.dragState = {
+        isDragging: false,
+        draggedCard: null,
+        draggedGoalId: null,
+        dragClone: null,
+        placeholder: null,
+        startY: 0,
+        offsetY: 0,
+        cloneLeft: 0,
+        goalsList: null
+      };
+
       this.init();
     }
 
@@ -619,20 +662,33 @@
         const result = await chrome.storage.local.get([
           STORAGE_KEYS.GOALS,
           STORAGE_KEYS.SETTINGS,
-          STORAGE_KEYS.ACTIVE_TIMERS
+          STORAGE_KEYS.ACTIVE_TIMERS,
+          STORAGE_KEYS.WIDGET_GOAL_ORDER
         ]);
 
         widgetState.goals = result[STORAGE_KEYS.GOALS] || [];
         widgetState.settings = result[STORAGE_KEYS.SETTINGS] || {};
         widgetState.activeTimers = result[STORAGE_KEYS.ACTIVE_TIMERS] || {};
         widgetState.enabled = widgetState.settings.floatingWidgetEnabled || false;
-        widgetState.position = widgetState.settings.floatingWidgetPosition || { x: null, y: null };
+
+        // Get position and goal order for current site
+        const siteKey = getSiteKey();
+        const sitePositions = widgetState.settings.floatingWidgetPositions || {};
+        widgetState.position = sitePositions[siteKey] || { x: null, y: null };
+
+        // Get per-site goal order
+        const allSiteOrders = result[STORAGE_KEYS.WIDGET_GOAL_ORDER] || {};
+        widgetState.goalOrder = allSiteOrders[siteKey] || [];
+
         widgetState.theme = this.detectTheme();
 
         console.log('[Widget] State loaded:', {
           enabled: widgetState.enabled,
           goalsCount: widgetState.goals.length,
-          theme: widgetState.theme
+          theme: widgetState.theme,
+          site: siteKey,
+          position: widgetState.position,
+          goalOrder: widgetState.goalOrder
         });
       } catch (error) {
         console.error('[Widget] Error loading state:', error);
@@ -713,6 +769,9 @@
       const goals = widgetState.goals;
       const completedCount = goals.filter(g => g.progress >= g.target).length;
 
+      // Sort goals by per-site custom order, then completed at bottom
+      const sortedGoals = this.getSortedGoals();
+
       return `
         <div class="widget-header">
           <div class="widget-title">
@@ -724,7 +783,7 @@
           </button>
         </div>
         <div class="widget-goals">
-          ${goals.length === 0 ? this.renderEmptyState() : goals.map(goal => this.renderGoalItem(goal)).join('')}
+          ${sortedGoals.length === 0 ? this.renderEmptyState() : sortedGoals.map(goal => this.renderGoalItem(goal)).join('')}
         </div>
         <div class="widget-footer">
           <span class="widget-summary">${completedCount}/${goals.length} completed</span>
@@ -734,6 +793,32 @@
           </button>
         </div>
       `;
+    }
+
+    // Get goals sorted by per-site custom order, with completed at bottom
+    getSortedGoals() {
+      const goals = [...widgetState.goals];
+      const order = widgetState.goalOrder;
+
+      // First sort by custom order (goals not in order array go last)
+      goals.sort((a, b) => {
+        const aIndex = order.indexOf(a.id);
+        const bIndex = order.indexOf(b.id);
+
+        // If neither is in order, keep original order
+        if (aIndex === -1 && bIndex === -1) return 0;
+        // If only one is in order, it comes first
+        if (aIndex === -1) return 1;
+        if (bIndex === -1) return -1;
+        // Both in order, sort by index
+        return aIndex - bIndex;
+      });
+
+      // Then sort completed items to the bottom while preserving relative order
+      const incomplete = goals.filter(g => g.progress < g.target);
+      const completed = goals.filter(g => g.progress >= g.target);
+
+      return [...incomplete, ...completed];
     }
 
     renderEmptyState() {
@@ -812,15 +897,13 @@
     renderTimerControls(goal) {
       const isActive = goal.isActive || widgetState.activeTimers[goal.id];
       const currentProgress = this.getCurrentTimerProgress(goal);
-      const isCompleted = currentProgress >= goal.target;
 
       return `
         <div class="timer-controls">
           <span class="timer-display" data-timer-display="${goal.id}">${this.formatTime(currentProgress)}</span>
           <button class="timer-btn ${isActive ? 'pause' : 'play'}"
                   data-action="${isActive ? 'pause' : 'play'}"
-                  data-goal-id="${goal.id}"
-                  ${isCompleted ? 'disabled' : ''}>
+                  data-goal-id="${goal.id}">
             ${isActive ? ICONS.pause : ICONS.play}
           </button>
         </div>
@@ -833,19 +916,17 @@
         return goal.progress;
       }
       const elapsed = Math.floor((Date.now() - timerData.startTime) / 1000);
-      return Math.min(goal.progress + elapsed, goal.target);
+      return goal.progress + elapsed; // Allow overflow
     }
 
     renderCounterControls(goal) {
-      const isCompleted = goal.progress >= goal.target;
-
       return `
         <div class="counter-controls">
           <button class="counter-btn" data-action="decrement" data-goal-id="${goal.id}" ${goal.progress <= 0 ? 'disabled' : ''}>
             ${ICONS.minus}
           </button>
           <span class="counter-value">${goal.progress}/${goal.target}</span>
-          <button class="counter-btn" data-action="increment" data-goal-id="${goal.id}" ${isCompleted ? 'disabled' : ''}>
+          <button class="counter-btn" data-action="increment" data-goal-id="${goal.id}">
             ${ICONS.plus}
           </button>
         </div>
@@ -899,6 +980,9 @@
         this.container.style.top = `${safeY}px`;
         this.container.style.right = 'auto';
         this.container.style.bottom = 'auto';
+
+        // Update panel position based on saved coordinates
+        this.updatePanelPosition(safeX, safeY);
         console.log('[Widget] Using saved position:', safeX, safeY);
       } else {
         // Default position: bottom-right with safe margin
@@ -906,22 +990,33 @@
         this.container.style.bottom = `${defaultBottom}px`;
         this.container.style.left = 'auto';
         this.container.style.top = 'auto';
-        console.log('[Widget] Using default position');
-      }
 
-      this.updatePanelPosition();
+        // Calculate actual position for panel direction
+        const actualX = window.innerWidth - defaultRight - 40; // 40 is icon width
+        const actualY = window.innerHeight - defaultBottom - 40; // 40 is icon height
+        this.updatePanelPosition(actualX, actualY);
+        console.log('[Widget] Using default position, calculated:', actualX, actualY);
+      }
     }
 
-    updatePanelPosition() {
-      const rect = this.container.getBoundingClientRect();
+    updatePanelPosition(x = null, y = null) {
       const viewportWidth = window.innerWidth;
-      const viewportHeight = window.innerHeight;
+
+      // Use provided coordinates or fall back to getBoundingClientRect
+      let posX = x;
+      let posY = y;
+
+      if (posX === null || posY === null) {
+        const rect = this.container.getBoundingClientRect();
+        posX = rect.left;
+        posY = rect.top;
+      }
 
       // Remove existing position classes
       this.container.classList.remove('position-left', 'position-right', 'position-top');
 
       // Determine horizontal position - panel opens toward center
-      if (rect.left < viewportWidth / 2) {
+      if (posX < viewportWidth / 2) {
         this.container.classList.add('position-left');
       } else {
         this.container.classList.add('position-right');
@@ -929,7 +1024,7 @@
 
       // Determine vertical position - open upward by default (bottom of screen)
       // Only open downward if icon is in top 200px of screen
-      if (rect.top < 200) {
+      if (posY < 200) {
         this.container.classList.add('position-top');
       }
     }
@@ -972,6 +1067,9 @@
           }
         });
       }
+
+      // Setup goal drag-to-reorder
+      this.setupGoalDrag();
     }
 
     setupDrag() {
@@ -1023,7 +1121,7 @@
           this.container.style.right = 'auto';
           this.container.style.bottom = 'auto';
 
-          this.updatePanelPosition();
+          this.updatePanelPosition(newX, newY);
         }
       };
 
@@ -1034,19 +1132,23 @@
         if (currentIcon) currentIcon.classList.remove('dragging');
 
         if (hasMoved) {
-          // Save position
+          // Save position per site
           const rect = this.container.getBoundingClientRect();
           widgetState.position = { x: rect.left, y: rect.top };
 
           try {
             const currentSettings = widgetState.settings || {};
+            const siteKey = getSiteKey();
+            const sitePositions = currentSettings.floatingWidgetPositions || {};
+            sitePositions[siteKey] = widgetState.position;
+
             await chrome.storage.local.set({
               [STORAGE_KEYS.SETTINGS]: {
                 ...currentSettings,
-                floatingWidgetPosition: widgetState.position
+                floatingWidgetPositions: sitePositions
               }
             });
-            console.log('[Widget] Position saved:', widgetState.position);
+            console.log('[Widget] Position saved for', siteKey, ':', widgetState.position);
           } catch (error) {
             console.error('[Widget] Error saving position:', error);
           }
@@ -1064,6 +1166,266 @@
 
       // Use event delegation on container - survives re-renders
       this.container.addEventListener('mousedown', onMouseDown);
+    }
+
+    // ============================================
+    // Goal Drag-to-Reorder
+    // ============================================
+
+    setupGoalDrag() {
+      // Use event delegation on the shadow root for goal dragging
+      this.shadow.addEventListener('mousedown', (e) => this.handleGoalDragStart(e));
+      this.shadow.addEventListener('touchstart', (e) => this.handleGoalTouchStart(e), { passive: false });
+    }
+
+    handleGoalDragStart(e) {
+      if (e.button !== 0) return;
+
+      const goalItem = e.target.closest('.goal-item');
+      if (!goalItem) return;
+
+      // Don't drag if clicking on controls
+      if (e.target.closest('.goal-controls, button')) return;
+
+      e.preventDefault();
+      e.stopPropagation();
+
+      this.startGoalDrag(goalItem, e.clientY);
+
+      // Bind handlers
+      this.boundGoalDragMove = (e) => this.handleGoalDragMove(e);
+      this.boundGoalDragEnd = () => this.handleGoalDragEnd();
+
+      document.addEventListener('mousemove', this.boundGoalDragMove);
+      document.addEventListener('mouseup', this.boundGoalDragEnd);
+    }
+
+    handleGoalTouchStart(e) {
+      const goalItem = e.target.closest('.goal-item');
+      if (!goalItem) return;
+
+      if (e.target.closest('.goal-controls, button')) return;
+
+      e.preventDefault();
+
+      const touch = e.touches[0];
+      this.startGoalDrag(goalItem, touch.clientY);
+
+      this.boundGoalTouchMove = (e) => this.handleGoalTouchMove(e);
+      this.boundGoalTouchEnd = () => this.handleGoalDragEnd();
+
+      document.addEventListener('touchmove', this.boundGoalTouchMove, { passive: false });
+      document.addEventListener('touchend', this.boundGoalTouchEnd);
+    }
+
+    startGoalDrag(goalItem, clientY) {
+      const ds = this.dragState;
+      ds.isDragging = true;
+      ds.draggedCard = goalItem;
+      ds.draggedGoalId = goalItem.getAttribute('data-goal-id');
+      ds.goalsList = this.shadow.querySelector('.widget-goals');
+
+      const rect = goalItem.getBoundingClientRect();
+      ds.startY = clientY;
+      ds.offsetY = clientY - rect.top;
+      ds.cloneLeft = rect.left; // Store left position to keep clone horizontally aligned
+
+      // Get colors based on theme
+      const bgColor = widgetState.theme === 'dark' ? '#1A1A1A' : '#FFFFFF';
+      const borderColor = widgetState.theme === 'dark' ? '#333333' : '#E5E5E5';
+
+      // Create clone that follows cursor (preserve all classes and styling)
+      ds.dragClone = goalItem.cloneNode(true);
+      ds.dragClone.classList.remove('dragging');
+      ds.dragClone.style.cssText = `
+        position: fixed !important;
+        left: ${rect.left}px;
+        top: ${rect.top}px;
+        width: ${rect.width}px;
+        height: ${rect.height}px;
+        z-index: 2147483647;
+        pointer-events: none;
+        cursor: grabbing;
+        transform: scale(1.03);
+        box-shadow: 0 12px 28px rgba(0,0,0,0.25);
+        transition: transform 0.15s ease, box-shadow 0.15s ease;
+        background: ${bgColor};
+        border: 1px solid ${borderColor};
+        border-radius: 6px;
+        display: flex;
+        flex-direction: column;
+        gap: 5px;
+        padding: 8px 10px;
+        opacity: 1 !important;
+        margin: 0 !important;
+      `;
+      this.shadow.appendChild(ds.dragClone);
+
+      // Animate clone scale
+      requestAnimationFrame(() => {
+        if (ds.dragClone) {
+          ds.dragClone.style.transform = 'scale(1.05)';
+        }
+      });
+
+      // Create placeholder
+      ds.placeholder = document.createElement('div');
+      ds.placeholder.className = 'drag-placeholder';
+      ds.placeholder.style.height = `${rect.height}px`;
+
+      // Hide original and insert placeholder
+      goalItem.classList.add('dragging');
+      goalItem.parentNode.insertBefore(ds.placeholder, goalItem);
+    }
+
+    handleGoalDragMove(e) {
+      if (!this.dragState.isDragging) return;
+      e.preventDefault();
+      this.updateGoalDragPosition(e.clientY);
+    }
+
+    handleGoalTouchMove(e) {
+      if (!this.dragState.isDragging) return;
+      e.preventDefault();
+      const touch = e.touches[0];
+      this.updateGoalDragPosition(touch.clientY);
+    }
+
+    updateGoalDragPosition(clientY) {
+      const ds = this.dragState;
+      if (!ds.dragClone || !ds.placeholder) return;
+
+      // Move clone (only vertical, keep horizontal position fixed)
+      const cloneTop = clientY - ds.offsetY;
+      ds.dragClone.style.top = `${cloneTop}px`;
+      ds.dragClone.style.left = `${ds.cloneLeft}px`;
+
+      // Find insert position
+      if (!ds.goalsList) return;
+
+      const cards = Array.from(ds.goalsList.querySelectorAll('.goal-item:not(.dragging)'));
+      if (cards.length === 0) return;
+
+      const dragCenterY = cloneTop + (ds.placeholder.offsetHeight / 2);
+
+      let insertBeforeCard = null;
+      for (const card of cards) {
+        const rect = card.getBoundingClientRect();
+        const midY = rect.top + rect.height / 2;
+        if (dragCenterY < midY) {
+          insertBeforeCard = card;
+          break;
+        }
+      }
+
+      // Move placeholder
+      if (insertBeforeCard) {
+        ds.goalsList.insertBefore(ds.placeholder, insertBeforeCard);
+      } else {
+        ds.goalsList.appendChild(ds.placeholder);
+      }
+    }
+
+    async handleGoalDragEnd() {
+      const ds = this.dragState;
+      if (!ds.isDragging) return;
+
+      // Remove listeners
+      document.removeEventListener('mousemove', this.boundGoalDragMove);
+      document.removeEventListener('mouseup', this.boundGoalDragEnd);
+      document.removeEventListener('touchmove', this.boundGoalTouchMove);
+      document.removeEventListener('touchend', this.boundGoalTouchEnd);
+
+      ds.isDragging = false;
+
+      // Animate clone back to placeholder position
+      if (ds.dragClone && ds.placeholder) {
+        const placeholderRect = ds.placeholder.getBoundingClientRect();
+
+        ds.dragClone.style.transition = 'all 0.2s ease';
+        ds.dragClone.style.transform = 'scale(1)';
+        ds.dragClone.style.left = `${placeholderRect.left}px`;
+        ds.dragClone.style.top = `${placeholderRect.top}px`;
+        ds.dragClone.style.boxShadow = '0 2px 8px rgba(0,0,0,0.08)';
+
+        // Wait for animation
+        await new Promise(resolve => setTimeout(resolve, 200));
+      }
+
+      // Calculate new order using insertIndex approach (like main dragDrop.js)
+      if (ds.goalsList && ds.placeholder && ds.draggedGoalId) {
+        const allElements = Array.from(ds.goalsList.children);
+
+        // Count non-dragging cards BEFORE the placeholder to get insert index
+        let insertIndex = 0;
+        for (const el of allElements) {
+          if (el === ds.placeholder) break;
+          if (el.classList.contains('goal-item') && !el.classList.contains('dragging')) {
+            insertIndex++;
+          }
+        }
+
+        // Get current visual order
+        const currentOrder = this.getSortedGoals().map(g => g.id);
+
+        // Find and remove dragged item from its current position
+        const draggedCurrentIndex = currentOrder.indexOf(ds.draggedGoalId);
+        if (draggedCurrentIndex !== -1) {
+          currentOrder.splice(draggedCurrentIndex, 1);
+
+          // Adjust insert index if we removed from before insert position
+          if (draggedCurrentIndex < insertIndex) {
+            insertIndex--;
+          }
+        }
+
+        // Insert at new position
+        currentOrder.splice(insertIndex, 0, ds.draggedGoalId);
+
+        // Save new order
+        await this.saveGoalOrder(currentOrder);
+      }
+
+      // Clean up
+      if (ds.dragClone) {
+        ds.dragClone.remove();
+        ds.dragClone = null;
+      }
+
+      if (ds.placeholder) {
+        ds.placeholder.remove();
+        ds.placeholder = null;
+      }
+
+      if (ds.draggedCard) {
+        ds.draggedCard.classList.remove('dragging');
+        ds.draggedCard = null;
+      }
+
+      ds.draggedGoalId = null;
+      ds.goalsList = null;
+
+      // Re-render
+      this.render();
+    }
+
+    async saveGoalOrder(newOrder) {
+      try {
+        const siteKey = getSiteKey();
+        const result = await chrome.storage.local.get(STORAGE_KEYS.WIDGET_GOAL_ORDER);
+        const allSiteOrders = result[STORAGE_KEYS.WIDGET_GOAL_ORDER] || {};
+
+        allSiteOrders[siteKey] = newOrder;
+        widgetState.goalOrder = newOrder;
+
+        await chrome.storage.local.set({
+          [STORAGE_KEYS.WIDGET_GOAL_ORDER]: allSiteOrders
+        });
+
+        console.log('[Widget] Goal order saved for', siteKey, ':', newOrder);
+      } catch (error) {
+        console.error('[Widget] Error saving goal order:', error);
+      }
     }
 
     toggleExpanded(expanded = !widgetState.expanded) {
@@ -1106,8 +1468,6 @@
     }
 
     async incrementCounter(goal) {
-      if (goal.progress >= goal.target) return;
-
       const newProgress = goal.progress + 1;
       await this.updateGoalProgress(goal.id, newProgress);
     }
@@ -1134,7 +1494,8 @@
         widgetState.activeTimers[goal.id] = { startTime, goalId: goal.id };
         goal.isActive = true;
 
-        this.render();
+        // Use targeted update
+        this.updateGoalItem(goal.id);
         console.log('[Widget] Timer started:', goal.id);
       } catch (error) {
         console.error('[Widget] Error starting timer:', error);
@@ -1154,10 +1515,11 @@
         goal.isActive = false;
 
         if (response && response.elapsedSeconds !== undefined) {
-          goal.progress = Math.min(goal.progress + response.elapsedSeconds, goal.target);
+          goal.progress = goal.progress + response.elapsedSeconds; // Allow overflow
         }
 
-        this.render();
+        // Use targeted update
+        this.updateGoalItem(goal.id);
         console.log('[Widget] Timer paused:', goal.id);
       } catch (error) {
         console.error('[Widget] Error pausing timer:', error);
@@ -1191,7 +1553,9 @@
 
         // Update local state
         widgetState.goals = goals;
-        this.render();
+
+        // Use targeted update instead of full re-render
+        this.updateGoalItem(goalId);
 
         console.log('[Widget] Goal progress updated:', goalId, newProgress);
       } catch (error) {
@@ -1199,15 +1563,87 @@
       }
     }
 
+    // Update a specific goal item without re-rendering the entire panel
+    updateGoalItem(goalId) {
+      const goal = widgetState.goals.find(g => g.id === goalId);
+      if (!goal) return;
+
+      const goalElement = this.shadow.querySelector(`[data-goal-id="${goalId}"]`);
+      if (!goalElement) {
+        // If element not found, do a full render
+        this.render();
+        return;
+      }
+
+      const isCompleted = goal.progress >= goal.target;
+      const progressPercent = Math.min((goal.progress / goal.target) * 100, 100);
+
+      // Update completed state
+      goalElement.classList.toggle('completed', isCompleted);
+
+      // Update progress text
+      const progressText = goalElement.querySelector('.goal-progress-text');
+      if (progressText) {
+        progressText.textContent = this.formatProgress(goal);
+      }
+
+      // Update progress bar
+      const progressFill = goalElement.querySelector('.goal-progress-fill');
+      if (progressFill) {
+        progressFill.style.width = `${progressPercent}%`;
+      }
+
+      // Update controls
+      const controlsContainer = goalElement.querySelector('.goal-controls');
+      if (controlsContainer) {
+        controlsContainer.innerHTML = this.renderGoalControls(goal);
+      }
+
+      // Update badge
+      this.updateBadge();
+
+      // Update footer summary
+      this.updateFooterSummary();
+    }
+
+    updateBadge() {
+      const incompleteCount = widgetState.goals.filter(g => g.progress < g.target).length;
+      const badge = this.shadow.querySelector('.widget-badge');
+      if (badge) {
+        badge.textContent = incompleteCount === 0 ? '✓' : incompleteCount;
+        badge.classList.toggle('complete', incompleteCount === 0 && widgetState.goals.length > 0);
+        badge.classList.toggle('hidden', widgetState.goals.length === 0);
+      }
+    }
+
+    updateFooterSummary() {
+      const completedCount = widgetState.goals.filter(g => g.progress >= g.target).length;
+      const summary = this.shadow.querySelector('.widget-summary');
+      if (summary) {
+        summary.textContent = `${completedCount}/${widgetState.goals.length} completed`;
+      }
+    }
+
     setupStorageListener() {
       chrome.storage.onChanged.addListener((changes, namespace) => {
         if (namespace !== 'local') return;
 
-        let needsRender = false;
+        let needsFullRender = false;
 
         if (changes[STORAGE_KEYS.GOALS]) {
-          widgetState.goals = changes[STORAGE_KEYS.GOALS].newValue || [];
-          needsRender = true;
+          const oldGoals = widgetState.goals;
+          const newGoals = changes[STORAGE_KEYS.GOALS].newValue || [];
+          widgetState.goals = newGoals;
+
+          // Only do full render if goals were added/removed, not just updated
+          if (oldGoals.length !== newGoals.length ||
+              !oldGoals.every(og => newGoals.some(ng => ng.id === og.id))) {
+            needsFullRender = true;
+          } else {
+            // Just update badge and summary for progress changes
+            this.updateBadge();
+            this.updateFooterSummary();
+          }
         }
 
         if (changes[STORAGE_KEYS.SETTINGS]) {
@@ -1241,15 +1677,15 @@
             }
           }
 
-          needsRender = true;
+          needsFullRender = true;
         }
 
         if (changes[STORAGE_KEYS.ACTIVE_TIMERS]) {
           widgetState.activeTimers = changes[STORAGE_KEYS.ACTIVE_TIMERS].newValue || {};
-          needsRender = true;
+          // Don't need full render for timer state changes
         }
 
-        if (needsRender && this.container && widgetState.enabled) {
+        if (needsFullRender && this.container && widgetState.enabled) {
           this.render();
         }
       });
@@ -1269,11 +1705,7 @@
           if (display) {
             const currentProgress = this.getCurrentTimerProgress(goal);
             display.textContent = this.formatTime(currentProgress);
-
-            // Check if timer just completed
-            if (currentProgress >= goal.target && widgetState.activeTimers[goalId]) {
-              this.pauseTimer(goal);
-            }
+            // Timer continues even after target is reached (allows overflow)
           }
         });
       }, 1000);
