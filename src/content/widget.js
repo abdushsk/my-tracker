@@ -1372,14 +1372,11 @@
         const draggedCurrentIndex = currentOrder.indexOf(ds.draggedGoalId);
         if (draggedCurrentIndex !== -1) {
           currentOrder.splice(draggedCurrentIndex, 1);
-
-          // Adjust insert index if we removed from before insert position
-          if (draggedCurrentIndex < insertIndex) {
-            insertIndex--;
-          }
         }
 
         // Insert at new position
+        // No adjustment needed - insertIndex is the count of non-dragging cards before placeholder
+        // which directly maps to the correct array index after removal
         currentOrder.splice(insertIndex, 0, ds.draggedGoalId);
 
         // Save new order
