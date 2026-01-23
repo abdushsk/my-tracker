@@ -1,0 +1,718 @@
+/* ========================================
+   US-072: Weekly Review Screen Styles
+   ============================================================================ */
+
+/* Weekly Review Navigation Button in Reports */
+.weekly-review-nav-section {
+  margin-top: var(--spacing-sm);
+}
+
+.weekly-review-nav-btn {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-md);
+  width: 100%;
+  padding: var(--spacing-md);
+  background: linear-gradient(135deg, var(--background) 0%, var(--primary-light) 100%);
+  border: 1px solid var(--primary);
+  border-radius: var(--radius-lg);
+  cursor: pointer;
+  text-align: left;
+  transition: all var(--transition-fast);
+}
+
+.weekly-review-nav-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow);
+  border-color: var(--primary);
+}
+
+.weekly-review-nav-btn:active {
+  transform: translateY(0);
+}
+
+.weekly-review-nav-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  background-color: var(--primary);
+  border-radius: var(--radius-md);
+  color: white;
+  flex-shrink: 0;
+}
+
+.weekly-review-nav-icon svg {
+  width: 24px;
+  height: 24px;
+}
+
+.weekly-review-nav-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.weekly-review-nav-title {
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-semibold);
+  color: var(--text);
+}
+
+.weekly-review-nav-desc {
+  font-size: var(--font-size-xs);
+  color: var(--text-muted);
+}
+
+.weekly-review-nav-arrow {
+  display: flex;
+  align-items: center;
+  color: var(--primary);
+}
+
+.weekly-review-nav-arrow svg {
+  width: 20px;
+  height: 20px;
+}
+
+/* Weekly Review Screen Container */
+.weekly-review-screen {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  overflow: hidden;
+}
+
+/* Weekly Review Header */
+.weekly-review-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: var(--spacing-md);
+  background-color: var(--background);
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+}
+
+.weekly-review-header .back-btn {
+  padding: var(--spacing-sm);
+  min-width: 36px;
+  min-height: 36px;
+  justify-content: center;
+}
+
+.weekly-review-header .back-icon {
+  width: 20px;
+  height: 20px;
+}
+
+.weekly-review-title {
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-semibold);
+  color: var(--text);
+  margin: 0;
+}
+
+/* Weekly Review Content */
+.weekly-review-content {
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: var(--spacing-md);
+  background-color: var(--background-secondary);
+  scroll-behavior: smooth;
+}
+
+/* Weekly Review Section */
+.weekly-review-section {
+  margin-bottom: var(--spacing-lg);
+}
+
+.weekly-review-section:last-child {
+  margin-bottom: var(--spacing-md);
+}
+
+/* Week Date Range Header */
+.summary-header-section {
+  margin-bottom: var(--spacing-md);
+}
+
+.week-date-range {
+  display: flex;
+  justify-content: center;
+  padding: var(--spacing-sm) var(--spacing-md);
+  background-color: var(--background);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border);
+}
+
+.week-range-label {
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-medium);
+  color: var(--text);
+}
+
+/* Completions Card */
+.completions-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: var(--spacing-lg) var(--spacing-md);
+  background: linear-gradient(135deg, var(--background) 0%, var(--primary-light) 100%);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+  text-align: center;
+}
+
+.completions-display {
+  display: flex;
+  align-items: baseline;
+  gap: 4px;
+  margin-bottom: var(--spacing-xs);
+}
+
+.completions-value {
+  font-size: 48px;
+  font-weight: var(--font-weight-bold);
+  color: var(--primary);
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+}
+
+.completions-label {
+  font-size: var(--font-size-xl);
+  color: var(--text-muted);
+  font-weight: var(--font-weight-medium);
+}
+
+.completions-rate {
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  color: var(--text-secondary);
+}
+
+/* US-008: Theme-aware completion rate colors */
+.completions-rate.rate-excellent {
+  color: var(--chart-bar-excellent);
+}
+
+.completions-rate.rate-good {
+  color: var(--chart-bar-good);
+}
+
+.completions-rate.rate-moderate {
+  color: var(--chart-bar-moderate);
+}
+
+.completions-rate.rate-low {
+  color: var(--text-muted);
+}
+
+/* Time Card */
+.time-card {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--spacing-md);
+  padding: var(--spacing-lg) var(--spacing-md);
+  background-color: var(--background);
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--border);
+}
+
+.time-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 48px;
+  height: 48px;
+  background: linear-gradient(135deg, var(--secondary-light) 0%, var(--secondary) 100%);
+  border-radius: 50%;
+  color: white;
+}
+
+.time-icon svg {
+  width: 28px;
+  height: 28px;
+}
+
+.time-display {
+  font-size: var(--font-size-2xl);
+  font-weight: var(--font-weight-bold);
+  color: var(--text);
+  font-variant-numeric: tabular-nums;
+}
+
+/* Streak Cards Row */
+.streak-cards-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--spacing-sm);
+}
+
+.streak-card-mini {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  padding: var(--spacing-md);
+  background-color: var(--background);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+}
+
+.streak-card-mini.active {
+  border-color: var(--warning);
+  background: linear-gradient(135deg, var(--background) 0%, var(--warning-light) 100%);
+}
+
+.streak-card-mini.best {
+  background: linear-gradient(135deg, var(--background) 0%, var(--reward-subtle) 100%);
+  border-color: var(--reward);
+}
+
+.streak-card-mini .streak-icon {
+  font-size: 24px;
+  line-height: 1;
+}
+
+.streak-card-mini .streak-info {
+  display: flex;
+  flex-direction: column;
+}
+
+.streak-card-mini .streak-value {
+  font-size: var(--font-size-xl);
+  font-weight: var(--font-weight-bold);
+  color: var(--text);
+  line-height: 1;
+}
+
+.streak-card-mini .streak-label {
+  font-size: var(--font-size-xs);
+  color: var(--text-muted);
+}
+
+/* Performance Cards - Enhanced List View */
+.performance-cards {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.performance-list {
+  display: flex;
+  flex-direction: column;
+  background-color: var(--background);
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--border);
+  overflow: hidden;
+}
+
+.performance-item {
+  padding: var(--spacing-sm) var(--spacing-md);
+  border-bottom: 1px solid var(--border);
+}
+
+.performance-item:last-child {
+  border-bottom: none;
+}
+
+.performance-item.best-performer {
+  background: linear-gradient(135deg, transparent 0%, var(--accent-subtle) 100%);
+}
+
+.performance-item.needs-work {
+  background: linear-gradient(135deg, transparent 0%, var(--warning-subtle) 100%);
+}
+
+.performance-item-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--spacing-xs);
+}
+
+.performance-goal-info {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+  min-width: 0;
+  flex: 1;
+}
+
+.performance-type-icon {
+  width: 16px;
+  height: 16px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.performance-type-icon svg {
+  width: 14px;
+  height: 14px;
+}
+
+.performance-type-icon.type-timer {
+  color: var(--type-timer);
+}
+
+.performance-type-icon.type-counter {
+  color: var(--type-counter);
+}
+
+.performance-type-icon.type-checkbox {
+  color: var(--type-checkbox);
+}
+
+.performance-type-icon.type-avoidance {
+  color: var(--type-avoidance);
+}
+
+.performance-badge {
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-semibold);
+  padding: 2px 6px;
+  border-radius: var(--radius-sm);
+  flex-shrink: 0;
+}
+
+.performance-badge.best {
+  background-color: var(--accent);
+  color: var(--text-inverse);
+}
+
+.performance-badge.needs {
+  background-color: var(--warning);
+  color: white;
+}
+
+.performance-goal-title {
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  color: var(--text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.performance-item-stats {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.performance-progress-container {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+}
+
+.performance-progress-bar {
+  flex: 1;
+  height: 6px;
+  background-color: var(--border);
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.performance-progress-fill {
+  height: 100%;
+  border-radius: 3px;
+  transition: width 0.3s ease;
+}
+
+.performance-progress-fill.level-excellent {
+  background-color: var(--chart-bar-excellent);
+}
+
+.performance-progress-fill.level-good {
+  background-color: var(--chart-bar-good);
+}
+
+.performance-progress-fill.level-moderate {
+  background-color: var(--chart-bar-moderate);
+}
+
+.performance-progress-fill.level-low {
+  background-color: var(--chart-bar-low);
+}
+
+.performance-rate-value {
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-bold);
+  min-width: 36px;
+  text-align: right;
+}
+
+.performance-rate-value.level-excellent {
+  color: var(--chart-bar-excellent);
+}
+
+.performance-rate-value.level-good {
+  color: var(--chart-bar-good);
+}
+
+.performance-rate-value.level-moderate {
+  color: var(--chart-bar-moderate);
+}
+
+.performance-rate-value.level-low {
+  color: var(--text-muted);
+}
+
+.performance-details-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.performance-detail {
+  font-size: var(--font-size-xs);
+  color: var(--text-muted);
+}
+
+.performance-trend {
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-medium);
+}
+
+.performance-trend.above-average {
+  color: var(--chart-bar-excellent);
+}
+
+.performance-trend.average {
+  color: var(--text-muted);
+}
+
+.performance-trend.below-average {
+  color: var(--chart-bar-moderate);
+}
+
+.no-performance-data {
+  padding: var(--spacing-lg);
+  text-align: center;
+  color: var(--text-muted);
+  font-size: var(--font-size-sm);
+  background-color: var(--background);
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--border);
+}
+
+/* Daily Breakdown */
+.daily-breakdown {
+  background-color: var(--background);
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--border);
+  padding: var(--spacing-md);
+}
+
+.breakdown-bars {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--spacing-xs);
+  height: 120px;
+}
+
+.breakdown-day {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+
+.breakdown-day.is-today .breakdown-label {
+  font-weight: var(--font-weight-bold);
+  color: var(--primary);
+}
+
+.breakdown-day.is-future {
+  opacity: 0.4;
+}
+
+.breakdown-bar-wrapper {
+  flex: 1;
+  width: 100%;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  background-color: var(--background-secondary);
+  border-radius: var(--radius-sm);
+  position: relative;
+  cursor: pointer;
+}
+
+.breakdown-bar {
+  width: 80%;
+  min-height: 4px;
+  border-radius: var(--radius-sm);
+  transition: height var(--transition-normal);
+}
+
+/* US-008: Theme-aware breakdown bars */
+.breakdown-bar.bar-excellent {
+  background: linear-gradient(to top, var(--chart-bar-excellent), var(--accent-subtle));
+}
+
+.breakdown-bar.bar-good {
+  background: linear-gradient(to top, var(--chart-bar-good), var(--accent-subtle));
+}
+
+.breakdown-bar.bar-low {
+  background: linear-gradient(to top, var(--chart-bar-moderate), var(--accent-subtle));
+}
+
+.breakdown-bar.bar-empty {
+  background-color: var(--chart-bar-low);
+  min-height: 2px;
+}
+
+.breakdown-label {
+  font-size: var(--font-size-xs);
+  color: var(--text-secondary);
+  font-weight: var(--font-weight-medium);
+}
+
+/* US-010: Hover-to-show percentage on daily breakdown */
+.breakdown-hover-value {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 10px;
+  font-weight: var(--font-weight-semibold);
+  color: var(--text-inverse);
+  background-color: var(--text);
+  padding: 2px 6px;
+  border-radius: var(--radius-sm);
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity var(--transition-fast), visibility var(--transition-fast);
+  pointer-events: none;
+  white-space: nowrap;
+  z-index: 1;
+}
+
+.breakdown-bar-wrapper:hover .breakdown-hover-value {
+  opacity: 1;
+  visibility: visible;
+}
+
+/* Comparison Card */
+.comparison-card {
+  background-color: var(--background);
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--border);
+  padding: var(--spacing-md);
+}
+
+.comparison-content {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-md);
+}
+
+.comparison-icon {
+  font-size: 32px;
+  line-height: 1;
+}
+
+.comparison-stats {
+  flex: 1;
+}
+
+.comparison-diff {
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-semibold);
+}
+
+/* US-008: Theme-aware comparison colors */
+.comparison-diff.improved {
+  color: var(--chart-bar-excellent);
+}
+
+.comparison-diff.declined {
+  color: var(--chart-bar-moderate);
+}
+
+.comparison-diff.same {
+  color: var(--text-secondary);
+}
+
+.comparison-detail {
+  font-size: var(--font-size-xs);
+  color: var(--text-muted);
+  margin-top: 2px;
+}
+
+.comparison-message {
+  text-align: center;
+  color: var(--text-muted);
+  font-size: var(--font-size-sm);
+  padding: var(--spacing-sm);
+}
+
+/* ----------------------------------------
+   Dark Mode Support for Weekly Review
+   ---------------------------------------- */
+[data-theme="dark"] .weekly-review-nav-btn {
+  background: linear-gradient(135deg, var(--card-bg) 0%, var(--accent-subtle) 100%);
+}
+
+[data-theme="dark"] .completions-card {
+  background: linear-gradient(135deg, var(--card-bg) 0%, var(--accent-subtle) 100%);
+}
+
+[data-theme="dark"] .time-card,
+[data-theme="dark"] .streak-card-mini,
+[data-theme="dark"] .performance-list,
+[data-theme="dark"] .daily-breakdown,
+[data-theme="dark"] .comparison-card,
+[data-theme="dark"] .week-date-range {
+  background-color: var(--card-bg);
+  border-color: var(--border);
+}
+
+[data-theme="dark"] .streak-card-mini.active {
+  background: linear-gradient(135deg, var(--card-bg) 0%, var(--warning-subtle) 100%);
+}
+
+[data-theme="dark"] .streak-card-mini.best {
+  background: linear-gradient(135deg, var(--card-bg) 0%, var(--reward-subtle) 100%);
+}
+
+[data-theme="dark"] .performance-item.best-performer {
+  background: linear-gradient(135deg, transparent 0%, var(--accent-subtle) 100%);
+}
+
+[data-theme="dark"] .performance-item.needs-work {
+  background: linear-gradient(135deg, transparent 0%, var(--warning-subtle) 100%);
+}
+
+[data-theme="dark"] .no-performance-data {
+  background-color: var(--card-bg);
+}
+
+[data-theme="dark"] .breakdown-bar-wrapper {
+  background-color: var(--bg-tertiary);
+}
+
+/* ----------------------------------------
+   Reduced Motion Support for Weekly Review
+   ---------------------------------------- */
+@media (prefers-reduced-motion: reduce) {
+  .weekly-review-nav-btn,
+  .breakdown-bar {
+    transition: none;
+  }
+
+  .weekly-review-nav-btn:hover {
+    transform: none;
+  }
+}
+
+/* ========================================

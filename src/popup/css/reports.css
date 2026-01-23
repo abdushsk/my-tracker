@@ -1,0 +1,624 @@
+/* ========================================
+   US-043: Reports Screen - Layout
+   ======================================== */
+
+/* Reports Screen Container */
+.reports-screen {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  overflow: hidden;
+}
+
+/* Reports Header */
+.reports-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: var(--spacing-md);
+  background-color: var(--background);
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+}
+
+/* Back button overrides for reports-header */
+.reports-header .back-btn {
+  padding: var(--spacing-sm);
+  min-width: 36px;
+  min-height: 36px;
+  justify-content: center;
+}
+
+.reports-header .back-icon {
+  width: 20px;
+  height: 20px;
+}
+
+.reports-title {
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-semibold);
+  color: var(--text);
+  margin: 0;
+}
+
+/* Reports Content - Scrollable area */
+.reports-content {
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: var(--spacing-md);
+  padding-bottom: 80px; /* Account for fixed bottom nav */
+  background-color: var(--background-secondary);
+  scroll-behavior: smooth;
+}
+
+/* Reports Section */
+.reports-section {
+  margin-bottom: var(--spacing-lg);
+}
+
+.reports-section:last-child {
+  margin-bottom: var(--spacing-md);
+}
+
+/* Section Title */
+.section-title {
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-semibold);
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: var(--spacing-sm);
+}
+
+/* ----------------------------------------
+   Discipline Score Section
+   ---------------------------------------- */
+.discipline-section {
+  margin-bottom: var(--spacing-md);
+}
+
+.discipline-score-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: var(--spacing-lg) var(--spacing-md);
+  background: linear-gradient(135deg, var(--background) 0%, var(--primary-light) 100%);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow);
+  text-align: center;
+}
+
+.discipline-score-display {
+  display: flex;
+  align-items: baseline;
+  justify-content: center;
+  gap: 2px;
+  margin-bottom: var(--spacing-xs);
+}
+
+.discipline-score-value {
+  font-size: 48px;
+  font-weight: var(--font-weight-bold);
+  color: var(--primary);
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+}
+
+.discipline-score-max {
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-medium);
+  color: var(--text-muted);
+}
+
+.discipline-score-label {
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-semibold);
+  color: var(--text);
+  margin-bottom: 2px;
+}
+
+.discipline-score-description {
+  font-size: var(--font-size-xs);
+  color: var(--text-muted);
+}
+
+/* Score color coding (will be applied dynamically in US-044) */
+.discipline-score-value.score-excellent {
+  color: var(--success);
+}
+
+.discipline-score-value.score-good {
+  color: var(--primary);
+}
+
+.discipline-score-value.score-moderate {
+  color: var(--warning);
+}
+
+.discipline-score-value.score-needs-improvement {
+  color: var(--danger);
+}
+
+/* ----------------------------------------
+   Streak Section
+   ---------------------------------------- */
+.streak-section {
+  margin-bottom: var(--spacing-md);
+}
+
+.streak-cards {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--spacing-sm);
+}
+
+.streak-card {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-md);
+  padding: var(--spacing-md);
+  background-color: var(--background);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  transition: all var(--transition-fast);
+}
+
+.streak-card:hover {
+  box-shadow: var(--shadow-sm);
+}
+
+/* Current streak - active state */
+.current-streak-card.active {
+  border-color: var(--warning);
+  background: linear-gradient(135deg, var(--background) 0%, var(--warning-light) 100%);
+}
+
+.current-streak-card.active .streak-icon {
+  color: var(--warning);
+  animation: flame-glow 1.5s ease-in-out infinite;
+}
+
+@keyframes flame-glow {
+  0%, 100% {
+    filter: drop-shadow(0 0 2px rgba(255, 152, 0, 0.3));
+    transform: scale(1);
+  }
+  50% {
+    filter: drop-shadow(0 0 6px rgba(255, 152, 0, 0.5));
+    transform: scale(1.05);
+  }
+}
+
+/* Best streak card */
+.best-streak-card {
+  background: linear-gradient(135deg, var(--background) 0%, var(--gold-subtle) 100%);
+}
+
+.best-streak-card .streak-icon.best {
+  color: var(--gold);
+}
+
+/* Dark mode for best streak card */
+[data-theme="dark"] .best-streak-card {
+  background: linear-gradient(135deg, var(--card-bg) 0%, rgba(251, 191, 36, 0.15) 100%);
+}
+
+.streak-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  flex-shrink: 0;
+  color: var(--text-muted);
+}
+
+.streak-icon svg {
+  width: 28px;
+  height: 28px;
+}
+
+.streak-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.streak-value {
+  font-size: var(--font-size-xl);
+  font-weight: var(--font-weight-bold);
+  color: var(--text);
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+}
+
+.streak-label {
+  font-size: var(--font-size-xs);
+  color: var(--text-muted);
+  white-space: nowrap;
+}
+
+/* ----------------------------------------
+   Stats Cards Section
+   ---------------------------------------- */
+.stats-section {
+  margin-bottom: var(--spacing-md);
+}
+
+.stats-cards {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--spacing-sm);
+}
+
+.stat-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--spacing-xs);
+  padding: var(--spacing-md) var(--spacing-sm);
+  background-color: var(--background);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  text-align: center;
+  transition: all var(--transition-fast);
+}
+
+.stat-card:hover {
+  box-shadow: var(--shadow-sm);
+  transform: translateY(-1px);
+}
+
+.stat-card-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: var(--radius);
+  margin-bottom: 2px;
+}
+
+.stat-card-icon svg {
+  width: 20px;
+  height: 20px;
+}
+
+/* Icon color variants */
+.stat-card-icon.today-icon {
+  background-color: var(--primary-light);
+  color: var(--primary);
+}
+
+.stat-card-icon.week-icon {
+  background-color: var(--secondary-light);
+  color: var(--secondary);
+}
+
+.stat-card-icon.month-icon {
+  background-color: var(--counter-light);
+  color: var(--counter-color);
+}
+
+.stat-card-content {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.stat-card-value {
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-bold);
+  color: var(--text);
+  line-height: 1.2;
+  font-variant-numeric: tabular-nums;
+}
+
+.stat-card-label {
+  font-size: var(--font-size-xs);
+  color: var(--text-muted);
+}
+
+/* ----------------------------------------
+   Charts Placeholder Section
+   ---------------------------------------- */
+.charts-section {
+  margin-bottom: var(--spacing-sm);
+}
+
+.charts-placeholder {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 120px;
+  background-color: var(--background);
+  border: 2px dashed var(--border);
+  border-radius: var(--radius-lg);
+  padding: var(--spacing-lg);
+}
+
+.chart-coming-soon {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--spacing-sm);
+  color: var(--text-muted);
+}
+
+.chart-placeholder-icon {
+  width: 40px;
+  height: 40px;
+  opacity: 0.5;
+}
+
+.chart-placeholder-text {
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+}
+
+/* ----------------------------------------
+   US-047: Weekly Chart Styles
+   ---------------------------------------- */
+.weekly-chart {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+  padding: var(--spacing-md);
+  background-color: var(--card-bg);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+}
+
+.chart-bars {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  height: 100px;
+  gap: var(--spacing-xs);
+  padding: var(--spacing-xs) 0;
+}
+
+.chart-bar-container {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  align-items: flex-end;
+  height: 100%;
+  min-width: 28px;
+}
+
+.chart-bar {
+  width: 100%;
+  max-width: 32px;
+  min-height: 0;
+  border-radius: var(--radius-sm) var(--radius-sm) 0 0;
+  transition: height 0.3s ease, background-color 0.2s ease;
+  cursor: default;
+  position: relative;
+}
+
+/* Bar color classes - US-008: Theme-aware chart bars */
+.chart-bar-empty {
+  background-color: var(--chart-bar-low);
+  min-height: 4px;
+}
+
+.chart-bar-excellent {
+  background-color: var(--chart-bar-excellent);
+}
+
+.chart-bar-moderate {
+  background-color: var(--chart-bar-good);
+}
+
+.chart-bar-low {
+  background-color: var(--chart-bar-moderate);
+}
+
+/* Hover effect for bars */
+.chart-bar:hover {
+  filter: brightness(1.1);
+}
+
+/* Show percentage on hover */
+.chart-bar::after {
+  content: attr(data-percentage) '%';
+  position: absolute;
+  bottom: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  background-color: var(--text);
+  color: var(--background);
+  padding: 2px 6px;
+  border-radius: var(--radius-sm);
+  font-size: var(--font-size-xs);
+  white-space: nowrap;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s ease;
+  margin-bottom: 4px;
+}
+
+.chart-bar:hover::after {
+  opacity: 1;
+}
+
+/* Day labels */
+.chart-labels {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--spacing-xs);
+}
+
+.chart-label {
+  flex: 1;
+  text-align: center;
+  font-size: var(--font-size-xs);
+  color: var(--text-muted);
+  min-width: 28px;
+}
+
+.chart-label-today {
+  font-weight: var(--font-weight-semibold);
+  color: var(--primary);
+}
+
+/* ----------------------------------------
+   US-049: Activity Timeline Heatmap Styles
+   ---------------------------------------- */
+.heatmap-section {
+  margin-top: var(--spacing-md);
+}
+
+.activity-heatmap {
+  padding: var(--spacing-sm) var(--spacing-xs);
+  background-color: var(--card-bg);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+}
+
+.heatmap-container {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xs);
+}
+
+/* Hour labels row at the top */
+.heatmap-hour-labels {
+  display: grid;
+  grid-template-columns: repeat(24, 1fr);
+  gap: 1px;
+  margin-left: 28px; /* Space for day labels (2-letter format) */
+  margin-bottom: var(--spacing-xs);
+}
+
+.heatmap-hour-label {
+  font-size: 9px;
+  color: var(--text-muted);
+  text-align: center;
+}
+
+/* Grid wrapper with day labels on left */
+.heatmap-grid-wrapper {
+  display: flex;
+  gap: var(--spacing-xs);
+}
+
+/* Day labels column on the left */
+.heatmap-day-labels {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 1px;
+  width: 24px;
+  flex-shrink: 0;
+}
+
+.heatmap-day-label {
+  font-size: var(--font-size-xs);
+  color: var(--text-muted);
+  text-align: right;
+  padding-right: 4px;
+  height: 12px;
+  line-height: 12px;
+}
+
+.heatmap-day-today {
+  font-weight: var(--font-weight-semibold);
+  color: var(--primary);
+}
+
+/* Main heatmap grid - 7 rows x 24 columns */
+.heatmap-grid {
+  display: grid;
+  grid-template-columns: repeat(24, 1fr);
+  grid-template-rows: repeat(7, 12px);
+  gap: 1px;
+  flex: 1;
+}
+
+/* Individual heatmap cell */
+.heatmap-cell {
+  border-radius: 2px;
+  cursor: default;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.heatmap-cell:hover {
+  transform: scale(1.2);
+  box-shadow: var(--shadow-sm);
+  z-index: 1;
+}
+
+/* Heatmap intensity levels - uses CSS variables for dark mode support */
+.heatmap-cell.level-0 {
+  background-color: var(--heatmap-level-0);
+}
+
+.heatmap-cell.level-1 {
+  background-color: var(--heatmap-level-1);
+}
+
+.heatmap-cell.level-2 {
+  background-color: var(--heatmap-level-2);
+}
+
+.heatmap-cell.level-3 {
+  background-color: var(--heatmap-level-3);
+}
+
+.heatmap-cell.level-4 {
+  background-color: var(--heatmap-level-4);
+}
+
+/* Heatmap legend at the bottom */
+.heatmap-legend {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: var(--spacing-xs);
+  margin-top: var(--spacing-sm);
+  padding-top: var(--spacing-sm);
+}
+
+.legend-label {
+  font-size: var(--font-size-xs);
+  color: var(--text-muted);
+}
+
+.legend-scale {
+  display: flex;
+  gap: 2px;
+}
+
+.legend-cell {
+  width: 12px;
+  height: 12px;
+  border-radius: 2px;
+}
+
+.legend-cell.level-0 {
+  background-color: var(--heatmap-level-0);
+}
+
+.legend-cell.level-1 {
+  background-color: var(--heatmap-level-1);
+}
+
+.legend-cell.level-2 {
+  background-color: var(--heatmap-level-2);
+}
+
+.legend-cell.level-3 {
+  background-color: var(--heatmap-level-3);
+}
+
+.legend-cell.level-4 {
+  background-color: var(--heatmap-level-4);
+}
+
+/* ========================================

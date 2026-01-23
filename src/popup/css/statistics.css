@@ -1,0 +1,515 @@
+/* ========================================
+   US-071: Individual Goal Statistics Screen
+   ============================================================================= */
+
+.goal-statistics-screen {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  background: var(--bg-primary);
+}
+
+/* Header */
+.goal-statistics-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--spacing-sm) var(--spacing-md);
+  background: var(--bg-primary);
+  border-bottom: 1px solid var(--border);
+}
+
+.goal-statistics-header .back-btn {
+  padding: var(--spacing-sm);
+  min-width: 36px;
+  min-height: 36px;
+  justify-content: center;
+}
+
+.goal-statistics-header .back-icon {
+  width: 20px;
+  height: 20px;
+}
+
+.goal-statistics-title {
+  font-size: var(--font-size-lg);
+  font-weight: 600;
+  color: var(--text-primary);
+  margin: 0;
+}
+
+/* Content */
+.goal-statistics-content {
+  flex: 1;
+  overflow-y: auto;
+  padding: var(--spacing-md);
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-lg);
+}
+
+/* Section styling */
+.goal-statistics-section {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+}
+
+.goal-statistics-section .section-title {
+  font-size: var(--font-size-sm);
+  font-weight: 600;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin: 0 0 var(--spacing-xs) 0;
+}
+
+/* Goal Info Card */
+.goal-info-card {
+  background: var(--card-bg);
+  border-radius: var(--radius);
+  padding: var(--spacing-md);
+  border: 1px solid var(--border);
+}
+
+.goal-info-header {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  margin-bottom: var(--spacing-sm);
+}
+
+.goal-info-card .goal-type-indicator {
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius-sm);
+}
+
+.goal-info-card .goal-type-indicator svg {
+  width: 18px;
+  height: 18px;
+}
+
+.goal-info-card .goal-type-indicator.type-timer {
+  background: var(--secondary-light);
+  color: var(--secondary);
+}
+
+.goal-info-card .goal-type-indicator.type-counter {
+  background: var(--counter-light);
+  color: var(--counter-color);
+}
+
+.goal-info-card .goal-type-indicator.type-checkbox {
+  background: var(--success-light);
+  color: var(--success);
+}
+
+.goal-info-title {
+  font-size: var(--font-size-lg);
+  font-weight: 600;
+  color: var(--text-primary);
+  margin: 0;
+  flex: 1;
+}
+
+.goal-info-badges {
+  display: flex;
+  gap: var(--spacing-xs);
+  flex-wrap: wrap;
+}
+
+/* Compact Goal Info Card */
+.goal-info-section-compact {
+  padding: 0;
+}
+
+.goal-info-card-compact {
+  background: var(--card-bg);
+  border-radius: var(--radius);
+  padding: var(--spacing-sm) var(--spacing-md);
+  border: 1px solid var(--border);
+}
+
+.goal-info-main {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+}
+
+.goal-info-card-compact .goal-type-indicator {
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius-sm);
+  flex-shrink: 0;
+}
+
+.goal-info-card-compact .goal-type-indicator svg {
+  width: 14px;
+  height: 14px;
+}
+
+.goal-info-card-compact .goal-type-indicator.type-timer {
+  background: var(--secondary-light);
+  color: var(--secondary);
+}
+
+.goal-info-card-compact .goal-type-indicator.type-counter {
+  background: var(--counter-light);
+  color: var(--counter-color);
+}
+
+.goal-info-card-compact .goal-type-indicator.type-checkbox {
+  background: var(--success-light);
+  color: var(--success);
+}
+
+.goal-info-card-compact .goal-type-indicator.type-avoidance {
+  background: var(--warning-light, rgba(255, 152, 0, 0.15));
+  color: var(--warning, #ff9800);
+}
+
+.goal-info-details {
+  flex: 1;
+  min-width: 0;
+}
+
+.goal-info-title-compact {
+  font-size: var(--font-size-base);
+  font-weight: 600;
+  color: var(--text-primary);
+  margin: 0 0 var(--spacing-xs) 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.goal-info-meta {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+  flex-wrap: wrap;
+}
+
+.goal-category-badge-sm,
+.goal-timeframe-badge-sm,
+.goal-target-badge {
+  font-size: 10px;
+  padding: 2px 6px;
+  border-radius: var(--radius-sm);
+  font-weight: 500;
+}
+
+.goal-category-badge-sm {
+  /* Colors set inline */
+}
+
+.goal-timeframe-badge-sm {
+  background: var(--bg-secondary);
+  color: var(--text-secondary);
+}
+
+.goal-timeframe-badge-sm.timeframe-daily {
+  background: var(--primary-light);
+  color: var(--primary);
+}
+
+.goal-timeframe-badge-sm.timeframe-weekly {
+  background: var(--secondary-light);
+  color: var(--secondary);
+}
+
+.goal-target-badge {
+  background: var(--surface-sunken);
+  color: var(--text-secondary);
+  font-family: var(--font-mono, 'SF Mono', monospace);
+}
+
+/* Stats Cards Grid */
+.goal-stats-cards {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--spacing-sm);
+}
+
+.goal-stat-card {
+  background: var(--card-bg);
+  border-radius: var(--radius);
+  padding: var(--spacing-md);
+  border: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: var(--spacing-sm);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.goal-stat-card:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow);
+}
+
+.goal-stat-icon {
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: var(--bg-secondary);
+}
+
+.goal-stat-icon svg {
+  width: 20px;
+  height: 20px;
+  color: var(--text-secondary);
+}
+
+.completion-rate-card .goal-stat-icon {
+  background: var(--success-light);
+}
+
+.completion-rate-card .goal-stat-icon svg {
+  color: var(--success);
+}
+
+.best-streak-card .goal-stat-icon.streak-icon {
+  background: var(--warning-light);
+}
+
+.best-streak-card .goal-stat-icon.streak-icon svg {
+  color: var(--gold);
+}
+
+.total-accumulated-card .goal-stat-icon.total-icon {
+  background: var(--secondary-light);
+}
+
+.total-accumulated-card .goal-stat-icon.total-icon svg {
+  color: var(--secondary);
+}
+
+.goal-stat-content {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.goal-stat-value {
+  font-size: var(--font-size-lg);
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.goal-stat-label {
+  font-size: var(--font-size-xs);
+  color: var(--text-secondary);
+}
+
+/* Completion rate color coding - US-008: Theme-aware colors */
+.goal-stat-value.rate-excellent {
+  color: var(--chart-bar-excellent);
+}
+
+.goal-stat-value.rate-good {
+  color: var(--chart-bar-good);
+}
+
+.goal-stat-value.rate-moderate {
+  color: var(--chart-bar-moderate);
+}
+
+.goal-stat-value.rate-low {
+  color: var(--text-muted);
+}
+
+/* Comparison Card */
+.comparison-card {
+  background: var(--card-bg);
+  border-radius: var(--radius);
+  padding: var(--spacing-md);
+  border: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+}
+
+.comparison-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: var(--spacing-xs) 0;
+}
+
+.comparison-item:not(:last-child) {
+  border-bottom: 1px solid var(--border-light);
+}
+
+.comparison-label {
+  font-size: var(--font-size-sm);
+  color: var(--text-secondary);
+}
+
+.comparison-value {
+  font-size: var(--font-size-base);
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+/* 30-Day Progress Chart */
+.goal-progress-chart {
+  background: var(--card-bg);
+  border-radius: var(--radius);
+  padding: var(--spacing-md);
+  border: 1px solid var(--border);
+  overflow: hidden;
+}
+
+.progress-chart-bars {
+  display: flex;
+  align-items: flex-end;
+  gap: 2px;
+  height: 100px;
+  margin-bottom: var(--spacing-sm);
+  overflow: hidden;
+}
+
+.progress-bar-container {
+  flex: 1;
+  height: 100%;
+  display: flex;
+  align-items: flex-end;
+  cursor: pointer;
+}
+
+.progress-bar {
+  width: 100%;
+  border-radius: 2px 2px 0 0;
+  transition: height 0.3s ease;
+  min-height: 2px;
+}
+
+.progress-bar.bar-completed {
+  background: var(--success);
+}
+
+.progress-bar.bar-partial {
+  background: var(--warning);
+}
+
+.progress-bar.bar-missed {
+  background: var(--bg-secondary);
+}
+
+.progress-bar.bar-today {
+  box-shadow: 0 0 0 2px var(--primary);
+}
+
+.progress-chart-labels {
+  position: relative;
+  height: 16px;
+  width: 100%;
+}
+
+.progress-chart-label {
+  position: absolute;
+  transform: translateX(-50%);
+  font-size: 10px;
+  color: var(--text-tertiary);
+  white-space: nowrap;
+}
+
+.progress-chart-label.label-today {
+  color: var(--primary);
+  font-weight: 600;
+}
+
+/* Chart Legend */
+.chart-legend {
+  display: flex;
+  justify-content: center;
+  gap: var(--spacing-md);
+  margin-top: var(--spacing-sm);
+}
+
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+}
+
+.legend-color {
+  width: 12px;
+  height: 12px;
+  border-radius: 2px;
+}
+
+.legend-color.completed {
+  background: var(--success);
+}
+
+.legend-color.partial {
+  background: var(--warning);
+}
+
+.legend-color.missed {
+  background: var(--bg-secondary);
+}
+
+.legend-text {
+  font-size: var(--font-size-xs);
+  color: var(--text-secondary);
+}
+
+/* Stats Button - base styles defined earlier, compact adjustments only */
+.goal-card.compact .stats-btn {
+  width: 20px;
+  height: 20px;
+}
+
+.goal-card.compact .stats-btn svg {
+  width: 14px;
+  height: 14px;
+}
+
+/* Dark mode adjustments */
+[data-theme="dark"] .goal-stat-card {
+  background: var(--card-bg);
+  border-color: var(--border);
+}
+
+[data-theme="dark"] .goal-info-card,
+[data-theme="dark"] .comparison-card,
+[data-theme="dark"] .goal-progress-chart {
+  background: var(--card-bg);
+  border-color: var(--border);
+}
+
+/* US-002: Enhanced dark mode visibility for missed progress bars */
+[data-theme="dark"] .progress-bar.bar-missed {
+  background: #3A3A3A;
+}
+
+[data-theme="dark"] .legend-color.missed {
+  background: #3A3A3A;
+}
+
+/* Dark mode stats-btn hover uses base styles with accent-subtle */
+
+/* Reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  .goal-stat-card,
+  .progress-bar,
+  .stats-btn {
+    transition: none;
+  }
+}
+
+/* ============================================================================

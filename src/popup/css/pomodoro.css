@@ -1,0 +1,885 @@
+/* ========================================
+   US-083: Level and XP System Styles
+   ============================================================================= */
+
+/* Level Badge in Header */
+.level-badge {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  background: var(--reward-gradient);
+  border-radius: 20px;
+  cursor: default;
+  box-shadow: var(--shadow-md);
+  margin-left: auto;
+  margin-right: 8px;
+}
+
+.level-icon {
+  font-size: 14px;
+  line-height: 1;
+}
+
+.level-number {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--reward-text);
+  letter-spacing: -0.3px;
+}
+
+.level-progress-mini {
+  width: 30px;
+  height: 4px;
+  background: rgba(0, 0, 0, 0.15);
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.level-progress-bar-mini {
+  height: 100%;
+  background: rgba(255, 255, 255, 0.9);
+  border-radius: 2px;
+  transition: width 0.3s ease;
+}
+
+/* XP Toast Notification */
+.xp-toast {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%) scale(0.8);
+  z-index: 10000;
+  padding: 12px 20px;
+  background: linear-gradient(135deg, var(--accent) 0%, var(--accent-hover) 100%);
+  color: var(--text-inverse);
+  border-radius: 12px;
+  box-shadow: var(--shadow-lg);
+  opacity: 0;
+  transition: opacity 0.2s ease, transform 0.2s ease;
+  pointer-events: none;
+}
+
+.xp-toast.show {
+  opacity: 1;
+  transform: translate(-50%, -50%) scale(1);
+}
+
+.xp-toast-content {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  white-space: nowrap;
+}
+
+.xp-toast-icon {
+  font-size: 20px;
+  font-weight: 700;
+  opacity: 0.9;
+}
+
+.xp-toast-amount {
+  font-size: 18px;
+  font-weight: 700;
+  letter-spacing: -0.3px;
+}
+
+.xp-toast-bonus {
+  font-size: 11px;
+  opacity: 0.85;
+  font-weight: 500;
+  margin-left: 4px;
+}
+
+/* Level Up Notification */
+.level-up-notification {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%) scale(0.7);
+  z-index: 10001;
+  padding: 24px 40px;
+  background: var(--reward-gradient);
+  border-radius: 16px;
+  box-shadow: var(--shadow-lg);
+  opacity: 0;
+  transition: opacity 0.3s ease, transform 0.3s ease;
+  text-align: center;
+}
+
+.level-up-notification.show {
+  opacity: 1;
+  transform: translate(-50%, -50%) scale(1);
+}
+
+.level-up-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+
+.level-up-icon {
+  font-size: 48px;
+  line-height: 1;
+  animation: levelUpBounce 0.5s ease;
+}
+
+.level-up-text {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+}
+
+.level-up-label {
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: var(--reward-text);
+  opacity: 0.8;
+}
+
+.level-up-level {
+  font-size: 28px;
+  font-weight: 800;
+  color: var(--reward-text);
+  letter-spacing: -0.5px;
+}
+
+.level-up-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--reward-text);
+  opacity: 0.9;
+}
+
+@keyframes levelUpBounce {
+  0% { transform: scale(0.5); }
+  50% { transform: scale(1.2); }
+  100% { transform: scale(1); }
+}
+
+/* Level Up Confetti */
+.level-up-confetti-container {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 10002;
+  overflow: hidden;
+}
+
+.level-confetti-particle {
+  position: absolute;
+  top: -10px;
+  width: 10px;
+  height: 10px;
+  border-radius: 2px;
+  animation: confettiFall linear forwards;
+}
+
+@keyframes confettiFall {
+  0% {
+    transform: translateY(0) rotate(0deg);
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(100vh) rotate(720deg);
+    opacity: 0;
+  }
+}
+
+/* Dark Mode - Level and XP (now handled by CSS variables) */
+[data-theme="dark"] .level-progress-mini {
+  background: rgba(255, 255, 255, 0.15);
+}
+
+[data-theme="dark"] .xp-toast {
+  background: linear-gradient(135deg, var(--accent-hover) 0%, var(--accent-active) 100%);
+  box-shadow: var(--shadow-lg);
+}
+
+/* Reduced Motion - Level and XP */
+@media (prefers-reduced-motion: reduce) {
+  .xp-toast,
+  .level-up-notification {
+    transition: opacity 0.1s ease;
+    transform: translate(-50%, -50%);
+  }
+
+  .xp-toast.show,
+  .level-up-notification.show {
+    transform: translate(-50%, -50%);
+  }
+
+  .level-up-icon {
+    animation: none;
+  }
+
+  .level-confetti-particle {
+    animation: none;
+    opacity: 0;
+  }
+}
+
+/* =============================================================================
+   US-085: Pomodoro Timer Mode
+   ============================================================================= */
+
+/* Pomodoro Toggle Button on Regular Timer */
+.pomodoro-toggle-btn {
+  padding: 6px;
+  background: transparent;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.pomodoro-toggle-btn:hover {
+  background: var(--danger-light);
+  border-color: var(--danger);
+  color: var(--danger);
+}
+
+.pomodoro-toggle-btn svg {
+  width: 14px;
+  height: 14px;
+}
+
+/* Pomodoro Controls Container */
+.goal-controls-pomodoro {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  background: linear-gradient(135deg, rgba(231, 76, 60, 0.05) 0%, rgba(211, 84, 0, 0.05) 100%);
+  border-radius: 8px;
+  padding: 10px;
+  border: 1px solid rgba(231, 76, 60, 0.15);
+}
+
+/* Pomodoro Header */
+.pomodoro-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.pomodoro-phase-badge {
+  font-size: 11px;
+  font-weight: 600;
+  padding: 3px 8px;
+  border-radius: 4px;
+  background: var(--background-secondary);
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.pomodoro-phase-badge.work {
+  background: var(--danger-light);
+  color: var(--danger);
+}
+
+.pomodoro-phase-badge.break {
+  background: var(--success-light);
+  color: var(--success);
+}
+
+/* Pomodoro Sessions (Tomato Dots) */
+.pomodoro-sessions {
+  display: flex;
+  gap: 4px;
+  flex: 1;
+}
+
+.pomodoro-session-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--border);
+  transition: all 0.3s ease;
+}
+
+.pomodoro-session-dot.completed {
+  background: var(--danger);
+  box-shadow: 0 0 4px rgba(231, 76, 60, 0.4);
+}
+
+/* Pomodoro Close Button */
+.pomodoro-close-btn {
+  padding: 4px;
+  background: transparent;
+  border: none;
+  color: var(--text-secondary);
+  cursor: pointer;
+  border-radius: 4px;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.pomodoro-close-btn:hover {
+  background: var(--danger-light);
+  color: var(--danger);
+}
+
+/* Pomodoro Timer Display */
+.pomodoro-timer-display {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 8px 0;
+}
+
+.pomodoro-time-remaining {
+  font-size: 28px;
+  font-weight: 700;
+  font-family: 'SF Mono', 'Monaco', 'Inconsolata', 'Fira Mono', monospace;
+  color: var(--text);
+  letter-spacing: -0.5px;
+}
+
+.pomodoro-total-sessions {
+  font-size: 12px;
+  font-weight: 600;
+  background: var(--background-secondary);
+  color: var(--text-secondary);
+  padding: 2px 6px;
+  border-radius: 10px;
+  min-width: 20px;
+  text-align: center;
+}
+
+/* Pomodoro Action Buttons */
+.pomodoro-controls {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+}
+
+.pomodoro-play-btn {
+  padding: 10px 24px;
+  background: var(--danger);
+  border: none;
+  border-radius: 8px;
+  color: white;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.pomodoro-play-btn:hover {
+  background: var(--danger-hover);
+  transform: translateY(-1px);
+}
+
+.pomodoro-play-btn.is-active {
+  background: var(--warning);
+}
+
+.pomodoro-play-btn.is-active:hover {
+  background: var(--warning-hover);
+}
+
+.pomodoro-play-btn svg {
+  width: 18px;
+  height: 18px;
+}
+
+.pomodoro-skip-btn {
+  padding: 8px 12px;
+  background: transparent;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.pomodoro-skip-btn:hover {
+  border-color: var(--text-secondary);
+  background: var(--background-secondary);
+}
+
+.pomodoro-skip-btn svg {
+  width: 14px;
+  height: 14px;
+}
+
+/* Pomodoro Phase Toast Notification */
+.pomodoro-phase-toast {
+  position: fixed;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%) translateY(100px);
+  background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);
+  color: white;
+  padding: 14px 20px;
+  border-radius: 12px;
+  box-shadow: 0 4px 20px rgba(231, 76, 60, 0.4);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  z-index: 10000;
+  opacity: 0;
+  transition: all 0.3s ease;
+  max-width: calc(100% - 40px);
+}
+
+.pomodoro-phase-toast.show {
+  transform: translateX(-50%) translateY(0);
+  opacity: 1;
+}
+
+.pomodoro-toast-icon {
+  font-size: 24px;
+}
+
+.pomodoro-toast-content {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.pomodoro-toast-title {
+  font-weight: 600;
+  font-size: 14px;
+}
+
+.pomodoro-toast-message {
+  font-size: 12px;
+  opacity: 0.9;
+}
+
+/* Pomodoro Settings Section */
+.pomodoro-settings-section {
+  margin-top: 16px;
+  padding-top: 16px;
+  border-top: 1px solid var(--border);
+}
+
+.pomodoro-duration-inputs {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+  margin-top: 12px;
+}
+
+.pomodoro-duration-item {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.pomodoro-duration-label {
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.pomodoro-duration-input {
+  width: 100%;
+  padding: 8px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  font-size: 14px;
+  text-align: center;
+  background: var(--background);
+  color: var(--text);
+}
+
+.pomodoro-duration-input:focus {
+  outline: none;
+  border-color: var(--danger);
+  box-shadow: 0 0 0 2px rgba(231, 76, 60, 0.15);
+}
+
+/* Dark Mode - Pomodoro */
+[data-theme="dark"] .goal-controls-pomodoro {
+  background: linear-gradient(135deg, rgba(231, 76, 60, 0.1) 0%, rgba(211, 84, 0, 0.1) 100%);
+  border-color: rgba(231, 76, 60, 0.2);
+}
+
+[data-theme="dark"] .pomodoro-phase-badge {
+  background: var(--background-secondary);
+}
+
+[data-theme="dark"] .pomodoro-phase-badge.work {
+  background: var(--danger-subtle);
+}
+
+[data-theme="dark"] .pomodoro-phase-badge.break {
+  background: var(--accent-subtle);
+}
+
+[data-theme="dark"] .pomodoro-session-dot {
+  background: var(--border);
+}
+
+[data-theme="dark"] .pomodoro-toggle-btn:hover {
+  background: var(--danger-subtle);
+}
+
+[data-theme="dark"] .pomodoro-close-btn:hover {
+  background: var(--danger-subtle);
+}
+
+[data-theme="dark"] .pomodoro-duration-input {
+  background: var(--background-secondary);
+  border-color: var(--border);
+  color: var(--text);
+}
+
+/* Compact View - Pomodoro */
+.goal-card.compact .goal-controls-pomodoro {
+  padding: 8px;
+  gap: 6px;
+}
+
+.goal-card.compact .pomodoro-time-remaining {
+  font-size: 22px;
+}
+
+.goal-card.compact .pomodoro-play-btn {
+  padding: 8px 16px;
+}
+
+.goal-card.compact .pomodoro-phase-badge {
+  font-size: 10px;
+  padding: 2px 6px;
+}
+
+/* Reduced Motion - Pomodoro */
+@media (prefers-reduced-motion: reduce) {
+  .pomodoro-phase-toast {
+    transition: opacity 0.1s ease;
+    transform: translateX(-50%);
+  }
+
+  .pomodoro-phase-toast.show {
+    transform: translateX(-50%);
+  }
+
+  .pomodoro-session-dot.completed {
+    box-shadow: none;
+  }
+}
+
+/* =============================================================================
+   US-086: Break Reminders Styles
+   ============================================================================= */
+
+/* Break Reminder Overlay */
+.break-reminder-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10000;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.3s ease, visibility 0.3s ease;
+}
+
+.break-reminder-overlay.show {
+  opacity: 1;
+  visibility: visible;
+}
+
+/* Break Reminder Modal */
+.break-reminder-modal {
+  background: var(--background);
+  border-radius: 16px;
+  padding: 24px;
+  max-width: 340px;
+  width: calc(100% - 32px);
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+  transform: scale(0.9) translateY(20px);
+  transition: transform 0.3s ease;
+}
+
+.break-reminder-overlay.show .break-reminder-modal {
+  transform: scale(1) translateY(0);
+}
+
+/* Break Reminder Header */
+.break-reminder-header {
+  text-align: center;
+  margin-bottom: 16px;
+}
+
+.break-reminder-icon {
+  font-size: 48px;
+  display: block;
+  margin-bottom: 8px;
+  animation: breakBounce 1s ease infinite;
+}
+
+@keyframes breakBounce {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-4px); }
+}
+
+.break-reminder-title {
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--text);
+  margin: 0;
+}
+
+/* Break Reminder Description */
+.break-reminder-description {
+  font-size: 13px;
+  color: var(--text-secondary);
+  text-align: center;
+  margin-bottom: 20px;
+  line-height: 1.5;
+}
+
+/* Break Suggestion Card */
+.break-reminder-suggestion {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: linear-gradient(135deg, rgba(39, 174, 96, 0.1) 0%, rgba(46, 204, 113, 0.15) 100%);
+  border: 1px solid rgba(39, 174, 96, 0.3);
+  border-radius: 12px;
+  padding: 12px 16px;
+  margin-bottom: 16px;
+}
+
+.suggestion-icon {
+  font-size: 32px;
+  flex-shrink: 0;
+}
+
+.suggestion-content {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.suggestion-activity {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text);
+}
+
+.suggestion-duration {
+  font-size: 12px;
+  color: var(--text-secondary);
+}
+
+/* Other Activities */
+.break-reminder-activities {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 20px;
+  padding-left: 4px;
+}
+
+.activities-label {
+  font-size: 12px;
+  color: var(--text-secondary);
+}
+
+.activities-list {
+  display: flex;
+  gap: 6px;
+}
+
+.activity-chip {
+  font-size: 18px;
+  cursor: default;
+  opacity: 0.7;
+  transition: opacity 0.2s ease, transform 0.2s ease;
+}
+
+.activity-chip:hover {
+  opacity: 1;
+  transform: scale(1.1);
+}
+
+/* Break Actions */
+.break-reminder-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-bottom: 16px;
+}
+
+.break-reminder-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 10px 16px;
+  font-size: 14px;
+  font-weight: 600;
+  border-radius: 8px;
+  transition: all 0.2s ease;
+}
+
+.break-reminder-btn.btn-primary {
+  background: linear-gradient(135deg, var(--accent) 0%, var(--accent-hover) 100%);
+  color: var(--text-inverse);
+  border: none;
+}
+
+.break-reminder-btn.btn-primary:hover {
+  background: linear-gradient(135deg, var(--accent-hover) 0%, var(--accent-active) 100%);
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-md);
+}
+
+/* Snooze Button Group */
+.break-reminder-snooze-group {
+  display: flex;
+  gap: 8px;
+}
+
+.break-reminder-snooze-group .snooze-btn {
+  flex: 1;
+  padding: 8px 12px;
+  font-size: 12px;
+  font-weight: 500;
+  background: var(--background-secondary);
+  border: 1px solid var(--border);
+  color: var(--text-secondary);
+}
+
+.break-reminder-snooze-group .snooze-btn:hover {
+  background: var(--background-tertiary);
+  border-color: var(--primary);
+  color: var(--primary);
+}
+
+/* Break Footer Actions */
+.break-reminder-footer {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  padding-top: 16px;
+  border-top: 1px solid var(--border);
+}
+
+.break-reminder-skip-btn,
+.break-reminder-disable-btn {
+  background: none;
+  border: none;
+  font-size: 12px;
+  color: var(--text-secondary);
+  cursor: pointer;
+  padding: 4px 0;
+  transition: color 0.2s ease;
+}
+
+.break-reminder-skip-btn:hover {
+  color: var(--text);
+}
+
+.break-reminder-disable-btn:hover {
+  color: var(--danger);
+}
+
+/* Dark Mode - Break Reminders */
+[data-theme="dark"] .break-reminder-modal {
+  background: var(--background);
+  border: 1px solid var(--border);
+}
+
+[data-theme="dark"] .break-reminder-suggestion {
+  background: linear-gradient(135deg, rgba(39, 174, 96, 0.15) 0%, rgba(46, 204, 113, 0.1) 100%);
+  border-color: rgba(39, 174, 96, 0.25);
+}
+
+[data-theme="dark"] .break-reminder-snooze-group .snooze-btn {
+  background: var(--background-secondary);
+  border-color: var(--border);
+}
+
+[data-theme="dark"] .break-reminder-snooze-group .snooze-btn:hover {
+  background: var(--background-tertiary);
+}
+
+/* Reduced Motion - Break Reminders */
+@media (prefers-reduced-motion: reduce) {
+  .break-reminder-overlay {
+    transition: opacity 0.1s ease, visibility 0.1s ease;
+  }
+
+  .break-reminder-modal {
+    transition: none;
+    transform: scale(1) translateY(0);
+  }
+
+  .break-reminder-icon {
+    animation: none;
+  }
+
+  .activity-chip {
+    transition: none;
+  }
+
+  .break-reminder-btn {
+    transition: none;
+  }
+
+  .break-reminder-btn.btn-primary:hover {
+    transform: none;
+  }
+}
+
+/* Compact/Small Screen - Break Reminders */
+@media (max-width: 360px) {
+  .break-reminder-modal {
+    padding: 20px 16px;
+  }
+
+  .break-reminder-icon {
+    font-size: 40px;
+  }
+
+  .break-reminder-title {
+    font-size: 18px;
+  }
+
+  .break-reminder-snooze-group .snooze-btn {
+    padding: 6px 8px;
+    font-size: 11px;
+  }
+}
+
+/* Break Interval Input Wrapper */
+.break-interval-input-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+/* Color themes are auto-generated from /themes/theme-config.js */

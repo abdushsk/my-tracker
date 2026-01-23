@@ -1,0 +1,1133 @@
+/* ========================================
+   US-022: Add Goal Form - Modal
+   ======================================== */
+
+/* Modal Container - Hidden by default */
+.modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity var(--transition), visibility var(--transition);
+}
+
+.modal.active {
+  opacity: 1;
+  visibility: visible;
+}
+
+/* Modal Overlay - Dark background */
+.modal-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  cursor: pointer;
+  transition: background-color var(--transition);
+}
+
+.modal.active .modal-overlay {
+  background-color: rgba(0, 0, 0, 0.6);
+}
+
+/* Modal Container - The dialog itself */
+.modal-container {
+  position: relative;
+  width: calc(100% - var(--spacing-lg));
+  max-width: 360px;
+  max-height: calc(100% - var(--spacing-xl));
+  background-color: var(--background);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-lg), 0 8px 32px rgba(0, 0, 0, 0.2);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  transform: scale(0.95) translateY(10px);
+  transition: transform var(--transition);
+  z-index: 1001;
+}
+
+.modal.active .modal-container {
+  transform: scale(1) translateY(0);
+}
+
+/* Modal Header */
+.modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--spacing-md) var(--spacing-lg);
+  border-bottom: 1px solid var(--border);
+  background-color: var(--background);
+  flex-shrink: 0;
+}
+
+.modal-title {
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-semibold);
+  color: var(--text);
+  margin: 0;
+}
+
+/* Close Button (X) */
+.modal-close-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: var(--radius);
+  color: var(--text-muted);
+  background-color: transparent;
+  transition: all var(--transition-fast);
+}
+
+.modal-close-btn:hover {
+  background-color: var(--danger-light);
+  color: var(--danger);
+}
+
+.modal-close-btn:active {
+  transform: scale(0.9);
+}
+
+.modal-close-btn svg {
+  width: 20px;
+  height: 20px;
+}
+
+/* Modal Body */
+.modal-body {
+  flex: 1;
+  padding: var(--spacing-lg);
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+/* Goal Form */
+.goal-form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-md);
+}
+
+/* Placeholder for form fields (temporary) */
+.form-placeholder {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 120px;
+  background-color: var(--background-secondary);
+  border-radius: var(--radius);
+  border: 2px dashed var(--border);
+}
+
+.form-placeholder p {
+  color: var(--text-muted);
+  font-size: var(--font-size-sm);
+  margin: 0;
+}
+
+/* Modal Footer */
+.modal-footer {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: var(--spacing-sm);
+  padding: var(--spacing-md) var(--spacing-lg);
+  border-top: 1px solid var(--border);
+  background-color: var(--background-secondary);
+  flex-shrink: 0;
+}
+
+/* Modal animation keyframes */
+@keyframes modal-fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes modal-slide-up {
+  from {
+    transform: scale(0.95) translateY(10px);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1) translateY(0);
+    opacity: 1;
+  }
+}
+
+/* Focus trap - ensure modal is keyboard navigable */
+.modal-container:focus {
+  outline: none;
+}
+
+/* Prevent body scroll when modal is open */
+body.modal-open {
+  overflow: hidden;
+}
+
+/* ========================================
+   US-023: Add Goal Form - Title Input
+   ======================================== */
+
+/* Form Group - Container for label, input, and error */
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xs);
+}
+
+/* Form Label */
+.form-label {
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  color: var(--text);
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+}
+
+/* Required field indicator */
+.required-indicator {
+  color: var(--danger);
+  font-weight: var(--font-weight-bold);
+  font-size: var(--font-size-base);
+  line-height: 1;
+}
+
+/* Form Input - Enhanced text input styling */
+.form-input {
+  width: 100%;
+  padding: var(--spacing-sm) var(--spacing-md);
+  font-size: var(--font-size-base);
+  font-family: inherit;
+  color: var(--text);
+  background-color: var(--background);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  transition: all var(--transition-fast);
+  outline: none;
+}
+
+.form-input::placeholder {
+  color: var(--text-muted);
+  font-style: italic;
+}
+
+/* Focus state */
+.form-input:focus {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px var(--primary-light);
+}
+
+/* Hover state (when not focused) */
+.form-input:not(:focus):hover {
+  border-color: var(--text-muted);
+}
+
+/* Error state */
+.form-input.has-error {
+  border-color: var(--danger);
+  background-color: var(--danger-light);
+}
+
+.form-input.has-error:focus {
+  border-color: var(--danger);
+  box-shadow: 0 0 0 3px rgba(244, 67, 54, 0.15);
+}
+
+/* Valid state (optional - for when input is valid) */
+.form-input.is-valid {
+  border-color: var(--success);
+}
+
+.form-input.is-valid:focus {
+  box-shadow: 0 0 0 3px var(--success-light);
+}
+
+/* Form Error Message */
+.form-error {
+  font-size: var(--font-size-xs);
+  color: var(--danger);
+  min-height: 16px;
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+  opacity: 0;
+  transform: translateY(-4px);
+  transition: opacity var(--transition-fast), transform var(--transition-fast);
+}
+
+.form-error.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* Error icon (added via pseudo-element when error is visible) */
+.form-error.visible::before {
+  content: '!';
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 14px;
+  height: 14px;
+  background-color: var(--danger);
+  color: var(--text-inverse);
+  border-radius: var(--radius-full);
+  font-size: 10px;
+  font-weight: var(--font-weight-bold);
+  flex-shrink: 0;
+}
+
+/* Form Input - Character counter (optional for future use) */
+.form-input-wrapper {
+  position: relative;
+}
+
+.char-counter {
+  position: absolute;
+  right: var(--spacing-sm);
+  bottom: -20px;
+  font-size: var(--font-size-xs);
+  color: var(--text-muted);
+}
+
+.char-counter.warning {
+  color: var(--warning);
+}
+
+.char-counter.danger {
+  color: var(--danger);
+}
+
+/* ========================================
+   US-024: Add Goal Form - Type Selector
+   ======================================== */
+
+/* Type Selector Container - Button group */
+.type-selector {
+  display: flex;
+  gap: var(--spacing-sm);
+  width: 100%;
+}
+
+/* Type Option Button */
+.type-option {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  padding: 10px 6px;
+  background-color: transparent;
+  border: 1px solid transparent;
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  min-height: 54px;
+}
+
+.type-option:hover {
+  background-color: var(--background-secondary);
+}
+
+.type-option:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
+}
+
+/* Active/Selected state */
+.type-option.active {
+  border-color: transparent;
+}
+
+/* Type Option Icon */
+.type-option-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  color: var(--text-muted);
+  transition: all var(--transition-fast);
+}
+
+.type-option-icon svg {
+  width: 18px;
+  height: 18px;
+  stroke-width: 1.5;
+}
+
+.type-option:hover .type-option-icon {
+  color: var(--text-secondary);
+}
+
+.type-option.active .type-option-icon {
+  color: var(--primary);
+}
+
+/* Type-specific icon colors when active */
+.type-option[data-type="timer"].active .type-option-icon {
+  color: var(--secondary);
+}
+
+.type-option[data-type="counter"].active .type-option-icon {
+  color: var(--counter-color);
+}
+
+.type-option[data-type="checkbox"].active .type-option-icon {
+  color: var(--primary);
+}
+
+.type-option[data-type="avoidance"].active .type-option-icon {
+  color: var(--type-avoidance);
+}
+
+/* Type Option Label */
+.type-option-label {
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  color: var(--text-secondary);
+  transition: color var(--transition-fast);
+  text-align: center;
+}
+
+.type-option:hover .type-option-label {
+  color: var(--text);
+}
+
+.type-option.active .type-option-label {
+  color: var(--text);
+}
+
+/* Type-specific active styles - subtle tints only */
+.type-option[data-type="timer"].active,
+.type-option[data-type="timer"].active:hover,
+.type-option[data-type="timer"].active:focus {
+  background-color: var(--type-timer-subtle);
+}
+
+.type-option[data-type="counter"].active,
+.type-option[data-type="counter"].active:hover,
+.type-option[data-type="counter"].active:focus {
+  background-color: var(--type-counter-subtle);
+}
+
+.type-option[data-type="checkbox"].active,
+.type-option[data-type="checkbox"].active:hover,
+.type-option[data-type="checkbox"].active:focus {
+  background-color: var(--type-checkbox-subtle);
+}
+
+.type-option[data-type="avoidance"].active,
+.type-option[data-type="avoidance"].active:hover,
+.type-option[data-type="avoidance"].active:focus {
+  background-color: var(--type-avoidance-subtle);
+}
+
+
+/* Active state press effect */
+.type-option:active {
+  transform: scale(0.97);
+}
+
+/* ========================================
+   US-025: Add Goal Form - Target Input (Timer)
+   ======================================== */
+
+/* Target input group container */
+.target-input-group {
+  transition: opacity var(--transition), max-height var(--transition), margin var(--transition);
+  overflow: hidden;
+}
+
+/* Hidden state for target inputs (shown/hidden based on type) */
+.target-input-group.hidden {
+  opacity: 0;
+  max-height: 0;
+  margin: 0;
+  pointer-events: none;
+}
+
+/* Timer Target Inputs Container */
+.timer-target-inputs {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--spacing-sm);
+}
+
+/* Individual time input field container */
+.time-input-field {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  flex: 1;
+}
+
+/* Time input styling */
+.time-input {
+  width: 100%;
+  text-align: center;
+  font-size: var(--font-size-xl);
+  font-weight: var(--font-weight-semibold);
+  font-family: 'SF Mono', 'Menlo', 'Monaco', 'Courier New', monospace;
+  padding: var(--spacing-md);
+  border-radius: var(--radius-lg);
+  -moz-appearance: textfield; /* Hide spinner in Firefox */
+}
+
+/* Hide spinner buttons in Chrome/Safari/Edge */
+.time-input::-webkit-outer-spin-button,
+.time-input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+/* Time input label (hours/minutes) */
+.time-input-label {
+  font-size: var(--font-size-xs);
+  color: var(--text-muted);
+  font-weight: var(--font-weight-medium);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+/* Separator between hours and minutes */
+.time-separator {
+  font-size: var(--font-size-2xl);
+  font-weight: var(--font-weight-bold);
+  color: var(--text-muted);
+  margin-top: var(--spacing-sm);
+  user-select: none;
+}
+
+/* Form hint text */
+.form-hint {
+  font-size: var(--font-size-xs);
+  color: var(--text-muted);
+  margin: var(--spacing-xs) 0 0;
+  line-height: 1.4;
+}
+
+/* Focus state for time inputs */
+.time-input:focus {
+  border-color: var(--secondary);
+  box-shadow: 0 0 0 3px var(--secondary-light);
+}
+
+/* Error state for timer target */
+.time-input.has-error {
+  border-color: var(--danger);
+  background-color: var(--danger-light);
+}
+
+.time-input.has-error:focus {
+  border-color: var(--danger);
+  box-shadow: 0 0 0 3px rgba(244, 67, 54, 0.15);
+}
+
+/* Timer target group visible state */
+#timer-target-group {
+  max-height: 200px;
+  opacity: 1;
+}
+
+/* Hover effect for time inputs */
+.time-input:hover:not(:focus) {
+  border-color: var(--text-muted);
+}
+
+/* ========================================
+   US-026: Add Goal Form - Target Input (Counter)
+   ======================================== */
+
+/* Counter Target Input - Large prominent number input */
+.counter-target-input {
+  font-size: var(--font-size-xl);
+  font-weight: var(--font-weight-semibold);
+  text-align: center;
+  padding: var(--spacing-md) var(--spacing-lg);
+  border-radius: var(--radius-lg);
+  max-width: 200px;
+  -moz-appearance: textfield; /* Hide spinner in Firefox */
+}
+
+/* Hide spinner buttons in Chrome/Safari/Edge */
+.counter-target-input::-webkit-outer-spin-button,
+.counter-target-input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+/* Counter target group styling */
+#counter-target-group {
+  max-height: 150px;
+  opacity: 1;
+}
+
+#counter-target-group .form-label {
+  margin-bottom: var(--spacing-xs);
+}
+
+/* Focus state with counter/orange theme */
+.counter-target-input:focus {
+  border-color: var(--counter-accent);
+  box-shadow: 0 0 0 3px var(--counter-light);
+}
+
+/* Hover state */
+.counter-target-input:hover:not(:focus) {
+  border-color: var(--text-muted);
+}
+
+/* Error state */
+.counter-target-input.has-error {
+  border-color: var(--danger);
+  background-color: var(--danger-light);
+}
+
+.counter-target-input.has-error:focus {
+  border-color: var(--danger);
+  box-shadow: 0 0 0 3px rgba(244, 67, 54, 0.15);
+}
+
+/* ========================================
+   US-027: Add Goal Form - Timeframe Selector
+   ======================================== */
+
+/* Timeframe Selector Container - Grid of 4 options */
+.timeframe-selector {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: var(--spacing-sm);
+  width: 100%;
+}
+
+/* Timeframe Option Button */
+.timeframe-option {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  padding: var(--spacing-sm) var(--spacing-xs);
+  background-color: var(--background);
+  border: 2px solid var(--border);
+  border-radius: var(--radius);
+  cursor: pointer;
+  transition: all var(--transition);
+  min-height: 68px;
+}
+
+.timeframe-option:hover {
+  border-color: var(--text-muted);
+  background-color: var(--background-secondary);
+}
+
+.timeframe-option:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
+}
+
+/* Active/Selected state - Default (Daily) is green */
+.timeframe-option.active {
+  border-color: var(--primary);
+  background-color: var(--primary-light);
+  box-shadow: 0 0 0 2px var(--accent-subtle);
+}
+
+.timeframe-option.active:hover {
+  background-color: var(--primary-light);
+  border-color: var(--primary);
+}
+
+/* Timeframe-specific active colors */
+.timeframe-option[data-timeframe="daily"].active {
+  border-color: var(--primary);
+  background-color: var(--primary-light);
+  box-shadow: 0 0 0 2px var(--accent-subtle);
+}
+
+.timeframe-option[data-timeframe="weekly"].active {
+  border-color: var(--secondary);
+  background-color: var(--secondary-light);
+  box-shadow: 0 0 0 2px var(--info-subtle);
+}
+
+.timeframe-option[data-timeframe="monthly"].active {
+  border-color: var(--counter-accent);
+  background-color: var(--counter-light);
+  box-shadow: 0 0 0 2px var(--warning-subtle);
+}
+
+.timeframe-option[data-timeframe="yearly"].active {
+  border-color: var(--yearly-color);
+  background-color: var(--yearly-light);
+  box-shadow: 0 0 0 2px var(--type-avoidance-subtle);
+}
+
+/* Timeframe Option Icon */
+.timeframe-option-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  color: var(--text-secondary);
+  transition: all var(--transition-fast);
+}
+
+.timeframe-option-icon svg {
+  width: 22px;
+  height: 22px;
+}
+
+.timeframe-option:hover .timeframe-option-icon {
+  color: var(--text);
+  transform: scale(1.1);
+}
+
+/* Timeframe-specific icon colors when active */
+.timeframe-option[data-timeframe="daily"].active .timeframe-option-icon {
+  color: var(--primary);
+}
+
+.timeframe-option[data-timeframe="weekly"].active .timeframe-option-icon {
+  color: var(--secondary);
+}
+
+.timeframe-option[data-timeframe="monthly"].active .timeframe-option-icon {
+  color: var(--counter-color);
+}
+
+.timeframe-option[data-timeframe="yearly"].active .timeframe-option-icon {
+  color: var(--yearly-color);
+}
+
+/* Timeframe Option Label */
+.timeframe-option-label {
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-medium);
+  color: var(--text-secondary);
+  transition: color var(--transition-fast);
+  text-align: center;
+  white-space: nowrap;
+}
+
+.timeframe-option:hover .timeframe-option-label {
+  color: var(--text);
+}
+
+.timeframe-option.active .timeframe-option-label {
+  color: var(--text);
+  font-weight: var(--font-weight-semibold);
+}
+
+/* Selection animation */
+.timeframe-option.active {
+  animation: timeframe-select 0.25s ease;
+}
+
+@keyframes timeframe-select {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(0.96);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+/* Active state press effect */
+.timeframe-option:active {
+  transform: scale(0.96);
+}
+
+/* Timeframe Hint Text - Dynamic based on selection */
+.timeframe-hint {
+  margin-top: var(--spacing-sm);
+  font-size: var(--font-size-xs);
+  color: var(--text-muted);
+  min-height: 16px;
+  line-height: 1.4;
+  transition: color var(--transition-fast);
+}
+
+/* Hint text variations - shown/hidden via JS */
+.timeframe-hint span {
+  display: none;
+}
+
+.timeframe-hint .hint-daily.visible,
+.timeframe-hint .hint-weekly.visible,
+.timeframe-hint .hint-monthly.visible,
+.timeframe-hint .hint-yearly.visible {
+  display: inline;
+}
+
+/* ========================================
+   US-065: Category Selector Styles
+   ======================================== */
+
+/* Category selector container - similar to timeframe selector */
+.category-selector {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: var(--spacing-sm);
+  width: 100%;
+}
+
+/* Category option button */
+.category-option {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  padding: var(--spacing-sm) var(--spacing-xs);
+  background-color: var(--background);
+  border: 2px solid var(--border);
+  border-radius: var(--radius);
+  cursor: pointer;
+  transition: all var(--transition);
+  min-height: 60px;
+  position: relative;
+}
+
+.category-option:hover {
+  border-color: var(--text-muted);
+  background-color: var(--background-secondary);
+}
+
+.category-option:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
+}
+
+/* Active state for category option */
+.category-option.active {
+  border-color: currentColor;
+  box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.08);
+}
+
+/* Category-specific active colors */
+.category-option[data-category="work"].active {
+  border-color: var(--category-work);
+  background-color: var(--category-work-subtle);
+  box-shadow: 0 0 0 2px rgba(33, 150, 243, 0.12);
+}
+
+.category-option[data-category="health"].active {
+  border-color: var(--category-health);
+  background-color: var(--category-health-subtle);
+  box-shadow: 0 0 0 2px rgba(76, 175, 80, 0.12);
+}
+
+.category-option[data-category="learning"].active {
+  border-color: var(--category-learning);
+  background-color: var(--category-learning-subtle);
+  box-shadow: 0 0 0 2px rgba(156, 39, 176, 0.12);
+}
+
+.category-option[data-category="personal"].active {
+  border-color: var(--category-personal);
+  background-color: var(--category-personal-subtle);
+  box-shadow: 0 0 0 2px rgba(255, 152, 0, 0.12);
+}
+
+/* Category option icon (color circle) */
+.category-option-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  border-radius: var(--radius-full);
+  transition: transform var(--transition-fast);
+}
+
+.category-option:hover .category-option-icon {
+  transform: scale(1.15);
+}
+
+/* Category-specific icon colors */
+.category-option[data-category="work"] .category-option-icon {
+  background-color: var(--category-work);
+}
+
+.category-option[data-category="health"] .category-option-icon {
+  background-color: var(--category-health);
+}
+
+.category-option[data-category="learning"] .category-option-icon {
+  background-color: var(--category-learning);
+}
+
+.category-option[data-category="personal"] .category-option-icon {
+  background-color: var(--category-personal);
+}
+
+/* Category option label */
+.category-option-label {
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-medium);
+  color: var(--text-secondary);
+  transition: color var(--transition-fast);
+  text-align: center;
+  white-space: nowrap;
+}
+
+.category-option:hover .category-option-label {
+  color: var(--text);
+}
+
+.category-option.active .category-option-label {
+  color: var(--text);
+  font-weight: var(--font-weight-semibold);
+}
+
+/* Selection animation */
+.category-option.active {
+  animation: timeframe-select 0.25s ease;
+}
+
+/* Active state press effect */
+.category-option:active {
+  transform: scale(0.96);
+}
+
+/* None option - no category selected */
+.category-option[data-category="none"] .category-option-icon {
+  background-color: var(--text-muted);
+  opacity: 0.5;
+}
+
+.category-option[data-category="none"].active {
+  border-color: var(--text-muted);
+  background-color: var(--background-secondary);
+  box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.05);
+}
+
+/* Category filter bar for View Goals screen */
+.category-filter-bar {
+  display: flex;
+  gap: var(--spacing-xs);
+  padding: var(--spacing-sm) 0;
+  overflow-x: auto;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.category-filter-bar::-webkit-scrollbar {
+  display: none;
+}
+
+/* Category filter chip/button */
+.category-filter-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px var(--spacing-sm);
+  border-radius: var(--radius-full);
+  border: 1px solid var(--border);
+  background-color: var(--background);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-medium);
+  color: var(--text-secondary);
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all var(--transition-fast);
+}
+
+.category-filter-chip:hover {
+  border-color: var(--text-muted);
+  background-color: var(--background-secondary);
+  color: var(--text);
+}
+
+.category-filter-chip.active {
+  border-color: currentColor;
+  color: var(--text);
+}
+
+/* Filter chip color dot */
+.category-filter-chip .filter-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: var(--radius-full);
+  flex-shrink: 0;
+}
+
+/* Category-specific filter chip colors */
+.category-filter-chip[data-category="all"].active {
+  border-color: var(--primary);
+  background-color: var(--primary-light);
+  color: var(--primary);
+}
+
+.category-filter-chip[data-category="work"].active {
+  border-color: var(--category-work);
+  background-color: var(--category-work-subtle);
+  color: var(--category-work-text);
+}
+
+.category-filter-chip[data-category="health"].active {
+  border-color: var(--category-health);
+  background-color: var(--category-health-subtle);
+  color: var(--category-health-text);
+}
+
+.category-filter-chip[data-category="learning"].active {
+  border-color: var(--category-learning);
+  background-color: var(--category-learning-subtle);
+  color: var(--category-learning-text);
+}
+
+.category-filter-chip[data-category="personal"].active {
+  border-color: var(--category-personal);
+  background-color: var(--category-personal-subtle);
+  color: var(--category-personal-text);
+}
+
+/* Dark mode adjustments for categories now handled by CSS variables */
+
+/* ========================================
+   US-028: Add Goal Form - Save Logic
+   Feedback Toast and Error Banner Styles
+   ======================================== */
+
+/* Feedback Toast - Success/Error notification */
+.feedback-toast {
+  position: fixed;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%) translateY(100px);
+  z-index: 2000;
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  padding: var(--spacing-sm) var(--spacing-md);
+  border-radius: var(--radius-lg);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  box-shadow: var(--shadow-lg);
+  opacity: 0;
+  visibility: hidden;
+  transition:
+    transform var(--transition-normal) ease-out,
+    opacity var(--transition-normal) ease-out,
+    visibility var(--transition-normal);
+}
+
+.feedback-toast.visible {
+  transform: translateX(-50%) translateY(0);
+  opacity: 1;
+  visibility: visible;
+}
+
+/* Success toast styling */
+.feedback-toast.success {
+  background-color: var(--success);
+  color: var(--text-inverse);
+}
+
+/* Error toast styling */
+.feedback-toast.error {
+  background-color: var(--danger);
+  color: var(--text-inverse);
+}
+
+/* Toast icon */
+.feedback-toast .toast-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+}
+
+.feedback-toast .toast-icon svg {
+  width: 100%;
+  height: 100%;
+  stroke: currentColor;
+}
+
+/* Toast message */
+.feedback-toast .toast-message {
+  max-width: 250px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Form Error Banner - shown at top of modal for form-level errors */
+.form-error-banner {
+  display: none;
+  align-items: center;
+  gap: var(--spacing-sm);
+  padding: var(--spacing-sm) var(--spacing-md);
+  margin-bottom: var(--spacing-md);
+  background-color: var(--danger-light);
+  border: 1px solid var(--danger);
+  border-radius: var(--radius-md);
+  color: var(--danger);
+  font-size: var(--font-size-sm);
+  animation: shake 0.4s ease-in-out;
+}
+
+.form-error-banner.visible {
+  display: flex;
+}
+
+.form-error-banner .error-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 18px;
+  height: 18px;
+}
+
+.form-error-banner .error-icon svg {
+  width: 100%;
+  height: 100%;
+  stroke: var(--danger);
+}
+
+.form-error-banner .error-message {
+  flex: 1;
+  line-height: 1.4;
+}
+
+/* Shake animation for error */
+@keyframes shake {
+  0%, 100% {
+    transform: translateX(0);
+  }
+  10%, 30%, 50%, 70%, 90% {
+    transform: translateX(-4px);
+  }
+  20%, 40%, 60%, 80% {
+    transform: translateX(4px);
+  }
+}
+
+/* ========================================

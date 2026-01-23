@@ -1,0 +1,133 @@
+/* ========================================
+   US-058: Goal Form Screen (Full-Page)
+   ======================================== */
+
+/* Goal Form Screen Container */
+.goal-form-screen {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-height: 100%;
+  background-color: var(--background);
+}
+
+/* Goal Form Header */
+.goal-form-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: var(--spacing-md);
+  background-color: var(--background);
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+}
+
+/* Back button overrides for goal-form-header */
+.goal-form-header .back-btn {
+  padding: var(--spacing-sm);
+  min-width: 36px;
+  min-height: 36px;
+  justify-content: center;
+}
+
+.goal-form-header .back-icon {
+  width: 20px;
+  height: 20px;
+}
+
+.goal-form-title {
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-semibold);
+  color: var(--text);
+  margin: 0;
+  text-align: center;
+}
+
+/* Spacer for goal form header - matches back button width for centered title */
+.goal-form-header .header-spacer {
+  min-width: 36px;
+}
+
+/* Goal Form Content - Scrollable area */
+.goal-form-content {
+  flex: 1;
+  overflow-y: auto;
+  padding: var(--spacing-lg);
+}
+
+/* Goal Form Footer - Fixed at bottom */
+.goal-form-footer {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: var(--spacing-sm);
+  padding: var(--spacing-md) var(--spacing-lg);
+  border-top: 1px solid var(--border);
+  background-color: var(--background-secondary);
+  flex-shrink: 0;
+  margin-top: auto;
+}
+
+/* Reports screen */
+.reports-content {
+  flex: 1;
+  overflow-y: auto;
+  padding: var(--spacing-md);
+  padding-bottom: 80px; /* Account for fixed bottom nav */
+}
+
+.discipline-score {
+  text-align: center;
+  padding: var(--spacing-xl);
+  background-color: var(--background-secondary);
+  border-radius: var(--radius-lg);
+  margin-bottom: var(--spacing-md);
+}
+
+.score-value {
+  font-size: 48px;
+  font-weight: var(--font-weight-bold);
+  color: var(--primary);
+}
+
+.score-label {
+  font-size: var(--font-size-sm);
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.reports-placeholder {
+  text-align: center;
+  color: var(--text-muted);
+  padding: var(--spacing-lg);
+}
+
+/* Settings screen */
+.settings-content {
+  flex: 1;
+  overflow-y: auto;
+  padding: var(--spacing-md);
+  padding-bottom: 80px; /* Account for fixed bottom nav */
+}
+
+.settings-section {
+  margin-bottom: var(--spacing-lg);
+}
+
+.settings-section h2 {
+  font-size: var(--font-size-sm);
+  text-transform: uppercase;
+  color: var(--text-muted);
+  margin-bottom: var(--spacing-sm);
+  letter-spacing: 0.5px;
+}
+
+.setting-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: var(--spacing-sm) 0;
+  border-bottom: 1px solid var(--border);
+}
+

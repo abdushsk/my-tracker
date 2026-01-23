@@ -1,0 +1,1327 @@
+/* ========================================
+   US-015: Goal Card - Minimal Design v2.0
+   Progressive disclosure: show less, reveal on interaction
+   ======================================== */
+
+/* Goal Card - Clean, minimal styling */
+.goal-card {
+  position: relative;
+  padding: var(--space-3) var(--space-4);
+  background-color: var(--surface);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  transition: all var(--duration-fast) var(--ease-out);
+  overflow: hidden;
+}
+
+.goal-card:hover {
+  border-color: var(--border);
+  background-color: var(--surface-raised);
+}
+
+.goal-card:focus-within {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 2px var(--accent-subtle);
+}
+
+/* Goal Card Header - Properly aligned */
+.goal-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2);
+  margin-bottom: var(--space-2);
+  min-height: 24px;
+}
+
+.goal-card-title-row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  flex: 1;
+  min-width: 0;
+  height: 24px;
+}
+
+/* Goal Type Indicator - Smaller, subtle */
+.goal-type-indicator {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 20px;
+  height: 20px;
+  border-radius: var(--radius-sm);
+  background-color: transparent;
+}
+
+.goal-type-indicator .goal-type-icon {
+  width: 16px;
+  height: 16px;
+  color: var(--text-muted);
+}
+
+/* Type-specific indicator colors */
+.goal-type-timer .goal-type-indicator .goal-type-icon {
+  color: var(--type-timer);
+}
+
+.goal-type-counter .goal-type-indicator .goal-type-icon {
+  color: var(--type-counter);
+}
+
+.goal-type-checkbox .goal-type-indicator .goal-type-icon {
+  color: var(--type-checkbox);
+}
+
+.goal-type-avoidance .goal-type-indicator .goal-type-icon {
+  color: var(--type-avoidance);
+}
+
+/* Goal Title - Clean */
+.goal-card .goal-title {
+  font-size: var(--text-base);
+  font-weight: var(--weight-medium);
+  color: var(--text-primary);
+  margin: 0;
+  line-height: 1.4;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  flex: 1;
+}
+
+/* Header Actions - Always visible, aligned right */
+.goal-header-actions {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  flex-shrink: 0;
+  height: 24px;
+}
+
+/* Stats and Focus buttons - Always visible */
+.stats-btn,
+.focus-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  border-radius: var(--radius-sm);
+  color: var(--text-muted);
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  transition: all var(--duration-fast) var(--ease-out);
+}
+
+.stats-btn:hover,
+.focus-btn:hover {
+  color: var(--accent);
+  background-color: var(--accent-subtle);
+}
+
+/* Badges container - Always visible */
+.goal-badges {
+  display: flex;
+  gap: var(--space-1);
+  align-items: center;
+}
+
+/* Timeframe Badge - Subtle */
+.goal-timeframe-badge {
+  font-size: var(--text-xs);
+  padding: 2px var(--space-2);
+  border-radius: var(--radius-full);
+  font-weight: var(--weight-medium);
+  text-transform: lowercase;
+  white-space: nowrap;
+  background-color: var(--surface-sunken);
+  color: var(--text-secondary);
+  transition: all var(--duration-fast) var(--ease-out);
+}
+
+/* Timeframe badge color variants - subtle */
+.timeframe-daily {
+  background-color: var(--timeframe-daily-subtle);
+  color: var(--timeframe-daily);
+}
+
+.timeframe-weekly {
+  background-color: var(--timeframe-weekly-subtle);
+  color: var(--timeframe-weekly);
+}
+
+.timeframe-monthly {
+  background-color: var(--timeframe-monthly-subtle);
+  color: var(--timeframe-monthly);
+}
+
+.timeframe-yearly {
+  background-color: var(--timeframe-yearly-subtle);
+  color: var(--timeframe-yearly);
+}
+
+/* Category Badge - Very subtle */
+/* Category badge - hidden, category shown via filter bar */
+.goal-category-badge {
+  display: none;
+}
+
+/* Goal Card Body */
+.goal-card-body {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+/* Compact Timer Stats - inline with progress info */
+.timer-stats-compact {
+  font-family: var(--font-mono, 'SF Mono', 'Monaco', monospace);
+  font-size: var(--text-xs);
+  color: var(--text-muted);
+  font-weight: var(--weight-medium);
+  white-space: nowrap;
+}
+
+.timer-stats-compact .timer-current {
+  font-size: inherit;
+  font-weight: var(--weight-medium);
+  color: var(--text-secondary);
+}
+
+.timer-stats-compact .timer-sep {
+  color: var(--text-muted);
+  margin: 0 1px;
+}
+
+.timer-stats-compact .timer-target {
+  color: var(--text-tertiary);
+}
+
+.timer-stats-compact.is-active .timer-current {
+  color: var(--success);
+}
+
+.goal-card:hover .timer-stats-compact .timer-current {
+  color: var(--text-primary);
+}
+
+.goal-card:hover .timer-stats-compact.is-active .timer-current {
+  color: var(--success);
+}
+
+/* Goal Progress Wrapper - keeps timer stats above progress bar */
+.goal-progress-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xs);
+  flex: 1;
+  min-width: 0;
+}
+
+/* Goal Progress Section - Streamlined */
+.goal-progress-section {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.goal-progress-info {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.goal-progress-text {
+  font-size: var(--text-sm);
+  color: var(--text-secondary);
+  font-weight: var(--weight-normal);
+  font-variant-numeric: tabular-nums;
+}
+
+.goal-progress-percent {
+  font-size: var(--text-xs);
+  color: var(--text-muted);
+  font-weight: var(--weight-medium);
+  opacity: 100;
+}
+
+.goal-card:hover .goal-progress-percent {
+  opacity: 1;
+}
+
+/* Secondary Info - Shows completion stats */
+.goal-secondary-info {
+  font-size: var(--font-size-xs);
+  color: var(--text-muted);
+  margin-top: var(--spacing-xs);
+  padding-top: var(--spacing-xs);
+  border-top: 1px solid var(--border-subtle);
+  line-height: 1.3;
+}
+
+/* Progress Bar - Thin and clean */
+.goal-progress-bar {
+  height: 4px;
+  background-color: var(--border);
+  border-radius: var(--radius-full);
+  overflow: hidden;
+}
+
+.goal-progress-fill {
+  height: 100%;
+  background-color: var(--accent);
+  border-radius: var(--radius-full);
+  transition: width var(--duration-slow) var(--ease-out);
+  min-width: 0;
+}
+
+/* Type-specific progress fill colors - single solid color */
+
+
+/* Goal Controls Container - Minimal */
+.goal-controls {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin-top: var(--space-2);
+  padding-top: var(--space-2);
+  border-top: 1px solid var(--border-subtle);
+}
+
+/* Goal Control Button Base - Clean */
+.goal-control-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius-sm);
+  transition: all var(--duration-fast) var(--ease-out);
+  cursor: pointer;
+  background: transparent;
+  border: none;
+  color: var(--text-secondary);
+}
+
+.goal-control-btn svg {
+  width: 16px;
+  height: 16px;
+}
+
+.goal-control-btn:hover {
+  color: var(--accent);
+  background-color: var(--accent-subtle);
+}
+
+.goal-control-btn:active {
+  transform: scale(0.95);
+}
+
+/* ========================================
+   US-016: Timer Type Controls - Minimal
+   ======================================== */
+
+/* Timer Controls Container */
+.goal-controls-timer {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: var(--spacing-sm);
+}
+
+/* Timer Display - Clean monospace */
+.timer-display {
+  display: flex;
+  align-items: baseline;
+  gap: 2px;
+  font-family: var(--font-mono);
+}
+
+.timer-current {
+  font-size: var(--text-lg);
+  font-weight: var(--weight-semibold);
+  color: var(--text-primary);
+  letter-spacing: -0.5px;
+}
+
+.timer-separator {
+  font-size: var(--text-sm);
+  color: var(--text-muted);
+  margin: 0 2px;
+}
+
+.timer-target {
+  font-size: var(--text-sm);
+  color: var(--text-muted);
+  font-weight: var(--weight-normal);
+}
+
+/* Timer Live Display - Shows current elapsed time */
+.timer-live-display {
+  font-family: var(--font-mono, 'SF Mono', 'Monaco', 'Inconsolata', 'Roboto Mono', monospace);
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-semibold);
+  color: var(--text-secondary);
+  letter-spacing: 0.5px;
+  min-width: 70px;
+  text-align: center;
+}
+
+.timer-live-display.is-active {
+  color: var(--success);
+}
+
+/* Timer Play/Pause Button - Compact */
+.timer-play-btn {
+  width: 40px;
+  height: 40px;
+  background-color: var(--type-timer);
+  color: var(--text-inverse);
+  border-radius: var(--radius-full);
+  flex-shrink: 0;
+  transition: all var(--duration-fast) var(--ease-out);
+}
+
+
+.timer-play-btn:active {
+  transform: scale(0.95);
+}
+
+.timer-play-btn svg {
+  width: 16px;
+  height: 16px;
+  /* Shift play icon slightly right for visual centering (triangle optical illusion) */
+  margin-left: 2px;
+}
+
+
+/* Timer goal card active state - subtle */
+.goal-type-timer.goal-timer-active {
+  border-color: var(--accent);
+}
+
+/* Pomodoro button - subtle */
+.timer-pomodoro-btn {
+  width: 32px;
+  height: 32px;
+  background-color: transparent;
+  color: var(--text-muted);
+  border-radius: var(--radius-sm);
+}
+
+.timer-pomodoro-btn:hover {
+  background-color: var(--danger-subtle);
+  color: var(--danger);
+}
+
+.goal-type-timer.goal-timer-active .goal-progress-fill {
+  background: linear-gradient(90deg, var(--accent) 0%, var(--accent-hover) 100%);
+  animation: progress-shimmer 2s ease-in-out infinite;
+}
+
+@keyframes progress-shimmer {
+  0% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.8;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+
+/* ========================================
+   US-017: Counter Type Controls
+   ======================================== */
+
+/* Counter Controls */
+.goal-controls-counter {
+  justify-content: center;
+  gap: var(--spacing-md);
+}
+
+.counter-decrement-btn,
+.counter-increment-btn {
+  width: 40px;
+  height: 40px;
+  background-color: var(--background-secondary);
+  color: var(--text-secondary);
+  border-radius: var(--radius-full);
+  box-shadow: var(--shadow-sm);
+  transition: all var(--transition-fast);
+}
+
+.counter-decrement-btn svg,
+.counter-increment-btn svg {
+  width: 18px;
+  height: 18px;
+}
+
+.counter-decrement-btn:hover {
+  background-color: var(--danger-light);
+  color: var(--danger);
+  box-shadow: var(--shadow);
+}
+
+.counter-increment-btn:hover {
+  background-color: var(--counter-light);
+  color: var(--counter-color);
+  box-shadow: var(--shadow);
+}
+
+.counter-decrement-btn:active,
+.counter-increment-btn:active {
+  transform: scale(0.9);
+}
+
+/* Disabled state for decrement at 0 */
+.counter-decrement-btn.disabled,
+.counter-decrement-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+.counter-value {
+  font-size: var(--font-size-2xl);
+  font-weight: var(--font-weight-bold);
+  color: var(--text);
+  min-width: 64px;
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+  line-height: 1;
+}
+
+/* Counter goal active state - when at max or completed */
+.goal-type-counter.goal-completed .counter-value {
+  color: var(--success);
+}
+
+.goal-type-counter.goal-completed .counter-increment-btn {
+  background-color: var(--success-light);
+  color: var(--success);
+}
+
+/* ========================================
+   US-015: Compact Checkbox Goal Card
+   ======================================== */
+
+/* Checkbox card header layout */
+.checkbox-card-header {
+  gap: var(--space-2);
+}
+
+/* Checkbox card body - only shown when notes exist */
+.checkbox-card-body {
+  padding-top: 0;
+}
+
+/* Checkbox title row - no type indicator needed */
+.checkbox-title-row {
+  flex: 1;
+  min-width: 0;
+}
+
+/* Inline checkbox toggle button */
+.checkbox-inline-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  padding: 0;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  flex-shrink: 0;
+  border-radius: var(--radius-sm);
+  transition: all var(--duration-fast) var(--ease-out);
+}
+
+.checkbox-inline-toggle:hover {
+  background-color: var(--accent-subtle);
+}
+
+.checkbox-inline-toggle:active {
+  transform: scale(0.92);
+}
+
+/* Inline checkbox box */
+.checkbox-inline-box {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  border: 2px solid var(--text-muted);
+  border-radius: var(--radius-sm);
+  transition: all var(--duration-fast) var(--ease-out);
+  background-color: transparent;
+}
+
+.checkbox-inline-toggle:hover .checkbox-inline-box {
+  border-color: var(--accent);
+  transform: scale(1.05);
+}
+
+/* Checked state */
+.checkbox-inline-toggle.checked .checkbox-inline-box {
+  background-color: var(--accent);
+  border-color: var(--accent);
+}
+
+/* US-019: Only animate on first interaction (no animation-played class) */
+.checkbox-inline-toggle.checked:not(.animation-played) .checkbox-inline-box {
+  animation: checkbox-inline-pop 0.25s var(--ease-out);
+}
+
+@keyframes checkbox-inline-pop {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.15); }
+  100% { transform: scale(1); }
+}
+
+/* Checkmark icon */
+.checkbox-inline-box svg {
+  width: 12px;
+  height: 12px;
+  color: var(--text-inverse);
+}
+
+/* US-019: Only animate on first interaction */
+.checkbox-inline-toggle:not(.animation-played) .checkbox-inline-box svg {
+  animation: checkmark-inline-draw 0.2s var(--ease-out) forwards;
+}
+
+@keyframes checkmark-inline-draw {
+  0% {
+    opacity: 0;
+    transform: scale(0) rotate(-10deg);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1) rotate(0);
+  }
+}
+
+/* Completed title styling - subtle strikethrough */
+.checkbox-title-done {
+  text-decoration: line-through;
+  text-decoration-color: var(--accent);
+  text-decoration-thickness: 1.5px;
+  opacity: 0.7;
+}
+
+/* Completed checkbox card - subtle success styling */
+.goal-type-checkbox.goal-completed {
+  border-color: var(--accent);
+  background: linear-gradient(135deg, var(--card-bg) 0%, var(--accent-subtle) 100%);
+}
+
+/* ========================================
+   Legacy Checkbox Controls (for focus mode)
+   ======================================== */
+
+/* Checkbox Controls Container */
+.goal-controls-checkbox {
+  justify-content: center;
+}
+
+/* Large Clickable Checkbox Toggle Button - used in focus mode */
+.checkbox-toggle-btn {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-md);
+  padding: var(--spacing-md) var(--spacing-lg);
+  background-color: var(--background-secondary);
+  border-radius: var(--radius-lg);
+  color: var(--text-secondary);
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-medium);
+  width: 100%;
+  justify-content: center;
+  transition: all var(--transition);
+  cursor: pointer;
+  min-height: 48px;
+  position: relative;
+  overflow: hidden;
+}
+
+.checkbox-toggle-btn:hover {
+  background-color: var(--accent-subtle);
+  color: var(--accent);
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-sm);
+}
+
+.checkbox-toggle-btn:active {
+  transform: scale(0.98);
+}
+
+/* Checked/Completed State */
+.checkbox-toggle-btn.checked {
+  background-color: var(--accent);
+  color: var(--text-inverse);
+  box-shadow: var(--shadow-sm);
+}
+
+.checkbox-toggle-btn.checked:hover {
+  background-color: var(--accent-hover);
+  box-shadow: var(--shadow);
+}
+
+/* Checkbox Box - Large and Prominent */
+.checkbox-box {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  border: 2.5px solid currentColor;
+  border-radius: var(--radius-sm);
+  flex-shrink: 0;
+  transition: all var(--transition-fast);
+  background-color: transparent;
+}
+
+.checkbox-toggle-btn:hover .checkbox-box {
+  transform: scale(1.05);
+}
+
+.checkbox-toggle-btn.checked .checkbox-box {
+  background-color: transparent;
+  border-color: var(--text-inverse);
+}
+
+/* US-019: Only animate on first interaction */
+.checkbox-toggle-btn.checked:not(.animation-played) .checkbox-box {
+  animation: checkbox-pop 0.3s ease;
+}
+
+@keyframes checkbox-pop {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.2); }
+  100% { transform: scale(1); }
+}
+
+/* Checkmark Icon */
+.checkbox-box svg {
+  width: 14px;
+  height: 14px;
+}
+
+/* US-019: Only animate on first interaction */
+.checkbox-toggle-btn:not(.animation-played) .checkbox-box svg {
+  animation: checkmark-draw 0.3s ease forwards;
+}
+
+@keyframes checkmark-draw {
+  0% {
+    opacity: 0;
+    transform: scale(0);
+  }
+  50% { transform: scale(1.2); }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* Checkbox Label */
+.checkbox-label {
+  line-height: 1.2;
+  font-size: var(--font-size-sm);
+  transition: all var(--transition-fast);
+}
+
+.checkbox-toggle-btn.checked .checkbox-label {
+  font-weight: var(--font-weight-semibold);
+}
+
+/* Visual feedback ripple effect on click */
+.checkbox-toggle-btn::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0;
+  height: 0;
+  background: var(--accent-subtle);
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  transition: width 0.3s ease, height 0.3s ease, opacity 0.3s ease;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.checkbox-toggle-btn:active::after {
+  width: 200px;
+  height: 200px;
+  opacity: 1;
+}
+
+/* ========================================
+   US-087: Avoidance Goal Controls
+   ======================================== */
+
+/* Avoidance Controls Container */
+.goal-controls-avoidance {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-md);
+  justify-content: space-between;
+}
+
+/* Avoidance Streak Display */
+.avoidance-streak-display {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+  padding: var(--spacing-sm) var(--spacing-md);
+  background-color: var(--background-secondary);
+  border-radius: var(--radius-lg);
+  font-weight: var(--font-weight-semibold);
+}
+
+.avoidance-streak-display .streak-fire {
+  font-size: 1.25em;
+}
+
+.avoidance-streak-display .streak-count {
+  font-size: var(--font-size-xl);
+  color: var(--warning);
+  font-weight: var(--font-weight-bold);
+  min-width: 28px;
+  text-align: center;
+}
+
+.avoidance-streak-display .streak-label {
+  font-size: var(--font-size-sm);
+  color: var(--text-tertiary);
+}
+
+/* Avoidance Slip-Up Button */
+.avoidance-slip-btn {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+  padding: var(--spacing-sm) var(--spacing-md);
+  background-color: var(--background-secondary);
+  border-radius: var(--radius-lg);
+  color: var(--text-secondary);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  transition: all var(--transition);
+  cursor: pointer;
+}
+
+.avoidance-slip-btn svg {
+  width: 18px;
+  height: 18px;
+}
+
+.avoidance-slip-btn:hover {
+  background-color: var(--error-light);
+  color: var(--error);
+}
+
+.avoidance-slip-btn.has-forgiveness:hover {
+  background-color: var(--warning-light);
+  color: var(--warning);
+}
+
+/* Forgiveness Badge */
+.forgiveness-badge {
+  font-size: 1.2em;
+  cursor: help;
+}
+
+.forgiveness-badge.available {
+  animation: pulse 2s ease-in-out infinite;
+}
+
+.forgiveness-badge.used {
+  opacity: 0.6;
+}
+
+/* Avoidance Goal Card Styling */
+.goal-type-avoidance {
+  border-left: 4px solid var(--type-avoidance);
+}
+
+.goal-type-avoidance .goal-type-indicator {
+  background-color: var(--type-avoidance-subtle);
+}
+
+.goal-type-avoidance .goal-type-indicator .goal-type-icon {
+  color: var(--type-avoidance);
+}
+
+/* Avoidance Goal - Active Streak State */
+.goal-type-avoidance.goal-completed {
+  border-color: var(--type-avoidance);
+  background: linear-gradient(135deg, var(--background-card) 0%, var(--type-avoidance-subtle) 100%);
+}
+
+.goal-type-avoidance.goal-completed .goal-progress-fill {
+  background: var(--type-avoidance);
+}
+
+/* ========================================
+   US-087: Avoidance Form Settings
+   ======================================== */
+
+.avoidance-settings {
+  margin-bottom: var(--spacing-md);
+}
+
+.toggle-setting {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-md);
+  cursor: pointer;
+  padding: var(--spacing-sm) 0;
+}
+
+.toggle-setting input[type="checkbox"] {
+  appearance: none;
+  -webkit-appearance: none;
+  width: 48px;
+  height: 26px;
+  background-color: var(--background-tertiary);
+  border-radius: 13px;
+  position: relative;
+  cursor: pointer;
+  transition: all var(--transition);
+  flex-shrink: 0;
+}
+
+.toggle-setting input[type="checkbox"]::before {
+  content: '';
+  position: absolute;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  top: 2px;
+  left: 2px;
+  background-color: var(--background-card);
+  box-shadow: var(--shadow-sm);
+  transition: all var(--transition);
+}
+
+.toggle-setting input[type="checkbox"]:checked {
+  background-color: var(--success);
+}
+
+.toggle-setting input[type="checkbox"]:checked::before {
+  transform: translateX(22px);
+}
+
+.toggle-label {
+  font-size: var(--font-size-base);
+  color: var(--text-primary);
+}
+
+/* Avoidance Info Box */
+.avoidance-info-box {
+  display: flex;
+  gap: var(--spacing-md);
+  padding: var(--spacing-md);
+  background-color: var(--background-secondary);
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--border);
+}
+
+.avoidance-info-icon {
+  font-size: 1.5em;
+  flex-shrink: 0;
+}
+
+.avoidance-info-text {
+  font-size: var(--font-size-sm);
+  color: var(--text-secondary);
+  line-height: 1.5;
+}
+
+.avoidance-info-text strong {
+  color: var(--text-primary);
+  display: block;
+  margin-bottom: var(--spacing-xs);
+}
+
+.avoidance-info-text ul {
+  margin: 0;
+  padding-left: var(--spacing-md);
+}
+
+.avoidance-info-text li {
+  margin-bottom: var(--spacing-xs);
+}
+
+.avoidance-info-text li:last-child {
+  margin-bottom: 0;
+}
+
+/* ========================================
+   US-019: Goal Card - Completion State
+   ======================================== */
+
+/* Completed Goal State - Green left stripe indicator + reduced opacity */
+.goal-card.goal-completed {
+  opacity: 0.65;
+}
+
+.goal-card.goal-completed::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  width: 4px;
+  background-color: var(--accent);
+  border-radius: var(--radius-md) 0 0 var(--radius-md);
+  z-index: 1;
+}
+
+.goal-card.goal-completed .goal-progress-fill {
+  background-color: var(--accent);
+}
+
+.goal-card.goal-completed .goal-progress-percent {
+  color: var(--accent);
+}
+
+/* Hide checkmark indicator */
+.goal-completed-indicator {
+  display: none;
+}
+
+/* Just-completed animation - subtle pulse */
+/* US-019: Only animate on first completion (not already completed) */
+.goal-card.goal-completed.just-completed:not(.completion-animated) {
+  animation: completion-pulse 0.4s ease;
+}
+
+@keyframes completion-pulse {
+  0%, 100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.01);
+  }
+}
+
+/* Confetti effects disabled for minimal design */
+/* Enable via .with-confetti class if needed */
+
+/* Primary burst animation - faster expansion with rotation */
+@keyframes confetti-burst-primary {
+  0% {
+    transform: translate(-50%, -50%) scale(0) rotate(0deg);
+    opacity: 1;
+  }
+  30% {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1.2) rotate(15deg);
+  }
+  60% {
+    opacity: 0.7;
+  }
+  100% {
+    transform: translate(-50%, -50%) scale(2.5) rotate(30deg);
+    opacity: 0;
+  }
+}
+
+/* Secondary burst animation - slower, delayed for layered effect */
+@keyframes confetti-burst-secondary {
+  0% {
+    transform: translate(-50%, -50%) scale(0.5) rotate(0deg);
+    opacity: 0;
+  }
+  20% {
+    opacity: 0.9;
+  }
+  50% {
+    opacity: 0.6;
+    transform: translate(-50%, -50%) scale(1.5) rotate(-10deg);
+  }
+  100% {
+    transform: translate(-50%, -50%) scale(3) rotate(-20deg);
+    opacity: 0;
+  }
+}
+
+/* Type-specific completion enhancements */
+
+/* Timer goal completed */
+/* Timer completed - keep normal styling, border indicates completion */
+.goal-type-timer.goal-completed .timer-current {
+  color: var(--text-secondary);
+}
+
+/* Counter goal completed - subtle styling */
+.goal-type-counter.goal-completed .counter-increment-btn {
+  background-color: var(--surface-sunken);
+  color: var(--text-secondary);
+}
+
+/* ========================================
+   US-056: Compact View Mode
+   ======================================== */
+
+/* Header actions container for toggle and settings buttons */
+/* Note: Main .header-actions styles are defined earlier in the file */
+
+/* Compact view goals list - reduced gap */
+.goals-list.compact-view {
+  gap: var(--spacing-sm);
+}
+
+/* Compact goal card styles */
+.goal-card.compact {
+  padding: var(--spacing-sm) var(--spacing-md);
+}
+
+.goal-card.compact .goal-card-header {
+  margin-bottom: var(--spacing-xs);
+}
+
+.goal-card.compact .goal-card-title-row {
+  gap: var(--spacing-xs);
+}
+
+/* Smaller type indicator in compact mode */
+.goal-card.compact .goal-type-indicator {
+  width: 22px;
+  height: 22px;
+}
+
+.goal-card.compact .goal-type-indicator .goal-type-icon {
+  width: 12px;
+  height: 12px;
+}
+
+/* Smaller title in compact mode */
+.goal-card.compact .goal-title {
+  font-size: var(--font-size-sm);
+}
+
+/* Hide timeframe badge in compact mode */
+.goal-card.compact .goal-timeframe-badge {
+  display: none;
+}
+
+/* Compact card body - inline layout */
+.goal-card.compact .goal-card-body {
+  flex-direction: row;
+  align-items: center;
+  gap: var(--spacing-md);
+}
+
+/* Progress wrapper takes available space in compact mode */
+.goal-card.compact .goal-progress-wrapper {
+  flex: 1;
+  min-width: 0;
+}
+
+.goal-card.compact .goal-progress-section {
+  /* Already handled by wrapper */
+}
+
+/* Smaller progress bar in compact mode */
+.goal-card.compact .goal-progress-bar {
+  height: 6px;
+}
+
+/* Hide progress text in compact mode, show only percentage */
+.goal-card.compact .goal-progress-text {
+  display: none;
+}
+
+.goal-card.compact .goal-progress-percent {
+  font-size: var(--font-size-xs);
+}
+
+/* Compact controls - no border, smaller margin */
+.goal-card.compact .goal-controls {
+  margin-top: 0;
+  padding-top: 0;
+  border-top: none;
+  flex-shrink: 0;
+}
+
+/* Timer controls compact */
+.goal-card.compact .goal-controls-timer {
+  gap: var(--spacing-sm);
+}
+
+.goal-card.compact .timer-display {
+  display: none;
+}
+
+.goal-card.compact .timer-live-display {
+  font-size: var(--font-size-base);
+  min-width: 60px;
+}
+
+.goal-card.compact .timer-play-btn {
+  width: 36px;
+  height: 36px;
+}
+
+.goal-card.compact .timer-play-btn svg {
+  width: 16px;
+  height: 16px;
+  margin-left: 2px;
+}
+
+/* Counter controls compact */
+.goal-card.compact .goal-controls-counter {
+  gap: var(--spacing-xs);
+}
+
+.goal-card.compact .counter-decrement-btn,
+.goal-card.compact .counter-increment-btn {
+  width: 28px;
+  height: 28px;
+}
+
+.goal-card.compact .counter-value {
+  font-size: var(--font-size-lg);
+  min-width: 40px;
+}
+
+/* Checkbox controls compact */
+.goal-card.compact .checkbox-toggle-btn {
+  padding: var(--spacing-sm) var(--spacing-md);
+  gap: var(--spacing-sm);
+  min-height: 40px;
+  font-size: var(--font-size-sm);
+}
+
+.goal-card.compact .checkbox-box {
+  width: 22px;
+  height: 22px;
+  border-width: 2px;
+}
+
+.goal-card.compact .checkbox-box svg {
+  width: 14px;
+  height: 14px;
+}
+
+/* Compact completed indicator - smaller and adjusted position */
+/* US-063: Using bottom position to match expanded view */
+.goal-card.compact .goal-completed-indicator {
+  width: 20px;
+  height: 20px;
+  bottom: var(--spacing-xs);
+  right: var(--spacing-xs);
+}
+
+.goal-card.compact .completed-checkmark {
+  font-size: var(--font-size-xs);
+}
+
+/* Hide sparkle effects in compact mode */
+.goal-card.compact .goal-completed-indicator::before,
+.goal-card.compact .goal-completed-indicator::after {
+  display: none;
+}
+
+/* Smooth transition for view changes */
+.goals-list {
+  transition: gap var(--transition);
+}
+
+.goal-card {
+  transition: box-shadow var(--transition), transform var(--transition),
+              border-color var(--transition), padding var(--transition);
+}
+
+/* ========================================
+   US-059: Drag-to-Reorder Daily Goals - Minimal
+   ======================================== */
+
+/* Drag handle - Hidden by default, shown on hover */
+.drag-handle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 24px;
+  margin-right: var(--space-1);
+  color: var(--text-muted);
+  cursor: grab;
+  opacity: 0.4;
+  transition: opacity var(--duration-fast) var(--ease-out), color var(--duration-fast) var(--ease-out);
+  flex-shrink: 0;
+  border-radius: var(--radius-sm);
+}
+
+.goal-card:hover .drag-handle {
+  opacity: 0.7;
+}
+
+.drag-handle:hover {
+  opacity: 1 !important;
+  color: var(--accent);
+  background-color: var(--accent-subtle);
+}
+
+.drag-handle:active {
+  cursor: grabbing;
+  color: var(--accent);
+}
+
+.drag-handle svg {
+  width: 12px;
+  height: 12px;
+}
+
+/* Compact mode drag handle */
+.goal-card.compact .drag-handle {
+  width: 14px;
+  height: 16px;
+  margin-right: var(--space-1);
+}
+
+.goal-card.compact .drag-handle svg {
+  width: 10px;
+  height: 10px;
+}
+
+/* Goal card dragging state - completely remove from flow */
+.goal-card.dragging {
+  display: none !important;
+}
+
+/* Drag clone - the card that follows cursor */
+.goal-card.drag-clone {
+  cursor: grabbing;
+}
+
+/* Drag placeholder - subtle gap where item will be dropped */
+.drag-placeholder {
+  background-color: var(--surface-sunken);
+  border: 2px dashed var(--border);
+  border-radius: var(--radius-md);
+  margin-bottom: var(--space-2);
+  transition: all 0.15s ease;
+}
+
+/* Goals list styling during drag */
+.goals-list {
+  position: relative;
+}
+
+/* Prevent text selection during drag */
+.goal-card[draggable="true"] {
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+/* ========================================
