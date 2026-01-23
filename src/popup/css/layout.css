@@ -615,6 +615,17 @@
   height: 18px;
 }
 
+/* Smaller compact mode button when inside compact bar */
+.compact-mode-bar .compact-mode-btn {
+  width: 24px;
+  height: 24px;
+}
+
+.compact-mode-bar .compact-mode-btn svg {
+  width: 14px;
+  height: 14px;
+}
+
 /* Hide bottom navigation in compact mode */
 body.compact-mode .main-bottom-nav {
   display: none;
@@ -676,15 +687,21 @@ body.compact-mode .goals-list {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: var(--space-2);
-  padding: var(--space-2) var(--space-4);
+  gap: var(--space-1);
+  padding: 4px var(--space-3);
   background-color: var(--surface);
   border-bottom: 1px solid var(--border-subtle);
 }
 
+/* Smaller "All" chip in compact mode */
+.compact-mode-bar .category-filter-chip:not(.dot-only) {
+  padding: 3px 8px;
+  font-size: 10px;
+}
+
 /* Dot-only category chips for compact mode */
 .category-filter-chip.dot-only {
-  padding: 4px;
+  padding: 2px;
   min-width: 0;
   border: none;
   background: transparent;
@@ -693,8 +710,8 @@ body.compact-mode .goals-list {
 }
 
 .category-filter-chip.dot-only .filter-dot {
-  width: 16px;
-  height: 16px;
+  width: 12px;
+  height: 12px;
   transition: transform var(--duration-fast) var(--ease-out),
               box-shadow var(--duration-fast) var(--ease-out);
 }
