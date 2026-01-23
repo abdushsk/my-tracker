@@ -1691,18 +1691,35 @@
     startTimerUpdates() {
       // Update timer displays every second
       setInterval(() => {
-        if (!widgetState.expanded || !this.container) return;
+        if (!this.container) return;
 
         // Update each active timer display
         Object.keys(widgetState.activeTimers).forEach(goalId => {
           const goal = widgetState.goals.find(g => g.id === goalId);
           if (!goal) return;
 
+          const currentProgress = this.getCurrentTimerProgress(goal);
+
+          // Update timer display element
           const display = this.shadow.querySelector(`[data-timer-display="${goalId}"]`);
           if (display) {
-            const currentProgress = this.getCurrentTimerProgress(goal);
             display.textContent = this.formatTime(currentProgress);
-            // Timer continues even after target is reached (allows overflow)
+          }
+
+          // Update progress text element
+          const goalItem = this.shadow.querySelector(`[data-goal-id="${goalId}"]`);
+          if (goalItem) {
+            const progressText = goalItem.querySelector('.goal-progress-text');
+            if (progressText) {
+              progressText.textContent = `${this.formatTime(currentProgress)} / ${this.formatTime(goal.target)}`;
+            }
+
+            // Update progress bar
+            const progressFill = goalItem.querySelector('.goal-progress-fill');
+            if (progressFill) {
+              const progressPercent = Math.min((currentProgress / goal.target) * 100, 100);
+              progressFill.style.width = `${progressPercent}%`;
+            }
           }
         });
       }, 1000);
