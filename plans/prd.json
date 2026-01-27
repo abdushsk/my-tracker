@@ -5,18 +5,88 @@
   "featuresFile": "plans/FEATURES.md",
   "userStories": [
     {
-      "id": "US-019",
-      "title": "Optimize icon animation behavior",
-      "description": "In the goals screen, Modify the icon animation behavior so that animations only play the first time an icon is interacted with (e.g., when clicking on a goal card, play, pause, etc.). Prevent the animations from replaying on subsequent interactions to enhance user experience and reduce visual distraction.",
-      "priority": 19,
+      "id": "US-020",
+      "title": "Fix settings screen scroll reset on update",
+      "description": "When updating any setting in the settings screen, the scroll position resets to 0. This appears to be a rebuild/re-render issue. Fix the scroll position preservation so users don't lose their place when making changes.",
+      "priority": 1,
       "passes": true
     },
     {
-      "id": "US-020",
-      "title": "Fix x-axis clipping in Goal Statistics for last 30 days",
-      "description": "In the Goal Statistics section, address the issue where the x-axis labels for the last 30 days are getting clipped or overlapping, making them difficult to read. Ensure that all day numbers are fully visible and properly spaced to enhance readability and user experience.",
-      "priority": 20,
-      "passes": true
+      "id": "US-021",
+      "title": "Apply theme colors to floating widget",
+      "description": "The floating widget UI does not respect the app's theme configuration. Update the floating widget to use the configured theme colors consistently with the rest of the extension.",
+      "priority": 2,
+      "passes": false
+    },
+    {
+      "id": "US-022",
+      "title": "Remove color selector from add goal screen",
+      "description": "Remove the color selector option from the add goal screen as it is not being used. Clean up any related code and UI elements.",
+      "priority": 3,
+      "passes": false
+    },
+    {
+      "id": "US-023",
+      "title": "Implement multi-way state synchronization",
+      "description": "Enable real-time synchronization across all views. When a goal is updated from the today goals screen, the floating widget status and other views should automatically reflect the change without requiring a refresh.",
+      "priority": 4,
+      "passes": false
+    },
+    {
+      "id": "US-024",
+      "title": "Fix open app button in floating widget",
+      "description": "The 'Open App' button in the floating widget is not functioning. Fix it to properly trigger and open the main popup when clicked.",
+      "priority": 5,
+      "passes": false
+    },
+    {
+      "id": "US-025",
+      "title": "Add close button on floating widget hover",
+      "description": "When hovering over the floating widget, display an 'X' button in the top right corner. Clicking this button should dismiss/hide the floating widget for the current session only.",
+      "priority": 6,
+      "passes": false
+    },
+    {
+      "id": "US-026",
+      "title": "Fix compact mode header theme styling",
+      "description": "In compact mode view of goals, the header does not use any color shade according to the current theme settings. Update the header styling to properly use theme colors.",
+      "priority": 7,
+      "passes": false
+    },
+    {
+      "id": "US-027",
+      "title": "Add context menu option for Timer Floater",
+      "description": "Add a right-click context menu option called 'Timer Floater' that allows users to add/show the floating timer widget. This is useful when the widget is not enabled, was removed from the DOM (e.g., via the close button), or is otherwise not visible. Clicking the option should inject/display the floating widget on the page.",
+      "priority": 8,
+      "passes": false
+    },
+    {
+      "id": "US-028",
+      "title": "Replace emojis with proper icons",
+      "description": "Remove all emoji usage throughout the app and replace with proper icons using Font Awesome or inline SVGs for a more professional and consistent look.",
+      "priority": 9,
+      "passes": false
+    },
+    {
+      "id": "US-029",
+      "title": "Add fuzzy search to settings screen",
+      "description": "Add a fuzzy search input at the top of the settings screen body that allows users to quickly filter and find settings by name or description.",
+      "priority": 10,
+      "passes": false
+    },
+    {
+      "id": "US-030",
+      "title": "Improve settings categories UI",
+      "description": "Make the categories block compact instead of taking a full row for each item. Replace the alert box for adding new categories with an inline text field that appears in place, allowing users to type and submit with Enter or a submit button.",
+      "priority": 11,
+      "passes": false
+    },
+    {
+      "id": "US-031",
+      "title": "Remove unsupported settings options",
+      "description": "Remove settings options related to features that are no longer supported, such as daily goals and motivational quotes. Clean up the settings UI and underlying code to reflect the current feature set.",
+      "priority": 12,
+      "passes": false
     }
   ]
 }

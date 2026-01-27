@@ -88,10 +88,15 @@ function generateColorThemeButtons(currentTheme) {
 /**
  * Render the Settings screen
  * US-052: Full settings screen with sound toggle, volume slider, dark mode toggle, and about section
+ * US-020: Preserves scroll position when re-rendering after settings updates
  */
 export function renderSettingsScreen() {
   const screen = document.getElementById(SCREEN_IDS[SCREENS.SETTINGS]);
   if (!screen) return;
+
+  // US-020: Preserve scroll position before re-rendering
+  const settingsContent = screen.querySelector('.settings-content');
+  const scrollTop = settingsContent ? settingsContent.scrollTop : 0;
 
   // Get current settings
   const themeSetting = state.settings?.theme || 'auto';
@@ -552,6 +557,17 @@ export function renderSettingsScreen() {
 
   // US-075: Load and display next reset times
   loadNextResetTimes();
+
+  // US-020: Restore scroll position after DOM update
+  if (scrollTop > 0) {
+    const newSettingsContent = screen.querySelector('.settings-content');
+    if (newSettingsContent) {
+      // Use requestAnimationFrame to ensure DOM is ready
+      requestAnimationFrame(() => {
+        newSettingsContent.scrollTop = scrollTop;
+      });
+    }
+  }
 }
 
 /**

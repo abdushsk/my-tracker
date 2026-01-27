@@ -814,3 +814,30 @@ The previous implementation had these issues:
 - `transform: translateX(-50%)` is ideal for centering absolutely positioned elements
 - Rendering fewer DOM elements (7 vs 30) is also more performant
 
+## US-020: Fix Settings Screen Scroll Reset on Update (Completed)
+**Date**: 2026-01-28
+
+### Changes Made
+
+1. **Modified `renderSettingsScreen()` function** (settings.js:93-570):
+   - Added code to capture the current scroll position of `.settings-content` before re-rendering
+   - Added code to restore the scroll position after re-rendering using `requestAnimationFrame`
+   - The scroll position is only restored if it was greater than 0 (i.e., the user had scrolled)
+
+### Root Cause Analysis
+The settings screen was re-rendering the entire `screen.innerHTML` whenever a setting was changed (sound toggle, theme toggle, category deletion, etc.). This complete DOM replacement caused the scroll position to reset to 0 because:
+- The scrollable `.settings-content` element was destroyed and recreated
+- The browser's default behavior is to start at scroll position 0 for new content
+
+### Solution Approach
+1. Before calling `screen.innerHTML = ...`, capture the current `scrollTop` value from the `.settings-content` element
+2. After the DOM is replaced and all event listeners are attached, restore the scroll position
+3. Use `requestAnimationFrame` to ensure the DOM has been fully rendered before setting `scrollTop`
+4. Only restore if `scrollTop > 0` to avoid unnecessary operations
+
+### Key Learnings
+- When re-rendering a scrollable container by replacing its innerHTML, scroll position is always lost
+- Capturing scroll position before innerHTML replacement and restoring after is a reliable pattern
+- `requestAnimationFrame` ensures the browser has completed rendering before manipulating scroll position
+- This pattern can be applied to any screen that needs to preserve scroll state during re-renders
+
