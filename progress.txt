@@ -841,3 +841,52 @@ The settings screen was re-rendering the entire `screen.innerHTML` whenever a se
 - `requestAnimationFrame` ensures the browser has completed rendering before manipulating scroll position
 - This pattern can be applied to any screen that needs to preserve scroll state during re-renders
 
+## US-021: Apply Theme Colors to Floating Widget (Completed)
+**Date**: 2026-01-28
+
+### Changes Made
+
+1. **Added colorTheme to widget state** (widget.js:36):
+   - Added `colorTheme: 'default'` to `widgetState` to track the current color theme
+   - Widget now stores color theme setting alongside light/dark theme
+
+2. **Added CSS variables for all color themes** (widget.js:598-656):
+   - Added CSS rules for Ocean, Forest, Sunset, and Lavender themes
+   - Each theme has light mode and dark mode variants
+   - CSS selectors use `:host([data-color-theme="themeName"])` pattern
+   - Combined selectors `:host([data-theme="dark"][data-color-theme="themeName"])` for dark mode variants
+   - Variables updated per theme: `--widget-accent`, `--widget-accent-hover`, `--widget-accent-subtle`
+   - Sunset theme also updates `--widget-warning` and `--widget-warning-hover` for consistency
+
+3. **Updated loadState() to read colorTheme** (widget.js:745):
+   - Added `widgetState.colorTheme = widgetState.settings.colorTheme || 'default';`
+   - Color theme is now loaded from settings when widget initializes
+
+4. **Updated createWidget() to set color theme attribute** (widget.js:780-783):
+   - Widget host element now gets `data-color-theme` attribute when theme is not default
+   - Only sets attribute for non-default themes to keep DOM clean
+
+5. **Updated setupStorageListener() to handle color theme changes** (widget.js:1746-1757):
+   - Widget now listens for `colorTheme` changes in settings
+   - Updates `data-color-theme` attribute dynamically when user changes theme
+   - Removes attribute if changing back to default theme
+
+### Theme Color Mapping
+
+| Theme    | Light Mode Accent | Dark Mode Accent |
+|----------|------------------|------------------|
+| Default  | #10B981 (green)  | #34D399 (green)  |
+| Ocean    | #0077B6 (blue)   | #00B4D8 (blue)   |
+| Forest   | #2D5016 (green)  | #7CB342 (green)  |
+| Sunset   | #E65100 (orange) | #FF8A50 (orange) |
+| Lavender | #7C3AED (purple) | #A78BFA (purple) |
+
+### Key Learnings
+
+- Shadow DOM requires all CSS to be self-contained; cannot inherit from parent document
+- CSS attribute selectors on `:host` allow theme switching without JavaScript re-renders
+- The `data-color-theme` attribute pattern mirrors the popup's theming system for consistency
+- Color theme and light/dark theme are independent; widget now supports all 10 combinations (5 colors × 2 modes)
+- Storage listener pattern enables real-time theme updates across all extension views
+- Keeping theme colors in sync with `theme-config.js` values ensures visual consistency
+

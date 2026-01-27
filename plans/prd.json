@@ -16,7 +16,7 @@
       "title": "Apply theme colors to floating widget",
       "description": "The floating widget UI does not respect the app's theme configuration. Update the floating widget to use the configured theme colors consistently with the rest of the extension.",
       "priority": 2,
-      "passes": false
+      "passes": true
     },
     {
       "id": "US-022",

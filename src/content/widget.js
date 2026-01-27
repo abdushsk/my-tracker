@@ -33,6 +33,7 @@
     position: { x: null, y: null },
     isDragging: false,
     theme: 'light',
+    colorTheme: 'default', // Color theme (default, ocean, forest, sunset, lavender)
     goalOrder: [] // Per-site goal order (array of goal IDs)
   };
 
@@ -593,6 +594,66 @@
       --widget-shadow: 0 4px 20px rgba(0, 0, 0, 0.3), 0 2px 8px rgba(0, 0, 0, 0.2);
       --widget-shadow-hover: 0 8px 32px rgba(0, 0, 0, 0.4), 0 4px 12px rgba(0, 0, 0, 0.3);
     }
+
+    /* Ocean Theme - Light */
+    :host([data-color-theme="ocean"]) {
+      --widget-accent: #0077B6;
+      --widget-accent-hover: #005F8D;
+      --widget-accent-subtle: #CAF0F8;
+    }
+
+    /* Ocean Theme - Dark */
+    :host([data-theme="dark"][data-color-theme="ocean"]) {
+      --widget-accent: #00B4D8;
+      --widget-accent-hover: #48CAE4;
+      --widget-accent-subtle: rgba(0, 180, 216, 0.25);
+    }
+
+    /* Forest Theme - Light */
+    :host([data-color-theme="forest"]) {
+      --widget-accent: #2D5016;
+      --widget-accent-hover: #1E3A0F;
+      --widget-accent-subtle: #D4E9C7;
+    }
+
+    /* Forest Theme - Dark */
+    :host([data-theme="dark"][data-color-theme="forest"]) {
+      --widget-accent: #7CB342;
+      --widget-accent-hover: #9CCC65;
+      --widget-accent-subtle: rgba(124, 179, 66, 0.25);
+    }
+
+    /* Sunset Theme - Light */
+    :host([data-color-theme="sunset"]) {
+      --widget-accent: #E65100;
+      --widget-accent-hover: #BF360C;
+      --widget-accent-subtle: #FFE0B2;
+      --widget-warning: #F7931E;
+      --widget-warning-hover: #E07A00;
+    }
+
+    /* Sunset Theme - Dark */
+    :host([data-theme="dark"][data-color-theme="sunset"]) {
+      --widget-accent: #FF8A50;
+      --widget-accent-hover: #FFAB91;
+      --widget-accent-subtle: rgba(255, 138, 80, 0.25);
+      --widget-warning: #FFB74D;
+      --widget-warning-hover: #FFA726;
+    }
+
+    /* Lavender Theme - Light */
+    :host([data-color-theme="lavender"]) {
+      --widget-accent: #7C3AED;
+      --widget-accent-hover: #6D28D9;
+      --widget-accent-subtle: #EDE9FE;
+    }
+
+    /* Lavender Theme - Dark */
+    :host([data-theme="dark"][data-color-theme="lavender"]) {
+      --widget-accent: #A78BFA;
+      --widget-accent-hover: #C4B5FD;
+      --widget-accent-subtle: rgba(167, 139, 250, 0.25);
+    }
   `;
 
   // ============================================
@@ -681,6 +742,7 @@
         widgetState.goalOrder = allSiteOrders[siteKey] || [];
 
         widgetState.theme = this.detectTheme();
+        widgetState.colorTheme = widgetState.settings.colorTheme || 'default';
 
         console.log('[Widget] State loaded:', {
           enabled: widgetState.enabled,
@@ -714,6 +776,11 @@
       this.host = document.createElement('div');
       this.host.id = 'my-tracker-widget';
       this.host.setAttribute('data-theme', widgetState.theme);
+
+      // Apply color theme if not default
+      if (widgetState.colorTheme && widgetState.colorTheme !== 'default') {
+        this.host.setAttribute('data-color-theme', widgetState.colorTheme);
+      }
 
       // Attach shadow root
       this.shadow = this.host.attachShadow({ mode: 'closed' });
@@ -1667,12 +1734,25 @@
             }
           }
 
-          // Handle theme change
+          // Handle theme change (light/dark)
           const newTheme = this.detectTheme();
           if (newTheme !== widgetState.theme) {
             widgetState.theme = newTheme;
             if (this.host) {
               this.host.setAttribute('data-theme', newTheme);
+            }
+          }
+
+          // Handle color theme change
+          const newColorTheme = newSettings.colorTheme || 'default';
+          if (newColorTheme !== widgetState.colorTheme) {
+            widgetState.colorTheme = newColorTheme;
+            if (this.host) {
+              if (newColorTheme && newColorTheme !== 'default') {
+                this.host.setAttribute('data-color-theme', newColorTheme);
+              } else {
+                this.host.removeAttribute('data-color-theme');
+              }
             }
           }
 
