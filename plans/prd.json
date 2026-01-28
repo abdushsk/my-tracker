@@ -65,7 +65,7 @@
       "title": "Split Settings into Normal and Advanced sections",
       "description": "Split the Settings screen into two sections: Normal (always visible) and Advanced (hidden by default, revealed via dropdown/expandable section). The search functionality should work across both sections and show matching results regardless of which section they belong to.",
       "priority": 8,
-      "passes": false
+      "passes": true
     },
     {
       "id": "US-040",

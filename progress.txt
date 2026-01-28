@@ -2008,3 +2008,88 @@ The changes increase spacing throughout the Settings screen while maintaining a 
 - Using CSS variables consistently makes it easier to maintain proportional spacing
 - Increasing section margins and item padding together creates a more breathable visual hierarchy
 - The --spacing-sm (8px) value works well as a default item padding in settings screens
+
+## US-039: Split Settings into Normal and Advanced Sections (Completed)
+**Date**: 2026-01-28
+
+### Task Analysis
+
+The Settings screen needed to be split into two sections:
+- **Normal Settings** (always visible): Sound, Notifications, Appearance
+- **Advanced Settings** (hidden by default, expandable): Reset Times, Categories, Pomodoro Timer, Break Reminders, Data Management, About
+
+The search functionality needed to work across both sections and show matching results regardless of which section they belong to.
+
+### Implementation
+
+#### 1. **HTML Structure Changes** (settings.js:137-303, 550-553)
+
+The settings screen now contains two groups:
+- `.settings-group-normal` wrapping Sound, Notifications, and Appearance sections
+- `.settings-advanced-container` with a toggle button and `.settings-group-advanced` containing the remaining sections
+
+The Advanced toggle button includes:
+- Text label "Advanced Settings"
+- Chevron icon that rotates when expanded
+- ARIA attributes for accessibility (`aria-expanded`)
+
+#### 2. **New Module: advancedSettings.js** (87 lines)
+
+Created a new module to handle advanced settings functionality:
+- `attachAdvancedToggleListener(screen)` - Handles expand/collapse toggle
+- `handleAdvancedSearchVisibility(screen, query, hasAdvancedMatch)` - Auto-expands when search matches advanced content
+- `isInAdvancedSection(section, advancedGroup)` - Helper to check if section is in advanced group
+
+#### 3. **State Persistence**
+
+The expanded/collapsed state is persisted in `state.settings.advancedSettingsExpanded`:
+- Default: `false` (collapsed)
+- Saved to Chrome storage when toggled
+- Restored on page load
+
+#### 4. **Search Integration** (settings.js:1099-1178)
+
+Search now works across both sections:
+- When searching, the Advanced toggle button is hidden
+- Advanced section auto-expands if there are search matches in it
+- When search is cleared, Advanced section returns to its saved state
+- Uses `search-expanded` class to track search-triggered expansion
+
+#### 5. **CSS Styling** (advanced-settings.css, 109 lines)
+
+New CSS file for advanced settings section:
+- `.settings-advanced-toggle` - Styled button with hover/focus states
+- `.settings-group-advanced` - Collapsible container with display: none/block
+- `.settings-group-advanced.expanded` - Visible state
+- `.settings-group-advanced.search-expanded` - State when expanded due to search
+- `@keyframes advancedSlideDown` - Slide animation on expand
+- Dark mode adjustments
+
+### Section Classification
+
+| Section | Group | Rationale |
+|---------|-------|-----------|
+| Sound | Normal | Basic user preference |
+| Notifications | Normal | Commonly adjusted |
+| Appearance | Normal | User-facing styling |
+| Reset Times | Advanced | Power user feature |
+| Categories | Advanced | Power user feature |
+| Pomodoro Timer | Advanced | Advanced feature |
+| Break Reminders | Advanced | Advanced feature |
+| Data Management | Advanced | Sensitive operations |
+| About | Advanced | Less frequently accessed |
+
+### Files Created
+- `src/popup/screens/advancedSettings.js` (87 lines) - Advanced settings toggle module
+- `src/popup/css/advanced-settings.css` (109 lines) - Advanced settings styles
+
+### Files Modified
+- `src/popup/screens/settings.js` - Added Normal/Advanced section structure, updated search
+- `src/popup/css/index.css` - Added import for advanced-settings.css
+- `plans/prd.json` - Marked US-039 as passes: true
+
+### Key Learnings
+- Separating advanced settings reduces cognitive load for typical users
+- Auto-expanding during search ensures discoverability despite hiding
+- Persisting expansion state respects user preference
+- Using a dedicated module keeps the main settings.js manageable

@@ -1,6 +1,7 @@
 /**
  * Settings Screen Module
  * US-052: Settings Screen (Sound toggle, volume slider, theme)
+ * US-039: Split Settings into Normal and Advanced sections
  * US-065: Categories Management
  * US-075: Reset Times Configuration
  * US-076: Notification Settings
@@ -25,6 +26,11 @@ import {
   attachDataManagementListeners
 } from './dataManagement.js';
 import { attachNotificationSettingsListeners } from './notificationSettings.js';
+import {
+  attachAdvancedToggleListener,
+  handleAdvancedSearchVisibility,
+  isInAdvancedSection
+} from './advancedSettings.js';
 import {
   AVAILABLE_COLOR_THEMES,
   getThemeMetadata,
@@ -105,6 +111,9 @@ export function renderSettingsScreen() {
   const soundEnabled = state.settings?.soundEnabled !== false; // Default to true
   const soundVolume = state.settings?.soundVolume ?? 50; // Default to 50
 
+  // US-039: Get advanced section expanded state (default to collapsed)
+  const advancedExpanded = state.settings?.advancedSettingsExpanded || false;
+
   // US-052: Full settings screen layout
   screen.innerHTML = `
     <div class="settings-screen">
@@ -129,6 +138,9 @@ export function renderSettingsScreen() {
           </div>
           <p class="settings-search-no-results hidden" id="settings-no-results">No settings found matching your search.</p>
         </div>
+
+        <!-- US-039: Normal Settings (Always Visible) -->
+        <div class="settings-group settings-group-normal" data-settings-group="normal">
 
         <!-- Sound Settings Section -->
         <div class="settings-section">
@@ -282,6 +294,18 @@ export function renderSettingsScreen() {
             </label>
           </div>
         </div>
+
+        </div><!-- End Normal Settings Group -->
+
+        <!-- US-039: Advanced Settings (Hidden by default, revealed via dropdown) -->
+        <div class="settings-advanced-container">
+          <button type="button" class="settings-advanced-toggle" id="advanced-settings-toggle" aria-expanded="${advancedExpanded}">
+            <span class="settings-advanced-toggle-text">Advanced Settings</span>
+            <svg class="settings-advanced-toggle-icon ${advancedExpanded ? 'expanded' : ''}" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="16" height="16">
+              <polyline points="6 9 12 15 18 9"/>
+            </svg>
+          </button>
+          <div class="settings-group settings-group-advanced ${advancedExpanded ? 'expanded' : ''}" data-settings-group="advanced" id="advanced-settings-group">
 
         <!-- US-075: Reset Times Section -->
         <div class="settings-section">
@@ -529,6 +553,9 @@ export function renderSettingsScreen() {
           <p class="app-version">My Tracker v1.0.0</p>
           <p class="app-description">Track your daily goals with timers, counters, and checkboxes. Build discipline through consistent progress.</p>
         </div>
+
+          </div><!-- End Advanced Settings Group -->
+        </div><!-- End Advanced Settings Container -->
       </main>
     </div>
   `;
@@ -570,6 +597,9 @@ export function renderSettingsScreen() {
 
   // US-029: Attach search functionality
   attachSearchListener(screen);
+
+  // US-039: Attach advanced settings toggle listener
+  attachAdvancedToggleListener(screen);
 
   // US-020: Restore scroll position after DOM update
   if (scrollTop > 0) {
@@ -1060,7 +1090,8 @@ function attachSearchListener(screen) {
 }
 
 /**
- * US-029: Filter settings sections and items based on search query
+ * US-029/US-039: Filter settings sections and items based on search query
+ * Also handles auto-expanding advanced section when matches are found there
  * @param {HTMLElement} screen - The settings screen element
  * @param {string} query - Search query
  * @param {HTMLElement} noResultsMsg - No results message element
@@ -1068,6 +1099,10 @@ function attachSearchListener(screen) {
 function filterSettings(screen, query, noResultsMsg) {
   const sections = screen.querySelectorAll('.settings-section');
   let totalVisibleItems = 0;
+  let hasAdvancedMatch = false;
+
+  // US-039: Get advanced section element
+  const advancedGroup = screen.querySelector('#advanced-settings-group');
 
   sections.forEach(section => {
     const sectionTitle = section.querySelector('h2')?.textContent || '';
@@ -1125,8 +1160,16 @@ function filterSettings(screen, query, noResultsMsg) {
 
     if (hasVisibleContent) {
       totalVisibleItems++;
+
+      // US-039: Check if this match is in the advanced section
+      if (query && isInAdvancedSection(section, advancedGroup)) {
+        hasAdvancedMatch = true;
+      }
     }
   });
+
+  // US-039: Handle advanced section visibility during search
+  handleAdvancedSearchVisibility(screen, query, hasAdvancedMatch);
 
   // Show/hide no results message
   if (noResultsMsg) {
