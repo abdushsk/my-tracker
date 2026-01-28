@@ -44,7 +44,7 @@
       "title": "Make Reports page compact, dont just remove space, improve layout",
       "description": "Make the Reports page more compact by reducing spacing and making better use of available space.",
       "priority": 6,
-      "passes": false
+      "passes": true
     },
     {
       "id": "US-038",

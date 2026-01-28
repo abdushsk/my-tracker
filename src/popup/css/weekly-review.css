@@ -4,26 +4,25 @@
 
 /* Weekly Review Navigation Button in Reports */
 .weekly-review-nav-section {
-  margin-top: var(--spacing-sm);
+  margin-top: var(--spacing-xs);
 }
 
 .weekly-review-nav-btn {
   display: flex;
   align-items: center;
-  gap: var(--spacing-md);
+  gap: var(--spacing-sm);
   width: 100%;
-  padding: var(--spacing-md);
+  padding: var(--spacing-xs) var(--spacing-sm);
   background: linear-gradient(135deg, var(--background) 0%, var(--primary-light) 100%);
   border: 1px solid var(--primary);
-  border-radius: var(--radius-lg);
+  border-radius: var(--radius);
   cursor: pointer;
   text-align: left;
   transition: all var(--transition-fast);
 }
 
 .weekly-review-nav-btn:hover {
-  transform: translateY(-2px);
-  box-shadow: var(--shadow);
+  box-shadow: var(--shadow-sm);
   border-color: var(--primary);
 }
 
@@ -35,34 +34,35 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 40px;
-  height: 40px;
+  width: 28px;
+  height: 28px;
   background-color: var(--primary);
-  border-radius: var(--radius-md);
+  border-radius: var(--radius-sm);
   color: white;
   flex-shrink: 0;
 }
 
 .weekly-review-nav-icon svg {
-  width: 24px;
-  height: 24px;
+  width: 16px;
+  height: 16px;
 }
 
 .weekly-review-nav-content {
   flex: 1;
   display: flex;
-  flex-direction: column;
-  gap: 2px;
+  flex-direction: row;
+  align-items: center;
+  gap: var(--spacing-xs);
 }
 
 .weekly-review-nav-title {
-  font-size: var(--font-size-base);
+  font-size: var(--font-size-sm);
   font-weight: var(--font-weight-semibold);
   color: var(--text);
 }
 
 .weekly-review-nav-desc {
-  font-size: var(--font-size-xs);
+  font-size: 10px;
   color: var(--text-muted);
 }
 
@@ -73,8 +73,8 @@
 }
 
 .weekly-review-nav-arrow svg {
-  width: 20px;
-  height: 20px;
+  width: 16px;
+  height: 16px;
 }
 
 /* Weekly Review Screen Container */
