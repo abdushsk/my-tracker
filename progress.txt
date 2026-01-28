@@ -1051,3 +1051,61 @@ Widget (content script) → sendMessage('OPEN_POPUP') → Service Worker → chr
 - Fallback UX is important for older Chrome versions where the API isn't available
 - Using visual feedback (button text/color change) helps guide users when programmatic approaches fail
 
+## US-025: Add Close Button on Floating Widget Hover (Completed)
+**Date**: 2026-01-28
+
+### Changes Made
+
+1. **Added dismiss button CSS** (widget.js:135-171):
+   - New `.widget-dismiss` class: 20x20px circular button positioned at top-right (-6px, -6px)
+   - Uses `--widget-danger` for background color (red)
+   - Hidden by default, shown on `.widget-icon:hover` via `display: flex`
+   - Hover state darkens to `#DC2626` with `scale(1.1)` for visual feedback
+   - Active state uses `scale(0.95)` for tactile click feedback
+
+2. **Added `dismissed` state to widgetState** (widget.js:30):
+   - New boolean flag `dismissed: false` for session-only visibility tracking
+   - This is NOT persisted to storage - resets on page refresh
+
+3. **Added dismiss button HTML to render()** (widget.js:865-867):
+   - Button placed inside `.widget-icon` div after the badge
+   - Uses `data-action="dismiss-widget"` for event delegation (though handled explicitly)
+   - Title attribute: "Dismiss widget for this session"
+   - Uses existing `ICONS.close` SVG
+
+4. **Added dismissWidget() method** (widget.js:1583-1591):
+   - Sets `widgetState.dismissed = true`
+   - Adds `hidden` class to container (existing CSS rule hides it with `display: none`)
+   - Logs dismissal for debugging
+
+5. **Added click handler for dismiss button** (widget.js:1145-1151):
+   - Handler checked FIRST in click listener to prevent icon toggle
+   - Uses `e.stopPropagation()` to prevent event bubbling
+   - Returns early to skip other handlers
+
+### Behavior
+
+**When hovering over widget icon:**
+- Small red 'X' button appears at top-right corner
+- Hovering over X shows slightly larger, darker button
+
+**When clicking X button:**
+- Widget is hidden immediately
+- Console logs "[Widget] Dismissed for current session"
+- Widget stays hidden until page refresh
+
+**How to restore widget:**
+- Refresh the page (session-only dismissal)
+- Future US-027 will add context menu option to restore
+
+### Files Modified
+- `src/content/widget.js` (CSS, HTML, state, method, event handler)
+
+### Key Learnings
+- Shadow DOM requires all styles to be self-contained in the component
+- Session-only state (not persisted) is perfect for temporary UI dismissal
+- Checking dismiss button handler first in the click listener prevents unintended icon toggle
+- `e.stopPropagation()` is essential to prevent parent element handlers from firing
+- Positioning with negative values (-6px) allows button to extend outside parent bounds
+- Using existing `.widget-container.hidden` class (already defined in CSS) avoids code duplication
+

@@ -44,7 +44,7 @@
       "title": "Add close button on floating widget hover",
       "description": "When hovering over the floating widget, display an 'X' button in the top right corner. Clicking this button should dismiss/hide the floating widget for the current session only.",
       "priority": 6,
-      "passes": false
+      "passes": true
     },
     {
       "id": "US-026",

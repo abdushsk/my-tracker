@@ -27,6 +27,7 @@
   let widgetState = {
     enabled: false,
     expanded: false,
+    dismissed: false, // US-025: Session-only dismissal flag
     goals: [],
     settings: {},
     activeTimers: {},
@@ -130,6 +131,44 @@
 
     .widget-badge.hidden {
       display: none;
+    }
+
+    /* US-025: Hover dismiss button */
+    .widget-dismiss {
+      position: absolute;
+      top: -6px;
+      right: -6px;
+      width: 20px;
+      height: 20px;
+      border: none;
+      background: var(--widget-danger);
+      border-radius: 50%;
+      cursor: pointer;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      padding: 0;
+      transition: background 0.15s ease, transform 0.15s ease;
+      z-index: 10;
+    }
+
+    .widget-dismiss svg {
+      width: 12px;
+      height: 12px;
+    }
+
+    .widget-icon:hover .widget-dismiss {
+      display: flex;
+    }
+
+    .widget-dismiss:hover {
+      background: #DC2626;
+      transform: scale(1.1);
+    }
+
+    .widget-dismiss:active {
+      transform: scale(0.95);
     }
 
     /* Expanded Panel */
@@ -824,6 +863,9 @@
         <div class="widget-icon" title="My Tracker - Click to expand, drag to move">
           ${ICONS.target}
           <span class="widget-badge ${badgeClass} ${badgeHidden}">${incompleteCount === 0 ? '✓' : incompleteCount}</span>
+          <button class="widget-dismiss" title="Dismiss widget for this session" data-action="dismiss-widget">
+            ${ICONS.close}
+          </button>
         </div>
         <div class="widget-panel ${widgetState.expanded ? 'visible' : ''}">
           ${this.renderPanel()}
@@ -1100,6 +1142,14 @@
     setupEventListeners() {
       // Click on icon to expand/collapse
       this.container.addEventListener('click', (e) => {
+        // US-025: Dismiss button handler (must be checked first to prevent icon toggle)
+        const dismissBtn = e.target.closest('.widget-dismiss');
+        if (dismissBtn) {
+          e.stopPropagation();
+          this.dismissWidget();
+          return;
+        }
+
         const icon = e.target.closest('.widget-icon');
         if (icon && !widgetState.isDragging) {
           this.toggleExpanded();
@@ -1536,6 +1586,16 @@
           btn.style.background = '';
         }, 3000);
       }
+    }
+
+    /**
+     * US-025: Dismiss widget for current session only
+     * Widget can be restored via context menu (US-027) or by refreshing the page
+     */
+    dismissWidget() {
+      widgetState.dismissed = true;
+      this.container.classList.add('hidden');
+      console.log('[Widget] Dismissed for current session');
     }
 
     async handleGoalAction(btn) {
