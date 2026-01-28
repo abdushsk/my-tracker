@@ -9,7 +9,7 @@
       "title": "Make Add New Goal screen compact with smart category layout",
       "description": "Make the Add New Goal screen compact and tightly wound. Categories should use smart flex layout to fit optimally in one row (e.g., 5 items in one row instead of 4+1). Make the overall layout more space-efficient.",
       "priority": 1,
-      "passes": false
+      "passes": true
     },
     {
       "id": "US-033",

@@ -117,7 +117,12 @@
 .goal-form {
   display: flex;
   flex-direction: column;
-  gap: var(--spacing-md);
+  gap: var(--spacing-sm);
+}
+
+/* US-032: Compact form group spacing */
+.goal-form .form-group {
+  margin-bottom: 0;
 }
 
 /* Placeholder for form fields (temporary) */
@@ -188,7 +193,7 @@ body.modal-open {
 .form-group {
   display: flex;
   flex-direction: column;
-  gap: var(--spacing-xs);
+  gap: 4px;
 }
 
 /* Form Label */
@@ -212,7 +217,7 @@ body.modal-open {
 /* Form Input - Enhanced text input styling */
 .form-input {
   width: 100%;
-  padding: var(--spacing-sm) var(--spacing-md);
+  padding: 8px var(--spacing-sm);
   font-size: var(--font-size-base);
   font-family: inherit;
   color: var(--text);
@@ -321,25 +326,25 @@ body.modal-open {
 /* Type Selector Container - Button group */
 .type-selector {
   display: flex;
-  gap: var(--spacing-sm);
+  gap: var(--spacing-xs);
   width: 100%;
 }
 
-/* Type Option Button */
+/* Type Option Button - US-032: More compact */
 .type-option {
   flex: 1;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 4px;
-  padding: 10px 6px;
+  gap: 2px;
+  padding: 8px 4px;
   background-color: transparent;
   border: 1px solid transparent;
   border-radius: var(--radius-md);
   cursor: pointer;
   transition: all var(--transition-fast);
-  min-height: 54px;
+  min-height: 44px;
 }
 
 .type-option:hover {
@@ -356,20 +361,20 @@ body.modal-open {
   border-color: transparent;
 }
 
-/* Type Option Icon */
+/* Type Option Icon - US-032: Compact */
 .type-option-icon {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 24px;
-  height: 24px;
+  width: 20px;
+  height: 20px;
   color: var(--text-muted);
   transition: all var(--transition-fast);
 }
 
 .type-option-icon svg {
-  width: 18px;
-  height: 18px;
+  width: 16px;
+  height: 16px;
   stroke-width: 1.5;
 }
 
@@ -398,9 +403,9 @@ body.modal-open {
   color: var(--type-avoidance);
 }
 
-/* Type Option Label */
+/* Type Option Label - US-032: Compact */
 .type-option-label {
-  font-size: var(--font-size-sm);
+  font-size: var(--font-size-xs);
   font-weight: var(--font-weight-medium);
   color: var(--text-secondary);
   transition: color var(--transition-fast);
@@ -480,15 +485,15 @@ body.modal-open {
   flex: 1;
 }
 
-/* Time input styling */
+/* Time input styling - US-032: Compact */
 .time-input {
   width: 100%;
   text-align: center;
-  font-size: var(--font-size-xl);
+  font-size: var(--font-size-lg);
   font-weight: var(--font-weight-semibold);
   font-family: 'SF Mono', 'Menlo', 'Monaco', 'Courier New', monospace;
-  padding: var(--spacing-md);
-  border-radius: var(--radius-lg);
+  padding: var(--spacing-sm);
+  border-radius: var(--radius);
   -moz-appearance: textfield; /* Hide spinner in Firefox */
 }
 
@@ -508,21 +513,21 @@ body.modal-open {
   letter-spacing: 0.5px;
 }
 
-/* Separator between hours and minutes */
+/* Separator between hours and minutes - US-032: Compact */
 .time-separator {
-  font-size: var(--font-size-2xl);
+  font-size: var(--font-size-lg);
   font-weight: var(--font-weight-bold);
   color: var(--text-muted);
-  margin-top: var(--spacing-sm);
+  margin-top: 6px;
   user-select: none;
 }
 
-/* Form hint text */
+/* Form hint text - US-032: Compact */
 .form-hint {
   font-size: var(--font-size-xs);
   color: var(--text-muted);
-  margin: var(--spacing-xs) 0 0;
-  line-height: 1.4;
+  margin: 2px 0 0;
+  line-height: 1.3;
 }
 
 /* Focus state for time inputs */
@@ -557,14 +562,14 @@ body.modal-open {
    US-026: Add Goal Form - Target Input (Counter)
    ======================================== */
 
-/* Counter Target Input - Large prominent number input */
+/* Counter Target Input - US-032: Compact */
 .counter-target-input {
-  font-size: var(--font-size-xl);
+  font-size: var(--font-size-lg);
   font-weight: var(--font-weight-semibold);
   text-align: center;
-  padding: var(--spacing-md) var(--spacing-lg);
-  border-radius: var(--radius-lg);
-  max-width: 200px;
+  padding: var(--spacing-sm) var(--spacing-md);
+  border-radius: var(--radius);
+  max-width: 160px;
   -moz-appearance: textfield; /* Hide spinner in Firefox */
 }
 
@@ -611,28 +616,30 @@ body.modal-open {
    US-027: Add Goal Form - Timeframe Selector
    ======================================== */
 
-/* Timeframe Selector Container - Grid of 4 options */
+/* Timeframe Selector Container - US-032: Compact flex row */
 .timeframe-selector {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: var(--spacing-sm);
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--spacing-xs);
   width: 100%;
 }
 
-/* Timeframe Option Button */
+/* Timeframe Option Button - US-032: Compact */
 .timeframe-option {
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 4px;
-  padding: var(--spacing-sm) var(--spacing-xs);
+  gap: 2px;
+  padding: 6px 8px;
   background-color: var(--background);
-  border: 2px solid var(--border);
+  border: 1.5px solid var(--border);
   border-radius: var(--radius);
   cursor: pointer;
   transition: all var(--transition);
-  min-height: 68px;
+  min-height: 48px;
+  flex: 1 1 auto;
+  min-width: 70px;
 }
 
 .timeframe-option:hover {
@@ -682,20 +689,20 @@ body.modal-open {
   box-shadow: 0 0 0 2px var(--type-avoidance-subtle);
 }
 
-/* Timeframe Option Icon */
+/* Timeframe Option Icon - US-032: Compact */
 .timeframe-option-icon {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 24px;
-  height: 24px;
+  width: 20px;
+  height: 20px;
   color: var(--text-secondary);
   transition: all var(--transition-fast);
 }
 
 .timeframe-option-icon svg {
-  width: 22px;
-  height: 22px;
+  width: 18px;
+  height: 18px;
 }
 
 .timeframe-option:hover .timeframe-option-icon {
@@ -787,29 +794,30 @@ body.modal-open {
    US-065: Category Selector Styles
    ======================================== */
 
-/* Category selector container - similar to timeframe selector */
+/* Category selector container - US-032: Smart flex layout for optimal row fitting */
 .category-selector {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: var(--spacing-sm);
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--spacing-xs);
   width: 100%;
 }
 
-/* Category option button */
+/* Category option button - US-032: Compact chip style */
 .category-option {
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
   align-items: center;
   justify-content: center;
-  gap: 4px;
-  padding: var(--spacing-sm) var(--spacing-xs);
+  gap: 6px;
+  padding: 6px 10px;
   background-color: var(--background);
-  border: 2px solid var(--border);
-  border-radius: var(--radius);
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius-full);
   cursor: pointer;
   transition: all var(--transition);
-  min-height: 60px;
+  min-height: auto;
   position: relative;
+  flex: 0 0 auto;
 }
 
 .category-option:hover {
@@ -853,19 +861,20 @@ body.modal-open {
   box-shadow: 0 0 0 2px rgba(255, 152, 0, 0.12);
 }
 
-/* Category option icon (color circle) */
+/* Category option icon (color circle) - US-032: Smaller for chip layout */
 .category-option-icon {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 20px;
-  height: 20px;
+  width: 12px;
+  height: 12px;
   border-radius: var(--radius-full);
   transition: transform var(--transition-fast);
+  flex-shrink: 0;
 }
 
 .category-option:hover .category-option-icon {
-  transform: scale(1.15);
+  transform: scale(1.1);
 }
 
 /* Category-specific icon colors */
@@ -885,7 +894,7 @@ body.modal-open {
   background-color: var(--category-personal);
 }
 
-/* Category option label */
+/* Category option label - US-032: Inline chip style */
 .category-option-label {
   font-size: var(--font-size-xs);
   font-weight: var(--font-weight-medium);
@@ -893,6 +902,7 @@ body.modal-open {
   transition: color var(--transition-fast);
   text-align: center;
   white-space: nowrap;
+  line-height: 1;
 }
 
 .category-option:hover .category-option-label {

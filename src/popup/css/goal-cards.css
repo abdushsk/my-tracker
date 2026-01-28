@@ -874,15 +874,16 @@
    ======================================== */
 
 .avoidance-settings {
-  margin-bottom: var(--spacing-md);
+  margin-bottom: var(--spacing-sm);
 }
 
+/* US-032: Compact toggle setting */
 .toggle-setting {
   display: flex;
   align-items: center;
-  gap: var(--spacing-md);
+  gap: var(--spacing-sm);
   cursor: pointer;
-  padding: var(--spacing-sm) 0;
+  padding: var(--spacing-xs) 0;
 }
 
 .toggle-setting input[type="checkbox"] {
@@ -924,25 +925,25 @@
   color: var(--text-primary);
 }
 
-/* Avoidance Info Box */
+/* Avoidance Info Box - US-032: Compact */
 .avoidance-info-box {
   display: flex;
-  gap: var(--spacing-md);
-  padding: var(--spacing-md);
+  gap: var(--spacing-sm);
+  padding: var(--spacing-sm);
   background-color: var(--background-secondary);
-  border-radius: var(--radius-lg);
+  border-radius: var(--radius);
   border: 1px solid var(--border);
 }
 
 .avoidance-info-icon {
-  font-size: 1.5em;
+  font-size: 1.2em;
   flex-shrink: 0;
 }
 
 .avoidance-info-text {
-  font-size: var(--font-size-sm);
+  font-size: var(--font-size-xs);
   color: var(--text-secondary);
-  line-height: 1.5;
+  line-height: 1.4;
 }
 
 .avoidance-info-text strong {

@@ -1501,3 +1501,83 @@ This approach allows the features to remain functional for existing users while 
 - The settings screen becomes cleaner and more focused when unused toggles are removed
 - This is a minimal, focused change that only affects the settings UI, not feature functionality
 
+## US-032: Make Add New Goal Screen Compact with Smart Category Layout (Completed)
+**Date**: 2026-01-28
+
+### Changes Made
+
+1. **Reduced form gap spacing** (goal-form.css:117-125):
+   - Changed `.goal-form` gap from `var(--spacing-md)` to `var(--spacing-sm)`
+   - Added `.goal-form .form-group { margin-bottom: 0 }` to eliminate extra margins
+
+2. **Compacted form group and input spacing** (goal-form.css:193-228):
+   - Reduced `.form-group` gap from `var(--spacing-xs)` to `4px`
+   - Reduced `.form-input` padding from `var(--spacing-sm) var(--spacing-md)` to `8px var(--spacing-sm)`
+
+3. **Made type selector more compact** (goal-form.css:326-412):
+   - Changed `.type-selector` gap from `var(--spacing-sm)` to `var(--spacing-xs)`
+   - Reduced `.type-option` padding from `10px 6px` to `8px 4px`
+   - Reduced min-height from `54px` to `44px`
+   - Reduced icon size from `24x24px` to `20x20px`, SVG from `18px` to `16px`
+   - Changed label font from `var(--font-size-sm)` to `var(--font-size-xs)`
+
+4. **Compacted timer target inputs** (goal-form.css:488-523):
+   - Reduced `.time-input` font from `var(--font-size-xl)` to `var(--font-size-lg)`
+   - Reduced padding from `var(--spacing-md)` to `var(--spacing-sm)`
+   - Reduced `.time-separator` font from `var(--font-size-2xl)` to `var(--font-size-lg)`
+   - Reduced `.form-hint` margin from `var(--spacing-xs)` to `2px`
+
+5. **Compacted counter target input** (goal-form.css:565-573):
+   - Reduced font from `var(--font-size-xl)` to `var(--font-size-lg)`
+   - Reduced max-width from `200px` to `160px`
+
+6. **Changed timeframe selector to flex layout** (goal-form.css:619-706):
+   - Changed from `grid-template-columns: repeat(4, 1fr)` to `display: flex; flex-wrap: wrap`
+   - Reduced gap to `var(--spacing-xs)`
+   - Reduced padding from `var(--spacing-sm) var(--spacing-xs)` to `6px 8px`
+   - Reduced min-height from `68px` to `48px`
+   - Reduced icon size from `24x24px` to `20x20px`, SVG from `22px` to `18px`
+
+7. **Implemented smart flex category layout** (goal-form.css:797-905):
+   - Changed from 4-column grid to `display: flex; flex-wrap: wrap`
+   - Changed from vertical column layout to horizontal chip/pill style
+   - Reduced category icon from `20x20px` to `12x12px`
+   - Added `border-radius: var(--radius-full)` for pill-shaped appearance
+   - Categories now flow naturally, fitting 5+ items in one row
+
+8. **Compacted header, content, and footer** (goal-form-screen.css:14-68):
+   - Reduced header padding from `var(--spacing-md)` to `var(--spacing-sm) var(--spacing-md)`
+   - Reduced content padding from `var(--spacing-lg)` to `var(--spacing-md)`
+   - Reduced footer padding from `var(--spacing-md) var(--spacing-lg)` to `var(--spacing-sm) var(--spacing-md)`
+
+9. **Compacted notes textarea** (customization.css:5-20):
+   - Reduced min-height from `80px` to `60px`
+   - Reduced max-height from `150px` to `120px`
+   - Reduced char count margin from `var(--spacing-xs)` to `2px`
+
+10. **Compacted avoidance settings** (goal-cards.css:876-946):
+    - Reduced settings margin from `var(--spacing-md)` to `var(--spacing-sm)`
+    - Reduced toggle gap from `var(--spacing-md)` to `var(--spacing-sm)`
+    - Reduced info box padding and gap
+    - Reduced info text font to `var(--font-size-xs)`
+
+### Layout Changes
+
+**Before (old category layout):**
+```
+[Work    ] [Health  ] [Learning] [Personal]
+[None    ] [Custom1 ]
+```
+
+**After (smart flex category layout):**
+```
+[● Work] [● Health] [● Learning] [● Personal] [● None] [● Custom1]
+```
+
+### Key Learnings
+- Using `flex-wrap: wrap` instead of fixed grid columns allows items to flow naturally and fit optimally in available space
+- Horizontal chip/pill style is more space-efficient than vertical stacked buttons for single-selection groups
+- Reducing padding and margins consistently across all form elements creates a cohesive compact appearance
+- Smaller icons (12px category dots, 16-18px type/timeframe icons) still convey meaning while reducing visual bulk
+- Using `flex: 0 0 auto` with `flex-wrap` creates a natural flow that adapts to the number of items
+
