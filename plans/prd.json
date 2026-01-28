@@ -65,7 +65,7 @@
       "title": "Replace emojis with proper icons",
       "description": "Remove all emoji usage throughout the app and replace with proper icons using Font Awesome or inline SVGs for a more professional and consistent look.",
       "priority": 9,
-      "passes": false
+      "passes": true
     },
     {
       "id": "US-029",

@@ -21,6 +21,7 @@ import {
   unlockAchievement
 } from '../../utils/storage.js';
 import { playSound, SOUNDS } from '../../utils/sounds.js';
+import { getIcon } from '../utils/icons.js';
 
 // =============================================================================
 // Callback Registration
@@ -88,7 +89,7 @@ export function renderAchievementsScreen() {
         <!-- Summary Card -->
         <section class="achievements-section summary-section">
           <div class="achievements-summary-card">
-            <div class="achievements-summary-icon">🏆</div>
+            <div class="achievements-summary-icon">${getIcon('trophy', 32)}</div>
             <div class="achievements-summary-info">
               <span class="achievements-summary-value">${unlockedCount} / ${totalCount}</span>
               <span class="achievements-summary-label">Achievements Unlocked</span>
@@ -140,7 +141,7 @@ export function renderAchievementBadge(definition) {
 
   return `
     <div class="achievement-badge ${isUnlocked ? 'unlocked' : 'locked'}" data-achievement-id="${definition.id}">
-      <div class="achievement-icon ${isUnlocked ? '' : 'grayscale'}">${definition.icon}</div>
+      <div class="achievement-icon ${isUnlocked ? '' : 'grayscale'}">${getIcon(definition.icon, 24)}</div>
       <div class="achievement-info">
         <span class="achievement-title">${definition.title}</span>
         <span class="achievement-description">${definition.description}</span>
@@ -155,7 +156,7 @@ export function renderAchievementBadge(definition) {
           </div>
         `}
       </div>
-      ${isUnlocked ? '<div class="achievement-check">✓</div>' : ''}
+      ${isUnlocked ? `<div class="achievement-check">${getIcon('check', 16)}</div>` : ''}
     </div>
   `;
 }
@@ -369,7 +370,7 @@ export function showAchievementUnlockNotification(definition) {
   toast.className = 'achievement-toast';
   toast.innerHTML = `
     <div class="achievement-toast-content">
-      <div class="achievement-toast-icon">${definition.icon}</div>
+      <div class="achievement-toast-icon">${getIcon(definition.icon, 20)}</div>
       <div class="achievement-toast-info">
         <span class="achievement-toast-label">Achievement Unlocked</span>
         <span class="achievement-toast-title">${definition.title}</span>

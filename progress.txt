@@ -1213,3 +1213,94 @@ Widget becomes visible (restored from dismissed or created)
 - The `contexts: ['page']` option ensures the menu item appears on right-click anywhere on the page
 - Using `chrome.contextMenus.removeAll()` before `create()` prevents duplicate menu items on extension update
 
+## US-028: Replace Emojis with Proper Icons (Completed)
+**Date**: 2026-01-28
+
+### Changes Made
+
+1. **Created new icons utility module** (src/popup/utils/icons.js):
+   - New module providing 60+ SVG icons organized by category
+   - All icons use `currentColor` for theme-aware coloring
+   - `getIcon(iconId, size)` function for retrieving icons by string ID
+   - `getIconSpan(iconId, size, className)` for wrapped icon usage
+   - Icons cover: achievements, streaks, time, documents, numbers, body/strength, nature, celebration, wellness, arrows, status, hearts
+
+2. **Updated models.js data definitions**:
+   - Changed all achievement definitions to use icon IDs instead of emojis (22 achievements)
+   - Changed all daily challenge definitions to use icon IDs (18 challenges)
+   - Changed all level title definitions to use icon IDs (11 levels)
+   - Icon property now stores string IDs like 'trophy', 'flame', 'star' instead of emoji characters
+
+3. **Updated UI rendering files**:
+   - `achievements.js`: Summary card icon, achievement badge icons, unlock toast icons, check mark icons
+   - `dailyChallenges.js`: Challenge card icon, completion celebration icon
+   - `challengeReports.js`: Stats icons, history icons, status icons
+   - `pomodoro.js`: Phase notification toast icons
+   - `reports.js`: Achievements navigation button icon
+   - `weeklyReview.js`: Streak icons, quote icon, calendar icon, performance badges, trend arrows
+   - `weeklyReviewCharts.js`: Week comparison trend icons
+   - `goalCard.js`: Avoidance streak icons, forgiveness badge icons
+   - `breakReminders.js`: Break reminder modal icons, activity suggestion icons
+   - `xpLevels.js`: Level-up notification icon
+
+4. **Updated storage.js**:
+   - Changed BREAK_ACTIVITIES icons from emojis to icon IDs
+
+5. **Added CSS icon styles** (base.css):
+   - Added `.icon` utility class for inline SVG icon display
+   - Added icon container styles for various UI elements
+   - Added grayscale filter for locked achievement icons
+   - Ensured SVG icons inherit color from parent elements
+
+### Icon Mapping (Emoji to Icon ID)
+
+| Category | Emoji | Icon ID |
+|----------|-------|---------|
+| Fire/Streaks | 🔥 | `flame` |
+| Trophy | 🏆 | `trophy` |
+| Crown | 👑 | `crown` |
+| Star | ⭐, 🌟 | `star`, `star-filled` |
+| Diamond | 💎 | `gem` |
+| Target | 🎯 | `target` |
+| Check | ✅, ✓ | `check-circle`, `check` |
+| Timer | ⏱️, ⏰ | `timer`, `alarm` |
+| Calendar | 📅 | `calendar` |
+| Chart | 📊, 📈, 📉 | `bar-chart`, `trending-up`, `trending-down` |
+| Muscle | 💪 | `muscle` |
+| Sunrise | 🌅 | `sunrise` |
+| Moon | 🦉 | `moon` |
+| Party | 🎉 | `party-popper` |
+| Coffee | ☕ | `coffee` |
+| Heart | 💚, 💔 | `heart`, `heart-crack` |
+| Sprout | 🌱 | `sprout` |
+| Lightbulb | 💡 | `lightbulb` |
+| Footprints | 👣 | `footprints` |
+
+### Files Modified
+- `src/popup/utils/icons.js` (NEW - 430 lines)
+- `src/utils/models.js` (updated icon values in definitions)
+- `src/utils/storage.js` (updated BREAK_ACTIVITIES icons)
+- `src/popup/features/achievements.js` (added import and usage)
+- `src/popup/features/dailyChallenges.js` (added import and usage)
+- `src/popup/features/challengeReports.js` (added import and usage)
+- `src/popup/features/pomodoro.js` (added import and usage)
+- `src/popup/features/breakReminders.js` (added import and usage)
+- `src/popup/features/xpLevels.js` (added import and usage)
+- `src/popup/screens/reports.js` (added import and usage)
+- `src/popup/screens/weeklyReview.js` (added import and usage)
+- `src/popup/screens/weeklyReviewCharts.js` (added import and usage)
+- `src/popup/components/goalCard.js` (added import and usage)
+- `src/popup/css/base.css` (added icon utility styles)
+
+### Files NOT Changed
+- `src/popup/features/shareTemplates.js` - Uses emojis for canvas text rendering in social sharing cards (acceptable as these are rendered as text on canvas, not as DOM elements)
+
+### Key Learnings
+- SVG icons using `currentColor` adapt automatically to theme colors
+- Icon size can be parameterized for flexibility across different UI contexts
+- The icons module provides a centralized location for all app icons, making it easy to maintain consistency
+- Using string IDs for icons in data models decouples the visual representation from the data structure
+- Canvas-based text rendering (like share templates) handles emojis differently and can retain them
+- Adding base CSS for icon containers ensures consistent display across different contexts
+- The grayscale filter on SVGs provides a clean locked/disabled state for achievements
+

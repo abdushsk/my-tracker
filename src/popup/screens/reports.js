@@ -24,6 +24,7 @@ import {
 import { renderChallengeStatsSection } from '../features/dailyChallenges.js';
 import { updateStreakDisplay } from './reportsStreak.js';
 import { renderWeeklyChart, renderActivityHeatmap } from './reportsCharts.js';
+import { getIcon } from '../utils/icons.js';
 
 // Callbacks to be registered from popup.js
 let callbacks = {
@@ -223,7 +224,7 @@ export function renderReportsScreen() {
         <!-- US-080: Achievements Navigation -->
         <section class="reports-section achievements-nav-section">
           <button class="achievements-nav-btn" data-screen="${SCREENS.ACHIEVEMENTS}">
-            <div class="achievements-nav-icon">🏆</div>
+            <div class="achievements-nav-icon">${getIcon('trophy', 24)}</div>
             <div class="achievements-nav-content">
               <span class="achievements-nav-title">Achievements</span>
               <span class="achievements-nav-desc">View all badges and milestones</span>

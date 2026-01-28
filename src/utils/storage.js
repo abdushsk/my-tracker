@@ -1762,15 +1762,16 @@ async function disablePomodoroForGoal(goalId) {
 
 /**
  * Break activities to suggest during breaks
+ * Icon IDs reference icons in src/popup/utils/icons.js
  * @type {Array<{icon: string, activity: string, duration: string}>}
  */
 const BREAK_ACTIVITIES = [
-  { icon: '🧘', activity: 'Stretch your body', duration: '2 min' },
-  { icon: '💧', activity: 'Drink some water', duration: '1 min' },
-  { icon: '👀', activity: 'Rest your eyes (20-20-20 rule)', duration: '20 sec' },
-  { icon: '🚶', activity: 'Take a short walk', duration: '3 min' },
-  { icon: '🌬️', activity: 'Deep breathing exercises', duration: '1 min' },
-  { icon: '🪟', activity: 'Look at something far away', duration: '30 sec' }
+  { icon: 'meditation', activity: 'Stretch your body', duration: '2 min' },
+  { icon: 'droplet', activity: 'Drink some water', duration: '1 min' },
+  { icon: 'eye', activity: 'Rest your eyes (20-20-20 rule)', duration: '20 sec' },
+  { icon: 'footprints', activity: 'Take a short walk', duration: '3 min' },
+  { icon: 'wind', activity: 'Deep breathing exercises', duration: '1 min' },
+  { icon: 'window', activity: 'Look at something far away', duration: '30 sec' }
 ];
 
 /**

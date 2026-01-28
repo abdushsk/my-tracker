@@ -820,7 +820,7 @@ const ACHIEVEMENT_DEFINITIONS = [
     id: 'first-step',
     title: 'First Step',
     description: 'Complete your first goal',
-    icon: '👣',
+    icon: 'footprints',
     category: ACHIEVEMENT_CATEGORIES.MILESTONES,
     condition: { type: 'total_completions', target: 1 }
   },
@@ -828,7 +828,7 @@ const ACHIEVEMENT_DEFINITIONS = [
     id: 'first-goal-created',
     title: 'Goal Setter',
     description: 'Create your first goal',
-    icon: '🎯',
+    icon: 'target',
     category: ACHIEVEMENT_CATEGORIES.MILESTONES,
     condition: { type: 'total_goals_created', target: 1 }
   },
@@ -836,7 +836,7 @@ const ACHIEVEMENT_DEFINITIONS = [
     id: 'five-goals',
     title: 'Getting Organized',
     description: 'Create 5 goals',
-    icon: '📋',
+    icon: 'clipboard',
     category: ACHIEVEMENT_CATEGORIES.MILESTONES,
     condition: { type: 'total_goals_created', target: 5 }
   },
@@ -844,7 +844,7 @@ const ACHIEVEMENT_DEFINITIONS = [
     id: 'ten-goals',
     title: 'Planner',
     description: 'Create 10 goals',
-    icon: '📝',
+    icon: 'clipboard-list',
     category: ACHIEVEMENT_CATEGORIES.MILESTONES,
     condition: { type: 'total_goals_created', target: 10 }
   },
@@ -854,7 +854,7 @@ const ACHIEVEMENT_DEFINITIONS = [
     id: 'streak-3',
     title: 'Getting Started',
     description: 'Maintain a 3-day streak',
-    icon: '🔥',
+    icon: 'flame',
     category: ACHIEVEMENT_CATEGORIES.STREAKS,
     condition: { type: 'streak', target: 3 }
   },
@@ -862,7 +862,7 @@ const ACHIEVEMENT_DEFINITIONS = [
     id: 'streak-7',
     title: 'Consistent',
     description: 'Maintain a 7-day streak',
-    icon: '🔥',
+    icon: 'flame',
     category: ACHIEVEMENT_CATEGORIES.STREAKS,
     condition: { type: 'streak', target: 7 }
   },
@@ -870,7 +870,7 @@ const ACHIEVEMENT_DEFINITIONS = [
     id: 'streak-14',
     title: 'Committed',
     description: 'Maintain a 14-day streak',
-    icon: '💪',
+    icon: 'muscle',
     category: ACHIEVEMENT_CATEGORIES.STREAKS,
     condition: { type: 'streak', target: 14 }
   },
@@ -878,7 +878,7 @@ const ACHIEVEMENT_DEFINITIONS = [
     id: 'streak-30',
     title: 'Dedicated',
     description: 'Maintain a 30-day streak',
-    icon: '⚡',
+    icon: 'zap',
     category: ACHIEVEMENT_CATEGORIES.STREAKS,
     condition: { type: 'streak', target: 30 }
   },
@@ -886,7 +886,7 @@ const ACHIEVEMENT_DEFINITIONS = [
     id: 'streak-60',
     title: 'Determined',
     description: 'Maintain a 60-day streak',
-    icon: '🌟',
+    icon: 'star',
     category: ACHIEVEMENT_CATEGORIES.STREAKS,
     condition: { type: 'streak', target: 60 }
   },
@@ -894,7 +894,7 @@ const ACHIEVEMENT_DEFINITIONS = [
     id: 'streak-100',
     title: 'Unstoppable',
     description: 'Maintain a 100-day streak',
-    icon: '🏆',
+    icon: 'trophy',
     category: ACHIEVEMENT_CATEGORIES.STREAKS,
     condition: { type: 'streak', target: 100 }
   },
@@ -904,7 +904,7 @@ const ACHIEVEMENT_DEFINITIONS = [
     id: 'completions-10',
     title: 'Making Progress',
     description: 'Complete 10 goals total',
-    icon: '✅',
+    icon: 'check-circle',
     category: ACHIEVEMENT_CATEGORIES.COMPLETIONS,
     condition: { type: 'total_completions', target: 10 }
   },
@@ -912,7 +912,7 @@ const ACHIEVEMENT_DEFINITIONS = [
     id: 'completions-50',
     title: 'Achiever',
     description: 'Complete 50 goals total',
-    icon: '🎖️',
+    icon: 'medal',
     category: ACHIEVEMENT_CATEGORIES.COMPLETIONS,
     condition: { type: 'total_completions', target: 50 }
   },
@@ -920,7 +920,7 @@ const ACHIEVEMENT_DEFINITIONS = [
     id: 'completions-100',
     title: 'Centurion',
     description: 'Complete 100 goals total',
-    icon: '💯',
+    icon: 'hundred',
     category: ACHIEVEMENT_CATEGORIES.COMPLETIONS,
     condition: { type: 'total_completions', target: 100 }
   },
@@ -928,7 +928,7 @@ const ACHIEVEMENT_DEFINITIONS = [
     id: 'completions-500',
     title: 'Goal Master',
     description: 'Complete 500 goals total',
-    icon: '👑',
+    icon: 'crown',
     category: ACHIEVEMENT_CATEGORIES.COMPLETIONS,
     condition: { type: 'total_completions', target: 500 }
   },
@@ -936,7 +936,7 @@ const ACHIEVEMENT_DEFINITIONS = [
     id: 'perfectionist',
     title: 'Perfectionist',
     description: 'Complete all goals in a single day',
-    icon: '💎',
+    icon: 'gem',
     category: ACHIEVEMENT_CATEGORIES.COMPLETIONS,
     condition: { type: 'all_goals_completed_day', target: 1 }
   },
@@ -944,7 +944,7 @@ const ACHIEVEMENT_DEFINITIONS = [
     id: 'perfect-week',
     title: 'Perfect Week',
     description: 'Complete all goals every day for a week',
-    icon: '🌈',
+    icon: 'rainbow',
     category: ACHIEVEMENT_CATEGORIES.COMPLETIONS,
     condition: { type: 'perfect_days', target: 7 }
   },
@@ -954,7 +954,7 @@ const ACHIEVEMENT_DEFINITIONS = [
     id: 'early-bird',
     title: 'Early Bird',
     description: 'Complete a goal before 8 AM',
-    icon: '🌅',
+    icon: 'sunrise',
     category: ACHIEVEMENT_CATEGORIES.SPECIAL,
     condition: { type: 'complete_before_hour', target: 8 }
   },
@@ -962,7 +962,7 @@ const ACHIEVEMENT_DEFINITIONS = [
     id: 'night-owl',
     title: 'Night Owl',
     description: 'Complete a goal after 10 PM',
-    icon: '🦉',
+    icon: 'moon',
     category: ACHIEVEMENT_CATEGORIES.SPECIAL,
     condition: { type: 'complete_after_hour', target: 22 }
   },
@@ -970,7 +970,7 @@ const ACHIEVEMENT_DEFINITIONS = [
     id: 'marathon',
     title: 'Marathon',
     description: 'Log 10 hours on a single timer goal',
-    icon: '⏱️',
+    icon: 'timer',
     category: ACHIEVEMENT_CATEGORIES.SPECIAL,
     condition: { type: 'timer_hours', target: 10 }
   },
@@ -978,7 +978,7 @@ const ACHIEVEMENT_DEFINITIONS = [
     id: 'counter-100',
     title: 'Counter Champion',
     description: 'Reach 100 on a counter goal',
-    icon: '🔢',
+    icon: 'hash',
     category: ACHIEVEMENT_CATEGORIES.SPECIAL,
     condition: { type: 'counter_target', target: 100 }
   },
@@ -986,7 +986,7 @@ const ACHIEVEMENT_DEFINITIONS = [
     id: 'variety',
     title: 'Variety',
     description: 'Complete all three goal types in one day',
-    icon: '🎨',
+    icon: 'palette',
     category: ACHIEVEMENT_CATEGORIES.SPECIAL,
     condition: { type: 'all_types_completed_day', target: 1 }
   },
@@ -994,7 +994,7 @@ const ACHIEVEMENT_DEFINITIONS = [
     id: 'category-explorer',
     title: 'Category Explorer',
     description: 'Complete goals in 4 different categories',
-    icon: '🗂️',
+    icon: 'folder',
     category: ACHIEVEMENT_CATEGORIES.SPECIAL,
     condition: { type: 'categories_used', target: 4 }
   }
@@ -1327,17 +1327,17 @@ function createXPHistoryEntry(source, amount, description, context = null) {
  * @returns {{title: string, icon: string}} Level title and icon
  */
 function getLevelTitle(level) {
-  if (level >= 50) return { title: 'Legend', icon: '👑' };
-  if (level >= 45) return { title: 'Master', icon: '🏆' };
-  if (level >= 40) return { title: 'Expert', icon: '💎' };
-  if (level >= 35) return { title: 'Champion', icon: '🌟' };
-  if (level >= 30) return { title: 'Pro', icon: '⭐' };
-  if (level >= 25) return { title: 'Veteran', icon: '🎯' };
-  if (level >= 20) return { title: 'Skilled', icon: '💪' };
-  if (level >= 15) return { title: 'Dedicated', icon: '🔥' };
-  if (level >= 10) return { title: 'Committed', icon: '✨' };
-  if (level >= 5) return { title: 'Apprentice', icon: '🌱' };
-  return { title: 'Beginner', icon: '🎈' };
+  if (level >= 50) return { title: 'Legend', icon: 'crown' };
+  if (level >= 45) return { title: 'Master', icon: 'trophy' };
+  if (level >= 40) return { title: 'Expert', icon: 'gem' };
+  if (level >= 35) return { title: 'Champion', icon: 'star' };
+  if (level >= 30) return { title: 'Pro', icon: 'star-filled' };
+  if (level >= 25) return { title: 'Veteran', icon: 'target' };
+  if (level >= 20) return { title: 'Skilled', icon: 'muscle' };
+  if (level >= 15) return { title: 'Dedicated', icon: 'flame' };
+  if (level >= 10) return { title: 'Committed', icon: 'sparkles' };
+  if (level >= 5) return { title: 'Apprentice', icon: 'sprout' };
+  return { title: 'Beginner', icon: 'balloon' };
 }
 
 // =============================================================================
@@ -1366,7 +1366,7 @@ const DAILY_CHALLENGE_DEFINITIONS = [
     id: 'challenge-complete-one',
     title: 'Quick Win',
     description: 'Complete at least 1 goal today',
-    icon: '🎯',
+    icon: 'target',
     difficulty: CHALLENGE_DIFFICULTY.EASY,
     condition: { type: 'goals_completed', target: 1 },
     reward: 'Warm-up complete!'
@@ -1375,7 +1375,7 @@ const DAILY_CHALLENGE_DEFINITIONS = [
     id: 'challenge-complete-three',
     title: 'Triple Threat',
     description: 'Complete 3 goals today',
-    icon: '🌟',
+    icon: 'star',
     difficulty: CHALLENGE_DIFFICULTY.EASY,
     condition: { type: 'goals_completed', target: 3 },
     reward: 'Three down!'
@@ -1384,7 +1384,7 @@ const DAILY_CHALLENGE_DEFINITIONS = [
     id: 'challenge-morning-start',
     title: 'Morning Momentum',
     description: 'Complete a goal before 10 AM',
-    icon: '🌅',
+    icon: 'sunrise',
     difficulty: CHALLENGE_DIFFICULTY.EASY,
     condition: { type: 'complete_before_hour', target: 10 },
     reward: 'Early starter!'
@@ -1393,7 +1393,7 @@ const DAILY_CHALLENGE_DEFINITIONS = [
     id: 'challenge-timer-15min',
     title: 'Quick Focus',
     description: 'Log 15 minutes on any timer goal',
-    icon: '⏰',
+    icon: 'alarm',
     difficulty: CHALLENGE_DIFFICULTY.EASY,
     condition: { type: 'timer_minutes', target: 15 },
     reward: 'Focused mind!'
@@ -1402,7 +1402,7 @@ const DAILY_CHALLENGE_DEFINITIONS = [
     id: 'challenge-counter-5',
     title: 'Count It Up',
     description: 'Add 5 to any counter goal',
-    icon: '🔢',
+    icon: 'hash',
     difficulty: CHALLENGE_DIFFICULTY.EASY,
     condition: { type: 'counter_increments', target: 5 },
     reward: 'Numbers climbing!'
@@ -1411,7 +1411,7 @@ const DAILY_CHALLENGE_DEFINITIONS = [
     id: 'challenge-checkbox-one',
     title: 'Check It Off',
     description: 'Complete a checkbox goal',
-    icon: '✅',
+    icon: 'check-circle',
     difficulty: CHALLENGE_DIFFICULTY.EASY,
     condition: { type: 'checkbox_completed', target: 1 },
     reward: 'Done and dusted!'
@@ -1422,7 +1422,7 @@ const DAILY_CHALLENGE_DEFINITIONS = [
     id: 'challenge-complete-five',
     title: 'High Five',
     description: 'Complete 5 goals today',
-    icon: '🖐️',
+    icon: 'hand',
     difficulty: CHALLENGE_DIFFICULTY.MEDIUM,
     condition: { type: 'goals_completed', target: 5 },
     reward: 'Five star performance!'
@@ -1431,7 +1431,7 @@ const DAILY_CHALLENGE_DEFINITIONS = [
     id: 'challenge-timer-30min',
     title: 'Half Hour Hero',
     description: 'Log 30 minutes on any timer goal',
-    icon: '⏱️',
+    icon: 'timer',
     difficulty: CHALLENGE_DIFFICULTY.MEDIUM,
     condition: { type: 'timer_minutes', target: 30 },
     reward: 'Time well spent!'
@@ -1440,7 +1440,7 @@ const DAILY_CHALLENGE_DEFINITIONS = [
     id: 'challenge-timer-1hr',
     title: 'Hour of Power',
     description: 'Log 1 hour on any timer goal',
-    icon: '💪',
+    icon: 'muscle',
     difficulty: CHALLENGE_DIFFICULTY.MEDIUM,
     condition: { type: 'timer_minutes', target: 60 },
     reward: 'Powerful progress!'
@@ -1449,7 +1449,7 @@ const DAILY_CHALLENGE_DEFINITIONS = [
     id: 'challenge-counter-10',
     title: 'Double Digits',
     description: 'Add 10 to any counter goal',
-    icon: '🔟',
+    icon: 'ten',
     difficulty: CHALLENGE_DIFFICULTY.MEDIUM,
     condition: { type: 'counter_increments', target: 10 },
     reward: 'Numbers soaring!'
@@ -1458,7 +1458,7 @@ const DAILY_CHALLENGE_DEFINITIONS = [
     id: 'challenge-variety-2types',
     title: 'Mix It Up',
     description: 'Complete goals of 2 different types',
-    icon: '🎨',
+    icon: 'palette',
     difficulty: CHALLENGE_DIFFICULTY.MEDIUM,
     condition: { type: 'goal_types_completed', target: 2 },
     reward: 'Versatile achiever!'
@@ -1467,7 +1467,7 @@ const DAILY_CHALLENGE_DEFINITIONS = [
     id: 'challenge-afternoon-productivity',
     title: 'Afternoon Achiever',
     description: 'Complete 2 goals between 12 PM and 5 PM',
-    icon: '☀️',
+    icon: 'clock',
     difficulty: CHALLENGE_DIFFICULTY.MEDIUM,
     condition: { type: 'goals_completed_between', startHour: 12, endHour: 17, target: 2 },
     reward: 'Afternoon champion!'
@@ -1476,7 +1476,7 @@ const DAILY_CHALLENGE_DEFINITIONS = [
     id: 'challenge-evening-finish',
     title: 'Evening Excellence',
     description: 'Complete a goal after 6 PM',
-    icon: '🌆',
+    icon: 'sunset',
     difficulty: CHALLENGE_DIFFICULTY.MEDIUM,
     condition: { type: 'complete_after_hour', target: 18 },
     reward: 'Strong finish!'
@@ -1485,7 +1485,7 @@ const DAILY_CHALLENGE_DEFINITIONS = [
     id: 'challenge-two-categories',
     title: 'Category Crosser',
     description: 'Complete goals in 2 different categories',
-    icon: '🗂️',
+    icon: 'folder',
     difficulty: CHALLENGE_DIFFICULTY.MEDIUM,
     condition: { type: 'categories_completed', target: 2 },
     reward: 'Well-rounded day!'
@@ -1496,7 +1496,7 @@ const DAILY_CHALLENGE_DEFINITIONS = [
     id: 'challenge-all-goals',
     title: 'Clean Sweep',
     description: 'Complete ALL your goals today',
-    icon: '🧹',
+    icon: 'broom',
     difficulty: CHALLENGE_DIFFICULTY.HARD,
     condition: { type: 'all_goals_completed', target: 1 },
     reward: 'Perfect day!'
@@ -1505,7 +1505,7 @@ const DAILY_CHALLENGE_DEFINITIONS = [
     id: 'challenge-timer-2hr',
     title: 'Endurance Expert',
     description: 'Log 2 hours total on timer goals',
-    icon: '🏃',
+    icon: 'person-running',
     difficulty: CHALLENGE_DIFFICULTY.HARD,
     condition: { type: 'timer_minutes', target: 120 },
     reward: 'Marathon mindset!'
@@ -1514,7 +1514,7 @@ const DAILY_CHALLENGE_DEFINITIONS = [
     id: 'challenge-variety-3types',
     title: 'Triple Variety',
     description: 'Complete all 3 goal types today',
-    icon: '🏆',
+    icon: 'trophy',
     difficulty: CHALLENGE_DIFFICULTY.HARD,
     condition: { type: 'goal_types_completed', target: 3 },
     reward: 'Master of all!'
@@ -1523,7 +1523,7 @@ const DAILY_CHALLENGE_DEFINITIONS = [
     id: 'challenge-early-bird',
     title: 'Dawn Patrol',
     description: 'Complete 2 goals before 9 AM',
-    icon: '🐦',
+    icon: 'bird',
     difficulty: CHALLENGE_DIFFICULTY.HARD,
     condition: { type: 'goals_completed_before', hour: 9, target: 2 },
     reward: 'Early bird champion!'
@@ -1532,7 +1532,7 @@ const DAILY_CHALLENGE_DEFINITIONS = [
     id: 'challenge-counter-20',
     title: 'Counter Master',
     description: 'Add 20 to any counter goal',
-    icon: '📊',
+    icon: 'bar-chart',
     difficulty: CHALLENGE_DIFFICULTY.HARD,
     condition: { type: 'counter_increments', target: 20 },
     reward: 'Numbers king!'
@@ -1541,7 +1541,7 @@ const DAILY_CHALLENGE_DEFINITIONS = [
     id: 'challenge-focus-session',
     title: 'Deep Focus',
     description: 'Complete a 45-minute uninterrupted timer session',
-    icon: '🧘',
+    icon: 'meditation',
     difficulty: CHALLENGE_DIFFICULTY.HARD,
     condition: { type: 'continuous_timer_minutes', target: 45 },
     reward: 'Zen master!'
@@ -1550,7 +1550,7 @@ const DAILY_CHALLENGE_DEFINITIONS = [
     id: 'challenge-multi-category',
     title: 'Category Champion',
     description: 'Complete goals in 3+ different categories',
-    icon: '🎖️',
+    icon: 'medal',
     difficulty: CHALLENGE_DIFFICULTY.HARD,
     condition: { type: 'categories_completed', target: 3 },
     reward: 'Balanced excellence!'
@@ -1559,7 +1559,7 @@ const DAILY_CHALLENGE_DEFINITIONS = [
     id: 'challenge-night-owl',
     title: 'Night Warrior',
     description: 'Complete 3 goals after 8 PM',
-    icon: '🦉',
+    icon: 'moon',
     difficulty: CHALLENGE_DIFFICULTY.HARD,
     condition: { type: 'goals_completed_after', hour: 20, target: 3 },
     reward: 'Night champion!'

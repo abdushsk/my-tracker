@@ -7,6 +7,7 @@ import { state } from '../state.js';
 import { formatTime, formatProgressDisplay, escapeHtml } from '../utils/formatting.js';
 import { GOAL_TYPES, isGoalCompleted, getGoalCompletionPercentage } from '../../utils/models.js';
 import { renderPomodoroControls } from '../features/pomodoro.js';
+import { getIcon } from '../utils/icons.js';
 
 // =============================================================================
 // Goal Type Icons
@@ -606,7 +607,7 @@ function renderAvoidanceControls(goal) {
   return `
     <div class="goal-controls goal-controls-avoidance">
       <div class="avoidance-streak-display">
-        <span class="streak-fire">${streakDays > 0 ? '🔥' : '🌱'}</span>
+        <span class="streak-fire">${streakDays > 0 ? getIcon('flame', 16) : getIcon('sprout', 16)}</span>
         <span class="streak-count">${streakDays}</span>
         <span class="streak-label">${streakDays === 1 ? 'day' : 'days'}</span>
       </div>
@@ -623,7 +624,7 @@ function renderAvoidanceControls(goal) {
       </button>
       ${goal.forgivenessEnabled ? `
         <span class="forgiveness-badge ${hasForgiveness ? 'available' : 'used'}" title="${hasForgiveness ? 'Forgiveness available this week' : 'Forgiveness used this week'}">
-          ${hasForgiveness ? '💚' : '💔'}
+          ${hasForgiveness ? getIcon('heart', 14) : getIcon('heart-crack', 14)}
         </span>
       ` : ''}
     </div>

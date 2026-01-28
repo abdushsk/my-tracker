@@ -21,6 +21,7 @@ import {
   disablePomodoroForGoal
 } from '../../utils/storage.js';
 import { playSound, SOUNDS } from '../../utils/sounds.js';
+import { getIcon } from '../utils/icons.js';
 
 // =============================================================================
 // Callback Registration
@@ -377,14 +378,14 @@ function showPomodoroPhaseNotification(goalId, fromPhase, toPhase, sessionsCompl
   if (fromPhase === POMODORO_PHASES.WORK) {
     if (toPhase === POMODORO_PHASES.LONG_BREAK) {
       message = `Great job! ${sessionsCompleted} sessions complete. Time for a long break!`;
-      icon = '🎉';
+      icon = getIcon('party-popper', 20);
     } else {
       message = `Session ${sessionsCompleted} complete! Take a short break.`;
-      icon = '☕';
+      icon = getIcon('coffee', 20);
     }
   } else {
     message = `Break over. Ready for another work session?`;
-    icon = '💪';
+    icon = getIcon('muscle', 20);
   }
 
   // Create and show notification toast

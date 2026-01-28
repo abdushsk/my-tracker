@@ -5,6 +5,7 @@
 
 import { state } from '../state.js';
 import { getChallengeDefinition } from '../../utils/models.js';
+import { getIcon } from '../utils/icons.js';
 
 // =============================================================================
 // Reports Screen Section
@@ -40,17 +41,17 @@ export function renderChallengeStatsSection() {
       <h2 class="section-title">Daily Challenges</h2>
       <div class="challenge-stats-cards">
         <div class="challenge-stat-card">
-          <div class="challenge-stat-icon">🎯</div>
+          <div class="challenge-stat-icon">${getIcon('target', 20)}</div>
           <div class="challenge-stat-value">${totalCompleted}</div>
           <div class="challenge-stat-label">Completed</div>
         </div>
         <div class="challenge-stat-card">
-          <div class="challenge-stat-icon">🔥</div>
+          <div class="challenge-stat-icon">${getIcon('flame', 20)}</div>
           <div class="challenge-stat-value">${currentStreak}</div>
           <div class="challenge-stat-label">Streak</div>
         </div>
         <div class="challenge-stat-card">
-          <div class="challenge-stat-icon">⭐</div>
+          <div class="challenge-stat-icon">${getIcon('star', 20)}</div>
           <div class="challenge-stat-value">${bestStreak}</div>
           <div class="challenge-stat-label">Best Streak</div>
         </div>
@@ -72,11 +73,12 @@ function renderChallengeHistory(recentHistory) {
       <div class="challenge-history-list">
         ${recentHistory.map(entry => {
           const definition = getChallengeDefinition(entry.id);
-          const statusIcon = entry.completed ? '✓' : entry.skipped ? '⏭️' : '✗';
+          const statusIcon = entry.completed ? getIcon('check', 14) : entry.skipped ? getIcon('skip', 14) : getIcon('x', 14);
           const statusClass = entry.completed ? 'completed' : entry.skipped ? 'skipped' : 'expired';
+          const iconHtml = definition?.icon ? getIcon(definition.icon, 18) : getIcon('target', 18);
           return `
             <div class="challenge-history-item ${statusClass}">
-              <div class="challenge-history-icon">${definition?.icon || '❓'}</div>
+              <div class="challenge-history-icon">${iconHtml}</div>
               <div class="challenge-history-info">
                 <span class="challenge-history-title">${definition?.title || 'Unknown'}</span>
                 <span class="challenge-history-date">${formatChallengeDate(entry.date)}</span>

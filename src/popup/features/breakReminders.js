@@ -16,6 +16,7 @@ import {
   disableBreakRemindersForSession
 } from '../../utils/storage.js';
 import { playSound, SOUNDS } from '../../utils/sounds.js';
+import { getIcon } from '../utils/icons.js';
 
 // =============================================================================
 // Callback Registration
@@ -101,14 +102,14 @@ export function showBreakReminderOverlay() {
   overlay.innerHTML = `
     <div class="break-reminder-modal">
       <div class="break-reminder-header">
-        <span class="break-reminder-icon">☕</span>
+        <span class="break-reminder-icon">${getIcon('coffee', 28)}</span>
         <h2 class="break-reminder-title">Time for a Break!</h2>
       </div>
       <p class="break-reminder-description">
         You've been working hard! Taking short breaks helps maintain focus and productivity.
       </p>
       <div class="break-reminder-suggestion">
-        <span class="suggestion-icon">${suggestion.icon}</span>
+        <span class="suggestion-icon">${getIcon(suggestion.icon, 24)}</span>
         <div class="suggestion-content">
           <span class="suggestion-activity">${suggestion.activity}</span>
           <span class="suggestion-duration">${suggestion.duration}</span>
@@ -118,7 +119,7 @@ export function showBreakReminderOverlay() {
         <span class="activities-label">Other ideas:</span>
         <div class="activities-list">
           ${allActivities.filter(a => a.activity !== suggestion.activity).slice(0, 3).map(a => `
-            <span class="activity-chip" title="${a.activity}">${a.icon}</span>
+            <span class="activity-chip" title="${a.activity}">${getIcon(a.icon, 16)}</span>
           `).join('')}
         </div>
       </div>

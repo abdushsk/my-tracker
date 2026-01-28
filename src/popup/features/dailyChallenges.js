@@ -23,6 +23,7 @@ import {
   completeCurrentChallenge
 } from '../../utils/storage.js';
 import { playSound, SOUNDS } from '../../utils/sounds.js';
+import { getIcon } from '../utils/icons.js';
 
 // Re-export reports section from dedicated module
 export { renderChallengeStatsSection } from './challengeReports.js';
@@ -151,7 +152,7 @@ export function renderDailyChallengeCard() {
         ` : ''}
       </div>
       <div class="challenge-content">
-        <div class="challenge-icon">${definition.icon}</div>
+        <div class="challenge-icon">${getIcon(definition.icon, 24)}</div>
         <div class="challenge-info">
           <span class="challenge-title">${definition.title}</span>
           <span class="challenge-description">${definition.description}</span>
@@ -159,7 +160,7 @@ export function renderDailyChallengeCard() {
       </div>
       ${isCompleted ? `
         <div class="challenge-completed-banner">
-          <span class="challenge-completed-icon">🎉</span>
+          <span class="challenge-completed-icon">${getIcon('party-popper', 16)}</span>
           <span class="challenge-completed-text">${definition.reward}</span>
         </div>
       ` : `

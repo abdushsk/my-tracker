@@ -171,7 +171,74 @@
   --challenge-complete: #11998e;
   --challenge-complete-hover: #38ef7d;
   --challenge-complete-gradient: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+}
 
+/* ========================================
+   US-028: Icon Utility Styles
+   ======================================== */
+
+/* Base icon wrapper for inline SVG icons */
+.icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+/* Ensure SVG icons inside icon containers are properly sized */
+.icon svg {
+  display: block;
+  width: 1em;
+  height: 1em;
+}
+
+/* Achievement and gamification icon containers */
+.achievement-icon,
+.challenge-icon,
+.challenge-stat-icon,
+.challenge-history-icon,
+.achievements-summary-icon,
+.achievements-nav-icon,
+.level-up-icon,
+.streak-icon,
+.weekly-review-quote-icon,
+.performance-badge,
+.performance-trend,
+.break-reminder-icon,
+.suggestion-icon,
+.activity-chip,
+.forgiveness-badge,
+.streak-fire {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* SVG icons inherit colors properly */
+.achievement-icon svg,
+.challenge-icon svg,
+.challenge-stat-icon svg,
+.challenge-history-icon svg,
+.achievements-summary-icon svg,
+.achievements-nav-icon svg,
+.level-up-icon svg,
+.streak-icon svg,
+.weekly-review-quote-icon svg,
+.break-reminder-icon svg,
+.suggestion-icon svg,
+.activity-chip svg,
+.forgiveness-badge svg,
+.streak-fire svg {
+  color: currentColor;
+}
+
+/* Grayscale filter for locked achievements */
+.achievement-icon.grayscale svg {
+  filter: grayscale(100%);
+  opacity: 0.5;
+}
+
+:root {
   /* Heatmap colors - US-018: Improved no-progress visibility */
   --heatmap-level-0: #E5E5E5;
   --heatmap-level-1: #D1FAE5;

@@ -11,6 +11,7 @@ import {
   filterHistoryByDateRange,
   groupHistoryByDate
 } from '../../utils/models.js';
+import { getIcon } from '../utils/icons.js';
 
 // =============================================================================
 // Daily Breakdown Chart
@@ -143,7 +144,7 @@ export function updateWeekComparison(history) {
       </div>
     `;
   } else {
-    const diffIcon = isImproved ? '📈' : isDeclined ? '📉' : '➡️';
+    const diffIcon = isImproved ? getIcon('trending-up', 20) : isDeclined ? getIcon('trending-down', 20) : getIcon('arrow-right', 20);
     const diffClass = isImproved ? 'improved' : isDeclined ? 'declined' : 'same';
     const diffText = isImproved
       ? `+${Math.round(Math.abs(rateDiff))}% improvement`

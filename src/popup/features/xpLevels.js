@@ -15,6 +15,7 @@ import {
 } from '../../utils/models.js';
 import { addXP, markFirstGoalBonusAwarded } from '../../utils/storage.js';
 import { playSound, SOUNDS } from '../../utils/sounds.js';
+import { getIcon } from '../utils/icons.js';
 
 // =============================================================================
 // XP Awarding Functions
@@ -211,7 +212,7 @@ export function showLevelUpNotification(newLevel, oldLevel) {
   notification.className = 'level-up-notification';
   notification.innerHTML = `
     <div class="level-up-content">
-      <div class="level-up-icon">${levelInfo.icon}</div>
+      <div class="level-up-icon">${getIcon(levelInfo.icon, 32)}</div>
       <div class="level-up-text">
         <span class="level-up-label">Level Up!</span>
         <span class="level-up-level">Level ${newLevel}</span>

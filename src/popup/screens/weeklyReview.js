@@ -15,6 +15,7 @@ import {
 } from '../../utils/models.js';
 import { getHistory, getActivityLog } from '../../utils/storage.js';
 import { renderDailyBreakdown, updateWeekComparison } from './weeklyReviewCharts.js';
+import { getIcon } from '../utils/icons.js';
 
 // =============================================================================
 // Callback Registration
@@ -103,14 +104,14 @@ export function renderWeeklyReviewScreen() {
           <h2 class="section-title">Streaks</h2>
           <div class="streak-cards-row">
             <div class="streak-card-mini ${currentStreak > 0 ? 'active' : ''}">
-              <div class="streak-icon">🔥</div>
+              <div class="streak-icon">${getIcon('flame', 20)}</div>
               <div class="streak-info">
                 <span class="streak-value">${currentStreak}</span>
                 <span class="streak-label">Current</span>
               </div>
             </div>
             <div class="streak-card-mini best">
-              <div class="streak-icon">⭐</div>
+              <div class="streak-icon">${getIcon('star', 20)}</div>
               <div class="streak-info">
                 <span class="streak-value">${bestStreak}</span>
                 <span class="streak-label">Best</span>
@@ -176,7 +177,7 @@ function renderWeeklyReviewQuote() {
   return `
     <section class="weekly-review-section quote-section">
       <div class="weekly-review-quote">
-        <div class="weekly-review-quote-icon">&#128161;</div>
+        <div class="weekly-review-quote-icon">${getIcon('lightbulb', 24)}</div>
         <p class="weekly-review-quote-text">"${quote.text}"</p>
         ${quote.author ? `<span class="weekly-review-quote-author">— ${quote.author}</span>` : ''}
       </div>
@@ -260,7 +261,7 @@ function updateWeekDateRange() {
   };
 
   dateRangeEl.innerHTML = `
-    <span class="week-range-label">📅 ${formatDate(startDate)} - ${formatDate(endDate)}</span>
+    <span class="week-range-label">${getIcon('calendar', 14)} ${formatDate(startDate)} - ${formatDate(endDate)}</span>
   `;
 }
 
@@ -464,9 +465,9 @@ async function updateGoalPerformance(history) {
       // Determine badge
       let badge = '';
       if (isBest) {
-        badge = '<span class="performance-badge best">🏆 Best</span>';
+        badge = `<span class="performance-badge best">${getIcon('trophy', 12)} Best</span>`;
       } else if (isWorst) {
-        badge = '<span class="performance-badge needs">📈 Focus</span>';
+        badge = `<span class="performance-badge needs">${getIcon('trending-up', 12)} Focus</span>`;
       }
 
       html += `
@@ -488,7 +489,7 @@ async function updateGoalPerformance(history) {
             <div class="performance-details-row">
               <span class="performance-detail">${completed}/${total} days</span>
               <span class="performance-trend ${trendClass}">
-                ${trendDiff >= 5 ? '↑' : trendDiff <= -5 ? '↓' : '→'}
+                ${trendDiff >= 5 ? getIcon('arrow-up', 10) : trendDiff <= -5 ? getIcon('arrow-down', 10) : getIcon('arrow-right', 10)}
                 ${trendDiff >= 0 ? '+' : ''}${Math.round(trendDiff)}% vs avg
               </span>
             </div>
