@@ -51,7 +51,7 @@
       "title": "Fix compact mode header theme styling",
       "description": "In compact mode view of goals, the header does not use any color shade according to the current theme settings. Update the header styling to properly use theme colors.",
       "priority": 7,
-      "passes": false
+      "passes": true
     },
     {
       "id": "US-027",

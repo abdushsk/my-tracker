@@ -1109,3 +1109,40 @@ Widget (content script) → sendMessage('OPEN_POPUP') → Service Worker → chr
 - Positioning with negative values (-6px) allows button to extend outside parent bounds
 - Using existing `.widget-container.hidden` class (already defined in CSS) avoids code duplication
 
+## US-026: Fix Compact Mode Header Theme Styling (Completed)
+**Date**: 2026-01-28
+
+### Changes Made
+
+1. **Updated theme CSS injection** (theme-config.js:321-324):
+   - Added `.compact-mode-bar` to the auto-generated theme CSS selector alongside `.screen-header`
+   - Both elements now receive `background: var(--header-gradient)` when a color theme is active
+   - The `--header-gradient` variable is defined per theme with subtle color tints (e.g., Ocean blue, Forest green, Sunset orange, Lavender purple)
+
+### Root Cause Analysis
+
+The compact mode filter bar (`.category-filter-bar.compact-mode-bar`) used a static `background-color: var(--surface)` which didn't adapt to the selected color theme. Meanwhile, the main headers used `--header-gradient` which is theme-aware and provides subtle colored gradients for non-default themes.
+
+### Solution Approach
+
+Added the `.compact-mode-bar` selector to the `injectThemeCSS()` function's CSS template. This function generates CSS rules for all color themes and injects them into the document. By adding the compact mode bar to the same selector as `.screen-header`, it now receives the same theme-aware gradient background.
+
+### Theme Header Gradients
+
+| Theme    | Light Mode Gradient | Dark Mode Gradient |
+|----------|--------------------|--------------------|
+| Default  | none | none |
+| Ocean    | rgba(0, 119, 182, 0.06) | rgba(0, 180, 216, 0.08) |
+| Forest   | rgba(74, 124, 35, 0.06) | rgba(124, 179, 66, 0.08) |
+| Sunset   | rgba(255, 107, 53, 0.06) | rgba(255, 138, 80, 0.08) |
+| Lavender | rgba(139, 92, 246, 0.06) | rgba(167, 139, 250, 0.08) |
+
+### Files Modified
+- `src/popup/themes/theme-config.js` (added `.compact-mode-bar` to CSS injection template)
+
+### Key Learnings
+- The `injectThemeCSS()` function is the central place for applying theme-aware backgrounds to headers
+- Using the same CSS injection pattern as existing themed elements ensures consistency
+- The `background` shorthand property (from injected CSS) properly overrides `background-color` (from base CSS) due to selector specificity with `[data-color-theme]` attribute
+- Compact mode header now matches the main header's theme styling, providing visual consistency when switching between normal and compact views
+

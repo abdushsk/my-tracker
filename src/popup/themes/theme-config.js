@@ -318,7 +318,8 @@ export function injectThemeCSS() {
 [data-color-theme] .popup-container {
   background: var(--body-gradient);
 }
-[data-color-theme] .screen-header {
+[data-color-theme] .screen-header,
+[data-color-theme] .compact-mode-bar {
   background: var(--header-gradient);
 }
 `;
