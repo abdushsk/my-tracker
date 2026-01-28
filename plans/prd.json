@@ -5,88 +5,60 @@
   "featuresFile": "plans/FEATURES.md",
   "userStories": [
     {
-      "id": "US-020",
-      "title": "Fix settings screen scroll reset on update",
-      "description": "When updating any setting in the settings screen, the scroll position resets to 0. This appears to be a rebuild/re-render issue. Fix the scroll position preservation so users don't lose their place when making changes.",
+      "id": "US-032",
+      "title": "Make Add New Goal screen compact with smart category layout",
+      "description": "Make the Add New Goal screen compact and tightly wound. Categories should use smart flex layout to fit optimally in one row (e.g., 5 items in one row instead of 4+1). Make the overall layout more space-efficient.",
       "priority": 1,
-      "passes": true
+      "passes": false
     },
     {
-      "id": "US-021",
-      "title": "Apply theme colors to floating widget",
-      "description": "The floating widget UI does not respect the app's theme configuration. Update the floating widget to use the configured theme colors consistently with the rest of the extension.",
+      "id": "US-033",
+      "title": "Use compact buttons on Add New Goal screen",
+      "description": "Replace large buttons with more compact alternatives throughout the Add New Goal screen to reduce visual bulk and improve the tight layout.",
       "priority": 2,
-      "passes": true
+      "passes": false
     },
     {
-      "id": "US-022",
-      "title": "Remove color selector from add goal screen",
-      "description": "Remove the color selector option from the add goal screen as it is not being used. Clean up any related code and UI elements.",
+      "id": "US-034",
+      "title": "Fix Target Count field layout",
+      "description": "The Target Count input field is not taking the full row width and appears to be floating in empty space. Fix the layout so it properly fills its container.",
       "priority": 3,
-      "passes": true
+      "passes": false
     },
     {
-      "id": "US-023",
-      "title": "Implement multi-way state synchronization",
-      "description": "Enable real-time synchronization across all views. When a goal is updated from the today goals screen, the floating widget status and other views should automatically reflect the change without requiring a refresh.",
+      "id": "US-035",
+      "title": "Make Settings screen more compact",
+      "description": "Make the Settings screen more compact, particularly the reset times section, i like the current skeleton but just Reduce spacing and make better use of available space.",
       "priority": 4,
-      "passes": true
+      "passes": false
     },
     {
-      "id": "US-024",
-      "title": "Fix open app button in floating widget",
-      "description": "The 'Open App' button in the floating widget is not functioning. Fix it to properly trigger and open the main popup when clicked.",
+      "id": "US-036",
+      "title": "Clean up context menu options",
+      "description": "Remove the 'Start Timer' option from the right-click context menu as it has no use. Also, hide the 'Timer Floater' option if the floater is already injected and visible on the page.",
       "priority": 5,
-      "passes": true
+      "passes": false
     },
     {
-      "id": "US-025",
-      "title": "Add close button on floating widget hover",
-      "description": "When hovering over the floating widget, display an 'X' button in the top right corner. Clicking this button should dismiss/hide the floating widget for the current session only.",
+      "id": "US-037",
+      "title": "Make Reports page compact",
+      "description": "Make the Reports page more compact by reducing spacing and making better use of available space.",
       "priority": 6,
-      "passes": true
+      "passes": false
     },
     {
-      "id": "US-026",
-      "title": "Fix compact mode header theme styling",
-      "description": "In compact mode view of goals, the header does not use any color shade according to the current theme settings. Update the header styling to properly use theme colors.",
+      "id": "US-038",
+      "title": "Add Reset option in Settings",
+      "description": "Add a Reset button beside Export/Import in Settings that clears all extension storage, states, and data. Should include a confirmation dialog to prevent accidental resets.",
       "priority": 7,
-      "passes": true
+      "passes": false
     },
     {
-      "id": "US-027",
-      "title": "Add context menu option for Timer Floater",
-      "description": "Add a right-click context menu option called 'Timer Floater' that allows users to add/show the floating timer widget. This is useful when the widget is not enabled, was removed from the DOM (e.g., via the close button), or is otherwise not visible. Clicking the option should inject/display the floating widget on the page.",
+      "id": "US-039",
+      "title": "Split Settings into Normal and Advanced sections",
+      "description": "Split the Settings screen into two sections: Normal (always visible) and Advanced (hidden by default, revealed via dropdown/expandable section). The search functionality should work across both sections and show matching results regardless of which section they belong to.",
       "priority": 8,
-      "passes": true
-    },
-    {
-      "id": "US-028",
-      "title": "Replace emojis with proper icons",
-      "description": "Remove all emoji usage throughout the app and replace with proper icons using Font Awesome or inline SVGs for a more professional and consistent look.",
-      "priority": 9,
-      "passes": true
-    },
-    {
-      "id": "US-029",
-      "title": "Add fuzzy search to settings screen",
-      "description": "Add a fuzzy search input at the top of the settings screen body that allows users to quickly filter and find settings by name or description.",
-      "priority": 10,
-      "passes": true
-    },
-    {
-      "id": "US-030",
-      "title": "Improve settings categories UI",
-      "description": "Make the categories block compact instead of taking a full row for each item. Replace the alert box for adding new categories with an inline text field that appears in place, allowing users to type and submit with Enter or a submit button.",
-      "priority": 11,
-      "passes": true
-    },
-    {
-      "id": "US-031",
-      "title": "Remove unsupported settings options",
-      "description": "Remove settings options related to features that are no longer supported, such as daily goals and motivational quotes. Clean up the settings UI and underlying code to reflect the current feature set.",
-      "priority": 12,
-      "passes": true
+      "passes": false
     }
   ]
 }

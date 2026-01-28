@@ -156,6 +156,7 @@
     .widget-dismiss svg {
       width: 12px;
       height: 12px;
+      color: white;
     }
 
     .widget-icon:hover .widget-dismiss {
@@ -982,7 +983,7 @@
           <div class="goal-header">
             <div class="goal-info">
               <div class="goal-title" title="${goal.title}">${goal.title}</div>
-              <div class="goal-progress-text">${this.formatProgress(goal)}</div>
+              <div class="goal-progress-text" ${goal.type === 'timer' ? `data-progress-text="${goal.id}"` : ''}>${this.formatProgress(goal)}</div>
             </div>
             <div class="goal-controls">
               ${this.renderGoalControls(goal)}
@@ -998,7 +999,8 @@
     formatProgress(goal) {
       switch (goal.type) {
         case 'timer':
-          return `${this.formatTime(goal.progress)} / ${this.formatTime(goal.target)}`;
+          const currentProgress = this.getCurrentTimerProgress(goal);
+          return `${this.formatTime(currentProgress)} / ${this.formatTime(goal.target)}`;
         case 'counter':
           return `${goal.progress} / ${goal.target}`;
         case 'checkbox':
@@ -1937,8 +1939,28 @@
         }
 
         if (changes[STORAGE_KEYS.ACTIVE_TIMERS]) {
-          widgetState.activeTimers = changes[STORAGE_KEYS.ACTIVE_TIMERS].newValue || {};
-          // Don't need full render for timer state changes
+          const oldTimers = widgetState.activeTimers;
+          const newTimers = changes[STORAGE_KEYS.ACTIVE_TIMERS].newValue || {};
+          widgetState.activeTimers = newTimers;
+
+          // US-023: Update goal items for timers that changed (started or stopped)
+          // Find timers that were added or removed
+          const oldTimerIds = Object.keys(oldTimers);
+          const newTimerIds = Object.keys(newTimers);
+
+          // Timers that were stopped (in old but not in new)
+          oldTimerIds.forEach(goalId => {
+            if (!newTimers[goalId]) {
+              this.updateGoalItem(goalId);
+            }
+          });
+
+          // Timers that were started (in new but not in old)
+          newTimerIds.forEach(goalId => {
+            if (!oldTimers[goalId]) {
+              this.updateGoalItem(goalId);
+            }
+          });
         }
 
         if (needsFullRender && this.container && widgetState.enabled) {
@@ -1957,11 +1979,17 @@
           const goal = widgetState.goals.find(g => g.id === goalId);
           if (!goal) return;
 
+          const currentProgress = this.getCurrentTimerProgress(goal);
+
           const display = this.shadow.querySelector(`[data-timer-display="${goalId}"]`);
           if (display) {
-            const currentProgress = this.getCurrentTimerProgress(goal);
             display.textContent = this.formatTime(currentProgress);
-            // Timer continues even after target is reached (allows overflow)
+          }
+
+          // Also update the progress text (e.g., "0:02 / 00:00")
+          const progressText = this.shadow.querySelector(`[data-progress-text="${goalId}"]`);
+          if (progressText) {
+            progressText.textContent = `${this.formatTime(currentProgress)} / ${this.formatTime(goal.target)}`;
           }
         });
       }, 1000);

@@ -80,7 +80,7 @@ export function renderGoalCard(goal) {
     'goal-card',
     `goal-type-${goal.type}`,
     isCompleted ? 'goal-completed' : '',
-    goal.type === GOAL_TYPES.TIMER && goal.isActive ? 'goal-timer-active' : '',
+    goal.type === GOAL_TYPES.TIMER && (goal.isActive || state.activeTimers[goal.id]) ? 'goal-timer-active' : '',
     justCompleted ? 'just-completed' : '',
     completionAnimated ? 'completion-animated' : '', // US-019: Prevent re-animation
     'compact' // Always compact
@@ -108,7 +108,7 @@ export function renderGoalCard(goal) {
 
   // Compact completed view - show completed non-checkbox goals in single-row format
   // Unless expanded or timer is running, then show the full card
-  const isTimerRunning = goal.type === GOAL_TYPES.TIMER && goal.isActive;
+  const isTimerRunning = goal.type === GOAL_TYPES.TIMER && (goal.isActive || state.activeTimers[goal.id]);
   if (isCompleted && !state.expandedCompletedGoals?.has(goal.id) && !isTimerRunning) {
     return renderCompactCompletedCard(goal, {
       cardClasses,
@@ -334,8 +334,9 @@ function formatTimerDisplay(totalSeconds) {
  * @returns {string} HTML string for compact timer stats
  */
 function renderTimerStatsCompact(goal) {
-  const isActive = goal.isActive;
+  // US-023: Check both goal.isActive and activeTimers for sync consistency
   const activeTimer = state.activeTimers[goal.id];
+  const isActive = goal.isActive || !!activeTimer;
 
   let displayProgress = goal.progress;
   if (isActive && activeTimer && activeTimer.startTime) {
@@ -519,7 +520,9 @@ function renderTimerControls(goal) {
   }
 
   // Regular timer controls
-  const isActive = goal.isActive;
+  // US-023: Check both goal.isActive and activeTimers for sync consistency
+  // activeTimers is the source of truth for running state
+  const isActive = goal.isActive || !!state.activeTimers[goal.id];
 
   const playIcon = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"/></svg>';
   const pauseIcon = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>';

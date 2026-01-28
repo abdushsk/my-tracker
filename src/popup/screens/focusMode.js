@@ -191,8 +191,9 @@ function renderFocusModeDisplay(goal) {
  * @returns {string} HTML string
  */
 function renderFocusTimerDisplay(goal) {
-  const isActive = goal.isActive;
+  // US-023: Check both goal.isActive and activeTimers for sync consistency
   const activeTimer = state.activeTimers[goal.id];
+  const isActive = goal.isActive || !!activeTimer;
 
   // Calculate current elapsed time for display (allow overtime)
   let displayProgress = goal.progress;
@@ -292,7 +293,8 @@ function renderFocusModeControls(goal) {
  * @returns {string} HTML string
  */
 function renderFocusTimerControls(goal) {
-  const isActive = goal.isActive;
+  // US-023: Check both goal.isActive and activeTimers for sync consistency
+  const isActive = goal.isActive || !!state.activeTimers[goal.id];
   const playIcon = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"/></svg>';
   const pauseIcon = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>';
 
