@@ -1146,3 +1146,70 @@ Added the `.compact-mode-bar` selector to the `injectThemeCSS()` function's CSS 
 - The `background` shorthand property (from injected CSS) properly overrides `background-color` (from base CSS) due to selector specificity with `[data-color-theme]` attribute
 - Compact mode header now matches the main header's theme styling, providing visual consistency when switching between normal and compact views
 
+## US-027: Add Context Menu Option for Timer Floater (Completed)
+**Date**: 2026-01-28
+
+### Changes Made
+
+1. **Added contextMenus permission** (manifest.json:10):
+   - Added `"contextMenus"` to the permissions array to enable right-click context menu functionality
+
+2. **Added context menu registration** (service-worker.js:162-195):
+   - Added `setupContextMenu()` function called during extension install/update
+   - Uses `chrome.contextMenus.removeAll()` first to avoid duplicates on update
+   - Creates context menu item with id `timer-floater`, title "Timer Floater", and `page` context
+
+3. **Added context menu click handler** (service-worker.js:197-215):
+   - Added `chrome.contextMenus.onClicked` listener
+   - When "timer-floater" menu item is clicked, sends `SHOW_WIDGET` message to the active tab's content script
+   - Includes error handling for pages where content script may not be loaded (e.g., chrome:// pages)
+
+4. **Added message listener in widget** (widget.js:766-791):
+   - Added `setupMessageListener()` method to GoalsWidget class
+   - Listens for `SHOW_WIDGET` message from service worker
+   - Checks if widget is enabled in settings before showing
+   - Calls `showWidget()` method to restore/display the widget
+
+5. **Added showWidget() method** (widget.js:1601-1636):
+   - New method to restore widget from dismissed state or create it if needed
+   - Handles multiple scenarios:
+     - Widget dismissed: Clears dismissed flag and removes hidden class
+     - Widget not created: Creates widget elements and sets up listeners
+     - Widget already visible: Just logs the status
+     - Widget hidden for other reason: Removes hidden class
+
+### Architecture
+
+**Message Flow:**
+```
+User right-clicks on page
+       ↓
+"Timer Floater" context menu appears
+       ↓
+User clicks "Timer Floater"
+       ↓
+chrome.contextMenus.onClicked fires in service worker
+       ↓
+Service worker sends 'SHOW_WIDGET' message to tab via chrome.tabs.sendMessage()
+       ↓
+Content script (widget.js) receives message via chrome.runtime.onMessage
+       ↓
+Widget checks if enabled, then calls showWidget()
+       ↓
+Widget becomes visible (restored from dismissed or created)
+```
+
+### Files Modified
+- `manifest.json` (added contextMenus permission)
+- `src/background/service-worker.js` (context menu setup and click handler)
+- `src/content/widget.js` (message listener and showWidget method)
+
+### Key Learnings
+- Context menus in Chrome extensions require the `contextMenus` permission
+- Context menu items are registered via `chrome.contextMenus.create()` in the service worker
+- The service worker communicates with content scripts via `chrome.tabs.sendMessage(tabId, message)`
+- Content scripts listen for messages via `chrome.runtime.onMessage.addListener()`
+- Setting up the message listener before checking if widget is enabled allows the widget to respond to context menu even when initially disabled
+- The `contexts: ['page']` option ensures the menu item appears on right-click anywhere on the page
+- Using `chrome.contextMenus.removeAll()` before `create()` prevents duplicate menu items on extension update
+

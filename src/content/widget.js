@@ -742,6 +742,11 @@
       // Load initial state from storage
       await this.loadState();
 
+      // US-027: Set up message listener for context menu commands
+      // This needs to be set up before we check if widget is enabled,
+      // so we can still receive SHOW_WIDGET messages even when disabled
+      this.setupMessageListener();
+
       // Only create widget if enabled
       if (!widgetState.enabled) {
         console.log('[Widget] Disabled - not creating widget');
@@ -756,6 +761,33 @@
 
       // Start timer updates
       this.startTimerUpdates();
+    }
+
+    /**
+     * US-027: Set up message listener for commands from service worker
+     * Handles SHOW_WIDGET message from context menu click
+     */
+    setupMessageListener() {
+      chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+        console.log('[Widget] Message received:', message.type);
+
+        if (message.type === 'SHOW_WIDGET') {
+          // Check if widget is enabled in settings
+          if (!widgetState.enabled) {
+            console.log('[Widget] Widget is disabled in settings, cannot show');
+            sendResponse({ success: false, error: 'Widget is disabled in settings' });
+            return true;
+          }
+
+          // Show the widget
+          this.showWidget();
+          sendResponse({ success: true, message: 'Widget shown' });
+          return true;
+        }
+
+        // Don't handle other messages
+        return false;
+      });
     }
 
     async loadState() {
@@ -1596,6 +1628,43 @@
       widgetState.dismissed = true;
       this.container.classList.add('hidden');
       console.log('[Widget] Dismissed for current session');
+    }
+
+    /**
+     * US-027: Show widget (restore from dismissed state or create if needed)
+     * Called from context menu "Timer Floater" option
+     */
+    showWidget() {
+      // If widget was dismissed, restore it
+      if (widgetState.dismissed) {
+        widgetState.dismissed = false;
+        if (this.container) {
+          this.container.classList.remove('hidden');
+          console.log('[Widget] Restored from dismissed state');
+        }
+        return;
+      }
+
+      // If widget doesn't exist yet but should be enabled, create it
+      if (!this.container && widgetState.enabled) {
+        this.createWidget();
+        this.setupStorageListener();
+        this.startTimerUpdates();
+        console.log('[Widget] Created via context menu');
+        return;
+      }
+
+      // If widget exists and is visible, just log
+      if (this.container && !this.container.classList.contains('hidden')) {
+        console.log('[Widget] Already visible');
+        return;
+      }
+
+      // If container exists but is somehow hidden, show it
+      if (this.container) {
+        this.container.classList.remove('hidden');
+        console.log('[Widget] Made visible');
+      }
     }
 
     async handleGoalAction(btn) {

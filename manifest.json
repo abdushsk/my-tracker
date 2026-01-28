@@ -6,7 +6,8 @@
   "permissions": [
     "storage",
     "alarms",
-    "notifications"
+    "notifications",
+    "contextMenus"
   ],
   "action": {
     "default_popup": "src/popup/popup.html",

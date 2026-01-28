@@ -58,7 +58,7 @@
       "title": "Add context menu option for Timer Floater",
       "description": "Add a right-click context menu option called 'Timer Floater' that allows users to add/show the floating timer widget. This is useful when the widget is not enabled, was removed from the DOM (e.g., via the close button), or is otherwise not visible. Clicking the option should inject/display the floating widget on the page.",
       "priority": 8,
-      "passes": false
+      "passes": true
     },
     {
       "id": "US-028",

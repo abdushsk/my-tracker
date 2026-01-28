@@ -159,11 +159,59 @@ chrome.runtime.onInstalled.addListener(async (details) => {
     // Future: Handle any migration or cleanup needed
   }
 
+  // US-027: Register context menu for Timer Floater
+  await setupContextMenu();
+
   // US-040: Set up alarms for scheduled resets
   await setupResetAlarms();
 
   // US-053: Update badge on install/update
   await updateBadge();
+});
+
+// ============================================
+// US-027: Context Menu Setup
+// ============================================
+
+/**
+ * Set up right-click context menu for Timer Floater
+ */
+async function setupContextMenu() {
+  try {
+    // Remove existing menu items first to avoid duplicates on update
+    await chrome.contextMenus.removeAll();
+
+    // Create the Timer Floater context menu item
+    await chrome.contextMenus.create({
+      id: 'timer-floater',
+      title: 'Timer Floater',
+      contexts: ['page']
+    });
+
+    console.log('[Service Worker] Context menu registered');
+  } catch (error) {
+    console.error('[Service Worker] Error setting up context menu:', error);
+  }
+}
+
+/**
+ * Handle context menu clicks
+ */
+chrome.contextMenus.onClicked.addListener(async (info, tab) => {
+  console.log('[Service Worker] Context menu clicked:', info.menuItemId);
+
+  if (info.menuItemId === 'timer-floater') {
+    try {
+      // Send message to content script to show widget
+      await chrome.tabs.sendMessage(tab.id, {
+        type: 'SHOW_WIDGET'
+      });
+      console.log('[Service Worker] SHOW_WIDGET message sent to tab:', tab.id);
+    } catch (error) {
+      console.error('[Service Worker] Error sending SHOW_WIDGET message:', error);
+      // Widget might not be loaded on this page (e.g., chrome:// pages)
+    }
+  }
 });
 
 // ============================================
