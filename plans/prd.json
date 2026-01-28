@@ -72,7 +72,7 @@
       "title": "Add fuzzy search to settings screen",
       "description": "Add a fuzzy search input at the top of the settings screen body that allows users to quickly filter and find settings by name or description.",
       "priority": 10,
-      "passes": false
+      "passes": true
     },
     {
       "id": "US-030",

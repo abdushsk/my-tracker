@@ -1304,3 +1304,76 @@ Widget becomes visible (restored from dismissed or created)
 - Adding base CSS for icon containers ensures consistent display across different contexts
 - The grayscale filter on SVGs provides a clean locked/disabled state for achievements
 
+## US-029: Add Fuzzy Search to Settings Screen (Completed)
+**Date**: 2026-01-28
+
+### Changes Made
+
+1. **Created new fuzzy search utility module** (src/popup/utils/fuzzySearch.js):
+   - `fuzzyMatch(query, text)` - Calculates match score between query and text
+   - Supports exact matches (highest score), contains matches, and fuzzy character-by-character matching
+   - Bonus scoring for consecutive matches and word boundary matches
+   - `searchSettings(query, items)` - Searches settings data with weighted scoring
+   - `highlightMatch(text, query)` - Returns HTML with `<mark>` tags for highlighting
+   - `debounce(func, wait)` - Debounce utility for search input
+
+2. **Added search input to settings screen** (settings.js:116-132):
+   - Search input with search icon and placeholder text "Search settings..."
+   - Clear button (X) that appears when text is entered
+   - No results message displayed when no matches found
+   - Search container is sticky at top of settings content
+
+3. **Implemented filtering logic** (settings.js:1010-1162):
+   - `attachSearchListener()` - Sets up input, clear button, and keyboard handlers
+   - `filterSettings()` - Filters sections and items based on search query
+   - `isItemMatch()` - Checks if individual setting item matches query
+   - Supports filtering by: section titles, section descriptions, setting labels, setting descriptions
+   - Uses `.search-hidden` class to hide non-matching items
+   - Entire sections are hidden when all items within are filtered out
+   - Debounced search (150ms) to prevent excessive re-filtering
+
+4. **Added CSS styles** (settings.css:1-116):
+   - `.settings-search-container` - Sticky container at top of content
+   - `.settings-search-wrapper` - Relative container for icon positioning
+   - `.settings-search-input` - Styled input with focus states
+   - `.settings-search-icon` - Search magnifying glass icon
+   - `.settings-search-clear` - Clear/X button with hover states
+   - `.settings-search-no-results` - No results message
+   - `.search-hidden` - Universal hide class for filtered items
+   - Dark mode adjustments for search input
+
+### Search Behavior
+
+**Matching Algorithm:**
+- Exact match: 100 points
+- Contains (at start): 90 points
+- Contains (at word boundary): 85 points
+- Contains (anywhere): 80 points
+- Fuzzy match: up to 79 points (consecutive matches get bonus)
+
+**Filterable Content:**
+- Section headers (h2): "Sound", "Notifications", "Appearance", etc.
+- Section descriptions: subtitle text below headers
+- Setting labels: primary text like "Sound Effects", "Theme", etc.
+- Setting descriptions: secondary text like "Play sounds on goal interactions"
+- Category names, reset time labels, button text
+
+**User Interactions:**
+- Typing filters in real-time (150ms debounce)
+- Escape key clears search and blurs input
+- Clear button (X) clears search and keeps focus
+- Matching entire section name shows all items in that section
+
+### Files Modified
+- `src/popup/utils/fuzzySearch.js` (NEW - 148 lines)
+- `src/popup/screens/settings.js` (added import, search HTML, attach listener call, filtering functions)
+- `src/popup/css/settings.css` (added search styles at top of file)
+
+### Key Learnings
+- Fuzzy matching with bonus scores for consecutive characters provides intuitive results
+- Debouncing search prevents UI lag when typing quickly
+- Using a `.search-hidden` class with `display: none !important` ensures filtered items are hidden regardless of their original display type
+- Sticky positioning for the search container keeps it visible while scrolling through results
+- Checking section title matches allows showing all items when searching for a category name like "Sound"
+- The `position: sticky` with `z-index: 10` ensures search stays above other content while scrolling
+

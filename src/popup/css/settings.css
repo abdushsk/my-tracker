@@ -1,3 +1,120 @@
+/* ============================================
+   US-029: Settings Search
+   ============================================ */
+
+.settings-search-container {
+  position: sticky;
+  top: 0;
+  background: var(--background);
+  padding: var(--spacing-sm) 0 var(--spacing-md);
+  margin-bottom: var(--spacing-sm);
+  z-index: 10;
+}
+
+.settings-search-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.settings-search-icon {
+  position: absolute;
+  left: var(--spacing-sm);
+  color: var(--text-muted);
+  pointer-events: none;
+  transition: color var(--transition-fast);
+}
+
+.settings-search-input {
+  width: 100%;
+  padding: var(--spacing-sm) var(--spacing-sm) var(--spacing-sm) 36px;
+  font-size: var(--font-size-sm);
+  font-family: inherit;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  background: var(--background);
+  color: var(--text);
+  transition: all var(--transition-fast);
+}
+
+.settings-search-input::placeholder {
+  color: var(--text-muted);
+}
+
+.settings-search-input:hover {
+  border-color: var(--text-muted);
+}
+
+.settings-search-input:focus {
+  outline: none;
+  border-color: var(--primary);
+  box-shadow: 0 0 0 2px var(--primary-light);
+}
+
+.settings-search-input:focus + .settings-search-icon,
+.settings-search-input:not(:placeholder-shown) + .settings-search-icon {
+  color: var(--primary);
+}
+
+.settings-search-clear {
+  position: absolute;
+  right: var(--spacing-xs);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  padding: 0;
+  background: none;
+  border: none;
+  border-radius: var(--radius);
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.settings-search-clear:hover {
+  background: var(--background-secondary);
+  color: var(--text);
+}
+
+.settings-search-clear:active {
+  transform: scale(0.9);
+}
+
+.settings-search-clear.hidden {
+  display: none;
+}
+
+.settings-search-no-results {
+  text-align: center;
+  padding: var(--spacing-lg) var(--spacing-md);
+  color: var(--text-muted);
+  font-size: var(--font-size-sm);
+}
+
+.settings-search-no-results.hidden {
+  display: none;
+}
+
+/* Search hidden state for filtered items */
+.search-hidden {
+  display: none !important;
+}
+
+/* Dark mode adjustments for search */
+[data-theme="dark"] .settings-search-container {
+  background: var(--background);
+}
+
+[data-theme="dark"] .settings-search-input {
+  background: var(--surface);
+}
+
+[data-theme="dark"] .settings-search-input:focus {
+  box-shadow: 0 0 0 2px rgba(74, 222, 128, 0.15);
+}
+
 /* US-051: Clickable setting item for theme toggle */
 .setting-item-clickable {
   cursor: pointer;

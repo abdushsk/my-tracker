@@ -32,6 +32,7 @@ import {
   getColorThemePreviewGradient,
   applyColorTheme
 } from '../utils/theme.js';
+import { fuzzyMatch, debounce } from '../utils/fuzzySearch.js';
 
 // Callbacks to be registered from popup.js
 let callbacks = {
@@ -112,6 +113,24 @@ export function renderSettingsScreen() {
         <h1 class="screen-title">Settings</h1>
       </header>
       <main class="settings-content">
+        <!-- US-029: Fuzzy Search Input -->
+        <div class="settings-search-container">
+          <div class="settings-search-wrapper">
+            <svg class="settings-search-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="16" height="16">
+              <circle cx="11" cy="11" r="8"/>
+              <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+            </svg>
+            <input type="text" id="settings-search-input" class="settings-search-input" placeholder="Search settings..." autocomplete="off">
+            <button type="button" id="settings-search-clear" class="settings-search-clear hidden" aria-label="Clear search">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="14" height="14">
+                <line x1="18" y1="6" x2="6" y2="18"/>
+                <line x1="6" y1="6" x2="18" y2="18"/>
+              </svg>
+            </button>
+          </div>
+          <p class="settings-search-no-results hidden" id="settings-no-results">No settings found matching your search.</p>
+        </div>
+
         <!-- Sound Settings Section -->
         <div class="settings-section">
           <h2>Sound</h2>
@@ -558,6 +577,9 @@ export function renderSettingsScreen() {
   // US-075: Load and display next reset times
   loadNextResetTimes();
 
+  // US-029: Attach search functionality
+  attachSearchListener(screen);
+
   // US-020: Restore scroll position after DOM update
   if (scrollTop > 0) {
     const newSettingsContent = screen.querySelector('.settings-content');
@@ -984,3 +1006,157 @@ function lightenColor(hex, amount) {
 
 // US-070: Data Management functions (attachDataManagementListeners, handleExportData, etc.)
 // are now imported from ./dataManagement.js
+
+/**
+ * US-029: Attach search listener for fuzzy settings search
+ * @param {HTMLElement} screen - The settings screen element
+ */
+function attachSearchListener(screen) {
+  const searchInput = screen.querySelector('#settings-search-input');
+  const clearBtn = screen.querySelector('#settings-search-clear');
+  const noResultsMsg = screen.querySelector('#settings-no-results');
+
+  if (!searchInput) return;
+
+  // Debounced search function
+  const performSearch = debounce((query) => {
+    filterSettings(screen, query, noResultsMsg);
+  }, 150);
+
+  // Input event listener
+  searchInput.addEventListener('input', (e) => {
+    const query = e.target.value.trim();
+
+    // Toggle clear button visibility
+    if (clearBtn) {
+      clearBtn.classList.toggle('hidden', !query);
+    }
+
+    performSearch(query);
+  });
+
+  // Clear button listener
+  if (clearBtn) {
+    clearBtn.addEventListener('click', () => {
+      searchInput.value = '';
+      clearBtn.classList.add('hidden');
+      filterSettings(screen, '', noResultsMsg);
+      searchInput.focus();
+    });
+  }
+
+  // Keyboard shortcuts
+  searchInput.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') {
+      searchInput.value = '';
+      if (clearBtn) clearBtn.classList.add('hidden');
+      filterSettings(screen, '', noResultsMsg);
+      searchInput.blur();
+    }
+  });
+}
+
+/**
+ * US-029: Filter settings sections and items based on search query
+ * @param {HTMLElement} screen - The settings screen element
+ * @param {string} query - Search query
+ * @param {HTMLElement} noResultsMsg - No results message element
+ */
+function filterSettings(screen, query, noResultsMsg) {
+  const sections = screen.querySelectorAll('.settings-section');
+  let totalVisibleItems = 0;
+
+  sections.forEach(section => {
+    const sectionTitle = section.querySelector('h2')?.textContent || '';
+    const sectionDesc = section.querySelector('.settings-section-description')?.textContent || '';
+
+    // Check if section itself matches
+    const sectionMatches = query && (
+      fuzzyMatch(query, sectionTitle) > 0 ||
+      fuzzyMatch(query, sectionDesc) > 0
+    );
+
+    let visibleItemsInSection = 0;
+
+    // Get all searchable items in the section
+    const settingItems = section.querySelectorAll('.setting-item, .reset-time-item, .category-item, .pomodoro-duration-item, .data-action-btn');
+
+    settingItems.forEach(item => {
+      const isMatch = isItemMatch(item, query);
+
+      // Show item if: no query, section matches, or item matches
+      const shouldShow = !query || sectionMatches || isMatch;
+
+      item.classList.toggle('search-hidden', !shouldShow);
+
+      if (shouldShow) {
+        visibleItemsInSection++;
+      }
+    });
+
+    // Also check for special containers (pomodoro duration, data management)
+    const specialContainers = section.querySelectorAll('.pomodoro-duration-inputs, .data-management-actions, .categories-list, .reset-times-list');
+    specialContainers.forEach(container => {
+      const hasVisibleChildren = container.querySelector('.setting-item:not(.search-hidden), .reset-time-item:not(.search-hidden), .category-item:not(.search-hidden), .pomodoro-duration-item:not(.search-hidden), .data-action-btn:not(.search-hidden)');
+      container.classList.toggle('search-hidden', query && !hasVisibleChildren && !sectionMatches);
+    });
+
+    // Handle buttons that aren't in standard containers
+    const buttons = section.querySelectorAll('.btn:not(.data-action-btn)');
+    buttons.forEach(btn => {
+      const btnText = btn.textContent || '';
+      const btnMatches = !query || sectionMatches || fuzzyMatch(query, btnText) > 0;
+      btn.classList.toggle('search-hidden', !btnMatches);
+      if (btnMatches && query) visibleItemsInSection++;
+    });
+
+    // Handle notes and special elements
+    const notes = section.querySelectorAll('.reset-times-note');
+    notes.forEach(note => {
+      note.classList.toggle('search-hidden', query && visibleItemsInSection === 0 && !sectionMatches);
+    });
+
+    // Show/hide entire section based on content visibility
+    const hasVisibleContent = !query || sectionMatches || visibleItemsInSection > 0;
+    section.classList.toggle('search-hidden', !hasVisibleContent);
+
+    if (hasVisibleContent) {
+      totalVisibleItems++;
+    }
+  });
+
+  // Show/hide no results message
+  if (noResultsMsg) {
+    noResultsMsg.classList.toggle('hidden', !query || totalVisibleItems > 0);
+  }
+}
+
+/**
+ * US-029: Check if a setting item matches the search query
+ * @param {HTMLElement} item - The setting item element
+ * @param {string} query - Search query
+ * @returns {boolean} Whether the item matches
+ */
+function isItemMatch(item, query) {
+  if (!query) return true;
+
+  // Get all searchable text from the item
+  const searchableTexts = [];
+
+  // Labels
+  const label = item.querySelector('.setting-label, .reset-time-label, .category-name, .pomodoro-duration-label');
+  if (label) searchableTexts.push(label.textContent);
+
+  // Descriptions
+  const desc = item.querySelector('.setting-description, .reset-time-description');
+  if (desc) searchableTexts.push(desc.textContent);
+
+  // Button text
+  const btnText = item.querySelector('span');
+  if (btnText && item.classList.contains('data-action-btn')) {
+    searchableTexts.push(btnText.textContent);
+  }
+
+  // Check for matches
+  return searchableTexts.some(text => fuzzyMatch(query, text) > 0);
+}
