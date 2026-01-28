@@ -6,7 +6,8 @@
 import {
   exportAllData,
   validateImportData,
-  importAllData
+  importAllData,
+  clearAllData
 } from '../../utils/storage.js';
 import { getTodayDateString } from '../../utils/models.js';
 import { playSound } from '../../utils/sounds.js';
@@ -58,6 +59,12 @@ export function attachDataManagementListeners(screen) {
   const fileInput = screen.querySelector('#import-file-input');
   if (fileInput) {
     fileInput.addEventListener('change', handleImportFileSelect);
+  }
+
+  // US-038: Reset button
+  const resetBtn = screen.querySelector('#reset-data-btn');
+  if (resetBtn) {
+    resetBtn.addEventListener('click', handleResetData);
   }
 }
 
@@ -315,5 +322,123 @@ export function showDataManagementFeedback(type, message) {
       feedback.classList.add('fade-out');
       setTimeout(() => feedback.remove(), 300);
     }, 4000);
+  }
+}
+
+/**
+ * US-038: Handle reset data button click
+ * Shows confirmation dialog before clearing all extension data
+ */
+async function handleResetData() {
+  showResetConfirmationDialog();
+}
+
+/**
+ * US-038: Show reset confirmation dialog
+ * Requires user to confirm by typing "RESET" to prevent accidental data loss
+ */
+function showResetConfirmationDialog() {
+  // Create modal overlay
+  const overlay = document.createElement('div');
+  overlay.className = 'import-modal-overlay';
+  overlay.innerHTML = `
+    <div class="import-modal reset-modal">
+      <div class="import-modal-header">
+        <h3>Reset All Data</h3>
+        <button class="import-modal-close" aria-label="Close">&times;</button>
+      </div>
+      <div class="import-modal-body">
+        <div class="reset-warning">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="32" height="32">
+            <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
+            <line x1="12" y1="9" x2="12" y2="13"/>
+            <line x1="12" y1="17" x2="12.01" y2="17"/>
+          </svg>
+          <p><strong>Warning:</strong> This will permanently delete ALL your data including:</p>
+        </div>
+        <ul class="reset-items-list">
+          <li>All goals and their progress</li>
+          <li>Activity history and streaks</li>
+          <li>Achievements and XP</li>
+          <li>Categories and templates</li>
+          <li>All settings and preferences</li>
+        </ul>
+        <p class="reset-confirm-text">Type <strong>RESET</strong> to confirm:</p>
+        <input type="text" class="reset-confirm-input" placeholder="Type RESET here" autocomplete="off">
+        <div class="reset-actions">
+          <button class="btn btn-secondary reset-cancel-btn">Cancel</button>
+          <button class="btn btn-danger reset-confirm-btn" disabled>Reset Everything</button>
+        </div>
+      </div>
+    </div>
+  `;
+
+  document.body.appendChild(overlay);
+
+  // Animate in
+  requestAnimationFrame(() => {
+    overlay.classList.add('visible');
+  });
+
+  // Get elements
+  const confirmInput = overlay.querySelector('.reset-confirm-input');
+  const confirmBtn = overlay.querySelector('.reset-confirm-btn');
+  const cancelBtn = overlay.querySelector('.reset-cancel-btn');
+  const closeBtn = overlay.querySelector('.import-modal-close');
+
+  // Close handlers
+  const closeModal = () => {
+    overlay.classList.remove('visible');
+    setTimeout(() => overlay.remove(), 200);
+  };
+
+  closeBtn.addEventListener('click', closeModal);
+  cancelBtn.addEventListener('click', closeModal);
+  overlay.addEventListener('click', (e) => {
+    if (e.target === overlay) closeModal();
+  });
+
+  // Enable confirm button only when "RESET" is typed
+  confirmInput.addEventListener('input', () => {
+    const isValid = confirmInput.value.trim().toUpperCase() === 'RESET';
+    confirmBtn.disabled = !isValid;
+  });
+
+  // Handle reset confirmation
+  confirmBtn.addEventListener('click', async () => {
+    closeModal();
+    await performReset();
+  });
+
+  // Focus the input
+  setTimeout(() => confirmInput.focus(), 100);
+}
+
+/**
+ * US-038: Perform the actual data reset
+ * Clears all storage and reloads the extension
+ */
+async function performReset() {
+  try {
+    // Show loading feedback
+    showDataManagementFeedback('loading', 'Resetting all data...');
+
+    // Clear all data
+    const success = await clearAllData();
+
+    if (success) {
+      showDataManagementFeedback('success', 'All data has been reset. Reloading...');
+      playSound('complete');
+
+      // Reload after a short delay to show the success message
+      setTimeout(() => {
+        window.location.reload();
+      }, 1500);
+    } else {
+      showDataManagementFeedback('error', 'Failed to reset data. Please try again.');
+    }
+  } catch (error) {
+    console.error('[Reset] Error resetting data:', error);
+    showDataManagementFeedback('error', 'An error occurred while resetting data.');
   }
 }

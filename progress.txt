@@ -1884,3 +1884,52 @@ The user story requested making the Reports page more compact while improving th
 - Using smaller fixed pixel values (10px, 9px fonts) for secondary text creates visual hierarchy without wasting space
 - Consistent gap reductions (spacing-sm -> spacing-xs) throughout creates a cohesive compact appearance
 - Horizontal nav button content shows both title and description on one line, saving vertical space
+
+## US-038: Add Reset Option in Settings (Completed)
+**Date**: 2026-01-28
+
+### Task Analysis
+
+The user story requested adding a "Reset" button in the Settings screen beside Export/Import that clears all extension storage, states, and data. A confirmation dialog is required to prevent accidental resets.
+
+### Implementation
+
+#### 1. **Reset Button** (settings.js:509-519)
+- Added a new "Reset All" button with btn-danger styling
+- Uses a trash can icon consistent with destructive actions
+- Placed after the Import button in the data-management-actions container
+
+#### 2. **Reset Handler** (dataManagement.js:328-444)
+- Added `handleResetData()` function to trigger the reset dialog
+- Added `showResetConfirmationDialog()` for the confirmation modal
+- Added `performReset()` to execute the actual storage clearing
+
+#### 3. **Confirmation Dialog Features**
+- Warning icon with red background to indicate danger
+- Lists all data that will be deleted (goals, history, achievements, etc.)
+- Requires typing "RESET" to enable the confirm button (prevents accidental clicks)
+- Cancel button to abort the operation
+- Clicking outside modal closes it
+
+#### 4. **Reset Execution Flow**
+- Shows "Resetting all data..." loading feedback
+- Calls `clearAllData()` from storage.js (already existed)
+- On success, shows success message and plays completion sound
+- Reloads the extension after 1.5 seconds to reinitialize with clean state
+
+#### 5. **CSS Styles** (settings.css:771-840)
+- `.reset-modal .reset-warning` - Warning box with danger background
+- `.reset-items-list` - List of data to be deleted
+- `.reset-confirm-input` - Input field for typing RESET
+- `.reset-actions` - Button container with Cancel and Reset buttons
+- Disabled state for confirm button until RESET is typed
+
+### Files Modified
+- `src/popup/screens/settings.js` (added Reset button HTML)
+- `src/popup/screens/dataManagement.js` (added reset handler, dialog, and execution functions)
+- `src/popup/css/settings.css` (added reset modal styles)
+
+### Key Learnings
+- Using a "type to confirm" pattern provides stronger protection against accidental destructive actions
+- The existing `clearAllData()` function in storage.js already handles Chrome storage clearing
+- Reloading the extension after reset ensures a clean state without stale data in memory

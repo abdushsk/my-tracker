@@ -51,7 +51,7 @@
       "title": "Add Reset option in Settings",
       "description": "Add a Reset button beside Export/Import in Settings that clears all extension storage, states, and data. Should include a confirmation dialog to prevent accidental resets.",
       "priority": 7,
-      "passes": false
+      "passes": true
     },
     {
       "id": "US-038.5",
