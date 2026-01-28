@@ -59,17 +59,15 @@ export function renderReportsScreen() {
         <h1 class="screen-title">Reports</h1>
       </header>
       <main class="reports-content">
-        <!-- Discipline Score Section - Compact horizontal display -->
+        <!-- Discipline Score Section - Prominent display -->
         <section class="reports-section discipline-section">
           <div class="discipline-score-card">
             <div class="discipline-score-display">
               <span class="discipline-score-value" id="discipline-score-value">--</span>
               <span class="discipline-score-max">/100</span>
             </div>
-            <div class="discipline-score-info">
-              <div class="discipline-score-label">Discipline Score</div>
-              <div class="discipline-score-description">Based on last 7 days</div>
-            </div>
+            <div class="discipline-score-label">Discipline Score</div>
+            <div class="discipline-score-description">Based on last 7 days</div>
           </div>
         </section>
 

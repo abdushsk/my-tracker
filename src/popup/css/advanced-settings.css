@@ -65,7 +65,7 @@
 /* Advanced settings group (collapsible) */
 .settings-group-advanced {
   display: none;
-  padding: var(--spacing-sm) 0;
+  padding: var(--spacing-sm) var(--spacing-md);
   border: 1px solid var(--border);
   border-top: none;
   border-radius: 0 0 var(--radius) var(--radius);
@@ -75,6 +75,21 @@
 
 .settings-group-advanced.expanded {
   display: block;
+}
+
+/* US-040: Spacing for sections inside advanced settings */
+/* Between different sections: larger spacing for visual separation */
+.settings-group-advanced .settings-section {
+  margin-bottom: var(--spacing-lg);
+}
+
+.settings-group-advanced .settings-section:last-child {
+  margin-bottom: 0;
+}
+
+/* Within a section: tighter spacing */
+.settings-group-advanced .settings-section h2 {
+  margin-bottom: var(--spacing-xs);
 }
 
 /* When searching, remove border styling as toggle is hidden */

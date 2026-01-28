@@ -317,7 +317,6 @@ export function renderSettingsScreen() {
             <div class="reset-time-item">
               <div class="reset-time-info">
                 <span class="reset-time-label">Daily Goals</span>
-                <span class="reset-time-next" id="daily-next-reset">Loading...</span>
               </div>
               <input type="time" id="daily-reset-time" class="reset-time-input" value="${state.settings?.dailyResetTime || '00:00'}">
             </div>
@@ -327,7 +326,6 @@ export function renderSettingsScreen() {
               <div class="reset-time-info">
                 <span class="reset-time-label">Weekly Goals</span>
                 <span class="reset-time-description">(Resets on Monday)</span>
-                <span class="reset-time-next" id="weekly-next-reset">Loading...</span>
               </div>
               <input type="time" id="weekly-reset-time" class="reset-time-input" value="${state.settings?.weeklyResetTime || '00:00'}">
             </div>
@@ -337,7 +335,6 @@ export function renderSettingsScreen() {
               <div class="reset-time-info">
                 <span class="reset-time-label">Monthly Goals</span>
                 <span class="reset-time-description">(Resets on the 1st)</span>
-                <span class="reset-time-next" id="monthly-next-reset">Loading...</span>
               </div>
               <input type="time" id="monthly-reset-time" class="reset-time-input" value="${state.settings?.monthlyResetTime || '00:00'}">
             </div>
@@ -347,7 +344,6 @@ export function renderSettingsScreen() {
               <div class="reset-time-info">
                 <span class="reset-time-label">Yearly Goals</span>
                 <span class="reset-time-description">(Resets on January 1st)</span>
-                <span class="reset-time-next" id="yearly-next-reset">Loading...</span>
               </div>
               <input type="time" id="yearly-reset-time" class="reset-time-input" value="${state.settings?.yearlyResetTime || '00:00'}">
             </div>
@@ -592,9 +588,6 @@ export function renderSettingsScreen() {
   // US-070: Attach data management listeners
   attachDataManagementListeners(screen);
 
-  // US-075: Load and display next reset times
-  loadNextResetTimes();
-
   // US-029: Attach search functionality
   attachSearchListener(screen);
 
@@ -812,9 +805,6 @@ function attachResetTimesListeners(screen) {
         } catch (error) {
           console.error('[Settings] Error notifying service worker:', error);
         }
-
-        // Update next reset time display
-        loadNextResetTimes();
 
         // Play feedback sound
         playSound('tick');

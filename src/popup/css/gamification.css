@@ -227,21 +227,20 @@
    Achievements Navigation Button (in Reports)
    ---------------------------------------- */
 .achievements-nav-section {
-  margin-top: var(--spacing-xs);
+  margin-top: var(--spacing-md);
 }
 
 .achievements-nav-btn {
   display: flex;
   align-items: center;
   width: 100%;
-  padding: var(--spacing-xs) var(--spacing-sm);
+  padding: var(--spacing-md);
   background: var(--bg-secondary);
   border: 1px solid var(--border);
-  border-radius: var(--radius);
+  border-radius: var(--radius-md);
   cursor: pointer;
   transition: all 0.2s ease;
   text-align: left;
-  gap: var(--spacing-sm);
 }
 
 .achievements-nav-btn:hover {
@@ -250,43 +249,33 @@
 }
 
 .achievements-nav-icon {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 28px;
-  height: 28px;
-  flex-shrink: 0;
-}
-
-.achievements-nav-icon svg {
-  width: 20px;
-  height: 20px;
-  color: var(--reward);
+  font-size: 28px;
+  line-height: 1;
+  margin-right: var(--spacing-md);
 }
 
 .achievements-nav-content {
   flex: 1;
   display: flex;
-  flex-direction: row;
-  align-items: center;
-  gap: var(--spacing-xs);
+  flex-direction: column;
+  gap: 2px;
 }
 
 .achievements-nav-title {
-  font-size: var(--font-size-sm);
+  font-size: var(--font-md);
   font-weight: 600;
   color: var(--text);
 }
 
 .achievements-nav-desc {
-  font-size: 10px;
+  font-size: var(--font-sm);
   color: var(--text-secondary);
 }
 
 .achievements-nav-arrow {
   color: var(--text-tertiary);
-  width: 16px;
-  height: 16px;
+  width: 20px;
+  height: 20px;
 }
 
 .achievements-nav-arrow svg {
@@ -675,37 +664,37 @@
 
 /* Challenge Stats Section (Reports) */
 .challenge-stats-section {
-  margin-top: var(--spacing-xs);
+  margin-top: 16px;
 }
 
 .challenge-stats-cards {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: var(--spacing-xs);
-  margin-bottom: var(--spacing-xs);
+  gap: 12px;
+  margin-bottom: 16px;
 }
 
 .challenge-stat-card {
   background: var(--background);
-  border-radius: var(--radius);
-  padding: var(--spacing-xs);
+  border-radius: var(--radius-lg);
+  padding: 12px;
   text-align: center;
   border: 1px solid var(--border);
 }
 
 .challenge-stat-icon {
-  font-size: 16px;
-  margin-bottom: 2px;
+  font-size: 24px;
+  margin-bottom: 4px;
 }
 
 .challenge-stat-value {
-  font-size: var(--font-size-base);
+  font-size: 20px;
   font-weight: 700;
   color: var(--text);
 }
 
 .challenge-stat-label {
-  font-size: 9px;
+  font-size: 11px;
   color: var(--text-muted);
   text-transform: uppercase;
   letter-spacing: 0.3px;
@@ -714,32 +703,32 @@
 /* Challenge History */
 .challenge-history {
   background: var(--background);
-  border-radius: var(--radius);
-  padding: var(--spacing-xs);
+  border-radius: var(--radius-lg);
+  padding: 12px;
   border: 1px solid var(--border);
 }
 
 .challenge-history-title {
-  font-size: var(--font-size-xs);
+  font-size: 13px;
   font-weight: 600;
   color: var(--text);
-  margin: 0 0 var(--spacing-xs) 0;
+  margin: 0 0 12px 0;
 }
 
 .challenge-history-list {
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 8px;
 }
 
 .challenge-history-item {
   display: flex;
   align-items: center;
-  gap: 6px;
-  padding: 4px 6px;
+  gap: 10px;
+  padding: 8px 10px;
   background: var(--background-secondary);
-  border-radius: var(--radius-sm);
-  border-left: 2px solid var(--border);
+  border-radius: var(--radius);
+  border-left: 3px solid var(--border);
 }
 
 .challenge-history-item.completed {
@@ -755,7 +744,7 @@
 }
 
 .challenge-history-icon {
-  font-size: 14px;
+  font-size: 20px;
   flex-shrink: 0;
 }
 
@@ -763,12 +752,12 @@
   flex: 1;
   display: flex;
   flex-direction: column;
-  gap: 1px;
+  gap: 2px;
   min-width: 0;
 }
 
 .challenge-history-info .challenge-history-title {
-  font-size: var(--font-size-xs);
+  font-size: 13px;
   font-weight: 500;
   color: var(--text);
   margin: 0;
@@ -778,12 +767,12 @@
 }
 
 .challenge-history-date {
-  font-size: 9px;
+  font-size: 11px;
   color: var(--text-muted);
 }
 
 .challenge-history-status {
-  font-size: 12px;
+  font-size: 16px;
   flex-shrink: 0;
 }
 
