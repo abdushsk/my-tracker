@@ -23,7 +23,7 @@
       "title": "Fix Target Count field layout",
       "description": "The Target Count input field is not taking the full row width and appears to be floating in empty space. Fix the layout so it properly fills its container.",
       "priority": 3,
-      "passes": false
+      "passes": true
     },
     {
       "id": "US-035",

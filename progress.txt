@@ -1631,3 +1631,32 @@ This approach allows the features to remain functional for existing users while 
 - Setting min-width on buttons prevents them from becoming too narrow with short text
 - Dynamic button text ("Save" vs "Update") provides better context to users
 
+## US-034: Fix Target Count Field Layout (Completed)
+**Date**: 2026-01-28
+
+### Changes Made
+
+1. **Fixed counter target input width constraint** (goal-form.css:565-574):
+   - Removed `max-width: 160px` that was causing the input to appear floating in empty space
+   - Added `width: 100%` to make the input fill its container
+   - Input now properly fills the form group container like other form inputs
+
+### Root Cause Analysis
+
+The counter target input (`.counter-target-input`) had a `max-width: 160px` constraint from the US-032 compacting changes. While this was intended to create a compact centered input, it caused the input to appear disconnected from its container - floating in empty space within the form group.
+
+The parent `.form-group` container is a flex column that takes full width, but the child input was limited to 160px, creating visual inconsistency with other full-width form inputs like the timer inputs.
+
+### Solution
+
+Replaced `max-width: 160px` with `width: 100%` to make the counter input fill its container. The `text-align: center` property is retained to keep the numeric input value centered within the full-width field.
+
+### Files Modified
+- `src/popup/css/goal-form.css` (removed max-width constraint, added width: 100%)
+
+### Key Learnings
+- When designing compact form inputs, `max-width` constraints can cause visual disconnection from container elements
+- Centered text (`text-align: center`) on a full-width input achieves a similar visual effect without the floating appearance
+- Form inputs should generally fill their containers for consistent visual alignment with labels, hints, and error messages
+- The timer target inputs use `width: 100%` and the counter input should follow the same pattern for consistency
+

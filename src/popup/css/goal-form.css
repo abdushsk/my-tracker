@@ -562,14 +562,14 @@ body.modal-open {
    US-026: Add Goal Form - Target Input (Counter)
    ======================================== */
 
-/* Counter Target Input - US-032: Compact */
+/* Counter Target Input - US-034: Full width layout */
 .counter-target-input {
+  width: 100%;
   font-size: var(--font-size-lg);
   font-weight: var(--font-weight-semibold);
   text-align: center;
   padding: var(--spacing-sm) var(--spacing-md);
   border-radius: var(--radius);
-  max-width: 160px;
   -moz-appearance: textfield; /* Hide spinner in Firefox */
 }
 
