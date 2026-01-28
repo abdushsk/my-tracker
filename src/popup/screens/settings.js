@@ -4,12 +4,11 @@
  * US-065: Categories Management
  * US-075: Reset Times Configuration
  * US-076: Notification Settings
- * US-077: Motivational Quotes Toggle
- * US-081: Daily Challenges Toggle
  * US-085: Pomodoro Settings
  * US-086: Break Reminder Settings
  *
  * Note: US-070 Export/Import Data moved to ./dataManagement.js
+ * Note: US-031 removed Motivational Quotes (US-077) and Daily Challenges (US-081) toggles
  */
 
 import { state, SCREENS, SCREEN_IDS } from '../state.js';
@@ -269,30 +268,6 @@ export function renderSettingsScreen() {
             <div class="color-theme-selector" role="radiogroup" aria-label="Select color theme">
               ${generateColorThemeButtons(state.settings?.colorTheme)}
             </div>
-          </div>
-
-          <!-- US-077: Motivational Quotes Toggle -->
-          <div class="setting-item setting-item-row" id="quotes-toggle-row">
-            <div class="setting-info">
-              <span class="setting-label">Motivational Quotes</span>
-              <span class="setting-description">Show quotes on empty state and completion</span>
-            </div>
-            <label class="toggle-switch" aria-label="Toggle motivational quotes">
-              <input type="checkbox" id="quotes-toggle" ${state.settings?.quotesEnabled !== false ? 'checked' : ''}>
-              <span class="toggle-slider"></span>
-            </label>
-          </div>
-
-          <!-- US-081: Daily Challenges Toggle -->
-          <div class="setting-item setting-item-row" id="challenges-toggle-row">
-            <div class="setting-info">
-              <span class="setting-label">Daily Challenges</span>
-              <span class="setting-description">Optional daily challenges for extra motivation</span>
-            </div>
-            <label class="toggle-switch" aria-label="Toggle daily challenges">
-              <input type="checkbox" id="challenges-toggle" ${state.settings?.dailyChallengesEnabled !== false ? 'checked' : ''}>
-              <span class="toggle-slider"></span>
-            </label>
           </div>
 
           <!-- Floating Widget Toggle -->
@@ -573,12 +548,6 @@ export function renderSettingsScreen() {
   // Color theme selector listener
   attachColorThemeListener(screen);
 
-  // US-077: Attach quotes toggle listener
-  attachQuotesToggleListener(screen);
-
-  // US-081: Attach daily challenges toggle listener
-  attachChallengesToggleListener(screen);
-
   // Attach floating widget toggle listener
   attachWidgetToggleListener(screen);
 
@@ -750,52 +719,6 @@ function attachColorThemeListener(screen) {
       console.log(`[Settings] Color theme changed to: ${theme}`);
     });
   });
-}
-
-/**
- * Attach quotes toggle listener
- */
-function attachQuotesToggleListener(screen) {
-  const quotesToggle = screen.querySelector('#quotes-toggle');
-  if (quotesToggle) {
-    quotesToggle.addEventListener('change', async (e) => {
-      const enabled = e.target.checked;
-
-      // Update state
-      state.settings = {
-        ...state.settings,
-        quotesEnabled: enabled
-      };
-
-      // Save to storage
-      await saveSettings(state.settings);
-
-      console.log(`[Settings] Motivational quotes: ${enabled ? 'enabled' : 'disabled'}`);
-    });
-  }
-}
-
-/**
- * Attach daily challenges toggle listener
- */
-function attachChallengesToggleListener(screen) {
-  const challengesToggle = screen.querySelector('#challenges-toggle');
-  if (challengesToggle) {
-    challengesToggle.addEventListener('change', async (e) => {
-      const enabled = e.target.checked;
-
-      // Update state
-      state.settings = {
-        ...state.settings,
-        dailyChallengesEnabled: enabled
-      };
-
-      // Save to storage
-      await saveSettings(state.settings);
-
-      console.log(`[Settings] Daily challenges: ${enabled ? 'enabled' : 'disabled'}`);
-    });
-  }
 }
 
 /**

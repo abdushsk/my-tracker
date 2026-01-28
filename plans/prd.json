@@ -86,7 +86,7 @@
       "title": "Remove unsupported settings options",
       "description": "Remove settings options related to features that are no longer supported, such as daily goals and motivational quotes. Clean up the settings UI and underlying code to reflect the current feature set.",
       "priority": 12,
-      "passes": false
+      "passes": true
     }
   ]
 }

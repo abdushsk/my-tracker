@@ -1450,3 +1450,54 @@ Widget becomes visible (restored from dismissed or created)
 - Error messages inline with the form provide better UX than blocking alerts
 - The `:not()` selector is useful for applying styles to all items except specific variants
 
+## US-031: Remove Unsupported Settings Options (Completed)
+**Date**: 2026-01-28
+
+### Changes Made
+
+1. **Removed Motivational Quotes toggle from settings UI** (settings.js:274-284):
+   - Removed the entire `.setting-item` block for quotes toggle
+   - Removed checkbox input `#quotes-toggle` and associated label/description
+   - Setting label was: "Motivational Quotes"
+   - Setting description was: "Show quotes on empty state and completion"
+
+2. **Removed Daily Challenges toggle from settings UI** (settings.js:286-296):
+   - Removed the entire `.setting-item` block for challenges toggle
+   - Removed checkbox input `#challenges-toggle` and associated label/description
+   - Setting label was: "Daily Challenges"
+   - Setting description was: "Optional daily challenges for extra motivation"
+
+3. **Removed toggle listener registration** (settings.js:552-556):
+   - Removed call to `attachQuotesToggleListener(screen)`
+   - Removed call to `attachChallengesToggleListener(screen)`
+
+4. **Removed toggle listener functions** (settings.js:725-769):
+   - Removed `attachQuotesToggleListener()` function (handled quotes toggle events)
+   - Removed `attachChallengesToggleListener()` function (handled daily challenges toggle events)
+
+5. **Updated module header comments** (settings.js:1-12):
+   - Removed US-077 and US-081 from the feature list
+   - Added note about US-031 removal of these features
+
+### What Was NOT Removed (Intentional)
+
+The underlying feature code for quotes and daily challenges was NOT removed because:
+- The settings toggles were the user-facing controls to enable/disable these features
+- The features themselves (quotes.js, dailyChallenges.js, etc.) still exist and function
+- The default settings in storage.js still have `quotesEnabled` and `dailyChallengesEnabled` properties
+- Users who had these features enabled before will continue to have them work
+- Only the settings UI controls were removed, not the features themselves
+
+This approach allows the features to remain functional for existing users while removing the configuration options from the settings screen.
+
+### Files Modified
+- `src/popup/screens/settings.js` (removed UI elements, listener calls, and listener functions)
+- `plans/prd.json` (marked US-031 as passes: true)
+
+### Key Learnings
+- When removing settings UI for features, the underlying feature code doesn't necessarily need to be removed
+- Removing just the toggle leaves existing users' settings intact (they keep their enabled/disabled state)
+- Updating module header comments helps track which features have been removed/deprecated
+- The settings screen becomes cleaner and more focused when unused toggles are removed
+- This is a minimal, focused change that only affects the settings UI, not feature functionality
+
