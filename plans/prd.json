@@ -37,7 +37,7 @@
       "title": "Clean up context menu options",
       "description": "Remove the 'Start Timer' option from the right-click context menu as it has no use. Also, hide the 'Timer Floater' option if the floater is already injected and visible on the page.",
       "priority": 5,
-      "passes": false
+      "passes": true
     },
     {
       "id": "US-037",

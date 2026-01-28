@@ -1748,3 +1748,51 @@ Replaced `max-width: 160px` with `width: 100%` to make the counter input fill it
 - Smaller font sizes (10px for secondary info, xs for labels) reduce visual bulk without sacrificing readability
 - Row direction buttons take less vertical space than column direction
 - Removing verbose descriptions from toggle items (just keeping labels) saves considerable space in dense settings screens
+
+
+## US-036: Clean Up Context Menu Options (Completed)
+**Date**: 2026-01-28
+
+### Task Analysis
+
+The user story requested:
+1. Remove 'Start Timer' option from context menu - **Not needed**: This option did not exist in the codebase
+2. Hide 'Timer Floater' option when the floater is already visible on the page
+
+### Implementation
+
+1. **Service Worker (service-worker.js:198-235)**:
+   - Added `chrome.contextMenus.onShown` listener to check widget visibility before the menu is displayed
+   - Uses `chrome.tabs.sendMessage` to query the content script for widget status
+   - Updates the `timer-floater` menu item visibility using `chrome.contextMenus.update({ visible: false/true })`
+   - Calls `chrome.contextMenus.refresh()` to apply changes to the context menu
+   - Gracefully handles cases where content script is unavailable (e.g., chrome:// pages)
+   - Renamed menu item from 'Timer Floater' to 'Show Timer Floater' for clarity
+
+2. **Widget Content Script (widget.js:790-798)**:
+   - Added handler for `GET_WIDGET_STATUS` message type
+   - Returns visibility status based on: enabled state, dismissed state, and container visibility
+   - Allows service worker to dynamically hide/show context menu item
+
+### Technical Details
+
+The implementation uses Chrome Extension APIs:
+- `chrome.contextMenus.onShown`: Fires when context menu is about to be displayed
+- `chrome.contextMenus.update`: Modifies existing menu items (visibility, title, etc.)
+- `chrome.contextMenus.refresh`: Forces menu to update with changes
+- `chrome.tabs.sendMessage`: Communicates with content script
+
+Widget visibility is determined by checking:
+- `widgetState.enabled` - Widget is enabled in settings
+- `!widgetState.dismissed` - Widget was not dismissed for this session
+- `this.container` exists and doesn't have `hidden` class
+
+### Files Modified
+- `src/background/service-worker.js` (added onShown listener, updated menu title)
+- `src/content/widget.js` (added GET_WIDGET_STATUS handler)
+
+### Key Learnings
+- `chrome.contextMenus.onShown` allows dynamic menu customization before display
+- Must call `refresh()` after `update()` for changes to take effect
+- Error handling is important for content script communication (not all pages support it)
+- Menu item visibility can be toggled dynamically with the `visible` property

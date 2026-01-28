@@ -767,6 +767,7 @@
     /**
      * US-027: Set up message listener for commands from service worker
      * Handles SHOW_WIDGET message from context menu click
+     * US-036: Handles GET_WIDGET_STATUS to report visibility state
      */
     setupMessageListener() {
       chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
@@ -783,6 +784,17 @@
           // Show the widget
           this.showWidget();
           sendResponse({ success: true, message: 'Widget shown' });
+          return true;
+        }
+
+        // US-036: Report widget visibility status for context menu
+        if (message.type === 'GET_WIDGET_STATUS') {
+          const isVisible = widgetState.enabled &&
+                           !widgetState.dismissed &&
+                           this.container &&
+                           !this.container.classList.contains('hidden');
+          console.log('[Widget] Status requested, visible:', isVisible);
+          sendResponse({ visible: isVisible });
           return true;
         }
 

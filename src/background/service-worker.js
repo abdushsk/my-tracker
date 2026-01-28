@@ -171,6 +171,7 @@ chrome.runtime.onInstalled.addListener(async (details) => {
 
 // ============================================
 // US-027: Context Menu Setup
+// US-036: Dynamic context menu visibility
 // ============================================
 
 /**
@@ -184,7 +185,7 @@ async function setupContextMenu() {
     // Create the Timer Floater context menu item
     await chrome.contextMenus.create({
       id: 'timer-floater',
-      title: 'Timer Floater',
+      title: 'Show Timer Floater',
       contexts: ['page']
     });
 
@@ -193,6 +194,45 @@ async function setupContextMenu() {
     console.error('[Service Worker] Error setting up context menu:', error);
   }
 }
+
+/**
+ * US-036: Check widget visibility status before showing context menu
+ * Hide the Timer Floater option if the widget is already visible
+ */
+chrome.contextMenus.onShown.addListener(async (info, tab) => {
+  if (!tab || !tab.id) return;
+
+  try {
+    // Query content script for widget visibility
+    const response = await chrome.tabs.sendMessage(tab.id, {
+      type: 'GET_WIDGET_STATUS'
+    });
+
+    // Hide the menu item if widget is already visible
+    const isVisible = response && response.visible === true;
+
+    await chrome.contextMenus.update('timer-floater', {
+      visible: !isVisible
+    });
+
+    // Refresh the menu to apply changes
+    chrome.contextMenus.refresh();
+
+    console.log('[Service Worker] Context menu updated, widget visible:', isVisible);
+  } catch (error) {
+    // Content script not available (e.g., chrome:// pages)
+    // Show the menu item by default
+    try {
+      await chrome.contextMenus.update('timer-floater', {
+        visible: true
+      });
+      chrome.contextMenus.refresh();
+    } catch (updateError) {
+      // Ignore update errors
+    }
+    console.log('[Service Worker] Could not check widget status:', error.message);
+  }
+});
 
 /**
  * Handle context menu clicks
