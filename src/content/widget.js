@@ -669,7 +669,8 @@
     check: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>`,
     fire: `<svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 23c-3.866 0-7-3.134-7-7 0-2.577 1.409-4.83 3.5-6.03A6.978 6.978 0 0 0 12 17a6.978 6.978 0 0 0 3.5-7.03C17.591 11.17 19 13.423 19 16c0 3.866-3.134 7-7 7zM12 1c0 4-3 6-3 10a3 3 0 0 0 6 0c0-4-3-6-3-10z"/></svg>`,
     external: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>`,
-    empty: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>`
+    empty: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>`,
+    info: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>`
   };
 
   // ============================================
@@ -1111,8 +1112,8 @@
 
         const openBtn = e.target.closest('.widget-open-btn');
         if (openBtn) {
-          // Can't directly open popup, but we can notify
-          console.log('[Widget] Open app clicked');
+          // US-024: Send message to service worker to open popup
+          this.openPopup();
         }
 
         // Goal action buttons
@@ -1499,6 +1500,41 @@
       const panel = this.container.querySelector('.widget-panel');
       if (panel) {
         panel.classList.toggle('visible', expanded);
+      }
+    }
+
+    /**
+     * US-024: Open the main popup via service worker
+     * Uses chrome.action.openPopup() which requires Chrome 127+
+     */
+    async openPopup() {
+      try {
+        console.log('[Widget] Requesting popup open');
+        const response = await chrome.runtime.sendMessage({ type: 'OPEN_POPUP' });
+        if (response && !response.success) {
+          console.warn('[Widget] Could not open popup:', response.error);
+          // Show visual feedback that user should click the extension icon
+          this.showOpenPopupHint();
+        }
+      } catch (error) {
+        console.error('[Widget] Error opening popup:', error);
+        this.showOpenPopupHint();
+      }
+    }
+
+    /**
+     * US-024: Show a hint to user when popup can't be opened programmatically
+     */
+    showOpenPopupHint() {
+      const btn = this.container.querySelector('.widget-open-btn');
+      if (btn) {
+        const originalText = btn.innerHTML;
+        btn.innerHTML = `${ICONS.info} Click extension icon`;
+        btn.style.background = 'var(--widget-warning)';
+        setTimeout(() => {
+          btn.innerHTML = originalText;
+          btn.style.background = '';
+        }, 3000);
       }
     }
 

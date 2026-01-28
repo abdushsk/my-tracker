@@ -37,7 +37,7 @@
       "title": "Fix open app button in floating widget",
       "description": "The 'Open App' button in the floating widget is not functioning. Fix it to properly trigger and open the main popup when clicked.",
       "priority": 5,
-      "passes": false
+      "passes": true
     },
     {
       "id": "US-025",

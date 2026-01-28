@@ -1003,3 +1003,51 @@ Widget updates goal → Storage changes → Popup listener detects → Debounced
 - Targeted DOM updates (updating specific goal elements) are more efficient than full re-renders for progress changes
 - The widget's shadow DOM isolation means it needs its own storage listener - it can't rely on the popup
 
+## US-024: Fix Open App Button in Floating Widget (Completed)
+**Date**: 2026-01-28
+
+### Changes Made
+
+1. **Added OPEN_POPUP message handler in service-worker.js** (lines 240-245, 1524-1548):
+   - Added new case handler for 'OPEN_POPUP' message type in the switch statement
+   - Created `handleOpenPopup()` async function that calls `chrome.action.openPopup()`
+   - Added proper error handling for cases where the API is not available (Chrome < 127)
+
+2. **Updated widget click handler** (widget.js:1112-1116):
+   - Changed from logging message to calling `this.openPopup()` method
+   - Added US-024 comment for traceability
+
+3. **Added openPopup() method to widget class** (widget.js:1505-1522):
+   - Sends 'OPEN_POPUP' message to service worker via `chrome.runtime.sendMessage()`
+   - Handles response and shows fallback hint if popup couldn't be opened
+
+4. **Added showOpenPopupHint() method** (widget.js:1524-1538):
+   - Provides visual feedback when popup can't be opened programmatically
+   - Changes button text to "Click extension icon" with warning color
+   - Reverts after 3 seconds
+
+5. **Added info icon to ICONS object** (widget.js:673):
+   - New SVG info icon used in the fallback hint message
+
+### Technical Details
+
+**Chrome API Used**: `chrome.action.openPopup()`
+- Available in Chrome 127+ (general availability)
+- Was policy-only in Chrome 118-126
+- Called from service worker in response to message from content script
+
+**Message Flow**:
+```
+Widget (content script) → sendMessage('OPEN_POPUP') → Service Worker → chrome.action.openPopup()
+```
+
+### Files Modified
+- `src/background/service-worker.js` (added message handler and function)
+- `src/content/widget.js` (added openPopup method, hint fallback, info icon)
+
+### Key Learnings
+- Content scripts cannot directly open the extension popup - must communicate with service worker
+- `chrome.action.openPopup()` is the modern Manifest V3 way to programmatically open popups
+- Fallback UX is important for older Chrome versions where the API isn't available
+- Using visual feedback (button text/color change) helps guide users when programmatic approaches fail
+

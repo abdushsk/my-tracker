@@ -237,6 +237,13 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     case 'REQUEST_NOTIFICATION_PERMISSION':
       return handleNotificationMessage(message, sendResponse);
 
+    // US-024: Open popup from widget
+    case 'OPEN_POPUP':
+      handleOpenPopup()
+        .then(result => sendResponse(result))
+        .catch(error => sendResponse({ success: false, error: error.message }));
+      break;
+
     default:
       console.log('[Service Worker] Unknown message type:', message.type);
       sendResponse({ success: false, error: 'Unknown message type' });
@@ -1513,6 +1520,32 @@ chrome.notifications.onClicked.addListener(async (notificationId) => {
 
   // The click will naturally focus the browser - user can then click the extension icon
 });
+
+// ============================================
+// US-024: Open Popup Handler
+// ============================================
+
+/**
+ * Handle request to open the extension popup from the widget
+ * Uses chrome.action.openPopup() which is available in Chrome 127+
+ * @returns {Promise<Object>} Response object
+ */
+async function handleOpenPopup() {
+  console.log('[Service Worker] Open popup requested from widget');
+
+  try {
+    // chrome.action.openPopup() is available in Chrome 127+
+    // It opens the extension's popup programmatically
+    await chrome.action.openPopup();
+    console.log('[Service Worker] Popup opened successfully');
+    return { success: true };
+  } catch (error) {
+    console.error('[Service Worker] Error opening popup:', error);
+    // If openPopup fails (e.g., older Chrome version), return error
+    // The widget will handle this gracefully
+    throw new Error('Unable to open popup. Please click the extension icon in your toolbar.');
+  }
+}
 
 /**
  * Handle notification closed
