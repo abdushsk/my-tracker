@@ -1377,3 +1377,76 @@ Widget becomes visible (restored from dismissed or created)
 - Checking section title matches allows showing all items when searching for a category name like "Sound"
 - The `position: sticky` with `z-index: 10` ensures search stays above other content while scrolling
 
+## US-030: Improve Settings Categories UI (Completed)
+**Date**: 2026-01-28
+
+### Changes Made
+
+1. **Redesigned categories layout to use compact chip grid** (settings.js:371-413):
+   - Changed from `.categories-list` (vertical list) to `.categories-compact-grid` (flex-wrap grid)
+   - Categories now display as compact pill-shaped chips instead of full-row items
+   - Each chip shows color indicator, category name, and delete button (for custom categories)
+   - Default categories no longer show a "Default" badge - they simply don't have delete buttons
+   - Added "Add" button as a chip in the same flow as categories
+
+2. **Replaced alert() dialog with inline text input** (settings.js:964-1065):
+   - Removed `showAddCategoryDialog()` function that used `prompt()` and `alert()`
+   - Added inline input field that appears when "Add" button is clicked
+   - Input field has submit (checkmark) and cancel (X) buttons
+   - Supports Enter key to submit and Escape key to cancel
+   - Error messages display below the grid instead of using `alert()`
+   - Validation happens inline with visual error feedback
+
+3. **Updated CSS for compact chip layout** (settings.css:266-421):
+   - `.categories-compact-grid`: flex-wrap container with minimal gap
+   - `.category-chip`: pill-shaped design with color dot, name, and hover delete
+   - `.category-chip-delete`: appears on hover for custom categories, absolute positioned
+   - `.category-chip-add`: dashed border, transforms to accent color on hover
+   - `.category-add-inline`: inline input container with submit/cancel buttons
+   - `.category-error-msg`: subtle error message styling below grid
+
+4. **Updated fuzzy search selectors** (settings.js:1157, 1173, 1175, 1222):
+   - Changed `.category-item` to `.category-chip` in search filtering
+   - Changed `.categories-list` to `.categories-compact-grid` in container selectors
+   - Added `.category-chip-name` to label selectors for search matching
+
+### Layout Changes
+
+**Before (old row-based layout):**
+```
+[Work    ● ──────────────────────────────── Default]
+[Health  ● ──────────────────────────────── Default]
+[Learning ● ─────────────────────────────── Default]
+[Personal ● ─────────────────────────────── Default]
+[Custom1 ● ────────────────────────────────── [X] ]
+[+ Add Custom Category]
+```
+
+**After (compact chip layout):**
+```
+[● Work] [● Health] [● Learning] [● Personal] [● Custom1 ×] [+ Add]
+```
+
+### Inline Add Category Flow
+
+1. User clicks "Add" chip button
+2. "Add" button hides, inline input field appears in same position
+3. User types category name (max 30 characters)
+4. User can:
+   - Press Enter or click checkmark to submit
+   - Press Escape or click X to cancel
+5. Validation errors appear below the grid (not as alert)
+6. On success, screen re-renders with new category chip
+
+### Files Modified
+- `src/popup/screens/settings.js` (HTML template, removed showAddCategoryDialog, updated listeners)
+- `src/popup/css/settings.css` (replaced old styles with compact chip styles)
+
+### Key Learnings
+- Chip/pill layouts with `flex-wrap` create a more compact and modern UI for tag-like items
+- Inline input fields are less disruptive than modal dialogs for simple text input
+- Positioning delete buttons with `position: absolute` on hover reduces visual clutter
+- Using `display: none` on the "Add" button when showing inline input maintains layout flow
+- Error messages inline with the form provide better UX than blocking alerts
+- The `:not()` selector is useful for applying styles to all items except specific variants
+

@@ -79,7 +79,7 @@
       "title": "Improve settings categories UI",
       "description": "Make the categories block compact instead of taking a full row for each item. Replace the alert box for adding new categories with an inline text field that appears in place, allowing users to type and submit with Enter or a submit button.",
       "priority": 11,
-      "passes": false
+      "passes": true
     },
     {
       "id": "US-031",

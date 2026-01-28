@@ -364,36 +364,53 @@ export function renderSettingsScreen() {
           </p>
         </div>
 
-        <!-- US-065: Categories Section -->
+        <!-- US-065/US-030: Categories Section -->
         <div class="settings-section">
           <h2>Categories</h2>
           <p class="settings-section-description">Organize your goals with color-coded categories</p>
-          <div class="categories-list">
+          <div class="categories-compact-grid">
             ${state.categories.map(cat => {
               const isDefault = DEFAULT_CATEGORIES.some(dc => dc.id === cat.id);
               return `
-                <div class="category-item" data-category-id="${cat.id}">
-                  <span class="category-color-indicator" style="background-color: ${cat.color}"></span>
-                  <span class="category-name">${cat.name}</span>
+                <div class="category-chip${isDefault ? ' category-chip-default' : ''}" data-category-id="${cat.id}">
+                  <span class="category-chip-color" style="background-color: ${cat.color}"></span>
+                  <span class="category-chip-name">${cat.name}</span>
                   ${!isDefault ? `
-                    <button class="category-delete-btn" data-action="delete-category" data-category-id="${cat.id}" title="Delete category">
-                      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="16" height="16">
+                    <button class="category-chip-delete" data-action="delete-category" data-category-id="${cat.id}" title="Delete category">
+                      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="12" height="12">
                         <line x1="18" y1="6" x2="6" y2="18"/>
                         <line x1="6" y1="6" x2="18" y2="18"/>
                       </svg>
                     </button>
-                  ` : '<span class="category-badge-default">Default</span>'}
+                  ` : ''}
                 </div>
               `;
             }).join('')}
+            <!-- US-030: Inline add category button/input -->
+            <button class="category-chip category-chip-add" id="add-category-btn" title="Add custom category">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="14" height="14">
+                <line x1="12" y1="5" x2="12" y2="19"/>
+                <line x1="5" y1="12" x2="19" y2="12"/>
+              </svg>
+              <span>Add</span>
+            </button>
+            <!-- US-030: Inline input field (hidden by default) -->
+            <div class="category-add-inline hidden" id="category-add-inline">
+              <input type="text" class="category-add-input" id="category-add-input" placeholder="Category name" maxlength="30">
+              <button class="category-add-submit" id="category-add-submit" title="Add category">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="14" height="14">
+                  <polyline points="20 6 9 17 4 12"/>
+                </svg>
+              </button>
+              <button class="category-add-cancel" id="category-add-cancel" title="Cancel">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="14" height="14">
+                  <line x1="18" y1="6" x2="6" y2="18"/>
+                  <line x1="6" y1="6" x2="18" y2="18"/>
+                </svg>
+              </button>
+            </div>
           </div>
-          <button class="btn btn-secondary btn-sm add-category-btn" id="add-category-btn">
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="16" height="16">
-              <line x1="12" y1="5" x2="12" y2="19"/>
-              <line x1="5" y1="12" x2="19" y2="12"/>
-            </svg>
-            Add Custom Category
-          </button>
+          <p class="category-error-msg hidden" id="category-error-msg"></p>
         </div>
 
         <!-- US-085: Pomodoro Settings Section -->
@@ -906,7 +923,7 @@ function updateNextResetDisplay(elementId, timestamp) {
 }
 
 /**
- * US-065: Attach category management listeners
+ * US-065/US-030: Attach category management listeners
  * @param {HTMLElement} screen - The settings screen element
  */
 function attachCategoryManagementListeners(screen) {
@@ -915,6 +932,7 @@ function attachCategoryManagementListeners(screen) {
   deleteButtons.forEach(btn => {
     btn.addEventListener('click', async (e) => {
       e.preventDefault();
+      e.stopPropagation();
       const categoryId = btn.getAttribute('data-category-id');
       if (!categoryId) return;
 
@@ -943,51 +961,108 @@ function attachCategoryManagementListeners(screen) {
     });
   });
 
-  // Add category button
+  // US-030: Add category button - shows inline input
   const addCategoryBtn = screen.querySelector('#add-category-btn');
-  if (addCategoryBtn) {
+  const inlineContainer = screen.querySelector('#category-add-inline');
+  const categoryInput = screen.querySelector('#category-add-input');
+  const submitBtn = screen.querySelector('#category-add-submit');
+  const cancelBtn = screen.querySelector('#category-add-cancel');
+  const errorMsg = screen.querySelector('#category-error-msg');
+
+  if (addCategoryBtn && inlineContainer && categoryInput) {
+    // Show inline input when Add button is clicked
     addCategoryBtn.addEventListener('click', () => {
-      showAddCategoryDialog();
+      addCategoryBtn.classList.add('hidden');
+      inlineContainer.classList.remove('hidden');
+      categoryInput.value = '';
+      hideError();
+      categoryInput.focus();
     });
+
+    // Submit on Enter key
+    categoryInput.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        handleAddCategory();
+      } else if (e.key === 'Escape') {
+        e.preventDefault();
+        hideInlineInput();
+      }
+    });
+
+    // Submit button click
+    if (submitBtn) {
+      submitBtn.addEventListener('click', (e) => {
+        e.preventDefault();
+        handleAddCategory();
+      });
+    }
+
+    // Cancel button click
+    if (cancelBtn) {
+      cancelBtn.addEventListener('click', (e) => {
+        e.preventDefault();
+        hideInlineInput();
+      });
+    }
   }
-}
 
-/**
- * US-065: Show dialog to add a custom category
- */
-function showAddCategoryDialog() {
-  const name = prompt('Enter category name:');
-  if (!name || !name.trim()) return;
-
-  const trimmedName = name.trim();
-
-  // Check for duplicate names
-  if (state.categories.some(c => c.name.toLowerCase() === trimmedName.toLowerCase())) {
-    alert('A category with this name already exists.');
-    return;
+  function hideInlineInput() {
+    if (inlineContainer) inlineContainer.classList.add('hidden');
+    if (addCategoryBtn) addCategoryBtn.classList.remove('hidden');
+    hideError();
   }
 
-  // Preset colors for custom categories
-  const presetColors = ['#E91E63', '#00BCD4', '#8BC34A', '#795548', '#607D8B', '#FF5722'];
-  const usedColors = state.categories.map(c => c.color);
-  const availableColor = presetColors.find(c => !usedColors.includes(c)) || presetColors[0];
+  function showError(message) {
+    if (errorMsg) {
+      errorMsg.textContent = message;
+      errorMsg.classList.remove('hidden');
+    }
+  }
 
-  // Generate light color variant
-  const lightColor = lightenColor(availableColor, 0.9);
+  function hideError() {
+    if (errorMsg) {
+      errorMsg.classList.add('hidden');
+      errorMsg.textContent = '';
+    }
+  }
 
-  // Create new category
-  const newCategory = {
-    id: `custom-${Date.now()}`,
-    name: trimmedName,
-    color: availableColor,
-    light: lightColor
-  };
+  async function handleAddCategory() {
+    const name = categoryInput?.value?.trim();
+    if (!name) {
+      showError('Please enter a category name');
+      categoryInput?.focus();
+      return;
+    }
 
-  // Save category
-  addCategory(newCategory).then(() => {
+    // Check for duplicate names
+    if (state.categories.some(c => c.name.toLowerCase() === name.toLowerCase())) {
+      showError('A category with this name already exists');
+      categoryInput?.focus();
+      return;
+    }
+
+    // Preset colors for custom categories
+    const presetColors = ['#E91E63', '#00BCD4', '#8BC34A', '#795548', '#607D8B', '#FF5722'];
+    const usedColors = state.categories.map(c => c.color);
+    const availableColor = presetColors.find(c => !usedColors.includes(c)) || presetColors[0];
+
+    // Generate light color variant
+    const lightColor = lightenColor(availableColor, 0.9);
+
+    // Create new category
+    const newCategory = {
+      id: `custom-${Date.now()}`,
+      name: name,
+      color: availableColor,
+      light: lightColor
+    };
+
+    // Save category
+    await addCategory(newCategory);
     state.categories.push(newCategory);
     renderSettingsScreen();
-  });
+  }
 }
 
 /**
@@ -1079,7 +1154,7 @@ function filterSettings(screen, query, noResultsMsg) {
     let visibleItemsInSection = 0;
 
     // Get all searchable items in the section
-    const settingItems = section.querySelectorAll('.setting-item, .reset-time-item, .category-item, .pomodoro-duration-item, .data-action-btn');
+    const settingItems = section.querySelectorAll('.setting-item, .reset-time-item, .category-chip, .pomodoro-duration-item, .data-action-btn');
 
     settingItems.forEach(item => {
       const isMatch = isItemMatch(item, query);
@@ -1095,9 +1170,9 @@ function filterSettings(screen, query, noResultsMsg) {
     });
 
     // Also check for special containers (pomodoro duration, data management)
-    const specialContainers = section.querySelectorAll('.pomodoro-duration-inputs, .data-management-actions, .categories-list, .reset-times-list');
+    const specialContainers = section.querySelectorAll('.pomodoro-duration-inputs, .data-management-actions, .categories-compact-grid, .reset-times-list');
     specialContainers.forEach(container => {
-      const hasVisibleChildren = container.querySelector('.setting-item:not(.search-hidden), .reset-time-item:not(.search-hidden), .category-item:not(.search-hidden), .pomodoro-duration-item:not(.search-hidden), .data-action-btn:not(.search-hidden)');
+      const hasVisibleChildren = container.querySelector('.setting-item:not(.search-hidden), .reset-time-item:not(.search-hidden), .category-chip:not(.search-hidden), .pomodoro-duration-item:not(.search-hidden), .data-action-btn:not(.search-hidden)');
       container.classList.toggle('search-hidden', query && !hasVisibleChildren && !sectionMatches);
     });
 
@@ -1144,7 +1219,7 @@ function isItemMatch(item, query) {
   const searchableTexts = [];
 
   // Labels
-  const label = item.querySelector('.setting-label, .reset-time-label, .category-name, .pomodoro-duration-label');
+  const label = item.querySelector('.setting-label, .reset-time-label, .category-name, .category-chip-name, .pomodoro-duration-label');
   if (label) searchableTexts.push(label.textContent);
 
   // Descriptions
