@@ -23,7 +23,7 @@
       "title": "Remove color selector from add goal screen",
       "description": "Remove the color selector option from the add goal screen as it is not being used. Clean up any related code and UI elements.",
       "priority": 3,
-      "passes": false
+      "passes": true
     },
     {
       "id": "US-023",

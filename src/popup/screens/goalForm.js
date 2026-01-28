@@ -18,8 +18,6 @@ import {
   setGoalFormScreenType,
   setGoalFormScreenTimeframe,
   setGoalFormScreenCategory,
-  setGoalFormScreenColor,
-  applyCustomColorFromInput,
   prefillGoalFormScreen
 } from './goalFormFields.js';
 
@@ -329,70 +327,6 @@ export function renderGoalFormScreen() {
             <input type="hidden" id="goal-form-category" name="category" value="">
           </div>
 
-          <!-- US-073: Custom Goal Color -->
-          <div class="form-group">
-            <label class="form-label">Goal Color <span class="optional-indicator">(optional)</span></label>
-            <div class="goal-color-picker" role="radiogroup" aria-label="Select goal color">
-              <button type="button" class="color-option active" data-color="none" role="radio" aria-checked="true" title="No custom color">
-                <span class="color-option-swatch color-none"></span>
-              </button>
-              <button type="button" class="color-option" data-color="#F44336" role="radio" aria-checked="false" title="Red">
-                <span class="color-option-swatch" style="background-color: #F44336"></span>
-              </button>
-              <button type="button" class="color-option" data-color="#E91E63" role="radio" aria-checked="false" title="Pink">
-                <span class="color-option-swatch" style="background-color: #E91E63"></span>
-              </button>
-              <button type="button" class="color-option" data-color="#9C27B0" role="radio" aria-checked="false" title="Purple">
-                <span class="color-option-swatch" style="background-color: #9C27B0"></span>
-              </button>
-              <button type="button" class="color-option" data-color="#673AB7" role="radio" aria-checked="false" title="Deep Purple">
-                <span class="color-option-swatch" style="background-color: #673AB7"></span>
-              </button>
-              <button type="button" class="color-option" data-color="#3F51B5" role="radio" aria-checked="false" title="Indigo">
-                <span class="color-option-swatch" style="background-color: #3F51B5"></span>
-              </button>
-              <button type="button" class="color-option" data-color="#2196F3" role="radio" aria-checked="false" title="Blue">
-                <span class="color-option-swatch" style="background-color: #2196F3"></span>
-              </button>
-              <button type="button" class="color-option" data-color="#00BCD4" role="radio" aria-checked="false" title="Cyan">
-                <span class="color-option-swatch" style="background-color: #00BCD4"></span>
-              </button>
-              <button type="button" class="color-option" data-color="#009688" role="radio" aria-checked="false" title="Teal">
-                <span class="color-option-swatch" style="background-color: #009688"></span>
-              </button>
-              <button type="button" class="color-option" data-color="#4CAF50" role="radio" aria-checked="false" title="Green">
-                <span class="color-option-swatch" style="background-color: #4CAF50"></span>
-              </button>
-              <button type="button" class="color-option" data-color="#FF9800" role="radio" aria-checked="false" title="Orange">
-                <span class="color-option-swatch" style="background-color: #FF9800"></span>
-              </button>
-              <button type="button" class="color-option" data-color="#795548" role="radio" aria-checked="false" title="Brown">
-                <span class="color-option-swatch" style="background-color: #795548"></span>
-              </button>
-              <button type="button" class="color-option" data-color="#607D8B" role="radio" aria-checked="false" title="Blue Grey">
-                <span class="color-option-swatch" style="background-color: #607D8B"></span>
-              </button>
-            </div>
-            <div class="custom-color-input-group">
-              <label for="goal-form-custom-color" class="custom-color-label">Or enter custom hex:</label>
-              <div class="custom-color-wrapper">
-                <span class="custom-color-hash">#</span>
-                <input
-                  type="text"
-                  id="goal-form-custom-color"
-                  name="custom-color"
-                  class="form-input custom-color-input"
-                  placeholder="FF5733"
-                  maxlength="6"
-                  pattern="[0-9A-Fa-f]{6}"
-                  autocomplete="off"
-                >
-                <button type="button" class="btn btn-sm custom-color-apply" id="goal-form-apply-custom-color">Apply</button>
-              </div>
-            </div>
-            <input type="hidden" id="goal-form-color" name="color" value="">
-          </div>
-
           <!-- US-074: Goal Notes/Description -->
           <div class="form-group">
             <label for="goal-form-notes" class="form-label">Notes <span class="optional-indicator">(optional)</span></label>
@@ -531,44 +465,6 @@ function attachGoalFormScreenListeners(screen, editingGoal) {
     });
   });
 
-  // US-073: Color picker buttons
-  const colorOptions = screen.querySelectorAll('.goal-color-picker .color-option');
-  colorOptions.forEach(option => {
-    option.addEventListener('click', (e) => {
-      e.preventDefault();
-      const color = option.getAttribute('data-color');
-      setGoalFormScreenColor(screen, color);
-    });
-
-    // Keyboard support
-    option.addEventListener('keydown', (e) => {
-      if (e.key === 'Enter' || e.key === ' ') {
-        e.preventDefault();
-        const color = option.getAttribute('data-color');
-        setGoalFormScreenColor(screen, color);
-      }
-    });
-  });
-
-  // US-073: Custom color input
-  const customColorInput = screen.querySelector('#goal-form-custom-color');
-  const applyCustomColorBtn = screen.querySelector('#goal-form-apply-custom-color');
-
-  if (applyCustomColorBtn && customColorInput) {
-    applyCustomColorBtn.addEventListener('click', (e) => {
-      e.preventDefault();
-      applyCustomColorFromInput(screen, customColorInput);
-    });
-
-    // Also apply on Enter key
-    customColorInput.addEventListener('keydown', (e) => {
-      if (e.key === 'Enter') {
-        e.preventDefault();
-        applyCustomColorFromInput(screen, customColorInput);
-      }
-    });
-  }
-
   // US-074: Notes textarea character count
   const notesTextarea = screen.querySelector('#goal-form-notes');
   const notesCount = screen.querySelector('#goal-form-notes-count');
@@ -685,15 +581,11 @@ async function handleGoalFormScreenSubmit(e) {
   const categoryInput = screen.querySelector('#goal-form-category');
   const category = categoryInput?.value || null;
 
-  // US-073: Get color (null if empty)
-  const colorInput = screen.querySelector('#goal-form-color');
-  const color = colorInput?.value || null;
-
   // US-074: Get notes (null if empty, max 500 chars enforced by maxlength)
   const notesTextarea = screen.querySelector('#goal-form-notes');
   const notes = notesTextarea?.value?.trim() || null;
 
-  console.log(`[GoalForm] Submitting in ${isEditMode ? 'edit' : 'add'} mode:`, { title, type, target, timeframe, category, color, notes, forgivenessEnabled });
+  console.log(`[GoalForm] Submitting in ${isEditMode ? 'edit' : 'add'} mode:`, { title, type, target, timeframe, category, notes, forgivenessEnabled });
 
   try {
     if (isEditMode && goalId) {
@@ -707,7 +599,6 @@ async function handleGoalFormScreenSubmit(e) {
         target,
         timeframe,
         category,
-        color,
         notes
       };
 
@@ -752,7 +643,6 @@ async function handleGoalFormScreenSubmit(e) {
         target,
         timeframe,
         category,
-        color,
         notes,
         forgivenessEnabled, // US-087: Avoidance forgiveness setting
         order: state.goals.length

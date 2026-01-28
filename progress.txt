@@ -890,3 +890,57 @@ The settings screen was re-rendering the entire `screen.innerHTML` whenever a se
 - Storage listener pattern enables real-time theme updates across all extension views
 - Keeping theme colors in sync with `theme-config.js` values ensures visual consistency
 
+## US-022: Remove Color Selector from Add Goal Screen (Completed)
+**Date**: 2026-01-28
+
+### Changes Made
+
+1. **Removed color selector HTML from goalForm.js** (lines 332-394):
+   - Removed the entire "Goal Color" form group containing:
+     - 13 preset color buttons (none + 12 colors)
+     - Custom hex color input field
+     - Apply button
+     - Hidden input for storing color value
+
+2. **Removed color-related imports from goalForm.js** (lines 18-22):
+   - Removed `setGoalFormScreenColor` import
+   - Removed `applyCustomColorFromInput` import
+
+3. **Removed color event listeners from goalForm.js** (lines 534-570):
+   - Removed click handlers for color option buttons
+   - Removed keyboard support for color selection
+   - Removed custom color input and apply button handlers
+
+4. **Removed color from form submission in goalForm.js**:
+   - Removed color input retrieval (line 584-586)
+   - Removed color from console.log output (line 592)
+   - Removed color from updateData object (line 606)
+   - Removed color from createGoal call (line 651)
+
+5. **Removed color functions from goalFormFields.js**:
+   - Removed `setGoalFormScreenColor()` function (lines 142-167)
+   - Removed `applyCustomColorFromInput()` function (lines 174-202)
+   - Removed color prefill logic from `prefillGoalFormScreen()` (lines 260-286)
+
+6. **Removed color picker CSS from customization.css** (lines 1-165):
+   - Removed `.goal-color-picker` container styles
+   - Removed `.color-option` and `.color-option-swatch` styles
+   - Removed `.color-option-swatch.color-none` styles
+   - Removed `.custom-color-input-group` styles
+   - Removed `.custom-color-wrapper` and related input styles
+   - Removed shake animation keyframes
+   - Removed `.goal-card.has-custom-color` placeholder
+   - Removed dark mode adjustments for color picker
+   - Removed reduced motion support for color picker
+
+### Files Modified
+- `src/popup/screens/goalForm.js` - Removed color selector UI and event handlers
+- `src/popup/screens/goalFormFields.js` - Removed color functions
+- `src/popup/css/customization.css` - Removed color picker CSS (now only contains US-074 notes styles)
+
+### Key Learnings
+- The color selector feature (US-073) was implemented but never actively used in the UI
+- Removing unused features keeps the codebase clean and reduces maintenance burden
+- The goal `color` property may still exist in stored goals but won't be displayed or editable
+- Form fields that are removed should also have their submission handling removed to avoid undefined variables
+
