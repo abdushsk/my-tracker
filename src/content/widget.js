@@ -1706,7 +1706,19 @@
               !oldGoals.every(og => newGoals.some(ng => ng.id === og.id))) {
             needsFullRender = true;
           } else {
-            // Just update badge and summary for progress changes
+            // US-023: Update each changed goal individually for real-time sync
+            // Find goals that changed and update them
+            newGoals.forEach(newGoal => {
+              const oldGoal = oldGoals.find(og => og.id === newGoal.id);
+              if (oldGoal) {
+                // Check if progress or isActive changed
+                if (oldGoal.progress !== newGoal.progress ||
+                    oldGoal.isActive !== newGoal.isActive) {
+                  this.updateGoalItem(newGoal.id);
+                }
+              }
+            });
+            // Also update badge and summary
             this.updateBadge();
             this.updateFooterSummary();
           }

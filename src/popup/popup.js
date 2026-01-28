@@ -96,6 +96,12 @@ import {
   checkBreakReminder
 } from './features/breakReminders.js';
 
+import {
+  registerStateSyncCallbacks,
+  initStateSync,
+  markLocalUpdate
+} from './features/stateSync.js';
+
 
 // Screen modules
 import {
@@ -1707,6 +1713,12 @@ function registerFeatureModuleCallbacks() {
     attachGoalControlListeners,
     startTimerUpdateInterval
   });
+
+  // US-023: Register state sync callbacks
+  registerStateSyncCallbacks({
+    renderCurrentScreen,
+    loadData
+  });
 }
 
 // =============================================================================
@@ -1736,6 +1748,9 @@ async function initApp() {
 
   // US-078: Initialize keyboard shortcuts
   initKeyboardShortcuts();
+
+  // US-023: Initialize state synchronization listener
+  initStateSync();
 
   // Check if we should restore focus mode
   const savedFocusedGoalId = await getFocusedGoalId();
@@ -1822,5 +1837,7 @@ export {
   canRedo,
   clearUndoHistory,
   showUndoToast,
-  hideUndoToast
+  hideUndoToast,
+  // US-023 State synchronization
+  markLocalUpdate
 };

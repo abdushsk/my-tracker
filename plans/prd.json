@@ -30,7 +30,7 @@
       "title": "Implement multi-way state synchronization",
       "description": "Enable real-time synchronization across all views. When a goal is updated from the today goals screen, the floating widget status and other views should automatically reflect the change without requiring a refresh.",
       "priority": 4,
-      "passes": false
+      "passes": true
     },
     {
       "id": "US-024",

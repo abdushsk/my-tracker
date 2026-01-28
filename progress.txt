@@ -944,3 +944,62 @@ The settings screen was re-rendering the entire `screen.innerHTML` whenever a se
 - The goal `color` property may still exist in stored goals but won't be displayed or editable
 - Form fields that are removed should also have their submission handling removed to avoid undefined variables
 
+## US-023: Implement Multi-Way State Synchronization (Completed)
+**Date**: 2026-01-28
+
+### Changes Made
+
+1. **Created new stateSync.js module** (src/popup/features/stateSync.js):
+   - New module dedicated to handling cross-view state synchronization
+   - Implements `chrome.storage.onChanged` listener for the popup
+   - Listens for changes to: goals, activeTimers, settings, achievements, xpData, dailyChallenges, pomodoroStates
+   - Uses debounced rendering (50ms) to prevent flickering from rapid consecutive updates
+   - Includes `markLocalUpdate()` function to track local updates and prevent re-render loops
+   - Deep comparison of state changes to avoid unnecessary re-renders
+
+2. **Updated popup.js** (src/popup/popup.js):
+   - Added import for `registerStateSyncCallbacks`, `initStateSync`, `markLocalUpdate`
+   - Registered state sync callbacks in `registerFeatureModuleCallbacks()`
+   - Called `initStateSync()` in `initApp()` to set up the storage listener
+   - Exported `markLocalUpdate` for use by other modules when making local updates
+
+3. **Enhanced widget storage listener** (src/content/widget.js:1699-1725):
+   - Modified `setupStorageListener()` to update individual goal displays when progress changes
+   - When goals update but no goals added/removed, now iterates through changed goals
+   - Calls `updateGoalItem()` for each goal where progress or isActive changed
+   - This ensures the widget UI reflects changes made from the popup in real-time
+
+### Architecture
+
+**Before (No Sync):**
+```
+Popup updates goal → Storage changes → Widget listener detects → Only badge/summary updated
+Widget updates goal → Storage changes → Popup has NO listener → Popup state is stale
+```
+
+**After (Full Sync):**
+```
+Popup updates goal → Storage changes → Widget listener detects → Individual goal displays updated
+Widget updates goal → Storage changes → Popup listener detects → Debounced re-render triggered
+```
+
+### Key Implementation Details
+
+1. **Debounced Rendering**: Uses 50ms debounce to batch rapid changes and prevent UI flickering
+2. **Local Update Tracking**: `markLocalUpdate()` marks updates from the popup itself to prevent infinite loops
+3. **Targeted Updates**: Widget uses `updateGoalItem()` for individual goals rather than full re-render
+4. **Smart Change Detection**: Uses JSON comparison to detect actual state changes, not just reference changes
+5. **Screen-Aware Updates**: Only re-renders screens that would be affected by the changed data
+
+### Files Modified
+- `src/popup/features/stateSync.js` (NEW - 215 lines)
+- `src/popup/popup.js` (added imports, registration, initialization, export)
+- `src/content/widget.js` (enhanced storage listener for targeted goal updates)
+
+### Key Learnings
+- Chrome extensions can use `chrome.storage.onChanged` to detect changes from any context (popup, content script, service worker)
+- Debouncing is critical for preventing rapid re-renders when multiple storage changes occur
+- Local update tracking prevents infinite loops where a component's own storage writes trigger its own re-render
+- Targeted DOM updates (updating specific goal elements) are more efficient than full re-renders for progress changes
+- The widget's shadow DOM isolation means it needs its own storage listener - it can't rely on the popup
+
