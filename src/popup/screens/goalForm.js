@@ -347,8 +347,8 @@ export function renderGoalFormScreen() {
         </form>
       </main>
       <footer class="goal-form-footer">
-        <button type="button" class="btn btn-secondary" id="goal-form-cancel-btn">Cancel</button>
-        <button type="submit" form="goal-form-page" class="btn btn-primary" id="goal-form-save-btn">Save Goal</button>
+        <button type="button" class="btn btn-secondary btn-compact" id="goal-form-cancel-btn">Cancel</button>
+        <button type="submit" form="goal-form-page" class="btn btn-primary btn-compact" id="goal-form-save-btn">${isEditMode ? 'Update' : 'Save'}</button>
       </footer>
     </div>
   `;

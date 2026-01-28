@@ -91,6 +91,13 @@
   font-size: var(--text-sm);
 }
 
+/* Compact button variant - US-033: For goal form footer */
+.btn-compact {
+  padding: 6px var(--space-3);
+  font-size: var(--font-size-sm);
+  min-height: 32px;
+}
+
 /* Add first goal button - CTA style */
 .add-first-goal {
   padding: var(--space-3) var(--space-5);

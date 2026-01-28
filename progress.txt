@@ -1581,3 +1581,53 @@ This approach allows the features to remain functional for existing users while 
 - Smaller icons (12px category dots, 16-18px type/timeframe icons) still convey meaning while reducing visual bulk
 - Using `flex: 0 0 auto` with `flex-wrap` creates a natural flow that adapts to the number of items
 
+## US-033: Use Compact Buttons on Add New Goal Screen (Completed)
+**Date**: 2026-01-28
+
+### Changes Made
+
+1. **Added new `.btn-compact` CSS class** (buttons.css:94-99):
+   - Created a new button variant with `padding: 6px var(--space-3)`
+   - Font size reduced to `var(--font-size-sm)`
+   - Min-height set to `32px` for consistent compact appearance
+
+2. **Updated footer buttons to use compact class** (goalForm.js:349-352):
+   - Changed Cancel button from `btn btn-secondary` to `btn btn-secondary btn-compact`
+   - Changed Save button from `btn btn-primary` to `btn btn-primary btn-compact`
+   - Dynamic button text: shows "Update" when editing, "Save" when adding
+
+3. **Compacted footer layout** (goal-form-screen.css:58-74):
+   - Reduced footer padding from `var(--spacing-sm) var(--spacing-md)` to `6px var(--spacing-md)`
+   - Reduced gap between buttons from `var(--spacing-sm)` to `var(--spacing-xs)`
+   - Added `min-width: 72px` to ensure buttons don't become too narrow
+
+4. **Compacted toggle switch** (goal-cards.css:889-921):
+   - Reduced toggle size from 48x26px to 40x22px
+   - Reduced toggle knob from 22x22px to 18x18px
+   - Changed checked color from `--success` to `--accent` for theme consistency
+   - Reduced toggle label font from `--font-size-base` to `--font-size-sm`
+
+### Button Size Comparison
+
+| Element | Before | After |
+|---------|--------|-------|
+| Footer button padding | 8px 16px | 6px 12px |
+| Footer button font | base | sm |
+| Footer gap | 8px | 4px |
+| Footer padding | 8px 16px | 6px 16px |
+| Toggle switch | 48x26px | 40x22px |
+| Toggle knob | 22x22px | 18x18px |
+
+### Files Modified
+- `src/popup/css/buttons.css` (added `.btn-compact` class)
+- `src/popup/screens/goalForm.js` (applied btn-compact to footer buttons)
+- `src/popup/css/goal-form-screen.css` (compacted footer layout)
+- `src/popup/css/goal-cards.css` (compacted toggle switch and label)
+
+### Key Learnings
+- Creating a dedicated `.btn-compact` class allows consistent compact button styling across the app
+- Toggle switches can be significantly smaller (40x22 vs 48x26) while remaining usable
+- Using `--accent` color for checked state ensures toggles match the selected color theme
+- Setting min-width on buttons prevents them from becoming too narrow with short text
+- Dynamic button text ("Save" vs "Update") provides better context to users
+

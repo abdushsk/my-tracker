@@ -16,7 +16,7 @@
       "title": "Use compact buttons on Add New Goal screen",
       "description": "Replace large buttons with more compact alternatives throughout the Add New Goal screen to reduce visual bulk and improve the tight layout.",
       "priority": 2,
-      "passes": false
+      "passes": true
     },
     {
       "id": "US-034",

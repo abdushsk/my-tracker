@@ -55,17 +55,22 @@
   padding: var(--spacing-md);
 }
 
-/* Goal Form Footer - Fixed at bottom - US-032: Compact */
+/* Goal Form Footer - Fixed at bottom - US-032/US-033: Compact */
 .goal-form-footer {
   display: flex;
   align-items: center;
   justify-content: flex-end;
-  gap: var(--spacing-sm);
-  padding: var(--spacing-sm) var(--spacing-md);
+  gap: var(--spacing-xs);
+  padding: 6px var(--spacing-md);
   border-top: 1px solid var(--border);
   background-color: var(--background-secondary);
   flex-shrink: 0;
   margin-top: auto;
+}
+
+/* US-033: Compact footer buttons */
+.goal-form-footer .btn {
+  min-width: 72px;
 }
 
 /* Reports screen */
