@@ -72,7 +72,7 @@
       "title": "Fix theme variable default value issue",
       "description": "Fix the issue where certain theme variables (e.g., --info) are showing default values instead of the selected theme values. This is happening randomly, sometimes in the Forest theme and particulary in the Default theme.",
       "priority": 9,
-      "passes": false
+      "passes": true
     }
   ]
 }

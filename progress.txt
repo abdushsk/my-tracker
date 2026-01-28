@@ -2093,3 +2093,47 @@ New CSS file for advanced settings section:
 - Auto-expanding during search ensures discoverability despite hiding
 - Persisting expansion state respects user preference
 - Using a dedicated module keeps the main settings.js manageable
+
+## US-040: Fix theme variable default value issue (Completed)
+**Date**: 2026-01-28
+
+### Problem Analysis
+The issue was that certain theme variables (e.g., `--info`, `--type-counter`, `--type-avoidance`, `--warning`) were showing default values from `:root` instead of the selected theme values. This happened randomly in the Forest theme and particularly in the Default theme.
+
+### Root Cause
+1. **Incomplete theme definitions**: Non-default themes (Ocean, Forest, Sunset, Lavender) were missing several semantic variables, causing them to fall back to `:root` defaults from base.css
+2. **Missing variables in Default theme config**: The Default theme in theme-config.js had minimal variables defined - only accent colors, bodyGradient, and headerGradient
+3. **Sunset theme specifically missing**: `info`, `infoSubtle`, and `typeAvoidance*` variables
+4. **Ocean, Forest, Lavender themes missing**: `typeCounter*`, `warning*`, and some `typeAvoidance*` variables
+
+### Solution
+Added all missing semantic color variables to every theme in theme-config.js to ensure complete and consistent theme definitions:
+
+**Variables ensured in ALL themes (both light and dark modes):**
+- `accent`, `accentHover`, `accentActive`, `accentSubtle`, `accentText`
+- `info`, `infoSubtle`
+- `warning`, `warningHover`, `warningSubtle`
+- `typeTimer`, `typeTimerSubtle`
+- `typeCounter`, `typeCounterSubtle`
+- `typeCheckbox`, `typeCheckboxSubtle`
+- `typeAvoidance`, `typeAvoidanceSubtle`
+- `heatmap0` through `heatmap4`
+- `bodyGradient`, `headerGradient`
+
+### Theme-Specific Color Choices
+Each theme's new variables were chosen to harmonize with the theme's palette:
+- **Default (Emerald)**: Uses blue for info/timer, amber for counter/warning, purple for avoidance
+- **Ocean (Blue)**: All variables use cyan/teal/blue tones
+- **Forest (Green)**: All variables use green/lime tones  
+- **Sunset (Orange)**: All variables use orange/amber tones
+- **Lavender (Purple)**: All variables use purple/violet tones
+
+### Files Modified
+- `src/popup/themes/theme-config.js` - Added complete variable sets to all 5 themes (426 lines total)
+- `plans/prd.json` - Marked US-040 as passes: true
+
+### Key Learnings
+- Theme configurations should be complete and consistent across all themes
+- Even though Default theme uses :root CSS, having its values in theme-config.js ensures documentation and consistency
+- Non-default themes must define ALL semantic variables to avoid fallback to :root defaults
+- Each theme should have harmonious color choices that fit its overall palette
