@@ -109,11 +109,6 @@ import {
   renderArchiveScreen
 } from './screens/archive.js';
 
-import {
-  registerTemplatesCallbacks,
-  renderTemplateGalleryScreen,
-  handleSaveAsTemplate
-} from './screens/templates.js';
 
 import {
   registerStatisticsCallbacks,
@@ -200,8 +195,6 @@ import {
   // getActivityLog now used in ./screens/reports.js
   getCategories,
   // addCategory, deleteCategory, DEFAULT_CATEGORIES now used in ./screens/settings.js
-  // US-066: Template imports
-  getTemplates,
   // US-069: Archive imports
   getArchivedGoals,
   // archiveGoal now used in ./screens/manageGoals.js
@@ -381,9 +374,6 @@ function renderCurrentScreen() {
       break;
     case SCREENS.GOAL_FORM:
       renderGoalFormScreen();
-      break;
-    case SCREENS.TEMPLATE_GALLERY:
-      renderTemplateGalleryScreen(); // US-066
       break;
     case SCREENS.FOCUS_MODE:
       renderFocusModeScreen(); // US-067
@@ -1303,7 +1293,6 @@ function capitalizeFirst(str) {
 // Manage Goals screen functions are now imported from ./screens/manageGoals.js
 
 // Goal Form Screen functions are now in ./screens/goalForm.js
-// Template Gallery Screen functions are now in ./screens/templates.js
 // Archive screen functions are now in ./screens/archive.js
 // Statistics screen functions are now in ./screens/statistics.js
 // Weekly Review screen functions are now in ./screens/weeklyReview.js
@@ -1369,21 +1358,113 @@ function attachNavigationListeners(container) {
 // =============================================================================
 
 /**
+ * Hide the loading skeleton and show the app
+ */
+function hideLoadingSkeleton() {
+  const skeleton = document.getElementById('loading-skeleton');
+  if (skeleton) {
+    skeleton.classList.add('hidden');
+  }
+}
+
+/**
+ * Load critical data needed for initial render
+ * Only loads what's needed to show the main goals screen ASAP
+ */
+async function loadCriticalData() {
+  // Load only essential data for first paint - in parallel
+  const [goals, settings, activeTimers, streakData, categories, focusedGoalId] = await Promise.all([
+    getGoals(),
+    getSettings(),
+    getActiveTimers(),
+    getStreakData(),
+    getCategories(),
+    getFocusedGoalId()
+  ]);
+
+  // Update state with critical data
+  state.goals = goals;
+  state.settings = settings;
+  state.activeTimers = activeTimers;
+  state.streakData = streakData;
+  state.categories = categories;
+
+  // Load compact mode preference from localStorage (sync, fast)
+  loadCompactModeState();
+
+  console.log('[Perf] Critical data loaded:', {
+    goalsCount: goals.length,
+    activeTimersCount: Object.keys(activeTimers).length
+  });
+
+  return { focusedGoalId };
+}
+
+/**
+ * Load secondary data in background (non-blocking)
+ * This data is not needed for initial render
+ */
+async function loadSecondaryData() {
+  try {
+    // Load non-critical data in parallel
+    const [archivedGoals, achievements, dailyChallenges, xpData, pomodoroSettings, pomodoroStates] = await Promise.all([
+      getArchivedGoals(),
+      getAchievements(),
+      getDailyChallenges(),
+      getXPData(),
+      getPomodoroSettings(),
+      getPomodoroStates()
+    ]);
+
+    // Update state
+    state.archivedGoals = archivedGoals;
+    state.pomodoroSettings = pomodoroSettings;
+    state.pomodoroStates = pomodoroStates;
+
+    // Initialize achievements if not present
+    if (!achievements || achievements.length === 0) {
+      state.achievements = createDefaultAchievementProgress();
+      saveAchievements(state.achievements); // Don't await
+    } else {
+      state.achievements = achievements;
+    }
+
+    // Initialize XP data if not present
+    if (!xpData) {
+      state.xpData = getDefaultXPData();
+      saveXPData(state.xpData); // Don't await
+    } else {
+      state.xpData = xpData;
+    }
+
+    // Initialize daily challenges (don't await)
+    initializeDailyChallenge(dailyChallenges);
+
+    console.log('[Perf] Secondary data loaded:', {
+      archivedGoalsCount: archivedGoals.length,
+      achievementsCount: state.achievements.length
+    });
+  } catch (error) {
+    console.error('Error loading secondary data:', error);
+  }
+}
+
+/**
  * Load all necessary data from storage
  * US-031: Enhanced to sync with service worker for background timer tracking
+ * @deprecated Use loadCriticalData + loadSecondaryData for better performance
  */
 async function loadData() {
   try {
     state.isLoading = true;
 
-    // Load goals, settings, active timers, streak data, categories, templates, archived goals, achievements, daily challenges, XP, and Pomodoro data in parallel
-    const [goals, settings, activeTimers, streakData, categories, templates, archivedGoals, achievements, dailyChallenges, xpData, pomodoroSettings, pomodoroStates] = await Promise.all([
+    // Load goals, settings, active timers, streak data, categories, archived goals, achievements, daily challenges, XP, and Pomodoro data in parallel
+    const [goals, settings, activeTimers, streakData, categories, archivedGoals, achievements, dailyChallenges, xpData, pomodoroSettings, pomodoroStates] = await Promise.all([
       getGoals(),
       getSettings(),
       getActiveTimers(),
       getStreakData(),
       getCategories(),
-      getTemplates(), // US-066: Load templates
       getArchivedGoals(), // US-069: Load archived goals
       getAchievements(), // US-080: Load achievements
       getDailyChallenges(), // US-081: Load daily challenges
@@ -1398,7 +1479,6 @@ async function loadData() {
     state.activeTimers = activeTimers;
     state.streakData = streakData;
     state.categories = categories;
-    state.templates = templates; // US-066
     state.archivedGoals = archivedGoals; // US-069
 
     // US-080: Initialize achievements if not present
@@ -1430,7 +1510,6 @@ async function loadData() {
       activeTimersCount: Object.keys(activeTimers).length,
       streakData: streakData,
       categoriesCount: categories.length,
-      templatesCount: templates.length,
       archivedGoalsCount: archivedGoals.length,
       achievementsCount: state.achievements.length,
       dailyChallengesEnabled: state.settings?.dailyChallengesEnabled,
@@ -1440,12 +1519,11 @@ async function loadData() {
       pomodoroGoalsCount: Object.keys(state.pomodoroStates).length
     });
 
-    // US-039: Initialize sound system with user settings
-    await initSounds();
-    loadSoundSettings(settings);
+    // US-039: Initialize sound system with user settings (non-blocking)
+    initSounds().then(() => loadSoundSettings(settings));
 
-    // US-031: Sync active timers with goals - ensure isActive flags are in sync
-    await syncActiveTimersWithGoals();
+    // US-031: Sync active timers with goals (non-blocking)
+    syncActiveTimersWithGoals();
 
     // Load compact mode preference from localStorage
     loadCompactModeState();
@@ -1627,15 +1705,6 @@ function registerFeatureModuleCallbacks() {
     capitalizeFirst
   });
 
-  // Register templates screen callbacks
-  registerTemplatesCallbacks({
-    showScreen,
-    showSuccessFeedback,
-    showFormError,
-    getGoalTypeIcon,
-    capitalizeFirst
-  });
-
   // Register statistics screen callbacks
   registerStatisticsCallbacks({
     showScreen,
@@ -1702,7 +1771,6 @@ function registerFeatureModuleCallbacks() {
     openGoalFormScreen,
     showSuccessFeedback,
     showFormError,
-    handleSaveAsTemplate,
     capitalizeFirst,
     renderCurrentScreen
   });
@@ -1727,52 +1795,58 @@ function registerFeatureModuleCallbacks() {
 
 /**
  * Initialize the popup application
+ * Optimized for fast first paint with lazy loading of non-critical data
  */
 async function initApp() {
-  console.log('My Tracker popup initializing...');
+  console.log('[Perf] My Tracker popup initializing...');
+  const startTime = performance.now();
 
-  // Register callbacks for feature modules
+  // Register callbacks for feature modules (sync, fast)
   registerFeatureModuleCallbacks();
 
-  // Load data from storage
-  await loadData();
+  // Load only critical data needed for first render
+  const { focusedGoalId } = await loadCriticalData();
 
-  // US-051: Initialize theme before showing any UI
+  // Apply theme immediately after critical data is loaded
   initTheme(state.settings);
 
-  // Set up listener for system theme changes
-  setupSystemThemeListener();
+  // Hide skeleton and show actual UI
+  hideLoadingSkeleton();
 
-  // Initialize persistent main navigation
-  initMainNav();
-
-  // US-078: Initialize keyboard shortcuts
-  initKeyboardShortcuts();
-
-  // US-023: Initialize state synchronization listener
-  initStateSync();
-
-  // Check if we should restore focus mode
-  const savedFocusedGoalId = await getFocusedGoalId();
-  if (savedFocusedGoalId) {
-    // Verify the goal still exists
-    const goalExists = state.goals.some(g => g.id === savedFocusedGoalId);
+  // Determine and show the appropriate screen
+  if (focusedGoalId) {
+    const goalExists = state.goals.some(g => g.id === focusedGoalId);
     if (goalExists) {
-      // Restore focus mode state and show focus mode screen
-      state.focusedGoalId = savedFocusedGoalId;
+      state.focusedGoalId = focusedGoalId;
       showScreen(SCREENS.FOCUS_MODE);
-      console.log('[FocusMode] Restored focus mode for goal:', savedFocusedGoalId);
+      console.log('[FocusMode] Restored focus mode for goal:', focusedGoalId);
     } else {
-      // Goal no longer exists, clear the saved focus mode
-      await clearFocusedGoalId();
+      clearFocusedGoalId(); // Don't await
       showScreen(SCREENS.VIEW_GOALS);
     }
   } else {
-    // Show the default screen (View Goals)
     showScreen(SCREENS.VIEW_GOALS);
   }
 
-  console.log('My Tracker popup initialized successfully');
+  console.log(`[Perf] First paint in ${(performance.now() - startTime).toFixed(0)}ms`);
+
+  // Initialize remaining features (non-blocking)
+  setupSystemThemeListener();
+  initMainNav();
+  initKeyboardShortcuts();
+  initStateSync();
+
+  // Load secondary data in background (non-blocking)
+  loadSecondaryData();
+
+  // Initialize sounds in background (non-blocking)
+  initSounds().then(() => loadSoundSettings(state.settings));
+
+  // Sync active timers in background (non-blocking)
+  syncActiveTimersWithGoals();
+
+  state.isLoading = false;
+  console.log('[Perf] My Tracker popup fully initialized');
 }
 
 // =============================================================================

@@ -1,6 +1,6 @@
 /**
  * Manage Goals Screen (US-020, US-021, US-029, US-030)
- * Screen for managing goals - edit, delete, archive, save as template
+ * Screen for managing goals - edit, delete, archive
  */
 
 import { state, SCREENS, SCREEN_IDS } from '../state.js';
@@ -176,7 +176,7 @@ export function renderManageGoalsScreen() {
     });
   }
 
-  // Attach Delete/Template button listeners
+  // Attach Delete/Archive button listeners
   attachManageGoalsListeners(screen);
 }
 

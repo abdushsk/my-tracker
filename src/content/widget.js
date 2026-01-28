@@ -133,6 +133,28 @@
       display: none;
     }
 
+    /* Loading state */
+    .widget-icon.loading {
+      animation: widget-pulse 1.5s ease-in-out infinite;
+    }
+
+    .widget-badge.loading {
+      background: linear-gradient(90deg, var(--widget-border) 0%, var(--widget-bg) 50%, var(--widget-border) 100%);
+      background-size: 200% 100%;
+      animation: widget-shimmer 1.2s ease-in-out infinite;
+      color: transparent;
+    }
+
+    @keyframes widget-pulse {
+      0%, 100% { opacity: 0.7; }
+      50% { opacity: 1; }
+    }
+
+    @keyframes widget-shimmer {
+      0% { background-position: 200% 0; }
+      100% { background-position: -200% 0; }
+    }
+
     /* US-025: Hover dismiss button */
     .widget-dismiss {
       position: absolute;
@@ -740,28 +762,132 @@
     }
 
     async init() {
-      // Load initial state from storage
-      await this.loadState();
+      console.log('[Widget] Initializing...');
+      const startTime = performance.now();
 
-      // US-027: Set up message listener for context menu commands
-      // This needs to be set up before we check if widget is enabled,
-      // so we can still receive SHOW_WIDGET messages even when disabled
+      // US-027: Set up message listener early (before loading state)
       this.setupMessageListener();
 
-      // Only create widget if enabled
+      // Quick check if widget might be enabled (using localStorage cache for speed)
+      const cachedEnabled = this.getCachedEnabledState();
+
+      if (cachedEnabled) {
+        // Show widget immediately with loading state
+        this.createWidgetWithLoadingState();
+        console.log(`[Widget] Showed loading state in ${(performance.now() - startTime).toFixed(0)}ms`);
+      }
+
+      // Load full state from storage
+      await this.loadState();
+
+      // If we showed loading state but widget is actually disabled, remove it
+      if (cachedEnabled && !widgetState.enabled) {
+        console.log('[Widget] Was cached as enabled but now disabled, removing');
+        if (this.host && this.host.parentNode) {
+          this.host.parentNode.removeChild(this.host);
+        }
+        this.host = null;
+        this.shadow = null;
+        this.container = null;
+        return;
+      }
+
+      // If widget is disabled and we didn't show loading, we're done
       if (!widgetState.enabled) {
         console.log('[Widget] Disabled - not creating widget');
         return;
       }
 
-      // Create widget elements
-      this.createWidget();
+      // If we showed loading state, update with real data; otherwise create widget
+      if (cachedEnabled && this.container) {
+        // Update theme from settings
+        this.host.setAttribute('data-theme', widgetState.theme);
+        if (widgetState.colorTheme && widgetState.colorTheme !== 'default') {
+          this.host.setAttribute('data-color-theme', widgetState.colorTheme);
+        }
+        this.render();
+        this.setPosition();
+        this.setupEventListeners();
+        console.log(`[Widget] Updated with real data in ${(performance.now() - startTime).toFixed(0)}ms`);
+      } else {
+        this.createWidget();
+      }
+
+      // Cache the enabled state for next time
+      this.cacheEnabledState(true);
 
       // Set up storage listener
       this.setupStorageListener();
 
       // Start timer updates
       this.startTimerUpdates();
+    }
+
+    /**
+     * Get cached enabled state from localStorage for instant check
+     */
+    getCachedEnabledState() {
+      try {
+        return localStorage.getItem('myTracker_widgetEnabled') === 'true';
+      } catch (e) {
+        return false;
+      }
+    }
+
+    /**
+     * Cache enabled state to localStorage for faster next load
+     */
+    cacheEnabledState(enabled) {
+      try {
+        if (enabled) {
+          localStorage.setItem('myTracker_widgetEnabled', 'true');
+        } else {
+          localStorage.removeItem('myTracker_widgetEnabled');
+        }
+      } catch (e) {
+        // Ignore localStorage errors
+      }
+    }
+
+    /**
+     * Create widget with loading placeholder (fast first paint)
+     */
+    createWidgetWithLoadingState() {
+      // Create host element
+      this.host = document.createElement('div');
+      this.host.id = 'my-tracker-widget';
+
+      // Use system theme initially (will update after loading settings)
+      const isDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+      this.host.setAttribute('data-theme', isDark ? 'dark' : 'light');
+
+      // Attach shadow root
+      this.shadow = this.host.attachShadow({ mode: 'closed' });
+
+      // Inject styles
+      const style = document.createElement('style');
+      style.textContent = WIDGET_CSS;
+      this.shadow.appendChild(style);
+
+      // Create container
+      this.container = document.createElement('div');
+      this.container.className = 'widget-container';
+      this.shadow.appendChild(this.container);
+
+      // Render loading state
+      this.container.innerHTML = `
+        <div class="widget-icon loading" title="My Tracker - Loading...">
+          ${ICONS.target}
+          <span class="widget-badge loading">...</span>
+        </div>
+        <div class="widget-panel"></div>
+      `;
+
+      // Default position (bottom-right)
+      this.container.style.cssText = 'right: 20px; bottom: 20px;';
+
+      // Add to page immediately
+      document.body.appendChild(this.host);
     }
 
     /**
@@ -1912,6 +2038,7 @@
           // Handle enable/disable
           if (!wasEnabled && widgetState.enabled) {
             // Widget was just enabled
+            this.cacheEnabledState(true);
             if (!this.host) {
               this.createWidget();
               this.startTimerUpdates();
@@ -1920,6 +2047,7 @@
             }
           } else if (wasEnabled && !widgetState.enabled) {
             // Widget was just disabled
+            this.cacheEnabledState(false);
             if (this.container) {
               this.container.classList.add('hidden');
             }

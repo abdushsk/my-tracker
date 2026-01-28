@@ -360,7 +360,7 @@ function showResetConfirmationDialog() {
           <li>All goals and their progress</li>
           <li>Activity history and streaks</li>
           <li>Achievements and XP</li>
-          <li>Categories and templates</li>
+          <li>Categories</li>
           <li>All settings and preferences</li>
         </ul>
         <p class="reset-confirm-text">Type <strong>RESET</strong> to confirm:</p>

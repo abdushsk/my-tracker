@@ -18,7 +18,6 @@ export const state = {
   streakData: null,
   categories: [], // US-065: Goal categories with color coding
   categoryFilter: 'all', // US-065: Current category filter for View Goals
-  templates: [], // US-066: Goal templates
   focusedGoalId: null, // US-067: Currently focused goal ID for Focus Mode
   archivedGoals: [], // US-069: Archived goals
   statisticsGoalId: null, // US-071: Goal ID for viewing statistics
@@ -62,7 +61,6 @@ export const SCREENS = {
   VIEW_GOALS: 'viewGoals',
   MANAGE_GOALS: 'manageGoals',
   GOAL_FORM: 'goalForm',
-  TEMPLATE_GALLERY: 'templateGallery', // US-066: Template gallery screen
   FOCUS_MODE: 'focusMode', // US-067: Focus Mode screen
   ARCHIVE: 'archive', // US-069: Archive screen
   GOAL_STATISTICS: 'goalStatistics', // US-071: Individual Goal Statistics screen
@@ -79,7 +77,6 @@ export const SCREEN_IDS = {
   [SCREENS.VIEW_GOALS]: 'screen-view-goals',
   [SCREENS.MANAGE_GOALS]: 'screen-manage-goals',
   [SCREENS.GOAL_FORM]: 'screen-goal-form',
-  [SCREENS.TEMPLATE_GALLERY]: 'screen-template-gallery', // US-066
   [SCREENS.FOCUS_MODE]: 'screen-focus-mode', // US-067
   [SCREENS.ARCHIVE]: 'screen-archive', // US-069
   [SCREENS.GOAL_STATISTICS]: 'screen-goal-statistics', // US-071
