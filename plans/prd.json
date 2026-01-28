@@ -30,7 +30,7 @@
       "title": "Make Settings screen more compact",
       "description": "Make the Settings screen more compact, particularly the reset times section, i like the current skeleton but just Reduce spacing and make better use of available space.",
       "priority": 4,
-      "passes": false
+      "passes": true
     },
     {
       "id": "US-036",
@@ -41,7 +41,7 @@
     },
     {
       "id": "US-037",
-      "title": "Make Reports page compact",
+      "title": "Make Reports page compact, dont just remove space, improve layout",
       "description": "Make the Reports page more compact by reducing spacing and making better use of available space.",
       "priority": 6,
       "passes": false
@@ -54,10 +54,24 @@
       "passes": false
     },
     {
+      "id": "US-038.5",
+      "title": "Add breathing space in Settings screen",
+      "description": "Increase spacing in the Settings screen to improve readability and visual comfort. The current layout feels too tight and cramped.",
+      "priority": 7.5,
+      "passes": false
+    },
+    {
       "id": "US-039",
       "title": "Split Settings into Normal and Advanced sections",
       "description": "Split the Settings screen into two sections: Normal (always visible) and Advanced (hidden by default, revealed via dropdown/expandable section). The search functionality should work across both sections and show matching results regardless of which section they belong to.",
       "priority": 8,
+      "passes": false
+    },
+    {
+      "id": "US-040",
+      "title": "Fix theme variable default value issue",
+      "description": "Fix the issue where certain theme variables (e.g., --info) are showing default values instead of the selected theme values. This is happening randomly, sometimes in the Forest theme and particulary in the Default theme.",
+      "priority": 9,
       "passes": false
     }
   ]

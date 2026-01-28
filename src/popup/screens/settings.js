@@ -414,19 +414,17 @@ export function renderSettingsScreen() {
             </div>
           </div>
 
-          <div class="setting-item setting-item-row" style="margin-top: 16px;">
+          <div class="setting-item setting-item-row">
             <div class="setting-info">
               <span class="setting-label">Sessions before long break</span>
-              <span class="setting-description">Number of work sessions before a long break</span>
             </div>
-            <input type="number" id="pomodoro-sessions-count" class="pomodoro-duration-input" style="width: 60px;"
+            <input type="number" id="pomodoro-sessions-count" class="pomodoro-duration-input" style="width: 50px;"
                    min="1" max="10" value="${state.pomodoroSettings?.sessionsBeforeLongBreak || 4}">
           </div>
 
-          <div class="setting-item setting-item-row" style="margin-top: 12px;">
+          <div class="setting-item setting-item-row">
             <div class="setting-info">
               <span class="setting-label">Auto-start breaks</span>
-              <span class="setting-description">Automatically start breaks after work</span>
             </div>
             <label class="toggle-switch" aria-label="Toggle auto-start breaks">
               <input type="checkbox" id="pomodoro-auto-breaks" ${state.pomodoroSettings?.autoStartBreaks ? 'checked' : ''}>
@@ -434,10 +432,9 @@ export function renderSettingsScreen() {
             </label>
           </div>
 
-          <div class="setting-item setting-item-row" style="margin-top: 12px;">
+          <div class="setting-item setting-item-row">
             <div class="setting-info">
               <span class="setting-label">Auto-start work</span>
-              <span class="setting-description">Automatically start work after breaks</span>
             </div>
             <label class="toggle-switch" aria-label="Toggle auto-start work">
               <input type="checkbox" id="pomodoro-auto-work" ${state.pomodoroSettings?.autoStartWork ? 'checked' : ''}>
@@ -449,12 +446,10 @@ export function renderSettingsScreen() {
         <!-- US-086: Break Reminders Section -->
         <div class="settings-section">
           <h2>Break Reminders</h2>
-          <p class="settings-section-description">Get reminded to take breaks during long timer sessions</p>
 
           <div class="setting-item setting-item-row">
             <div class="setting-info">
               <span class="setting-label">Enable break reminders</span>
-              <span class="setting-description">Remind you to take breaks while timers are running</span>
             </div>
             <label class="toggle-switch" aria-label="Toggle break reminders">
               <input type="checkbox" id="break-reminders-toggle" ${state.settings?.breakRemindersEnabled !== false ? 'checked' : ''}>
@@ -462,23 +457,21 @@ export function renderSettingsScreen() {
             </label>
           </div>
 
-          <div class="setting-item setting-item-row" style="margin-top: 12px;">
+          <div class="setting-item setting-item-row">
             <div class="setting-info">
               <span class="setting-label">Reminder interval</span>
-              <span class="setting-description">Minutes between break reminders</span>
             </div>
             <div class="break-interval-input-wrapper">
-              <input type="number" id="break-interval-input" class="pomodoro-duration-input" style="width: 70px;"
+              <input type="number" id="break-interval-input" class="pomodoro-duration-input" style="width: 55px;"
                      min="15" max="120" value="${state.settings?.breakReminderInterval || 45}"
                      ${state.settings?.breakRemindersEnabled === false ? 'disabled' : ''}>
               <span class="pomodoro-duration-unit">min</span>
             </div>
           </div>
 
-          <div class="setting-item setting-item-row" style="margin-top: 12px;">
+          <div class="setting-item setting-item-row">
             <div class="setting-info">
               <span class="setting-label">Notification sound</span>
-              <span class="setting-description">Play sound when break reminder appears</span>
             </div>
             <label class="toggle-switch" aria-label="Toggle break reminder sound">
               <input type="checkbox" id="break-sound-toggle"

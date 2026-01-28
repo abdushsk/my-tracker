@@ -474,21 +474,22 @@
   border-top: 1px solid var(--border);
 }
 
+/* US-035: Compact pomodoro duration inputs */
 .pomodoro-duration-inputs {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 12px;
-  margin-top: 12px;
+  gap: 8px;
+  margin-top: 6px;
 }
 
 .pomodoro-duration-item {
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 2px;
 }
 
 .pomodoro-duration-label {
-  font-size: 11px;
+  font-size: 10px;
   font-weight: 500;
   color: var(--text-secondary);
   text-transform: uppercase;
@@ -497,10 +498,10 @@
 
 .pomodoro-duration-input {
   width: 100%;
-  padding: 8px;
+  padding: 6px;
   border: 1px solid var(--border);
-  border-radius: 6px;
-  font-size: 14px;
+  border-radius: var(--radius);
+  font-size: var(--font-size-sm);
   text-align: center;
   background: var(--background);
   color: var(--text);
@@ -508,8 +509,13 @@
 
 .pomodoro-duration-input:focus {
   outline: none;
-  border-color: var(--danger);
-  box-shadow: 0 0 0 2px rgba(231, 76, 60, 0.15);
+  border-color: var(--primary);
+  box-shadow: 0 0 0 2px var(--primary-light);
+}
+
+.pomodoro-duration-unit {
+  font-size: 10px;
+  color: var(--text-muted);
 }
 
 /* Dark Mode - Pomodoro */

@@ -1660,3 +1660,91 @@ Replaced `max-width: 160px` with `width: 100%` to make the counter input fill it
 - Form inputs should generally fill their containers for consistent visual alignment with labels, hints, and error messages
 - The timer target inputs use `width: 100%` and the counter input should follow the same pattern for consistency
 
+
+## US-035: Make Settings Screen More Compact (Completed)
+**Date**: 2026-01-28
+
+### Changes Made
+
+1. **Global Settings Layout** (goal-form-screen.css:111-137):
+   - Reduced `.settings-content` padding from `var(--spacing-md)` to `var(--spacing-sm) var(--spacing-md)`
+   - Reduced `.settings-section` margin-bottom from `var(--spacing-lg)` to `var(--spacing-md)`
+   - Reduced `.settings-section h2` font-size from `var(--font-size-sm)` to `var(--font-size-xs)` and margin-bottom from `var(--spacing-sm)` to `var(--spacing-xs)`
+   - Reduced `.setting-item` padding from `var(--spacing-sm)` to `var(--spacing-xs)`
+
+2. **Reset Times Section** (settings.css:422-513):
+   - Reduced `.reset-times-list` gap from `var(--spacing-sm)` to `var(--spacing-xs)`
+   - Reduced `.reset-time-item` padding from `var(--spacing-sm) var(--spacing-md)` to `var(--spacing-xs) var(--spacing-sm)`
+   - Reduced `.reset-time-info` gap from 2px to 1px
+   - Reduced `.reset-time-label` font-size from `var(--font-size-base)` to `var(--font-size-sm)`
+   - Reduced description and next-reset font-size to 10px
+   - Reduced `.reset-time-input` width from 100px to 85px with compact padding
+
+3. **Toggle Switches** (settings.css:782-832):
+   - Reduced toggle switch from 44x24px to 36x20px
+   - Reduced toggle knob from 18x18px to 14x14px
+   - Adjusted transform for smaller size
+
+4. **Setting Item Rows** (settings.css:773-780):
+   - Reduced `.setting-item-row` padding from `var(--spacing-md)` to `var(--spacing-xs)`
+
+5. **Volume Control** (settings.css:834-852):
+   - Reduced gaps from `var(--spacing-sm)` to `var(--spacing-xs)`
+   - Reduced padding from `var(--spacing-md)` to `var(--spacing-xs)`
+
+6. **Color Theme Selector** (settings.css:186-241):
+   - Reduced gaps and padding throughout
+   - Reduced preview size from 32x32px to 24x24px
+   - Reduced theme name font-size to 10px
+
+7. **Categories Section** (settings.css:265-420):
+   - Reduced gap from `var(--spacing-xs)` to 4px
+   - Reduced category chip padding from 6px 10px to 4px 8px
+   - Reduced color dot size from 10x10px to 8x8px
+   - Compacted inline add category input
+
+8. **Notification Settings** (settings.css:931-1021):
+   - Compacted time inputs with smaller padding
+   - Reduced quiet hours layout spacing
+   - Made test notification button more compact
+
+9. **Data Management** (settings.css:515-564):
+   - Changed button layout from column to row direction
+   - Reduced padding and icon sizes
+
+10. **Pomodoro Settings** (pomodoro.css:477-519):
+    - Reduced grid gap from 12px to 8px
+    - Reduced item gap from 4px to 2px
+    - Reduced label font-size from 11px to 10px
+    - Reduced input padding from 8px to 6px
+
+11. **Settings.js Cleanup** (settings.js:417-483):
+    - Removed inline `margin-top` styles from Pomodoro and Break Reminder settings
+    - Removed verbose descriptions from compact toggle items
+
+### Size Comparison (Key Elements)
+
+| Element | Before | After |
+|---------|--------|-------|
+| Settings content padding | 16px | 8px 16px |
+| Section margin | 24px | 16px |
+| Section title font | sm | xs |
+| Toggle switch | 44x24px | 36x20px |
+| Reset time input | 100px wide | 85px wide |
+| Color preview | 32x32px | 24x24px |
+| Category chip padding | 6px 10px | 4px 8px |
+| Category dot size | 10px | 8px |
+| Pomodoro grid gap | 12px | 8px |
+
+### Files Modified
+- `src/popup/css/goal-form-screen.css` (compact settings layout base)
+- `src/popup/css/settings.css` (all settings-specific compact styles)
+- `src/popup/css/pomodoro.css` (compact pomodoro duration inputs)
+- `src/popup/screens/settings.js` (removed verbose inline styles)
+
+### Key Learnings
+- Using consistent smaller spacing units (`var(--spacing-xs)` instead of `var(--spacing-sm/md)`) creates a cohesive compact appearance
+- Reducing toggle switch size from 44x24 to 36x20 still maintains usability while saving significant space
+- Smaller font sizes (10px for secondary info, xs for labels) reduce visual bulk without sacrificing readability
+- Row direction buttons take less vertical space than column direction
+- Removing verbose descriptions from toggle items (just keeping labels) saves considerable space in dense settings screens
