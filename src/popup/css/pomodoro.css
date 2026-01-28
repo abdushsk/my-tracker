@@ -474,18 +474,18 @@
   border-top: 1px solid var(--border);
 }
 
-/* US-035: Compact pomodoro duration inputs */
+/* US-038.5: Pomodoro duration inputs with balanced spacing */
 .pomodoro-duration-inputs {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 8px;
-  margin-top: 6px;
+  gap: var(--spacing-sm);
+  margin-top: var(--spacing-sm);
 }
 
 .pomodoro-duration-item {
   display: flex;
   flex-direction: column;
-  gap: 2px;
+  gap: 4px;
 }
 
 .pomodoro-duration-label {
@@ -498,7 +498,7 @@
 
 .pomodoro-duration-input {
   width: 100%;
-  padding: 6px;
+  padding: var(--spacing-xs);
   border: 1px solid var(--border);
   border-radius: var(--radius);
   font-size: var(--font-size-sm);

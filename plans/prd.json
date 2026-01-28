@@ -58,7 +58,7 @@
       "title": "Add breathing space in Settings screen",
       "description": "Increase spacing in the Settings screen to improve readability and visual comfort. The current layout feels too tight and cramped.",
       "priority": 7.5,
-      "passes": false
+      "passes": true
     },
     {
       "id": "US-039",

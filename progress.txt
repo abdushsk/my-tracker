@@ -1933,3 +1933,78 @@ The user story requested adding a "Reset" button in the Settings screen beside E
 - Using a "type to confirm" pattern provides stronger protection against accidental destructive actions
 - The existing `clearAllData()` function in storage.js already handles Chrome storage clearing
 - Reloading the extension after reset ensures a clean state without stale data in memory
+
+## US-038.5: Add Breathing Space in Settings Screen (Completed)
+**Date**: 2026-01-28
+
+### Task Analysis
+
+The Settings screen was previously made very compact in US-035, but user feedback indicated the layout felt "too tight and cramped." This task adds more breathing space to improve readability and visual comfort.
+
+### Implementation
+
+The changes increase spacing throughout the Settings screen while maintaining a clean, organized layout. Key spacing changes:
+
+#### 1. **Settings Content Container** (goal-form-screen.css:112-117)
+- Top padding increased from `var(--spacing-sm)` to `var(--spacing-md)`
+
+#### 2. **Settings Sections** (goal-form-screen.css:119-121)
+- Section margin increased from `var(--spacing-md)` to `var(--spacing-lg)` (16px to 24px)
+
+#### 3. **Section Headings** (goal-form-screen.css:123-129)
+- Heading bottom margin increased from `var(--spacing-xs)` to `var(--spacing-sm)` (4px to 8px)
+
+#### 4. **Setting Items** (goal-form-screen.css:131-137, settings.css)
+- Item padding increased from `var(--spacing-xs)` to `var(--spacing-sm)` (4px to 8px)
+- Applied to all setting item variants: `.setting-item`, `.setting-item-row`, `.setting-item-volume`, `.setting-item-time`, `.setting-item-time-range`
+
+#### 5. **Setting Info Labels** (settings.css:140-144)
+- Gap between label and description increased from 2px to 4px
+
+#### 6. **Section Descriptions** (settings.css:258-263)
+- Description bottom margin increased from `var(--spacing-sm)` to `var(--spacing-md)` (8px to 16px)
+
+#### 7. **Color Theme Selector** (settings.css:186-191)
+- Gap between info and selector increased from `var(--spacing-xs)` to `var(--spacing-sm)`
+
+#### 8. **Categories Grid** (settings.css:265-271)
+- Gap between chips increased from 4px to `var(--spacing-xs)` (4px)
+- Bottom margin increased from `var(--spacing-xs)` to `var(--spacing-sm)`
+
+#### 9. **Reset Times List** (settings.css:437-441)
+- Gap between items increased from `var(--spacing-xs)` to `var(--spacing-sm)`
+- Item padding increased from `var(--spacing-xs)` to `var(--spacing-sm)`
+- Info gap increased from 1px to 2px
+- Note margin increased from `var(--spacing-xs)` to `var(--spacing-sm)`
+
+#### 10. **Pomodoro Settings** (pomodoro.css:477-489)
+- Grid gap increased from 8px to `var(--spacing-sm)` (8px)
+- Top margin increased from 6px to `var(--spacing-sm)` (8px)
+- Item gap increased from 2px to 4px
+- Input padding uses `var(--spacing-xs)` for consistency
+
+#### 11. **Quiet Hours and Notifications** (settings.css)
+- Quiet hours inputs padding-left increased from `var(--spacing-xs)` to `var(--spacing-sm)`
+- Added margin-top for quiet hours inputs
+- Test notification button margin increased from `var(--spacing-xs)` to `var(--spacing-sm)`
+- Button padding increased for better touch targets
+
+### Spacing Value Reference
+
+| CSS Variable | Value | Usage |
+|-------------|-------|-------|
+| --spacing-xs | 4px | Fine spacing between closely related elements |
+| --spacing-sm | 8px | Standard spacing between items |
+| --spacing-md | 16px | Section descriptions, content padding |
+| --spacing-lg | 24px | Section margins |
+
+### Files Modified
+- `src/popup/css/goal-form-screen.css` (settings-content, settings-section, setting-item base styles)
+- `src/popup/css/settings.css` (various setting item variants, theme selector, categories, reset times, notifications)
+- `src/popup/css/pomodoro.css` (pomodoro duration inputs)
+
+### Key Learnings
+- Small incremental spacing changes (4px → 8px) can significantly improve readability without making the layout feel sparse
+- Using CSS variables consistently makes it easier to maintain proportional spacing
+- Increasing section margins and item padding together creates a more breathable visual hierarchy
+- The --spacing-sm (8px) value works well as a default item padding in settings screens

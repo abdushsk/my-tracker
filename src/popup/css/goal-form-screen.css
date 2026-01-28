@@ -108,23 +108,23 @@
   padding: var(--spacing-lg);
 }
 
-/* Settings screen - US-035: Compact layout */
+/* Settings screen - US-035/US-038.5: Balanced layout with breathing space */
 .settings-content {
   flex: 1;
   overflow-y: auto;
-  padding: var(--spacing-sm) var(--spacing-md);
+  padding: var(--spacing-md) var(--spacing-md);
   padding-bottom: 80px; /* Account for fixed bottom nav */
 }
 
 .settings-section {
-  margin-bottom: var(--spacing-md);
+  margin-bottom: var(--spacing-lg);
 }
 
 .settings-section h2 {
   font-size: var(--font-size-xs);
   text-transform: uppercase;
   color: var(--text-muted);
-  margin-bottom: var(--spacing-xs);
+  margin-bottom: var(--spacing-sm);
   letter-spacing: 0.5px;
 }
 
@@ -132,7 +132,7 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: var(--spacing-xs) 0;
+  padding: var(--spacing-sm) 0;
   border-bottom: 1px solid var(--border);
 }
 
