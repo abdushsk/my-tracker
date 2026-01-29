@@ -45,6 +45,8 @@
   border-bottom-left-radius: 0;
   border-bottom-right-radius: 0;
   border-bottom-color: transparent;
+  border-color: var(--primary);
+  border-bottom-color: transparent;
 }
 
 .settings-advanced-toggle-text {
@@ -66,7 +68,7 @@
 .settings-group-advanced {
   display: none;
   padding: var(--spacing-sm) var(--spacing-md);
-  border: 1px solid var(--border);
+  border: 1px solid var(--primary);
   border-top: none;
   border-radius: 0 0 var(--radius) var(--radius);
   background: var(--background);

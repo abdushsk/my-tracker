@@ -133,28 +133,6 @@
       display: none;
     }
 
-    /* Loading state */
-    .widget-icon.loading {
-      animation: widget-pulse 1.5s ease-in-out infinite;
-    }
-
-    .widget-badge.loading {
-      background: linear-gradient(90deg, var(--widget-border) 0%, var(--widget-bg) 50%, var(--widget-border) 100%);
-      background-size: 200% 100%;
-      animation: widget-shimmer 1.2s ease-in-out infinite;
-      color: transparent;
-    }
-
-    @keyframes widget-pulse {
-      0%, 100% { opacity: 0.7; }
-      50% { opacity: 1; }
-    }
-
-    @keyframes widget-shimmer {
-      0% { background-position: 200% 0; }
-      100% { background-position: -200% 0; }
-    }
-
     /* US-025: Hover dismiss button */
     .widget-dismiss {
       position: absolute;
@@ -493,12 +471,12 @@
     }
 
     .timer-btn.pause {
-      background: var(--widget-warning);
+      background: var(--widget-accent);
       color: white;
     }
 
     .timer-btn.pause:hover {
-      background: var(--widget-warning-hover);
+      background: var(--widget-accent-hover);
       transform: scale(1.05);
     }
 
@@ -762,132 +740,28 @@
     }
 
     async init() {
-      console.log('[Widget] Initializing...');
-      const startTime = performance.now();
-
-      // US-027: Set up message listener early (before loading state)
-      this.setupMessageListener();
-
-      // Quick check if widget might be enabled (using localStorage cache for speed)
-      const cachedEnabled = this.getCachedEnabledState();
-
-      if (cachedEnabled) {
-        // Show widget immediately with loading state
-        this.createWidgetWithLoadingState();
-        console.log(`[Widget] Showed loading state in ${(performance.now() - startTime).toFixed(0)}ms`);
-      }
-
-      // Load full state from storage
+      // Load initial state from storage
       await this.loadState();
 
-      // If we showed loading state but widget is actually disabled, remove it
-      if (cachedEnabled && !widgetState.enabled) {
-        console.log('[Widget] Was cached as enabled but now disabled, removing');
-        if (this.host && this.host.parentNode) {
-          this.host.parentNode.removeChild(this.host);
-        }
-        this.host = null;
-        this.shadow = null;
-        this.container = null;
-        return;
-      }
+      // US-027: Set up message listener for context menu commands
+      // This needs to be set up before we check if widget is enabled,
+      // so we can still receive SHOW_WIDGET messages even when disabled
+      this.setupMessageListener();
 
-      // If widget is disabled and we didn't show loading, we're done
+      // Only create widget if enabled
       if (!widgetState.enabled) {
         console.log('[Widget] Disabled - not creating widget');
         return;
       }
 
-      // If we showed loading state, update with real data; otherwise create widget
-      if (cachedEnabled && this.container) {
-        // Update theme from settings
-        this.host.setAttribute('data-theme', widgetState.theme);
-        if (widgetState.colorTheme && widgetState.colorTheme !== 'default') {
-          this.host.setAttribute('data-color-theme', widgetState.colorTheme);
-        }
-        this.render();
-        this.setPosition();
-        this.setupEventListeners();
-        console.log(`[Widget] Updated with real data in ${(performance.now() - startTime).toFixed(0)}ms`);
-      } else {
-        this.createWidget();
-      }
-
-      // Cache the enabled state for next time
-      this.cacheEnabledState(true);
+      // Create widget elements
+      this.createWidget();
 
       // Set up storage listener
       this.setupStorageListener();
 
       // Start timer updates
       this.startTimerUpdates();
-    }
-
-    /**
-     * Get cached enabled state from localStorage for instant check
-     */
-    getCachedEnabledState() {
-      try {
-        return localStorage.getItem('myTracker_widgetEnabled') === 'true';
-      } catch (e) {
-        return false;
-      }
-    }
-
-    /**
-     * Cache enabled state to localStorage for faster next load
-     */
-    cacheEnabledState(enabled) {
-      try {
-        if (enabled) {
-          localStorage.setItem('myTracker_widgetEnabled', 'true');
-        } else {
-          localStorage.removeItem('myTracker_widgetEnabled');
-        }
-      } catch (e) {
-        // Ignore localStorage errors
-      }
-    }
-
-    /**
-     * Create widget with loading placeholder (fast first paint)
-     */
-    createWidgetWithLoadingState() {
-      // Create host element
-      this.host = document.createElement('div');
-      this.host.id = 'my-tracker-widget';
-
-      // Use system theme initially (will update after loading settings)
-      const isDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
-      this.host.setAttribute('data-theme', isDark ? 'dark' : 'light');
-
-      // Attach shadow root
-      this.shadow = this.host.attachShadow({ mode: 'closed' });
-
-      // Inject styles
-      const style = document.createElement('style');
-      style.textContent = WIDGET_CSS;
-      this.shadow.appendChild(style);
-
-      // Create container
-      this.container = document.createElement('div');
-      this.container.className = 'widget-container';
-      this.shadow.appendChild(this.container);
-
-      // Render loading state
-      this.container.innerHTML = `
-        <div class="widget-icon loading" title="My Tracker - Loading...">
-          ${ICONS.target}
-          <span class="widget-badge loading">...</span>
-        </div>
-        <div class="widget-panel"></div>
-      `;
-
-      // Default position (bottom-right)
-      this.container.style.cssText = 'right: 20px; bottom: 20px;';
-
-      // Add to page immediately
-      document.body.appendChild(this.host);
     }
 
     /**
@@ -1854,20 +1728,27 @@
       try {
         const startTime = Date.now();
 
-        // Send message to service worker
-        await chrome.runtime.sendMessage({
-          type: 'TIMER_START',
-          goalId: goal.id,
-          startTime: startTime
-        });
+        // Update active timers in storage directly (like counter buttons do)
+        const result = await chrome.storage.local.get(STORAGE_KEYS.ACTIVE_TIMERS);
+        const activeTimers = result[STORAGE_KEYS.ACTIVE_TIMERS] || {};
+        activeTimers[goal.id] = { startTime, goalId: goal.id };
+        await chrome.storage.local.set({ [STORAGE_KEYS.ACTIVE_TIMERS]: activeTimers });
+
+        // Update goal isActive status in storage
+        const goalsResult = await chrome.storage.local.get(STORAGE_KEYS.GOALS);
+        const goals = goalsResult[STORAGE_KEYS.GOALS] || [];
+        const goalIndex = goals.findIndex(g => g.id === goal.id);
+        if (goalIndex !== -1) {
+          goals[goalIndex].isActive = true;
+          await chrome.storage.local.set({ [STORAGE_KEYS.GOALS]: goals });
+        }
 
         // Update local state
         widgetState.activeTimers[goal.id] = { startTime, goalId: goal.id };
         goal.isActive = true;
 
-        // Use targeted update
+        // Update UI
         this.updateGoalItem(goal.id);
-        console.log('[Widget] Timer started:', goal.id);
       } catch (error) {
         console.error('[Widget] Error starting timer:', error);
       }
@@ -1875,23 +1756,37 @@
 
     async pauseTimer(goal) {
       try {
-        // Send message to service worker
-        const response = await chrome.runtime.sendMessage({
-          type: 'TIMER_PAUSE',
-          goalId: goal.id
-        });
+        // Get timer data to calculate elapsed time
+        const timerResult = await chrome.storage.local.get(STORAGE_KEYS.ACTIVE_TIMERS);
+        const activeTimers = timerResult[STORAGE_KEYS.ACTIVE_TIMERS] || {};
+        const timerData = activeTimers[goal.id];
+
+        let elapsedSeconds = 0;
+        if (timerData && timerData.startTime) {
+          elapsedSeconds = Math.floor((Date.now() - timerData.startTime) / 1000);
+        }
+
+        // Remove from active timers
+        delete activeTimers[goal.id];
+        await chrome.storage.local.set({ [STORAGE_KEYS.ACTIVE_TIMERS]: activeTimers });
+
+        // Update goal progress and isActive in storage
+        const goalsResult = await chrome.storage.local.get(STORAGE_KEYS.GOALS);
+        const goals = goalsResult[STORAGE_KEYS.GOALS] || [];
+        const goalIndex = goals.findIndex(g => g.id === goal.id);
+        if (goalIndex !== -1) {
+          goals[goalIndex].progress = goals[goalIndex].progress + elapsedSeconds;
+          goals[goalIndex].isActive = false;
+          await chrome.storage.local.set({ [STORAGE_KEYS.GOALS]: goals });
+        }
 
         // Update local state
         delete widgetState.activeTimers[goal.id];
         goal.isActive = false;
+        goal.progress = goal.progress + elapsedSeconds;
 
-        if (response && response.elapsedSeconds !== undefined) {
-          goal.progress = goal.progress + response.elapsedSeconds; // Allow overflow
-        }
-
-        // Use targeted update
+        // Update UI
         this.updateGoalItem(goal.id);
-        console.log('[Widget] Timer paused:', goal.id);
       } catch (error) {
         console.error('[Widget] Error pausing timer:', error);
       }
@@ -2038,7 +1933,6 @@
           // Handle enable/disable
           if (!wasEnabled && widgetState.enabled) {
             // Widget was just enabled
-            this.cacheEnabledState(true);
             if (!this.host) {
               this.createWidget();
               this.startTimerUpdates();
@@ -2047,7 +1941,6 @@
             }
           } else if (wasEnabled && !widgetState.enabled) {
             // Widget was just disabled
-            this.cacheEnabledState(false);
             if (this.container) {
               this.container.classList.add('hidden');
             }
