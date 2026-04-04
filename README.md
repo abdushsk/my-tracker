@@ -1,37 +1,62 @@
-# Daily Goals Tracker
+<div align="center">
 
-A Chrome extension for tracking daily goals with timers, counters, and checkboxes. Monitor your discipline through detailed reports and analytics.
+# My Tracker
+
+**A Chrome extension to track daily goals with timers, counters, and checkboxes.**
+**Stay disciplined. Build streaks. Crush your goals.**
+
+[![Chrome Extension](https://img.shields.io/badge/Chrome-Extension-4285F4?logo=googlechrome&logoColor=white)](https://github.com/abdushsk/my-tracker)
+[![Manifest V3](https://img.shields.io/badge/Manifest-V3-34A853)](https://developer.chrome.com/docs/extensions/mv3/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+
+<br>
+
+<img src="docs/screenshots/goals-view.png" width="280" alt="Goals View">&nbsp;&nbsp;&nbsp;
+<img src="docs/screenshots/reports-view.png" width="280" alt="Reports View">&nbsp;&nbsp;&nbsp;
+<img src="docs/screenshots/settings-view.png" width="280" alt="Settings View">
+
+</div>
+
+---
 
 ## Features
 
 ### Goal Types
-- **Timer** - Track time-based goals (e.g., study for 3 hours) with play, pause, and reset controls
-- **Counter** - Track count-based goals (e.g., complete 10 tasks) with increment/decrement buttons
-- **Checkbox** - Simple completion goals (e.g., meditate) with toggle functionality
+- **Timer** -- Track time-based goals (e.g., study for 3 hours) with play, pause, and reset controls
+- **Counter** -- Track count-based goals (e.g., complete 10 tasks) with increment/decrement buttons
+- **Checkbox** -- Simple completion goals (e.g., meditate) with toggle functionality
 
 ### Timeframes
-- Daily (resets at midnight)
-- Weekly (resets on Monday)
-- Monthly (resets on the 1st)
-- Yearly (resets on January 1st)
+- **Daily** (resets at midnight) | **Weekly** (resets on Monday) | **Monthly** (resets on the 1st) | **Yearly** (resets on Jan 1st)
 
 ### Reports & Analytics
-- Discipline score tracking
-- Streak counter with best streak records
+- Discipline score tracking and streak counters
+- Activity heatmaps and weekly completion charts
+- Weekly review with summary and achievements
 - Completion statistics by goal type and category
-- Activity heatmaps and charts
-- Weekly completion visualizations
 
-### Additional Features
-- **Pomodoro Mode** - Built-in 25/5 work-break cycles
-- **Focus Mode** - Distraction-free timer interface
-- **Achievements System** - Unlock badges for milestones like streaks and goal completions
-- **Daily Challenges** - Extra motivation with daily goals
-- **Sound Effects** - Satisfying audio feedback for goal interactions
-- **Themes** - Light, dark, and auto modes
-- **Categories** - Organize goals with custom categories and colors
-- **Keyboard Navigation** - Full keyboard support for accessibility
-- **Data Export/Import** - Backup and restore your data as JSON
+### Floating Widget
+Access your goals from any webpage without opening the extension popup.
+
+<div align="center">
+<img src="docs/screenshots/floating-widget.png" width="700" alt="Floating Widget on any webpage">
+<br>
+<em>Quick-access floating widget overlays on any webpage</em>
+</div>
+
+### More
+- **Pomodoro Mode** -- Built-in 25/5 work-break cycles
+- **Focus Mode** -- Distraction-free timer interface
+- **Achievements** -- Unlock badges for milestones like streaks and completions
+- **Daily Challenges** -- Extra motivation with bonus goals
+- **Sound Effects** -- Satisfying audio feedback
+- **Themes** -- Light, dark, auto modes with multiple color themes (Ocean, Forest, Sunset, Lavender)
+- **Categories** -- Organize goals by Work, Health, Learning, Personal, and custom categories
+- **Keyboard Navigation** -- Full keyboard support for accessibility
+- **Data Export/Import** -- Backup and restore your data as JSON
+- **Notifications** -- Reminders and achievement alerts
+
+---
 
 ## Installation
 
@@ -43,65 +68,61 @@ A Chrome extension for tracking daily goals with timers, counters, and checkboxe
    ```
 
 2. **Open Chrome Extensions page**
-   - Navigate to `chrome://extensions/` \ `brave://extensions/` in your Chrome browser
-   - Or go to Menu (three dots) > Extensions > Manage Extensions
+   Navigate to `chrome://extensions/` or `brave://extensions/`
 
 3. **Enable Developer Mode**
-   - Toggle the "Developer mode" switch in the top right corner
+   Toggle the "Developer mode" switch in the top right corner
 
 4. **Load the extension**
-   - Click "Load unpacked"
-   - Select the `my-tracker` folder (the root directory containing `manifest.json`)
+   Click "Load unpacked" and select the project root folder (containing `manifest.json`)
 
-5. **Pin the extension (optional)**
-   - Click the puzzle piece icon in Chrome's toolbar
-   - Click the pin icon next to "My Tracker" to keep it visible
+5. **Pin the extension** (optional)
+   Click the puzzle piece icon in Chrome's toolbar and pin "My Tracker"
 
 ### Updating
 
-To update the extension after pulling new changes:
-1. Go to `chrome://extensions/` / `brave://extensions/`
-2. Click the refresh icon on the Daily Goals Tracker card
-3. Or click "Update" at the top of the page to update all extensions
+1. Pull the latest changes with `git pull`
+2. Go to `chrome://extensions/` and click the refresh icon on the My Tracker card
 
-## Usage
-
-1. **Click the extension icon** in your Chrome toolbar to open the popup
-2. **Add a goal** by navigating to Manage Goals and clicking "Add Goal"
-3. **Track your progress** on the main screen:
-   - For timers: Click play to start, pause to stop
-   - For counters: Use +/- buttons to update count
-   - For checkboxes: Click to toggle completion
-4. **View your stats** in the Reports section to monitor your discipline score and streaks
+---
 
 ## Project Structure
 
 ```
 my-tracker/
-├── manifest.json          # Chrome extension manifest (v3)
+├── manifest.json              # Chrome extension manifest (v3)
 ├── src/
 │   ├── assets/
-│   │   ├── icons/         # Extension icons
-│   │   └── sounds/        # Audio feedback files
+│   │   ├── icons/             # Extension icons
+│   │   └── sounds/            # Audio feedback files
 │   ├── background/
 │   │   └── service-worker.js  # Background service worker
-│   └── popup/
-│       ├── popup.html     # Main popup UI
-│       ├── popup.js       # Main popup logic
-│       ├── popup.css      # Styles
-│       ├── screens/       # Screen components
-│       ├── features/      # Feature modules
-│       ├── utils/         # Utility functions
-│       └── themes/        # Theme configurations
-└── README.md
+│   ├── content/
+│   │   └── widget.js          # Floating widget (content script)
+│   ├── popup/
+│   │   ├── popup.html         # Main popup UI
+│   │   ├── popup.js           # Main popup logic
+│   │   ├── popup.css          # Styles
+│   │   ├── screens/           # Screen components
+│   │   ├── features/          # Feature modules
+│   │   ├── utils/             # Utility functions
+│   │   └── themes/            # Theme configurations
+│   ├── styles/                # Shared styles
+│   └── utils/                 # Shared utilities
+└── docs/
+    └── screenshots/           # App screenshots
 ```
 
 ## Permissions
 
-This extension requires the following permissions:
-- **storage** - Save goals and progress data locally
-- **alarms** - Schedule goal resets and reminders
-- **notifications** - Send reminder and achievement notifications
+| Permission | Purpose |
+|---|---|
+| `storage` | Save goals and progress data locally |
+| `alarms` | Schedule goal resets and reminders |
+| `notifications` | Send reminder and achievement notifications |
+| `contextMenus` | Right-click menu integration |
+
+---
 
 ## License
 
